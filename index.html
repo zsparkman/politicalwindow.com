@@ -710,8 +710,17 @@ function pick(abbr) {
   document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
   document.querySelectorAll('.row-selected').forEach(r => r.classList.remove('row-selected'));
 
-  if (sel === abbr && !isMobile()) { sel = null; emptyDetail(); return; }
+  // Toggle off if same state clicked again
+  if (sel === abbr) {
+    sel = null;
+    stateFilter = null;
+    emptyDetail();
+    drawTable();
+    return;
+  }
+
   sel = abbr;
+  stateFilter = abbr;
 
   const tile = document.querySelector(`[data-abbr="${abbr}"]`);
   if (tile) tile.classList.add('selected');
@@ -720,11 +729,10 @@ function pick(abbr) {
     openDrawer(abbr);
   } else {
     document.getElementById('detailPanel').innerHTML = buildDetailHTML(abbr);
-    const row = document.querySelector(`tr[data-abbr="${abbr}"]`);
-    if (row) { row.classList.add('row-selected'); row.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
-    const mobileCard = document.querySelector(`.mobile-state-card[data-abbr="${abbr}"]`);
-    if (mobileCard) mobileCard.classList.add('row-selected');
   }
+
+  // Filter table to selected state — no page scroll
+  drawTable();
 }
 
 function emptyDetail() {
@@ -761,7 +769,7 @@ const COLS = [
   { k:'races',  l:'Races',          sort:false, cls:'col-races' },
   { k:'cands',  l:'Key Candidates', sort:false, cls:'col-cands' },
 ];
-let sk = 'dWin', sd = 1, q = '', rf = 'all';
+let sk = 'dWin', sd = 1, q = '', rf = 'all', stateFilter = null;
 const SO = s => ({'window-open':0,'window-soon':1,'upcoming':2,'general-only':3,'inactive':4}[s]??5);
 const SPILL = {
   'window-open':  `<span class="spill spill-red">● OPEN</span>`,
@@ -788,6 +796,7 @@ function buildHead() {
 
 function filteredSorted() {
   return STATES.filter(s => {
+    if (stateFilter && s.abbr !== stateFilter) return false;
     if (q && !s.name.toLowerCase().includes(q)) return false;
     if (rf !== 'all' && !s.races.includes(rf)) return false;
     return true;
@@ -803,7 +812,10 @@ function filteredSorted() {
 
 function drawTable() {
   const data = filteredSorted();
-  document.getElementById('tableInfo').textContent = `${data.length} of ${STATES.length} states`;
+  const filterNote = stateFilter
+    ? `<span style="color:var(--amber);margin-left:0.5rem">▼ ${SM[stateFilter].name} <button onclick="clearStateFilter()" style="font-family:var(--mono);font-size:0.58rem;color:var(--text-muted);background:var(--navy-border);border:none;border-radius:2px;padding:1px 6px;cursor:pointer;margin-left:4px">✕ clear</button></span>`
+    : '';
+  document.getElementById('tableInfo').innerHTML = `${data.length} of ${STATES.length} states${filterNote}`;
   const tb = document.getElementById('tableBody'); tb.innerHTML = '';
 
   data.forEach(s => {
@@ -879,6 +891,12 @@ document.querySelectorAll('[data-race]').forEach(btn => btn.addEventListener('cl
   document.querySelectorAll('[data-race]').forEach(b => b.classList.remove('active'));
   btn.classList.add('active'); rf = btn.dataset.race; drawTable();
 }));
+
+function clearStateFilter() {
+  document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
+  sel = null; stateFilter = null;
+  emptyDetail(); drawTable();
+}
 
 // ── INIT ───────────────────────────────────────────────────────────────────────
 buildMap(); buildHead(); drawTable();
