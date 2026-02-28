@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PoliticalWindow.com — 2026 FCC Ad Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:       #08111F;
+    --navy-mid:   #0D1A2E;
+    --navy-card:  #0F2040;
+    --navy-border:#1A3156;
+    --blue:       #1E6FFF;
+    --blue-light: #4A9DFF;
+    --blue-glow:  rgba(30,111,255,0.18);
+    --amber:      #F5A623;
+    --amber-dim:  rgba(245,166,35,0.15);
+    --red:        #FF3D5A;
+    --red-dim:    rgba(255,61,90,0.15);
+    --green:      #00C48C;
+    --green-dim:  rgba(0,196,140,0.12);
+    --slate:      #4A6080;
+    --slate-dim:  rgba(74,96,128,0.2);
+    --text:       #D6E4F7;
+    --text-muted: #6B85A8;
+    --text-faint: #3A506E;
+    --mono:       'IBM Plex Mono', monospace;
+    --sans:       'DM Sans', sans-serif;
+    --display:    'Bebas Neue', sans-serif;
+  }
+
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy-mid);
+    border-bottom: 1px solid var(--navy-border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .logo-text {
+    font-family: var(--display);
+    font-size: 1.6rem;
+    letter-spacing: 0.04em;
+    color: #fff;
+  }
+  .logo-dot { color: var(--blue); }
+  .logo-badge {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--amber);
+    background: var(--amber-dim);
+    border: 1px solid var(--amber);
+    border-radius: 2px;
+    padding: 2px 5px;
+    letter-spacing: 0.08em;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .header-date {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .fcc-note {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem 3rem;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    gap: 1.25rem;
+  }
+
+  /* ── LEGEND / STATUS BAR ── */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--navy-card);
+    border: 1px solid var(--navy-border);
+    border-radius: 6px;
+    flex-wrap: wrap;
+  }
+  .status-bar-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .legend {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .legend-item:hover { color: var(--text); }
+  .legend-item.active { color: var(--text); }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-red    { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .dot-amber  { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  .dot-blue   { background: var(--blue); }
+  .dot-green  { background: var(--green); }
+  .dot-slate  { background: var(--slate); }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+  .filter-btn {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: 3px;
+    border: 1px solid var(--navy-border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: var(--blue); color: var(--blue-light); }
+  .filter-btn.active {
+    background: var(--blue-glow);
+    border-color: var(--blue);
+    color: var(--blue-light);
+  }
+
+  /* ── TOP SECTION: MAP + DETAIL ── */
+  .top-section {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  /* ── TILE MAP ── */
+  .map-card {
+    background: var(--navy-card);
+    border: 1px solid var(--navy-border);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .card-title {
+    font-family: var(--display);
+    font-size: 1.15rem;
+    letter-spacing: 0.05em;
+    color: #fff;
+  }
+  .card-subtitle {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(8, 40px);
+    gap: 3px;
+  }
+  .tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+    position: relative;
+    user-select: none;
+  }
+  .tile:hover {
+    transform: scale(1.12);
+    z-index: 10;
+    border-color: rgba(255,255,255,0.4);
+  }
+  .tile.selected {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+    transform: scale(1.08);
+    z-index: 10;
+  }
+  .tile-window-open   { background: var(--red-dim);   border-color: var(--red);   color: var(--red); }
+  .tile-window-soon   { background: var(--amber-dim);  border-color: var(--amber);  color: var(--amber); }
+  .tile-upcoming      { background: var(--blue-glow);  border-color: #1A4A99;      color: var(--blue-light); }
+  .tile-general-only  { background: var(--green-dim);  border-color: #0A4035;      color: var(--green); }
+  .tile-inactive      { background: rgba(20,35,58,0.4); border-color: transparent; color: var(--text-faint); }
+
+  /* ── STATE DETAIL PANEL ── */
+  .detail-panel {
+    background: var(--navy-card);
+    border: 1px solid var(--navy-border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    min-height: 340px;
+  }
+  .detail-state-name {
+    font-family: var(--display);
+    font-size: 2rem;
+    letter-spacing: 0.05em;
+    color: #fff;
+    line-height: 1;
+  }
+  .detail-state-abbr {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+    margin-bottom: 1rem;
+  }
+  .detail-section {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--navy-border);
+  }
+  .detail-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .detail-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 0.35rem;
+  }
+  .detail-value {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .detail-value.red    { color: var(--red); }
+  .detail-value.amber  { color: var(--amber); }
+  .detail-value.blue   { color: var(--blue-light); }
+  .detail-value.green  { color: var(--green); }
+  .detail-value.muted  { color: var(--text-muted); font-weight: 400; }
+  .detail-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .race-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.4rem;
+  }
+  .race-tag {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 2px;
+    border: 1px solid;
+  }
+  .tag-senate   { border-color: #3B6FD4; color: #7AB0FF; background: rgba(59,111,212,0.12); }
+  .tag-governor { border-color: #8B5FD4; color: #C09FFF; background: rgba(139,95,212,0.12); }
+  .tag-house    { border-color: #2A7A5C; color: #5FC9A0; background: rgba(42,122,92,0.12); }
+  .tag-issue    { border-color: #8A6020; color: #E0A040; background: rgba(138,96,32,0.12); }
+  .window-bar {
+    margin-top: 0.5rem;
+    height: 6px;
+    background: var(--navy-border);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+  .window-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .no-selection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 300px;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  .no-selection-icon {
+    font-size: 2rem;
+    opacity: 0.3;
+  }
+  .no-selection-text {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── TABLE ── */
+  .table-card {
+    background: var(--navy-card);
+    border: 1px solid var(--navy-border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .table-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--navy-border);
+    flex-wrap: wrap;
+  }
+  .search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--navy);
+    border: 1px solid var(--navy-border);
+    border-radius: 4px;
+    padding: 4px 10px;
+    flex: 1;
+    max-width: 220px;
+  }
+  .search-wrap input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    width: 100%;
+  }
+  .search-wrap input::placeholder { color: var(--text-faint); }
+  .search-icon { color: var(--text-faint); font-size: 0.75rem; }
+  .table-info {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead th {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--navy-border);
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    transition: color 0.15s;
+    background: var(--navy-mid);
+  }
+  thead th:hover { color: var(--text); }
+  thead th.sort-active { color: var(--blue-light); }
+  thead th .sort-arrow { margin-left: 4px; opacity: 0.5; }
+  thead th.sort-active .sort-arrow { opacity: 1; }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(26,49,86,0.5);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  tbody tr:hover { background: rgba(30,111,255,0.05); }
+  tbody tr.row-selected { background: rgba(30,111,255,0.1); }
+  tbody tr:last-child { border-bottom: none; }
+
+  td {
+    padding: 0.7rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    vertical-align: middle;
+  }
+  .td-state {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .state-flag {
+    width: 18px;
+    height: 18px;
+    background: var(--navy-border);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+  }
+  .state-name-cell {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .date-cell { color: var(--text); }
+  .date-cell.na { color: var(--text-faint); }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .pill-red   { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(255,61,90,0.3); }
+  .pill-amber { background: var(--amber-dim);  color: var(--amber);  border: 1px solid rgba(245,166,35,0.3); }
+  .pill-blue  { background: var(--blue-glow);  color: var(--blue-light); border: 1px solid rgba(30,111,255,0.3); }
+  .pill-green { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(0,196,140,0.3); }
+  .pill-slate { background: var(--slate-dim);  color: var(--slate);  border: 1px solid rgba(74,96,128,0.3); }
+
+  .inline-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+  .mini-tag {
+    font-size: 0.55rem;
+    padding: 1px 5px;
+    border-radius: 2px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+
+  .days-badge {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 1px;
+  }
+
+  /* ── DISCLAIMER ── */
+  .disclaimer {
+    padding: 0.75rem 1.25rem;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--text-faint);
+    border-top: 1px solid var(--navy-border);
+    line-height: 1.5;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--navy); }
+  ::-webkit-scrollbar-thumb { background: var(--navy-border); border-radius: 3px; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .pulse { animation: pulse 2s infinite; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-text">Political<span class="logo-dot">Window</span><span style="color:var(--text-muted)">.com</span></span>
+    <span class="logo-badge">2026 CYCLE</span>
+  </div>
+  <div class="header-right">
+    <span class="fcc-note">FCC Political Ad Intelligence · Broadcast & Cable</span>
+    <span class="header-date" id="live-date"></span>
+  </div>
+</header>
+
+<main>
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span class="status-bar-label">Window Status</span>
+    <div class="legend">
+      <div class="legend-item active" data-filter="window-open">
+        <div class="legend-dot dot-red pulse"></div> Primary Window Open
+      </div>
+      <div class="legend-item active" data-filter="window-soon">
+        <div class="legend-dot dot-amber"></div> Window Opens &lt;30 Days
+      </div>
+      <div class="legend-item active" data-filter="upcoming">
+        <div class="legend-dot dot-blue"></div> Primary Upcoming
+      </div>
+      <div class="legend-item active" data-filter="general-only">
+        <div class="legend-dot dot-green"></div> General Window Only
+      </div>
+      <div class="legend-item active" data-filter="inactive">
+        <div class="legend-dot dot-slate"></div> No Major Federal Race
+      </div>
+    </div>
+    <div class="filter-group">
+      <span class="status-bar-label" style="margin-right:0.25rem">Race Type:</span>
+      <button class="filter-btn active" data-race="all">All</button>
+      <button class="filter-btn" data-race="Senate">Senate</button>
+      <button class="filter-btn" data-race="Governor">Gov</button>
+      <button class="filter-btn" data-race="House">House</button>
+    </div>
+  </div>
+
+  <!-- TOP: MAP + DETAIL -->
+  <div class="top-section">
+    <div class="map-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">2026 Election Activity Map</div>
+          <div class="card-subtitle">Click any state for FCC window details</div>
+        </div>
+        <div class="card-subtitle" style="text-align:right">General Election: <span style="color:var(--green)">Nov 3, 2026</span><br>General FCC Window: <span style="color:var(--green)">Sep 4, 2026</span></div>
+      </div>
+      <div class="tile-grid" id="tileGrid"></div>
+    </div>
+
+    <div class="detail-panel" id="detailPanel">
+      <div class="no-selection">
+        <div class="no-selection-icon">🗳</div>
+        <div class="no-selection-text">SELECT A STATE<br>TO VIEW FCC WINDOW DETAILS</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-card">
+    <div class="table-toolbar">
+      <div class="card-title" style="font-size:1rem">State-by-State FCC Window Calendar</div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search state...">
+      </div>
+      <span class="table-info" id="tableInfo"></span>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr id="tableHead"></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="disclaimer">
+      ⚠ FCC Primary Window = 45 days prior to primary election date for federal candidates. FCC General Window = 60 days prior to November 3, 2026 (September 4, 2026). Issue/PAC advertisers not subject to federal windows but may have state-law obligations.
+      Dates based on current or projected state schedules as of Q1 2026 — subject to legislative change. Consult station political file and legal counsel. Not legal advice.
+    </div>
+  </div>
+</main>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const TODAY = new Date(2026, 1, 27); // Feb 27, 2026
+const GENERAL = new Date(2026, 10, 3); // Nov 3, 2026
+const GENERAL_WINDOW = new Date(2026, 8, 4); // Sep 4, 2026
+
+function fccPrimaryWindow(primaryDate) {
+  if (!primaryDate) return null;
+  const d = new Date(primaryDate);
+  d.setDate(d.getDate() - 45);
+  return d;
+}
+
+function daysUntil(d) {
+  if (!d) return null;
+  return Math.ceil((d - TODAY) / 86400000);
+}
+
+function fmt(d) {
+  if (!d) return null;
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+function fmtShort(d) {
+  if (!d) return '—';
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+
+// State election data: primary, races, runoff, notes
+const RAW = [
+  { abbr:'TX', name:'Texas',         primary:'2026-03-03', races:['Senate','Governor','House'], runoff:'2026-05-26', notes:'Top spend market; R primary competitive'},
+  { abbr:'IL', name:'Illinois',      primary:'2026-03-17', races:['Senate','Governor','House'], notes:'Dems favored; competitive Gov race'},
+  { abbr:'OH', name:'Ohio',          primary:'2026-05-05', races:['Senate','Governor','House'], notes:'Open Senate seat (R); key swing state'},
+  { abbr:'NC', name:'N. Carolina',   primary:'2026-05-19', races:['Senate','Governor','House'], notes:'Competitive Senate; open Gov seat'},
+  { abbr:'PA', name:'Pennsylvania',  primary:'2026-05-19', races:['Senate','House'],            notes:'Open Senate seat (R); no Gov race'},
+  { abbr:'GA', name:'Georgia',       primary:'2026-05-19', races:['Senate','Governor','House'], runoff:'2026-07-21', notes:'Ossoff (D) defending; Gov race'},
+  { abbr:'AR', name:'Arkansas',      primary:'2026-05-19', races:['Senate','Governor','House'], runoff:'2026-06-16', notes:'Safe R; Gov primary competitive'},
+  { abbr:'ID', name:'Idaho',         primary:'2026-05-19', races:['Senate','Governor','House'], notes:'Safe R; open Senate seat'},
+  { abbr:'KY', name:'Kentucky',      primary:'2026-05-19', races:['Senate','Governor','House'], notes:'McConnell seat open; safe R'},
+  { abbr:'OR', name:'Oregon',        primary:'2026-05-19', races:['Senate','Governor','House'], notes:'Merkley (D) defending; Gov open'},
+  { abbr:'WV', name:'W. Virginia',   primary:'2026-05-12', races:['Senate','House'],            notes:'Capito (R) defending'},
+  { abbr:'AK', name:'Alaska',        primary:'2026-08-25', races:['Senate','House'],            notes:'Top-4 open primary; Sullivan (R)'},
+  { abbr:'MT', name:'Montana',       primary:'2026-06-02', races:['Senate','House'],            notes:'Daines (R) defending'},
+  { abbr:'NJ', name:'New Jersey',    primary:'2026-06-02', races:['Senate','Governor','House'], notes:'Open Senate; high-stakes Gov'},
+  { abbr:'IA', name:'Iowa',          primary:'2026-06-02', races:['Senate','House'],            notes:'Grassley (R) retiring; open seat'},
+  { abbr:'MS', name:'Mississippi',   primary:'2026-Jun-02',races:['Senate','House'],            notes:'Wicker (R) defending'},
+  { abbr:'SD', name:'S. Dakota',     primary:'2026-06-03', races:['Senate','House'],            notes:'Rounds (R) defending; Gov open'},
+  { abbr:'NM', name:'New Mexico',    primary:'2026-06-02', races:['Senate','House'],            notes:'Heinrich (D) defending'},
+  { abbr:'NH', name:'New Hampshire', primary:'2026-09-08', races:['Senate','Governor','House'], notes:'Hassan (D) defending; Gov race'},
+  { abbr:'ME', name:'Maine',         primary:'2026-06-09', races:['Senate','House'],            notes:'Collins (R) defending'},
+  { abbr:'SC', name:'S. Carolina',   primary:'2026-06-09', races:['Senate','Governor','House'], notes:'Scott (R) defending'},
+  { abbr:'CO', name:'Colorado',      primary:'2026-06-23', races:['Senate','Governor','House'], notes:'Bennet (D) defending; Polis not running for Gov'},
+  { abbr:'AZ', name:'Arizona',       primary:'2026-08-04', races:['Senate','House'],            notes:'Open Senate (D); high stakes'},
+  { abbr:'MI', name:'Michigan',      primary:'2026-08-04', races:['Senate','Governor','House'], notes:'Peters (D) retiring; open Gov'},
+  { abbr:'WA', name:'Washington',    primary:'2026-08-04', races:['Senate','Governor','House'], notes:'Murray (D) retiring; open seat'},
+  { abbr:'MN', name:'Minnesota',     primary:'2026-08-11', races:['Senate','Governor','House'], notes:'Smith (D) defending; Gov open'},
+  { abbr:'WI', name:'Wisconsin',     primary:'2026-08-11', races:['Governor','House'],          notes:'No Senate; Gov race key'},
+  { abbr:'FL', name:'Florida',       primary:'2026-08-18', races:['Senate','House'],            notes:'Scott (R) defending'},
+  { abbr:'MA', name:'Massachusetts', primary:'2026-09-01', races:['Senate','Governor','House'], notes:'Warren (D) defending; Gov race'},
+  { abbr:'LA', name:'Louisiana',     primary:'2026-10-10', races:['Senate','House'],            notes:'Jungle primary; Cassidy (R)'},
+  { abbr:'DE', name:'Delaware',      primary:'2026-09-08', races:['Senate','House'],            notes:'Coons (D) defending'},
+  { abbr:'KS', name:'Kansas',        primary:'2026-08-04', races:['Senate','Governor','House'], notes:'Moran (R) defending'},
+  { abbr:'NE', name:'Nebraska',      primary:'2026-05-12', races:['Senate','House'],            notes:'Fischer (R) defending'},
+  { abbr:'OK', name:'Oklahoma',      primary:'2026-06-16', races:['Senate','House'],            runoff:'2026-08-25', notes:'Lankford (R) defending'},
+  { abbr:'TN', name:'Tennessee',     primary:'2026-08-06', races:['Senate','House'],            notes:'Blackburn (R) defending'},
+  { abbr:'VA', name:'Virginia',      primary:'2026-06-09', races:['House'],                    notes:'No Senate/Gov this cycle'},
+  { abbr:'MO', name:'Missouri',      primary:'2026-08-04', races:['Senate','House'],            notes:'Hawley (R) defending'},
+  { abbr:'RI', name:'Rhode Island',  primary:'2026-09-08', races:['Senate','Governor','House'], notes:'Reed (D) defending'},
+  { abbr:'VT', name:'Vermont',       primary:'2026-08-11', races:['Senate','Governor','House'], notes:'Sanders independent'},
+  { abbr:'WY', name:'Wyoming',       primary:'2026-08-18', races:['Senate','House'],            notes:'Barrasso (R) defending'},
+  { abbr:'IN', name:'Indiana',       primary:'2026-05-05', races:['Senate','House'],            notes:'Young (R) not running; open seat'},
+  // States with no major federal races this cycle
+  { abbr:'CA', name:'California',    primary:'2026-06-02', races:['Governor','House'],          notes:'No Senate; major Gov race'},
+  { abbr:'NY', name:'New York',      primary:'2026-06-23', races:['Governor','House'],          notes:'No Senate; Hochul Gov'},
+  { abbr:'NV', name:'Nevada',        primary:'2026-06-09', races:['Governor','House'],          notes:'No Senate this cycle'},
+  { abbr:'UT', name:'Utah',          primary:'2026-06-23', races:['Governor','House'],          notes:'No Senate this cycle'},
+  { abbr:'AL', name:'Alabama',       primary:'2026-05-19', races:['Senate','House'],            notes:'Tuberville (R) defending'},
+  { abbr:'HI', name:'Hawaii',        primary:'2026-08-08', races:['Senate','House'],            notes:'Hirono (D) defending'},
+  { abbr:'CT', name:'Connecticut',   primary:'2026-08-11', races:['Senate','House'],            notes:'Blumenthal (D) defending'},
+];
+
+// Build full state objects
+const STATES = RAW.map(s => {
+  const primary = s.primary.includes('Jun-') 
+    ? new Date(s.primary.replace('Jun-','06-').replace('2026-06-','2026-06-'))
+    : (s.primary ? new Date(s.primary) : null);
+  
+  // Fix any invalid dates
+  const pDate = primary instanceof Date && !isNaN(primary) ? primary : null;
+  const rDate = s.runoff ? new Date(s.runoff) : null;
+  const pWindow = fccPrimaryWindow(pDate);
+  const dUntilWindow = daysUntil(pWindow);
+  const dUntilPrimary = daysUntil(pDate);
+
+  let status;
+  if (pWindow && TODAY >= pWindow && TODAY <= pDate) {
+    status = 'window-open';
+  } else if (pWindow && dUntilWindow !== null && dUntilWindow > 0 && dUntilWindow <= 30) {
+    status = 'window-soon';
+  } else if (pDate && dUntilPrimary !== null && dUntilPrimary > 0) {
+    status = 'upcoming';
+  } else if (pDate && dUntilPrimary !== null && dUntilPrimary <= 0 && TODAY < GENERAL_WINDOW) {
+    status = 'general-only';
+  } else {
+    status = 'inactive';
+  }
+
+  return { ...s, pDate, rDate, pWindow, dUntilWindow, dUntilPrimary, status };
+});
+
+const STATE_MAP = Object.fromEntries(STATES.map(s => [s.abbr, s]));
+
+// ─── TILE MAP LAYOUT ─────────────────────────────────────────────────────────
+// [row, col] in 8x12 grid
+const GRID = {
+  ME:[0,11], NH:[1,10], VT:[1,9],
+  WA:[2,0], ID:[2,1], MT:[2,2], ND:[2,3], MN:[2,4], WI:[2,5], MI:[2,6], NY:[2,7], MA:[2,8], RI:[2,9], CT:[2,10],
+  OR:[3,0], NV:[3,1], WY:[3,2], SD:[3,3], IA:[3,4], IL:[3,5], IN:[3,6], OH:[3,7], PA:[3,8], NJ:[3,9], DE:[3,10],
+  CA:[4,0], UT:[4,1], CO:[4,2], NE:[4,3], MO:[4,4], KY:[4,5], WV:[4,6], VA:[4,7], MD:[4,8], DC:[4,9],
+  AK:[5,0], AZ:[5,1], NM:[5,2], KS:[5,3], AR:[5,4], TN:[5,5], NC:[5,6], SC:[5,7],
+  HI:[6,0], OK:[6,2], TX:[6,3], LA:[6,4], MS:[6,5], AL:[6,6], GA:[6,7],
+  FL:[7,7],
+};
+
+const ROWS = 8, COLS = 12;
+
+function buildTileMap() {
+  const grid = document.getElementById('tileGrid');
+  
+  // Create all cells
+  const cells = {};
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = document.createElement('div');
+      cell.style.gridRow = r + 1;
+      cell.style.gridColumn = c + 1;
+      cells[`${r},${c}`] = cell;
+      grid.appendChild(cell);
+    }
+  }
+
+  // Place state tiles
+  Object.entries(GRID).forEach(([abbr, [row, col]]) => {
+    const cell = cells[`${row},${col}`];
+    const state = STATE_MAP[abbr];
+    const statusClass = state ? `tile-${state.status}` : 'tile-inactive';
+    cell.className = `tile ${statusClass}`;
+    cell.textContent = abbr;
+    cell.title = state ? state.name : abbr;
+    cell.dataset.abbr = abbr;
+    if (state) {
+      cell.addEventListener('click', () => selectState(abbr));
+    }
+  });
+}
+
+// ─── DETAIL PANEL ─────────────────────────────────────────────────────────────
+let selectedAbbr = null;
+
+function selectState(abbr) {
+  // Deselect old
+  document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
+  
+  // Deselect table row
+  document.querySelectorAll('.row-selected').forEach(r => r.classList.remove('row-selected'));
+
+  if (selectedAbbr === abbr) {
+    selectedAbbr = null;
+    renderDetailEmpty();
+    return;
+  }
+
+  selectedAbbr = abbr;
+
+  // Highlight tile
+  const tile = document.querySelector(`[data-abbr="${abbr}"]`);
+  if (tile) tile.classList.add('selected');
+
+  // Highlight table row
+  const row = document.querySelector(`tr[data-abbr="${abbr}"]`);
+  if (row) {
+    row.classList.add('row-selected');
+    row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  const s = STATE_MAP[abbr];
+  if (!s) return;
+
+  const panel = document.getElementById('detailPanel');
+
+  const statusLabel = {
+    'window-open': `<span style="color:var(--red)">● PRIMARY WINDOW OPEN</span>`,
+    'window-soon': `<span style="color:var(--amber)">◐ WINDOW OPENS SOON</span>`,
+    'upcoming': `<span style="color:var(--blue-light)">○ PRIMARY UPCOMING</span>`,
+    'general-only': `<span style="color:var(--green)">◇ GENERAL WINDOW ONLY</span>`,
+    'inactive': `<span style="color:var(--slate)">— NO MAJOR FEDERAL RACE</span>`,
+  }[s.status] || '';
+
+  const raceTags = s.races.map(r => {
+    const cls = { Senate:'tag-senate', Governor:'tag-governor', House:'tag-house', Issue:'tag-issue' }[r] || '';
+    return `<span class="race-tag ${cls}">${r}</span>`;
+  }).join('');
+
+  const pWindowColor = s.status === 'window-open' ? 'red' : s.status === 'window-soon' ? 'amber' : 'blue';
+
+  // Progress bar for window (how far through primary window are we)
+  let barPct = 0, barColor = 'var(--blue)';
+  if (s.pWindow && s.pDate) {
+    const total = s.pDate - s.pWindow;
+    const elapsed = TODAY - s.pWindow;
+    barPct = Math.max(0, Math.min(100, (elapsed/total)*100));
+    if (s.status === 'window-open') barColor = 'var(--red)';
+  }
+
+  // General window bar
+  const genTotal = GENERAL - GENERAL_WINDOW;
+  const genElapsed = TODAY - GENERAL_WINDOW;
+  const genPct = Math.max(0, Math.min(100, (genElapsed/genTotal)*100));
+
+  panel.innerHTML = `
+    <div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.08em;margin-bottom:0.5rem">${statusLabel}</div>
+    <div class="detail-state-name">${s.name}</div>
+    <div class="detail-state-abbr">${s.abbr} · 2026 ELECTION CYCLE</div>
+
+    <div class="detail-section">
+      <div class="detail-label">Race Types</div>
+      <div class="race-tags">${raceTags}</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-row">
+        <div>
+          <div class="detail-label">Primary Date</div>
+          <div class="detail-value ${s.dUntilPrimary !== null && s.dUntilPrimary < 0 ? 'muted' : ''}">${s.pDate ? fmtShort(s.pDate) : '—'}</div>
+          ${s.dUntilPrimary !== null && s.dUntilPrimary > 0 ? `<span style="font-family:var(--mono);font-size:0.6rem;color:var(--text-muted)">${s.dUntilPrimary}d away</span>` : ''}
+          ${s.dUntilPrimary !== null && s.dUntilPrimary <= 0 ? `<span style="font-family:var(--mono);font-size:0.6rem;color:var(--text-faint)">Completed</span>` : ''}
+        </div>
+        <div>
+          <div class="detail-label">Runoff Date</div>
+          <div class="detail-value ${s.rDate ? '' : 'muted'}">${s.rDate ? fmtShort(s.rDate) : 'N/A'}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">FCC Primary Window</div>
+      <div class="detail-value ${pWindowColor}">${s.pWindow ? fmtShort(s.pWindow) : '—'} → ${s.pDate ? fmtShort(s.pDate) : '—'}</div>
+      <div class="window-bar">
+        <div class="window-bar-fill" style="width:${barPct}%;background:${barColor}"></div>
+      </div>
+      <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);margin-top:3px">
+        ${s.status === 'window-open' ? `Window ${Math.round(barPct)}% elapsed` : 
+          s.status === 'window-soon' ? `Opens in ${s.dUntilWindow} days` :
+          s.pWindow ? `Opens ${fmtShort(s.pWindow)}` : 'No primary window'}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">FCC General Window</div>
+      <div class="detail-value green">Sep 4, 2026 → Nov 3, 2026</div>
+      <div class="window-bar">
+        <div class="window-bar-fill" style="width:${genPct}%;background:var(--green)"></div>
+      </div>
+      <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);margin-top:3px">
+        ${TODAY >= GENERAL_WINDOW ? `General window ${Math.round(genPct)}% elapsed` : `Opens in ${daysUntil(GENERAL_WINDOW)} days`}
+      </div>
+    </div>
+
+    <div class="detail-section" style="border-bottom:none">
+      <div class="detail-label">Intel Notes</div>
+      <div style="font-family:var(--sans);font-size:0.78rem;color:var(--text-muted);line-height:1.5">${s.notes || '—'}</div>
+    </div>
+  `;
+}
+
+function renderDetailEmpty() {
+  document.getElementById('detailPanel').innerHTML = `
+    <div class="no-selection">
+      <div class="no-selection-icon">🗳</div>
+      <div class="no-selection-text">SELECT A STATE<br>TO VIEW FCC WINDOW DETAILS</div>
+    </div>`;
+}
+
+// ─── TABLE ───────────────────────────────────────────────────────────────────
+const COLS_DEF = [
+  { key: 'name',        label: 'State',             sortable: true },
+  { key: 'status',      label: 'Status',             sortable: true },
+  { key: 'pDate',       label: 'Primary Date',       sortable: true },
+  { key: 'pWindow',     label: 'FCC Primary Window', sortable: true },
+  { key: 'dUntilWindow',label: 'Days to Window',     sortable: true },
+  { key: 'rDate',       label: 'Runoff',             sortable: true },
+  { key: 'races',       label: 'Race Types',         sortable: false },
+  { key: 'notes',       label: 'Intel Notes',        sortable: false },
+];
+
+let sortKey = 'dUntilWindow';
+let sortDir = 1;
+let searchTerm = '';
+let raceFilter = 'all';
+
+function buildTableHead() {
+  const tr = document.getElementById('tableHead');
+  COLS_DEF.forEach(col => {
+    const th = document.createElement('th');
+    th.innerHTML = col.label + (col.sortable ? `<span class="sort-arrow">↕</span>` : '');
+    if (col.sortable) {
+      if (sortKey === col.key) th.classList.add('sort-active');
+      th.addEventListener('click', () => {
+        if (sortKey === col.key) sortDir *= -1;
+        else { sortKey = col.key; sortDir = 1; }
+        buildTableHead();
+        renderTable();
+      });
+    }
+    tr.appendChild(th);
+  });
+}
+
+function statusOrder(s) {
+  return { 'window-open':0, 'window-soon':1, 'upcoming':2, 'general-only':3, 'inactive':4 }[s] ?? 5;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  let data = STATES.filter(s => {
+    if (searchTerm && !s.name.toLowerCase().includes(searchTerm)) return false;
+    if (raceFilter !== 'all' && !s.races.includes(raceFilter)) return false;
+    return true;
+  });
+
+  data.sort((a, b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (sortKey === 'status') { av = statusOrder(a.status); bv = statusOrder(b.status); }
+    if (sortKey === 'races') { av = a.races.join(''); bv = b.races.join(''); }
+    if (av === null || av === undefined) return 1;
+    if (bv === null || bv === undefined) return -1;
+    if (av < bv) return -1 * sortDir;
+    if (av > bv) return 1 * sortDir;
+    return 0;
+  });
+
+  document.getElementById('tableInfo').textContent = `${data.length} of ${STATES.length} states`;
+
+  const statusPill = {
+    'window-open':   `<span class="status-pill pill-red">● OPEN</span>`,
+    'window-soon':   `<span class="status-pill pill-amber">◐ SOON</span>`,
+    'upcoming':      `<span class="status-pill pill-blue">○ UPCOMING</span>`,
+    'general-only':  `<span class="status-pill pill-green">◇ GEN ONLY</span>`,
+    'inactive':      `<span class="status-pill pill-slate">— NONE</span>`,
+  };
+
+  data.forEach(s => {
+    const tr = document.createElement('tr');
+    tr.dataset.abbr = s.abbr;
+    if (s.abbr === selectedAbbr) tr.classList.add('row-selected');
+    tr.addEventListener('click', () => selectState(s.abbr));
+
+    const raceTags = s.races.map(r => {
+      const cls = { Senate:'tag-senate', Governor:'tag-governor', House:'tag-house' }[r] || '';
+      return `<span class="mini-tag ${cls}">${r[0]}</span>`;
+    }).join('');
+
+    tr.innerHTML = `
+      <td><div class="td-state">
+        <div class="state-flag">${s.abbr}</div>
+        <div class="state-name-cell">${s.name}</div>
+      </div></td>
+      <td>${statusPill[s.status] || ''}</td>
+      <td class="date-cell ${!s.pDate ? 'na' : ''}">${s.pDate ? fmtShort(s.pDate) : '—'}</td>
+      <td class="date-cell ${s.status === 'window-open' ? '' : ''}">
+        ${s.pWindow ? fmtShort(s.pWindow) : '—'}
+        ${s.status === 'window-open' ? '<span class="days-badge pulse" style="color:var(--red)">● ACTIVE NOW</span>' : ''}
+        ${s.status === 'window-soon' ? `<span class="days-badge" style="color:var(--amber)">in ${s.dUntilWindow}d</span>` : ''}
+      </td>
+      <td class="date-cell">
+        ${s.dUntilWindow === null ? '—' : s.dUntilWindow <= 0 ? '<span style="color:var(--text-faint)">Past</span>' : s.dUntilWindow}
+      </td>
+      <td class="date-cell ${!s.rDate ? 'na' : ''}">${s.rDate ? fmtShort(s.rDate) : '—'}</td>
+      <td><div class="inline-tags">${raceTags}</div></td>
+      <td style="font-family:var(--sans);font-size:0.68rem;color:var(--text-muted);max-width:200px">${s.notes || '—'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─── FILTERS ──────────────────────────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchTerm = e.target.value.toLowerCase().trim();
+  renderTable();
+});
+
+document.querySelectorAll('[data-race]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-race]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    raceFilter = btn.dataset.race;
+    renderTable();
+  });
+});
+
+// ─── LIVE DATE ────────────────────────────────────────────────────────────────
+function updateDate() {
+  const el = document.getElementById('live-date');
+  const opts = { weekday:'short', month:'short', day:'numeric', year:'numeric' };
+  el.textContent = new Date().toLocaleDateString('en-US', opts).toUpperCase();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+buildTileMap();
+buildTableHead();
+renderTable();
+updateDate();
+</script>
+</body>
+</html>
