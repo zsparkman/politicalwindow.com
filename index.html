@@ -33,150 +33,301 @@
     --sans:       'DM Sans', sans-serif;
     --display:    'Bebas Neue', sans-serif;
   }
+
   body { background:var(--navy); color:var(--text); font-family:var(--sans); min-height:100vh; overflow-x:hidden; }
 
+  /* ── HEADER ── */
   header {
     background:var(--navy-mid); border-bottom:1px solid var(--navy-border);
-    padding:0 2rem; display:flex; align-items:center; justify-content:space-between;
-    height:56px; position:sticky; top:0; z-index:100;
+    padding:0 1.25rem; display:flex; align-items:center; justify-content:space-between;
+    height:52px; position:sticky; top:0; z-index:100;
   }
   .logo { display:flex; align-items:baseline; gap:0.5rem; }
-  .logo-text { font-family:var(--display); font-size:1.6rem; letter-spacing:0.04em; color:#fff; }
+  .logo-text { font-family:var(--display); font-size:1.5rem; letter-spacing:0.04em; color:#fff; line-height:1; }
   .logo-dot { color:var(--blue); }
-  .logo-badge { font-family:var(--mono); font-size:0.65rem; font-weight:600; color:var(--amber); background:var(--amber-dim); border:1px solid var(--amber); border-radius:2px; padding:2px 5px; letter-spacing:0.08em; }
-  .header-right { display:flex; align-items:center; gap:1.5rem; }
-  .header-meta { font-family:var(--mono); font-size:0.65rem; color:var(--text-muted); }
+  .logo-badge { font-family:var(--mono); font-size:0.6rem; font-weight:600; color:var(--amber); background:var(--amber-dim); border:1px solid var(--amber); border-radius:2px; padding:2px 5px; letter-spacing:0.08em; }
+  .header-right { display:flex; align-items:center; gap:1rem; }
+  .header-meta { font-family:var(--mono); font-size:0.62rem; color:var(--text-muted); }
+  .header-fcc { font-family:var(--mono); font-size:0.62rem; color:var(--text-muted); }
 
-  main { max-width:1440px; margin:0 auto; padding:1.5rem 2rem 3rem; display:grid; gap:1.25rem; }
+  /* ── LAYOUT ── */
+  main { max-width:1440px; margin:0 auto; padding:1rem 1.25rem 3rem; display:grid; gap:1rem; }
 
-  .status-bar { display:flex; align-items:center; gap:2rem; padding:0.75rem 1.25rem; background:var(--navy-card); border:1px solid var(--navy-border); border-radius:6px; flex-wrap:wrap; }
-  .status-bar-label { font-family:var(--mono); font-size:0.65rem; letter-spacing:0.1em; color:var(--text-faint); text-transform:uppercase; white-space:nowrap; }
-  .legend { display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; }
-  .legend-item { display:flex; align-items:center; gap:0.4rem; font-size:0.75rem; color:var(--text-muted); }
-  .legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-  .dot-red   { background:var(--red);   box-shadow:0 0 6px var(--red); }
+  /* ── STATUS BAR ── */
+  .status-bar {
+    display:flex; align-items:center; gap:1.5rem; padding:0.7rem 1rem;
+    background:var(--navy-card); border:1px solid var(--navy-border); border-radius:6px; flex-wrap:wrap;
+  }
+  .status-bar-label { font-family:var(--mono); font-size:0.62rem; letter-spacing:0.1em; color:var(--text-faint); text-transform:uppercase; white-space:nowrap; }
+  .legend { display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap; }
+  .legend-item { display:flex; align-items:center; gap:0.4rem; font-size:0.72rem; color:var(--text-muted); white-space:nowrap; }
+  .legend-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .dot-red   { background:var(--red);   box-shadow:0 0 5px var(--red); }
   .dot-amber { background:var(--amber); }
   .dot-blue  { background:var(--blue); }
   .dot-green { background:var(--green); }
   .dot-slate { background:var(--slate); }
-  .filter-group { display:flex; align-items:center; gap:0.5rem; margin-left:auto; }
-  .filter-btn { font-family:var(--mono); font-size:0.65rem; letter-spacing:0.06em; padding:4px 10px; border-radius:3px; border:1px solid var(--navy-border); background:transparent; color:var(--text-muted); cursor:pointer; transition:all 0.15s; }
-  .filter-btn:hover { border-color:var(--blue); color:var(--blue-light); }
+  .filter-group { display:flex; align-items:center; gap:0.4rem; margin-left:auto; flex-wrap:wrap; }
+  .filter-btn {
+    font-family:var(--mono); font-size:0.62rem; letter-spacing:0.05em;
+    padding:5px 11px; border-radius:3px; border:1px solid var(--navy-border);
+    background:transparent; color:var(--text-muted); cursor:pointer; transition:all 0.15s;
+    -webkit-tap-highlight-color: transparent; touch-action:manipulation;
+  }
+  .filter-btn:hover  { border-color:var(--blue); color:var(--blue-light); }
   .filter-btn.active { background:var(--blue-glow); border-color:var(--blue); color:var(--blue-light); }
 
-  .top-section { display:grid; grid-template-columns:1fr 370px; gap:1.25rem; align-items:start; }
+  /* ── TOP SECTION: MAP + DETAIL ── */
+  .top-section { display:grid; grid-template-columns:1fr 370px; gap:1rem; align-items:start; }
 
+  /* ── MAP CARD ── */
   .map-card { background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px; padding:1.25rem; }
-  .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
-  .card-title { font-family:var(--display); font-size:1.15rem; letter-spacing:0.05em; color:#fff; }
-  .card-sub { font-family:var(--mono); font-size:0.63rem; color:var(--text-muted); }
-  .tile-grid { display:grid; grid-template-columns:repeat(12,1fr); grid-template-rows:repeat(8,38px); gap:3px; }
-  .tile { display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:0.6rem; font-weight:600; border-radius:3px; cursor:pointer; transition:all 0.15s; border:1px solid transparent; position:relative; user-select:none; }
-  .tile:hover { transform:scale(1.14); z-index:10; border-color:rgba(255,255,255,0.35); }
-  .tile.selected { border-color:#fff; box-shadow:0 0 0 2px rgba(255,255,255,0.3); transform:scale(1.1); z-index:10; }
+  .card-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1rem; gap:0.5rem; }
+  .card-title { font-family:var(--display); font-size:1.1rem; letter-spacing:0.05em; color:#fff; }
+  .card-sub { font-family:var(--mono); font-size:0.6rem; color:var(--text-muted); line-height:1.6; }
+
+  /* Map scroll wrapper — enables horizontal scroll on mobile */
+  .map-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:4px; }
+  .tile-grid {
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    grid-template-rows:repeat(8,40px);
+    gap:3px;
+    min-width:480px; /* prevents tiles from becoming unusably small */
+  }
+  .tile {
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-size:0.58rem; font-weight:600; letter-spacing:0.03em;
+    border-radius:3px; cursor:pointer; transition:transform 0.12s, border-color 0.12s;
+    border:1px solid transparent; position:relative; user-select:none;
+    -webkit-tap-highlight-color: transparent; touch-action:manipulation;
+  }
+  .tile:hover  { transform:scale(1.12); z-index:10; border-color:rgba(255,255,255,0.3); }
+  .tile:active { transform:scale(0.95); }
+  .tile.selected { border-color:#fff; box-shadow:0 0 0 2px rgba(255,255,255,0.25); transform:scale(1.08); z-index:10; }
   .tile-window-open  { background:var(--red-dim);   border-color:var(--red);   color:var(--red); }
   .tile-window-soon  { background:var(--amber-dim);  border-color:var(--amber);  color:var(--amber); }
-  .tile-upcoming     { background:var(--blue-glow);  border-color:#1A4A99;      color:var(--blue-light); }
-  .tile-general-only { background:var(--green-dim);  border-color:#0A4035;      color:var(--green); }
+  .tile-upcoming     { background:var(--blue-glow);  border-color:#1A4A99;       color:var(--blue-light); }
+  .tile-general-only { background:var(--green-dim);  border-color:#0A4035;       color:var(--green); }
   .tile-inactive     { background:rgba(20,35,58,0.4); color:var(--text-faint); }
 
-  .detail-panel { background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px; padding:1.25rem; min-height:380px; overflow-y:auto; max-height:600px; }
-  .detail-state-name { font-family:var(--display); font-size:1.9rem; letter-spacing:0.05em; color:#fff; line-height:1; }
-  .detail-state-abbr { font-family:var(--mono); font-size:0.68rem; color:var(--text-muted); margin-top:2px; margin-bottom:0.875rem; }
+  /* ── DETAIL PANEL ── */
+  .detail-panel {
+    background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px;
+    padding:1.25rem; overflow-y:auto;
+  }
+  .detail-state-name { font-family:var(--display); font-size:1.85rem; letter-spacing:0.05em; color:#fff; line-height:1; }
+  .detail-state-abbr { font-family:var(--mono); font-size:0.65rem; color:var(--text-muted); margin-top:2px; margin-bottom:0.875rem; }
   .dsec { margin-bottom:0.875rem; padding-bottom:0.875rem; border-bottom:1px solid var(--navy-border); }
   .dsec:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
-  .dlabel { font-family:var(--mono); font-size:0.58rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-faint); margin-bottom:0.35rem; }
-  .dval { font-family:var(--mono); font-size:0.85rem; font-weight:600; color:var(--text); }
-  .dval.red   { color:var(--red); }
-  .dval.amber { color:var(--amber); }
-  .dval.green { color:var(--green); }
+  .dlabel { font-family:var(--mono); font-size:0.56rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-faint); margin-bottom:0.35rem; }
+  .dval { font-family:var(--mono); font-size:0.82rem; font-weight:600; color:var(--text); }
   .dval.muted { color:var(--text-muted); font-weight:400; }
+  .dval.green { color:var(--green); }
   .drow { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
-  .race-tags { display:flex; flex-wrap:wrap; gap:0.35rem; margin-top:0.3rem; }
-  .race-tag { font-family:var(--mono); font-size:0.58rem; padding:2px 6px; border-radius:2px; border:1px solid; }
+  .race-tags { display:flex; flex-wrap:wrap; gap:0.3rem; margin-top:0.3rem; }
+  .race-tag { font-family:var(--mono); font-size:0.56rem; padding:2px 6px; border-radius:2px; border:1px solid; }
   .tag-senate   { border-color:#3B6FD4; color:#7AB0FF; background:rgba(59,111,212,0.12); }
   .tag-governor { border-color:#8B5FD4; color:#C09FFF; background:rgba(139,95,212,0.12); }
   .tag-house    { border-color:#2A7A5C; color:#5FC9A0; background:rgba(42,122,92,0.12); }
   .wbar { margin-top:0.4rem; height:5px; background:var(--navy-border); border-radius:3px; overflow:hidden; }
   .wbar-fill { height:100%; border-radius:3px; }
-  .wbar-note { font-family:var(--mono); font-size:0.58rem; color:var(--text-muted); margin-top:3px; }
-  .no-sel { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:300px; text-align:center; gap:0.5rem; }
-  .no-sel-icon { font-size:2rem; opacity:0.25; }
-  .no-sel-txt { font-family:var(--mono); font-size:0.68rem; color:var(--text-faint); letter-spacing:0.08em; line-height:1.8; }
+  .wbar-note { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); margin-top:3px; }
+  .no-sel { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:220px; text-align:center; gap:0.5rem; }
+  .no-sel-icon { font-size:2rem; opacity:0.22; }
+  .no-sel-txt { font-family:var(--mono); font-size:0.65rem; color:var(--text-faint); letter-spacing:0.08em; line-height:1.9; }
 
   /* Candidates */
   .cand-race-block { margin-bottom:0.6rem; }
-  .cand-race-label { font-family:var(--mono); font-size:0.56rem; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; border:1px solid; display:inline-block; margin-bottom:0.35rem; }
-  .cand-row { display:flex; align-items:center; gap:0.45rem; padding:4px 7px; border-radius:3px; background:rgba(255,255,255,0.025); margin-bottom:2px; }
+  .cand-race-label { font-family:var(--mono); font-size:0.54rem; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; border:1px solid; display:inline-block; margin-bottom:0.3rem; }
+  .cand-row { display:flex; align-items:center; gap:0.4rem; padding:5px 7px; border-radius:3px; background:rgba(255,255,255,0.025); margin-bottom:2px; }
   .pdot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
-  .cname { font-family:var(--sans); font-size:0.73rem; font-weight:500; color:var(--text); flex:1; min-width:0; }
-  .cnote { font-size:0.58rem; color:var(--text-faint); display:block; }
-  .cbadge { font-family:var(--mono); font-size:0.54rem; padding:1px 5px; border-radius:2px; flex-shrink:0; }
+  .cname { font-family:var(--sans); font-size:0.72rem; font-weight:500; color:var(--text); flex:1; min-width:0; }
+  .cnote { font-size:0.57rem; color:var(--text-faint); display:block; }
+  .cbadge { font-family:var(--mono); font-size:0.52rem; padding:1px 5px; border-radius:2px; flex-shrink:0; white-space:nowrap; }
   .cbadge-inc { background:rgba(245,166,35,0.15); color:var(--amber); border:1px solid rgba(245,166,35,0.3); }
   .cbadge-dec { background:var(--slate-dim); color:var(--text-muted); border:1px solid var(--navy-border); }
-  .cparty { font-family:var(--mono); font-size:0.58rem; flex-shrink:0; }
+  .cparty { font-family:var(--mono); font-size:0.56rem; flex-shrink:0; }
 
-  /* Table */
+  /* ── TABLE ── */
   .table-card { background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px; overflow:hidden; }
-  .table-toolbar { display:flex; align-items:center; gap:1rem; padding:0.875rem 1.25rem; border-bottom:1px solid var(--navy-border); flex-wrap:wrap; }
-  .search-wrap { display:flex; align-items:center; gap:0.4rem; background:var(--navy); border:1px solid var(--navy-border); border-radius:4px; padding:4px 10px; max-width:220px; flex:1; }
+  .table-toolbar {
+    display:flex; align-items:center; gap:0.75rem; padding:0.875rem 1rem;
+    border-bottom:1px solid var(--navy-border); flex-wrap:wrap;
+  }
+  .search-wrap {
+    display:flex; align-items:center; gap:0.4rem; background:var(--navy);
+    border:1px solid var(--navy-border); border-radius:4px; padding:5px 10px; flex:1; min-width:120px;
+  }
   .search-wrap input { background:transparent; border:none; outline:none; color:var(--text); font-family:var(--mono); font-size:0.72rem; width:100%; }
   .search-wrap input::placeholder { color:var(--text-faint); }
-  .tbl-info { font-family:var(--mono); font-size:0.65rem; color:var(--text-muted); margin-left:auto; }
-  table { width:100%; border-collapse:collapse; }
-  thead th { font-family:var(--mono); font-size:0.6rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); padding:0.55rem 0.875rem; text-align:left; border-bottom:1px solid var(--navy-border); cursor:pointer; white-space:nowrap; user-select:none; transition:color 0.15s; background:var(--navy-mid); }
+  .tbl-info { font-family:var(--mono); font-size:0.62rem; color:var(--text-muted); white-space:nowrap; }
+  .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  table { width:100%; border-collapse:collapse; min-width:500px; }
+  thead th {
+    font-family:var(--mono); font-size:0.58rem; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--text-faint); padding:0.55rem 0.875rem; text-align:left; border-bottom:1px solid var(--navy-border);
+    cursor:pointer; white-space:nowrap; user-select:none; transition:color 0.15s; background:var(--navy-mid);
+  }
   thead th:hover { color:var(--text); }
   thead th.sort-active { color:var(--blue-light); }
   tbody tr { border-bottom:1px solid rgba(26,49,86,0.5); cursor:pointer; transition:background 0.1s; }
   tbody tr:hover { background:rgba(30,111,255,0.05); }
   tbody tr.row-selected { background:rgba(30,111,255,0.1); }
   tbody tr:last-child { border-bottom:none; }
-  td { padding:0.6rem 0.875rem; font-family:var(--mono); font-size:0.68rem; vertical-align:middle; }
-  .td-state { display:flex; align-items:center; gap:0.5rem; }
-  .sbox { width:28px; height:20px; background:var(--navy-border); border-radius:2px; display:flex; align-items:center; justify-content:center; font-size:0.54rem; color:var(--text-muted); font-weight:600; flex-shrink:0; }
-  .sname { font-weight:600; color:var(--text); font-size:0.75rem; }
-  .spill { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:2px; font-size:0.58rem; letter-spacing:0.04em; font-weight:600; white-space:nowrap; }
+  td { padding:0.6rem 0.875rem; font-family:var(--mono); font-size:0.67rem; vertical-align:middle; }
+  .td-state { display:flex; align-items:center; gap:0.45rem; }
+  .sbox { width:26px; height:19px; background:var(--navy-border); border-radius:2px; display:flex; align-items:center; justify-content:center; font-size:0.52rem; color:var(--text-muted); font-weight:600; flex-shrink:0; }
+  .sname { font-weight:600; color:var(--text); font-size:0.72rem; }
+  .spill { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:2px; font-size:0.56rem; letter-spacing:0.04em; font-weight:600; white-space:nowrap; }
   .spill-red   { background:var(--red-dim);   color:var(--red);        border:1px solid rgba(255,61,90,0.3); }
   .spill-amber { background:var(--amber-dim);  color:var(--amber);       border:1px solid rgba(245,166,35,0.3); }
   .spill-blue  { background:var(--blue-glow);  color:var(--blue-light);  border:1px solid rgba(30,111,255,0.3); }
   .spill-green { background:var(--green-dim);  color:var(--green);       border:1px solid rgba(0,196,140,0.3); }
   .spill-slate { background:var(--slate-dim);  color:var(--slate);       border:1px solid rgba(74,96,128,0.3); }
-  .itag { font-size:0.54rem; padding:1px 4px; border-radius:2px; border:1px solid; white-space:nowrap; }
-  .dbadge { font-size:0.56rem; color:var(--text-muted); display:block; margin-top:2px; }
+  .itag { font-size:0.52rem; padding:1px 4px; border-radius:2px; border:1px solid; white-space:nowrap; }
+  .dbadge { font-size:0.54rem; display:block; margin-top:2px; }
   .cand-mini { display:flex; flex-direction:column; gap:2px; }
   .cand-mini-row { display:flex; align-items:center; gap:4px; }
   .cand-mini-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-  .disclaimer { padding:0.75rem 1.25rem; font-family:var(--mono); font-size:0.58rem; color:var(--text-faint); border-top:1px solid var(--navy-border); line-height:1.7; }
-  ::-webkit-scrollbar { width:5px; height:5px; }
-  ::-webkit-scrollbar-track { background:var(--navy); }
-  ::-webkit-scrollbar-thumb { background:var(--navy-border); border-radius:3px; }
+  .disclaimer { padding:0.75rem 1rem; font-family:var(--mono); font-size:0.56rem; color:var(--text-faint); border-top:1px solid var(--navy-border); line-height:1.75; }
+
+  /* ── MOBILE STATE CARD (shown instead of table row on mobile) ── */
+  .mobile-state-list { display:none; }
+  .mobile-state-card {
+    display:flex; align-items:center; padding:0.875rem 1rem;
+    border-bottom:1px solid rgba(26,49,86,0.5); gap:0.75rem; cursor:pointer;
+    transition:background 0.1s; -webkit-tap-highlight-color:transparent;
+  }
+  .mobile-state-card:last-child { border-bottom:none; }
+  .mobile-state-card:active { background:rgba(30,111,255,0.08); }
+  .mobile-state-card.row-selected { background:rgba(30,111,255,0.12); }
+  .msc-left { flex:1; min-width:0; }
+  .msc-name { font-family:var(--sans); font-weight:600; font-size:0.9rem; color:var(--text); }
+  .msc-dates { font-family:var(--mono); font-size:0.6rem; color:var(--text-muted); margin-top:2px; }
+  .msc-cands { font-family:var(--mono); font-size:0.58rem; color:var(--text-faint); margin-top:3px; }
+  .msc-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+  .msc-arrow { color:var(--text-faint); font-size:0.75rem; margin-left:4px; }
+
+  /* ── MOBILE DETAIL DRAWER ── */
+  .mobile-detail-drawer {
+    display:none;
+    position:fixed; bottom:0; left:0; right:0;
+    background:var(--navy-mid); border-top:2px solid var(--navy-border);
+    border-radius:16px 16px 0 0; z-index:200;
+    max-height:80vh; overflow-y:auto;
+    transform:translateY(100%); transition:transform 0.3s ease;
+    padding:0 1rem 2rem;
+  }
+  .mobile-detail-drawer.open { transform:translateY(0); }
+  .drawer-handle { width:36px; height:4px; background:var(--navy-border); border-radius:2px; margin:12px auto 16px; }
+  .drawer-close {
+    position:absolute; top:12px; right:1rem;
+    font-family:var(--mono); font-size:0.65rem; color:var(--text-muted);
+    background:var(--navy-border); border:none; border-radius:3px; padding:3px 8px;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .drawer-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:199;
+  }
+  .drawer-overlay.open { display:block; }
+
+  /* ── ANIMATIONS ── */
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
   .pulse { animation:pulse 2s infinite; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(3px)} to{opacity:1;transform:none} }
   .fade-in { animation:fadeIn 0.18s ease; }
+
+  /* ── SCROLLBARS ── */
+  ::-webkit-scrollbar { width:5px; height:5px; }
+  ::-webkit-scrollbar-track { background:var(--navy); }
+  ::-webkit-scrollbar-thumb { background:var(--navy-border); border-radius:3px; }
+
+  /* ══════════════════════════════════════════
+     RESPONSIVE BREAKPOINTS
+  ══════════════════════════════════════════ */
+
+  /* Tablet: 900px and below — stack map + detail */
+  @media (max-width: 900px) {
+    .top-section { grid-template-columns: 1fr; }
+    .detail-panel { min-height:unset; max-height:unset; }
+    .header-fcc { display:none; }
+  }
+
+  /* Mobile: 640px and below — full mobile layout */
+  @media (max-width: 640px) {
+    header { padding:0 1rem; height:48px; }
+    .logo-text { font-size:1.3rem; }
+    .logo-badge { font-size:0.55rem; padding:2px 4px; }
+    .header-meta { display:none; }
+
+    main { padding:0.75rem 0.75rem 5rem; gap:0.75rem; }
+
+    /* Status bar: legend wraps, filters wrap below */
+    .status-bar { gap:0.75rem; padding:0.7rem 0.875rem; }
+    .status-bar-label { font-size:0.58rem; }
+    .legend { gap:0.75rem; }
+    .legend-item { font-size:0.67rem; }
+    .filter-group { margin-left:0; width:100%; justify-content:flex-start; }
+    .filter-btn { padding:6px 12px; font-size:0.6rem; }
+
+    /* Map card */
+    .map-card { padding:0.875rem; }
+    .card-header { flex-direction:column; gap:0.3rem; }
+    .card-sub { font-size:0.58rem; }
+    .tile-grid { grid-template-rows:repeat(8,36px); gap:2px; min-width:400px; }
+    .tile { font-size:0.52rem; }
+
+    /* Desktop detail panel → hidden; use drawer instead */
+    .detail-panel { display:none; }
+    .mobile-detail-drawer { display:block; }
+    .drawer-overlay { display:block; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+    .drawer-overlay.open { opacity:1; pointer-events:auto; }
+
+    /* Table: hide on mobile, show card list */
+    .table-card .table-scroll table { display:none; }
+    .mobile-state-list { display:block; }
+    .table-toolbar { padding:0.75rem 0.875rem; }
+    .card-title { font-size:0.9rem; }
+
+    /* Disclaimer */
+    .disclaimer { font-size:0.54rem; padding:0.75rem 0.875rem; }
+
+    /* Hide desktop-only table columns */
+    .col-runoff, .col-races, .col-cands { display:none; }
+  }
+
+  /* Very small phones */
+  @media (max-width: 375px) {
+    .tile-grid { min-width:360px; grid-template-rows:repeat(8,32px); }
+    .tile { font-size:0.48rem; }
+  }
 </style>
 </head>
 <body>
+
 <header>
   <div class="logo">
     <span class="logo-text">Political<span class="logo-dot">Window</span><span style="color:var(--text-muted)">.com</span></span>
-    <span class="logo-badge">2026 CYCLE</span>
+    <span class="logo-badge">2026</span>
   </div>
   <div class="header-right">
-    <span class="header-meta">FCC Political Ad Intelligence · Broadcast &amp; Cable</span>
+    <span class="header-fcc header-meta">FCC Political Ad Intelligence · Broadcast &amp; Cable</span>
     <span class="header-meta" id="live-date"></span>
   </div>
 </header>
 
 <main>
+
+  <!-- STATUS / LEGEND BAR -->
   <div class="status-bar">
     <span class="status-bar-label">FCC Window</span>
     <div class="legend">
-      <div class="legend-item"><div class="legend-dot dot-red pulse"></div>Primary Window Open</div>
-      <div class="legend-item"><div class="legend-dot dot-amber"></div>Opens &lt;30 Days</div>
-      <div class="legend-item"><div class="legend-dot dot-blue"></div>Primary Upcoming</div>
-      <div class="legend-item"><div class="legend-dot dot-green"></div>General Window Only</div>
-      <div class="legend-item"><div class="legend-dot dot-slate"></div>No Major Federal Race</div>
+      <div class="legend-item"><div class="legend-dot dot-red pulse"></div>Window Open</div>
+      <div class="legend-item"><div class="legend-dot dot-amber"></div>Opens &lt;30d</div>
+      <div class="legend-item"><div class="legend-dot dot-blue"></div>Upcoming</div>
+      <div class="legend-item"><div class="legend-dot dot-green"></div>General Only</div>
+      <div class="legend-item"><div class="legend-dot dot-slate"></div>None</div>
     </div>
     <div class="filter-group">
       <span class="status-bar-label" style="margin-right:2px">Race:</span>
@@ -187,17 +338,25 @@
     </div>
   </div>
 
+  <!-- MAP + DETAIL -->
   <div class="top-section">
     <div class="map-card">
       <div class="card-header">
         <div>
           <div class="card-title">2026 Election Activity Map</div>
-          <div class="card-sub">Click any state · FCC window + declared candidates</div>
+          <div class="card-sub">Tap any state · FCC window + declared candidates</div>
         </div>
-        <div class="card-sub" style="text-align:right">General: <span style="color:var(--green)">Nov 3, 2026</span><br>FCC General Window: <span style="color:var(--green)">Sep 4, 2026</span></div>
+        <div class="card-sub" style="text-align:right;flex-shrink:0">
+          General: <span style="color:var(--green)">Nov 3, 2026</span><br>
+          FCC Gen Window: <span style="color:var(--green)">Sep 4, 2026</span>
+        </div>
       </div>
-      <div class="tile-grid" id="tileGrid"></div>
+      <div class="map-scroll">
+        <div class="tile-grid" id="tileGrid"></div>
+      </div>
     </div>
+
+    <!-- Desktop detail panel (hidden on mobile, replaced by drawer) -->
     <div class="detail-panel" id="detailPanel">
       <div class="no-sel">
         <div class="no-sel-icon">🗳</div>
@@ -206,46 +365,54 @@
     </div>
   </div>
 
+  <!-- TABLE (desktop) / CARD LIST (mobile) -->
   <div class="table-card">
     <div class="table-toolbar">
-      <div class="card-title" style="font-size:1rem">State-by-State FCC Window Calendar</div>
+      <div class="card-title" style="font-size:0.95rem">State FCC Window Calendar</div>
       <div class="search-wrap">
-        <span style="color:var(--text-faint)">🔍</span>
+        <span style="color:var(--text-faint);font-size:0.8rem">🔍</span>
         <input type="text" id="searchInput" placeholder="Search state...">
       </div>
       <span class="tbl-info" id="tableInfo"></span>
     </div>
-    <div style="overflow-x:auto">
+
+    <!-- Desktop table -->
+    <div class="table-scroll">
       <table>
         <thead><tr id="tableHead"></tr></thead>
         <tbody id="tableBody"></tbody>
       </table>
     </div>
+
+    <!-- Mobile card list -->
+    <div class="mobile-state-list" id="mobileList"></div>
+
     <div class="disclaimer">
-      ⚠ FCC Primary Window = 45 days prior to primary election date (federal candidates, broadcast stations).&nbsp;
-      FCC General Window = 60 days prior to Nov 3, 2026 = <strong style="color:var(--text-muted)">Sep 4, 2026</strong>.&nbsp;
-      Lowest Unit Rate (LUR) applies during both windows for legally qualified federal candidates.&nbsp;
-      Issue/PAC advertisers are not subject to LUR but may have state-law obligations.&nbsp;
-      Candidate data sourced from public filings, FEC, and news reports as of Feb 27, 2026 — subject to change.&nbsp;
-      Not legal advice. Consult station political file and broadcast counsel.
+      ⚠ FCC Primary Window = 45 days prior to primary (federal candidates, broadcast). FCC General Window = 60 days prior to Nov 3, 2026 = <strong style="color:var(--text-muted)">Sep 4, 2026</strong>. LUR applies during both windows for legally qualified federal candidates. Issue/PAC advertisers not subject to LUR. Candidate data: public filings &amp; news reports as of Feb 27, 2026 — subject to change. Not legal advice.
     </div>
   </div>
 </main>
 
+<!-- Mobile detail drawer -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<div class="mobile-detail-drawer" id="mobileDrawer">
+  <div class="drawer-handle"></div>
+  <button class="drawer-close" id="drawerClose">✕ CLOSE</button>
+  <div id="drawerContent"></div>
+</div>
+
 <script>
-// ── DATES ────────────────────────────────────────────────────────────────────
+// ── DATES ─────────────────────────────────────────────────────────────────────
 const TODAY          = new Date(2026,1,27);
 const GENERAL        = new Date(2026,10,3);
 const GENERAL_WINDOW = new Date(2026,8,4);
-
 const fccPrimWin = d => { if(!d) return null; const r=new Date(d); r.setDate(r.getDate()-45); return r; };
 const daysTo     = d => d ? Math.ceil((d-TODAY)/86400000) : null;
 const fmtS       = d => d ? d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
 const fmtL       = d => d ? d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+const isMobile   = () => window.innerWidth <= 640;
 
-// ── CANDIDATE DATA ────────────────────────────────────────────────────────────
-// party: D=Democrat, R=Republican, I=Independent
-// status: inc=incumbent, dec=declared challenger
+// ── CANDIDATE DATA ─────────────────────────────────────────────────────────────
 const CANDS = {
   TX:[
     {race:'Senate', list:[
@@ -255,22 +422,16 @@ const CANDS = {
       {n:'Jasmine Crockett',p:'D', s:'dec', note:'U.S. Rep'},
       {n:'James Talarico',  p:'D', s:'dec', note:'State Rep'},
     ]},
-    {race:'Governor', list:[
-      {n:'Greg Abbott', p:'R', s:'inc'},
-    ]},
+    {race:'Governor', list:[{n:'Greg Abbott', p:'R', s:'inc'}]},
   ],
-  OH:[
-    {race:'Senate (Special)', list:[
-      {n:'Jon Husted',   p:'R', s:'inc', note:'Appointed; fmr Lt. Gov'},
-      {n:'Sherrod Brown',p:'D', s:'dec', note:'Fmr Senator 2007–25'},
-    ]},
-  ],
-  NC:[
-    {race:'Senate', list:[
-      {n:'Michael Whatley', p:'R', s:'dec', note:'Fmr RNC Chair, Trump-backed'},
-      {n:'Roy Cooper',      p:'D', s:'dec', note:'Fmr Governor'},
-    ]},
-  ],
+  OH:[{race:'Senate (Special)', list:[
+    {n:'Jon Husted',   p:'R', s:'inc', note:'Appointed; fmr Lt. Gov'},
+    {n:'Sherrod Brown',p:'D', s:'dec', note:'Fmr Senator 2007–25'},
+  ]}],
+  NC:[{race:'Senate', list:[
+    {n:'Michael Whatley', p:'R', s:'dec', note:'Fmr RNC Chair, Trump-backed'},
+    {n:'Roy Cooper',      p:'D', s:'dec', note:'Fmr Governor'},
+  ]}],
   GA:[
     {race:'Senate', list:[
       {n:'Jon Ossoff',  p:'D', s:'inc'},
@@ -301,149 +462,101 @@ const CANDS = {
       {n:'Mike Duggan',      p:'I', s:'dec', note:'Detroit Mayor · independent'},
     ]},
   ],
-  MN:[
-    {race:'Senate', list:[
-      {n:'Peggy Flannagan',p:'D', s:'dec', note:'Lt. Gov · Smith retiring'},
-      {n:'Angie Craig',    p:'D', s:'dec', note:'Fmr U.S. Rep'},
-      {n:'Royce White',    p:'R', s:'dec'},
-    ]},
-  ],
-  WI:[
-    {race:'Governor', list:[
-      {n:'Tony Evers',     p:'D', s:'inc'},
-      {n:'Tom Tiffany',    p:'R', s:'dec', note:'U.S. Rep · frontrunner'},
-      {n:'Josh Schoemann', p:'R', s:'dec', note:'Washington County Exec'},
-    ]},
-  ],
-  AZ:[
-    {race:'Governor', list:[
-      {n:'Katie Hobbs',      p:'D', s:'inc', note:'Calling race toughest in U.S.'},
-      {n:'Andy Biggs',       p:'R', s:'dec', note:'U.S. Rep · Trump endorsed'},
-      {n:'David Schweikert', p:'R', s:'dec', note:'U.S. Rep'},
-    ]},
-  ],
-  NJ:[
-    {race:'Governor', list:[
-      {n:'Mikie Sherrill',   p:'D', s:'dec', note:'U.S. Rep'},
-      {n:'Jack Ciattarelli', p:'R', s:'dec', note:'2021 nominee'},
-    ]},
-  ],
-  FL:[
-    {race:'Senate (Special)', list:[
-      {n:'Open seat', p:'R', s:'dec', note:'Rubio resigned for Sec. of State'},
-    ]},
-  ],
-  KY:[
-    {race:'Senate', list:[
-      {n:'Daniel Cameron', p:'R', s:'dec', note:'Fmr AG · McConnell seat'},
-      {n:'Andy Barr',      p:'R', s:'dec', note:'U.S. Rep'},
-      {n:'Nate Morris',    p:'R', s:'dec', note:'Businessman'},
-    ]},
-  ],
-  AK:[
-    {race:'Senate', list:[
-      {n:'Dan Sullivan', p:'R', s:'inc'},
-      {n:'Mary Peltola', p:'D', s:'dec', note:'Fmr U.S. Rep · top-4 primary'},
-    ]},
-  ],
-  NH:[
-    {race:'Senate', list:[
-      {n:'Chris Pappas', p:'D', s:'dec', note:'U.S. Rep · Shaheen retiring'},
-    ]},
-  ],
-  NE:[
-    {race:'Senate', list:[
-      {n:'Pete Ricketts', p:'R', s:'inc'},
-      {n:'Dan Osborn',    p:'I', s:'dec', note:'Labor leader · D not running'},
-    ]},
-  ],
+  MN:[{race:'Senate', list:[
+    {n:'Peggy Flannagan',p:'D', s:'dec', note:'Lt. Gov · Smith retiring'},
+    {n:'Angie Craig',    p:'D', s:'dec', note:'Fmr U.S. Rep'},
+    {n:'Royce White',    p:'R', s:'dec'},
+  ]}],
+  WI:[{race:'Governor', list:[
+    {n:'Tony Evers',     p:'D', s:'inc'},
+    {n:'Tom Tiffany',    p:'R', s:'dec', note:'U.S. Rep · frontrunner'},
+    {n:'Josh Schoemann', p:'R', s:'dec', note:'Washington County Exec'},
+  ]}],
+  AZ:[{race:'Governor', list:[
+    {n:'Katie Hobbs',      p:'D', s:'inc', note:'Calling race toughest in U.S.'},
+    {n:'Andy Biggs',       p:'R', s:'dec', note:'U.S. Rep · Trump endorsed'},
+    {n:'David Schweikert', p:'R', s:'dec', note:'U.S. Rep'},
+  ]}],
+  NJ:[{race:'Governor', list:[
+    {n:'Mikie Sherrill',   p:'D', s:'dec', note:'U.S. Rep'},
+    {n:'Jack Ciattarelli', p:'R', s:'dec', note:'2021 nominee'},
+  ]}],
+  FL:[{race:'Senate (Special)', list:[
+    {n:'Open seat', p:'R', s:'dec', note:'Rubio resigned for Sec. of State'},
+  ]}],
+  KY:[{race:'Senate', list:[
+    {n:'Daniel Cameron', p:'R', s:'dec', note:'Fmr AG · McConnell seat'},
+    {n:'Andy Barr',      p:'R', s:'dec', note:'U.S. Rep'},
+    {n:'Nate Morris',    p:'R', s:'dec', note:'Businessman'},
+  ]}],
+  AK:[{race:'Senate', list:[
+    {n:'Dan Sullivan', p:'R', s:'inc'},
+    {n:'Mary Peltola', p:'D', s:'dec', note:'Fmr U.S. Rep · top-4 primary'},
+  ]}],
+  NH:[{race:'Senate', list:[
+    {n:'Chris Pappas', p:'D', s:'dec', note:'U.S. Rep · Shaheen retiring'},
+  ]}],
+  NE:[{race:'Senate', list:[
+    {n:'Pete Ricketts', p:'R', s:'inc'},
+    {n:'Dan Osborn',    p:'I', s:'dec', note:'Labor leader · D not running'},
+  ]}],
   IL:[
-    {race:'Senate', list:[
-      {n:'Juliana Stratton', p:'D', s:'dec', note:'Lt. Gov · Durbin retiring'},
-    ]},
+    {race:'Senate', list:[{n:'Juliana Stratton', p:'D', s:'dec', note:'Lt. Gov · Durbin retiring'}]},
     {race:'Governor', list:[
       {n:'JB Pritzker',   p:'D', s:'inc', note:'Running for 3rd term'},
       {n:'Darren Bailey', p:'R', s:'dec', note:'2022 nominee'},
     ]},
   ],
-  PA:[
-    {race:'Senate', list:[
-      {n:'Dave McCormick', p:'R', s:'inc', note:'Won 2024'},
-      {n:'Bob Casey',      p:'D', s:'dec', note:'Lost 2024; running again'},
-    ]},
-  ],
-  OR:[
-    {race:'Senate', list:[
-      {n:'Jeff Merkley', p:'D', s:'inc'},
-    ]},
-  ],
-  MT:[
-    {race:'Senate', list:[
-      {n:'Steve Daines', p:'R', s:'inc'},
-    ]},
-  ],
-  WA:[
-    {race:'Senate', list:[
-      {n:'Patty Murray', p:'D', s:'inc', note:'Announced retirement'},
-    ]},
-  ],
-  SC:[
-    {race:'Senate', list:[
-      {n:'Tim Scott', p:'R', s:'inc'},
-    ]},
-  ],
-  CO:[
-    {race:'Senate', list:[
-      {n:'Michael Bennet', p:'D', s:'inc'},
-    ]},
-  ],
-  NV:[
-    {race:'Governor', list:[
-      {n:'Joe Lombardo', p:'R', s:'inc'},
-      {n:'Aaron Ford',   p:'D', s:'dec', note:'AG'},
-    ]},
-  ],
-  AR:[
-    {race:'Governor', list:[
-      {n:'Sarah Huckabee Sanders', p:'R', s:'inc'},
-    ]},
-  ],
+  PA:[{race:'Senate', list:[
+    {n:'Dave McCormick', p:'R', s:'inc', note:'Won 2024'},
+    {n:'Bob Casey',      p:'D', s:'dec', note:'Lost 2024; running again'},
+  ]}],
+  OR:[{race:'Senate', list:[{n:'Jeff Merkley', p:'D', s:'inc'}]}],
+  MT:[{race:'Senate', list:[{n:'Steve Daines', p:'R', s:'inc'}]}],
+  WA:[{race:'Senate', list:[{n:'Patty Murray', p:'D', s:'inc', note:'Announced retirement'}]}],
+  SC:[{race:'Senate', list:[{n:'Tim Scott', p:'R', s:'inc'}]}],
+  CO:[{race:'Senate', list:[{n:'Michael Bennet', p:'D', s:'inc'}]}],
+  NV:[{race:'Governor', list:[
+    {n:'Joe Lombardo', p:'R', s:'inc'},
+    {n:'Aaron Ford',   p:'D', s:'dec', note:'AG'},
+  ]}],
+  AR:[{race:'Governor', list:[{n:'Sarah Huckabee Sanders', p:'R', s:'inc'}]}],
 };
 
 // ── ELECTION DATA ─────────────────────────────────────────────────────────────
 const RAW=[
-  {abbr:'TX',name:'Texas',        primary:'2026-03-03',races:['Senate','Governor','House'],runoff:'2026-05-26',notes:'TX Senate primary is extremely competitive: Cornyn vs Hunt vs Paxton. Primary FCC window now open. Massive spend market.'},
-  {abbr:'IL',name:'Illinois',     primary:'2026-03-17',races:['Senate','Governor','House'],notes:'Pritzker (D) running for 3rd term. Sen seat open as Durbin retires. FCC primary window opens Feb 1.'},
-  {abbr:'OH',name:'Ohio',         primary:'2026-05-05',races:['Senate','House'],notes:'Marquee matchup: Husted (R-appointed) vs Brown (D-fmr Senator). Special election for former Vance seat.'},
-  {abbr:'NC',name:'N. Carolina',  primary:'2026-05-19',races:['Senate','Governor','House'],notes:'Cooper (D) vs Whatley (R) is a tier-1 Senate battle. Open Gov race. Top D offensive opportunity.'},
-  {abbr:'PA',name:'Pennsylvania', primary:'2026-05-19',races:['Senate','House'],notes:'McCormick (R) defending. Casey may mount rematch. No Gov race this cycle.'},
-  {abbr:'GA',name:'Georgia',      primary:'2026-05-19',races:['Senate','Governor','House'],runoff:'2026-07-21',notes:'Ossoff most vulnerable D incumbent. Crowded R Gov primary. Could require runoff July 21.'},
-  {abbr:'AR',name:'Arkansas',     primary:'2026-05-19',races:['Governor','House'],runoff:'2026-06-16',notes:'Gov Sanders (R) running for re-election. Gov primary possible runoff.'},
+  {abbr:'TX',name:'Texas',        primary:'2026-03-03',races:['Senate','Governor','House'],runoff:'2026-05-26',notes:'TX Senate: Cornyn vs Hunt vs Paxton R primary. Crockett leading D field. Massive spend market.'},
+  {abbr:'IL',name:'Illinois',     primary:'2026-03-17',races:['Senate','Governor','House'],notes:'Pritzker (D) running for 3rd term. Durbin retiring opens Senate seat.'},
+  {abbr:'OH',name:'Ohio',         primary:'2026-05-05',races:['Senate','House'],notes:'Marquee: Husted (R-appointed) vs Brown (D-fmr Senator). Special election for former Vance seat.'},
+  {abbr:'NC',name:'N. Carolina',  primary:'2026-05-19',races:['Senate','Governor','House'],notes:'Cooper (D) vs Whatley (R) tier-1 Senate battle. Open Gov race.'},
+  {abbr:'PA',name:'Pennsylvania', primary:'2026-05-19',races:['Senate','House'],notes:'McCormick (R) defending. Casey possible rematch. No Gov race this cycle.'},
+  {abbr:'GA',name:'Georgia',      primary:'2026-05-19',races:['Senate','Governor','House'],runoff:'2026-07-21',notes:'Ossoff most vulnerable D incumbent. Crowded R Gov primary. Possible runoff Jul 21.'},
+  {abbr:'AR',name:'Arkansas',     primary:'2026-05-19',races:['Governor','House'],runoff:'2026-06-16',notes:'Gov Sanders (R) re-election. Gov primary possible runoff.'},
   {abbr:'ID',name:'Idaho',        primary:'2026-05-19',races:['Senate','Governor','House'],notes:'Safe R. Open Senate seat (Risch retiring).'},
   {abbr:'KY',name:'Kentucky',     primary:'2026-05-19',races:['Senate','House'],notes:'McConnell seat open. Cameron vs Barr primary could be expensive.'},
-  {abbr:'OR',name:'Oregon',       primary:'2026-05-19',races:['Senate','Governor','House'],notes:'Merkley (D) running for re-election. Open Gov.'},
+  {abbr:'OR',name:'Oregon',       primary:'2026-05-19',races:['Senate','Governor','House'],notes:'Merkley (D) re-election. Open Gov.'},
   {abbr:'WV',name:'W. Virginia',  primary:'2026-05-12',races:['Senate','House'],notes:'Capito (R) defending.'},
-  {abbr:'AK',name:'Alaska',       primary:'2026-08-25',races:['Senate','Governor','House'],notes:'Sullivan (R) vs Peltola (D). Top-4 open primary format. Unique ballot dynamics.'},
+  {abbr:'AK',name:'Alaska',       primary:'2026-08-25',races:['Senate','Governor','House'],notes:'Sullivan (R) vs Peltola (D). Top-4 open primary format.'},
   {abbr:'MT',name:'Montana',      primary:'2026-06-02',races:['Senate','House'],notes:'Daines (R) defending.'},
   {abbr:'NJ',name:'New Jersey',   primary:'2026-06-03',races:['Senate','Governor','House'],notes:'Sherrill (D) vs Ciattarelli (R) key Gov race. Open Senate seat.'},
-  {abbr:'IA',name:'Iowa',         primary:'2026-06-02',races:['Senate','Governor','House'],notes:'Ernst retiring. Wide-open Senate seat. Could be competitive in strong D environment.'},
+  {abbr:'IA',name:'Iowa',         primary:'2026-06-02',races:['Senate','Governor','House'],notes:'Ernst retiring. Wide-open Senate seat.'},
   {abbr:'SD',name:'S. Dakota',    primary:'2026-06-02',races:['Senate','Governor','House'],notes:'Rounds (R) defending.'},
   {abbr:'NM',name:'New Mexico',   primary:'2026-06-02',races:['Senate','House'],notes:'Heinrich (D) defending.'},
   {abbr:'NH',name:'New Hampshire',primary:'2026-09-08',races:['Senate','Governor','House'],notes:'Shaheen retiring. Pappas (D) declared. Competitive open seat.'},
   {abbr:'ME',name:'Maine',        primary:'2026-06-09',races:['Senate','House'],notes:'Collins (R) defending.'},
   {abbr:'SC',name:'S. Carolina',  primary:'2026-06-09',races:['Senate','Governor','House'],notes:'Scott (R) defending.'},
   {abbr:'CO',name:'Colorado',     primary:'2026-06-23',races:['Senate','Governor','House'],notes:'Bennet (D) defending. Polis term-limited; open Gov race.'},
-  {abbr:'AZ',name:'Arizona',      primary:'2026-08-04',races:['Senator','Governor','House'],notes:'Hobbs (D) re-election in toss-up. Biggs vs Schweikert R primary for Gov.'},
-  {abbr:'MI',name:'Michigan',     primary:'2026-08-04',races:['Senate','Governor','House'],notes:'Whitmer term-limited. Duggan (I) running for Gov scrambles general. Tier-1 Senate open seat.'},
+  {abbr:'AZ',name:'Arizona',      primary:'2026-08-04',races:['Senate','Governor','House'],notes:'Hobbs (D) re-election in toss-up. Biggs vs Schweikert R primary for Gov.'},
+  {abbr:'MI',name:'Michigan',     primary:'2026-08-04',races:['Senate','Governor','House'],notes:'Whitmer term-limited. Duggan (I) running for Gov. Tier-1 Senate open seat.'},
   {abbr:'WA',name:'Washington',   primary:'2026-08-04',races:['Senate','Governor','House'],notes:'Murray retiring. Wide-open Senate race.'},
-  {abbr:'MN',name:'Minnesota',    primary:'2026-08-11',races:['Senate','Governor','House'],notes:'Smith retiring. Flannagan vs Craig D primary. Walz Gov eligible to run again.'},
-  {abbr:'WI',name:'Wisconsin',    primary:'2026-08-11',races:['Governor','House'],notes:'Evers (D) vs Tiffany (R) in key battleground Gov race. No Senate this cycle.'},
-  {abbr:'FL',name:'Florida',      primary:'2026-08-18',races:['Senate','House'],notes:'Special election for Rubio seat. DeSantis is term-limited for Gov.'},
+  {abbr:'MN',name:'Minnesota',    primary:'2026-08-11',races:['Senate','Governor','House'],notes:'Smith retiring. Flannagan vs Craig D primary.'},
+  {abbr:'WI',name:'Wisconsin',    primary:'2026-08-11',races:['Governor','House'],notes:'Evers (D) vs Tiffany (R). Key battleground Gov race.'},
+  {abbr:'FL',name:'Florida',      primary:'2026-08-18',races:['Senate','House'],notes:'Special election for Rubio seat. DeSantis term-limited for Gov.'},
   {abbr:'MA',name:'Massachusetts',primary:'2026-09-01',races:['Senate','Governor','House'],notes:'Warren (D) defending. Open Gov race.'},
   {abbr:'LA',name:'Louisiana',    primary:'2026-10-10',races:['Senate','House'],notes:'Jungle primary. Cassidy (R) defending.'},
   {abbr:'DE',name:'Delaware',     primary:'2026-09-08',races:['Senate','House'],notes:'Coons (D) defending.'},
-  {abbr:'KS',name:'Kansas',       primary:'2026-08-04',races:['Senate','Governor','House'],notes:'Moran (R) defending. Gov Kelly term-limited; D defending in R state.'},
-  {abbr:'NE',name:'Nebraska',     primary:'2026-05-12',races:['Senate','House'],notes:'Ricketts (R) vs Osborn (I). D party endorsed independent. Unique race.'},
+  {abbr:'KS',name:'Kansas',       primary:'2026-08-04',races:['Senate','Governor','House'],notes:'Moran (R) defending. Gov Kelly term-limited.'},
+  {abbr:'NE',name:'Nebraska',     primary:'2026-05-12',races:['Senate','House'],notes:'Ricketts (R) vs Osborn (I). D party endorsed independent.'},
   {abbr:'OK',name:'Oklahoma',     primary:'2026-06-16',races:['Senate','House'],runoff:'2026-08-25',notes:'Lankford (R) defending.'},
   {abbr:'TN',name:'Tennessee',    primary:'2026-08-06',races:['Senate','House'],notes:'Blackburn (R) defending.'},
   {abbr:'VA',name:'Virginia',     primary:'2026-06-09',races:['House'],notes:'No Senate or Gov race this cycle. House only.'},
@@ -456,11 +569,10 @@ const RAW=[
   {abbr:'NY',name:'New York',     primary:'2026-06-23',races:['Governor','House'],notes:'Hochul (D) seeking re-election. No Senate this cycle.'},
   {abbr:'NV',name:'Nevada',       primary:'2026-06-09',races:['Governor','House'],notes:'Lombardo (R) vs Ford (D) expected Gov matchup. No Senate this cycle.'},
   {abbr:'UT',name:'Utah',         primary:'2026-06-23',races:['Governor','House'],notes:'No Senate this cycle.'},
-  {abbr:'AL',name:'Alabama',      primary:'2026-05-19',races:['Senate','Governor','House'],notes:'Tuberville running for Gov; leaves Senate seat. Primary competitive on both.'},
+  {abbr:'AL',name:'Alabama',      primary:'2026-05-19',races:['Senate','Governor','House'],notes:'Tuberville running for Gov; leaves Senate seat open.'},
   {abbr:'HI',name:'Hawaii',       primary:'2026-08-08',races:['Senate','House'],notes:'Hirono (D) defending.'},
   {abbr:'CT',name:'Connecticut',  primary:'2026-08-11',races:['Senate','Governor','House'],notes:'Blumenthal (D) defending. Open Gov (Lamont eligible).'},
   {abbr:'MS',name:'Mississippi',  primary:'2026-06-02',races:['Senate','House'],notes:'Wicker (R) defending.'},
-  {abbr:'AR',name:'Arkansas',     primary:'2026-05-19',races:['Governor','House'],runoff:'2026-06-16',notes:'Gov Sanders (R) re-election.'},
 ];
 
 const STATES = (() => {
@@ -473,14 +585,13 @@ const STATES = (() => {
     const dPrim   = daysTo(pDate);
     let status;
     if (pWindow && TODAY >= pWindow && pDate && TODAY <= pDate) status = 'window-open';
-    else if (pWindow && dWin !== null && dWin > 0 && dWin <= 30)   status = 'window-soon';
-    else if (pDate  && dPrim !== null && dPrim > 0)                 status = 'upcoming';
-    else if (pDate  && dPrim !== null && dPrim <= 0 && TODAY < GENERAL_WINDOW) status = 'general-only';
+    else if (pWindow && dWin !== null && dWin > 0 && dWin <= 30) status = 'window-soon';
+    else if (pDate && dPrim !== null && dPrim > 0)               status = 'upcoming';
+    else if (pDate && dPrim !== null && dPrim <= 0 && TODAY < GENERAL_WINDOW) status = 'general-only';
     else status = 'inactive';
     return { ...s, pDate, rDate, pWindow, dWin, dPrim, status, cands: CANDS[s.abbr] || [] };
   });
 })();
-
 const SM = Object.fromEntries(STATES.map(s => [s.abbr, s]));
 
 // ── TILE MAP ──────────────────────────────────────────────────────────────────
@@ -511,142 +622,138 @@ function buildMap() {
   });
 }
 
-// ── DETAIL ────────────────────────────────────────────────────────────────────
-let sel = null;
-
-function pick(abbr) {
-  document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
-  document.querySelectorAll('.row-selected').forEach(r => r.classList.remove('row-selected'));
-  if (sel === abbr) { sel = null; emptyDetail(); return; }
-  sel = abbr;
-  const tile = document.querySelector(`[data-abbr="${abbr}"]`);
-  if (tile) tile.classList.add('selected');
-  const row = document.querySelector(`tr[data-abbr="${abbr}"]`);
-  if (row) { row.classList.add('row-selected'); row.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
-  renderDetail(abbr);
-}
-
-function emptyDetail() {
-  document.getElementById('detailPanel').innerHTML = `<div class="no-sel"><div class="no-sel-icon">🗳</div><div class="no-sel-txt">SELECT A STATE<br>TO VIEW FCC WINDOW<br>&amp; DECLARED CANDIDATES</div></div>`;
-}
-
-const PARTY_COLOR = { D:'var(--dem)', R:'var(--rep)', I:'var(--ind)' };
-const STATUS_LABEL = {
+// ── SHARED DETAIL HTML BUILDER ─────────────────────────────────────────────────
+const PC = { D:'var(--dem)', R:'var(--rep)', I:'var(--ind)' };
+const SL = {
   'window-open':  `<span style="color:var(--red)">● PRIMARY WINDOW OPEN</span>`,
   'window-soon':  `<span style="color:var(--amber)">◐ WINDOW OPENS SOON</span>`,
   'upcoming':     `<span style="color:var(--blue-light)">○ PRIMARY UPCOMING</span>`,
   'general-only': `<span style="color:var(--green)">◇ GENERAL WINDOW ONLY</span>`,
   'inactive':     `<span style="color:var(--slate)">— NO MAJOR FEDERAL RACE</span>`,
 };
-const WIN_COLOR = {
-  'window-open':'var(--red)', 'window-soon':'var(--amber)',
-  'upcoming':'var(--blue)', 'general-only':'var(--green)', 'inactive':'var(--slate)'
-};
+const WC = { 'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'var(--blue)', 'general-only':'var(--green)', 'inactive':'var(--slate)' };
 
-function renderDetail(abbr) {
-  const s = SM[abbr]; if (!s) return;
+function buildDetailHTML(abbr) {
+  const s = SM[abbr]; if (!s) return '';
   let barPct = 0;
   if (s.pWindow && s.pDate) barPct = Math.max(0, Math.min(100, ((TODAY - s.pWindow) / (s.pDate - s.pWindow)) * 100));
   const genPct = Math.max(0, Math.min(100, ((TODAY - GENERAL_WINDOW) / (GENERAL - GENERAL_WINDOW)) * 100));
-  const wc = WIN_COLOR[s.status] || 'var(--blue)';
-
+  const wc = WC[s.status] || 'var(--blue)';
   const raceTags = s.races.map(r => `<span class="race-tag tag-${r.toLowerCase().replace(/[^a-z]/g,'')}">${r}</span>`).join('');
-
-  // Build candidates HTML
   let candHTML = '';
   if (s.cands.length === 0) {
     candHTML = `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No major candidates on file yet</div>`;
   } else {
     s.cands.forEach(rc => {
-      const rbadge = {Senate:'tag-senate',Governor:'tag-governor',House:'tag-house'}[rc.race] || 'tag-house';
-      candHTML += `<div class="cand-race-block">
-        <span class="cand-race-label ${rbadge}">${rc.race}</span>`;
+      const rb = {Senate:'tag-senate',Governor:'tag-governor',House:'tag-house'}[rc.race] || 'tag-house';
+      candHTML += `<div class="cand-race-block"><span class="cand-race-label ${rb}">${rc.race}</span>`;
       rc.list.forEach(c => {
-        const pc = PARTY_COLOR[c.p] || 'var(--slate)';
-        const badge = c.s === 'inc'
-          ? `<span class="cbadge cbadge-inc">INCUMBENT</span>`
-          : `<span class="cbadge cbadge-dec">DECLARED</span>`;
+        const pc = PC[c.p] || 'var(--slate)';
+        const badge = c.s === 'inc' ? `<span class="cbadge cbadge-inc">INCUMBENT</span>` : `<span class="cbadge cbadge-dec">DECLARED</span>`;
         candHTML += `<div class="cand-row">
           <div class="pdot" style="background:${pc}"></div>
           <div class="cname">${c.n}${c.note ? `<span class="cnote">${c.note}</span>` : ''}</div>
-          <span class="cparty" style="color:${pc}">${c.p}</span>
-          ${badge}
-        </div>`;
+          <span class="cparty" style="color:${pc}">${c.p}</span>${badge}</div>`;
       });
       candHTML += `</div>`;
     });
   }
-
-  document.getElementById('detailPanel').innerHTML = `<div class="fade-in">
-    <div style="font-family:var(--mono);font-size:0.58rem;letter-spacing:0.08em;margin-bottom:0.4rem">${STATUS_LABEL[s.status]||''}</div>
+  return `<div class="fade-in">
+    <div style="font-family:var(--mono);font-size:0.57rem;letter-spacing:0.08em;margin-bottom:0.4rem">${SL[s.status]||''}</div>
     <div class="detail-state-name">${s.name}</div>
     <div class="detail-state-abbr">${s.abbr} · 2026 ELECTION CYCLE</div>
-
-    <div class="dsec">
-      <div class="dlabel">Races on Ballot</div>
-      <div class="race-tags">${raceTags}</div>
-    </div>
-
-    <div class="dsec">
-      <div class="drow">
-        <div>
-          <div class="dlabel">Primary Date</div>
-          <div class="dval ${s.dPrim !== null && s.dPrim < 0 ? 'muted' : ''}">${fmtS(s.pDate)}</div>
-          ${s.dPrim !== null && s.dPrim > 0 ? `<div class="wbar-note">${s.dPrim}d away</div>` : ''}
-          ${s.dPrim !== null && s.dPrim <= 0 ? `<div class="wbar-note" style="color:var(--text-faint)">Completed</div>` : ''}
-        </div>
-        <div>
-          <div class="dlabel">Runoff Date</div>
-          <div class="dval ${s.rDate ? '' : 'muted'}">${fmtS(s.rDate)}</div>
-        </div>
+    <div class="dsec"><div class="dlabel">Races on Ballot</div><div class="race-tags">${raceTags}</div></div>
+    <div class="dsec"><div class="drow">
+      <div>
+        <div class="dlabel">Primary Date</div>
+        <div class="dval ${s.dPrim!==null&&s.dPrim<0?'muted':''}">${fmtS(s.pDate)}</div>
+        ${s.dPrim!==null&&s.dPrim>0?`<div class="wbar-note">${s.dPrim}d away</div>`:''}
+        ${s.dPrim!==null&&s.dPrim<=0?`<div class="wbar-note" style="color:var(--text-faint)">Completed</div>`:''}
       </div>
-    </div>
-
+      <div>
+        <div class="dlabel">Runoff Date</div>
+        <div class="dval ${s.rDate?'':'muted'}">${fmtS(s.rDate)}</div>
+      </div>
+    </div></div>
     <div class="dsec">
-      <div class="dlabel">FCC Primary Window · Broadcast LUR Applies</div>
+      <div class="dlabel">FCC Primary Window · LUR Applies</div>
       <div class="dval" style="color:${wc}">${fmtS(s.pWindow)} → ${fmtS(s.pDate)}</div>
       <div class="wbar"><div class="wbar-fill" style="width:${barPct}%;background:${wc}"></div></div>
-      <div class="wbar-note">
-        ${s.status==='window-open' ? `${Math.round(barPct)}% elapsed · LOWEST UNIT RATE APPLIES NOW` :
-          s.status==='window-soon' ? `Opens in ${s.dWin} days · ${fmtL(s.pWindow)}` :
-          s.pWindow ? `Opens ${fmtL(s.pWindow)}` : 'No primary window this cycle'}
-      </div>
+      <div class="wbar-note">${s.status==='window-open'?`${Math.round(barPct)}% elapsed · LUR APPLIES NOW`:s.status==='window-soon'?`Opens in ${s.dWin}d · ${fmtL(s.pWindow)}`:s.pWindow?`Opens ${fmtL(s.pWindow)}`:'No primary window this cycle'}</div>
     </div>
-
     <div class="dsec">
       <div class="dlabel">FCC General Window · All Federal Candidates</div>
       <div class="dval green">Sep 4, 2026 → Nov 3, 2026</div>
       <div class="wbar"><div class="wbar-fill" style="width:${genPct}%;background:var(--green)"></div></div>
-      <div class="wbar-note">
-        ${TODAY >= GENERAL_WINDOW ? `${Math.round(genPct)}% elapsed` : `Opens in ${daysTo(GENERAL_WINDOW)}d · Sep 4, 2026`}
-      </div>
+      <div class="wbar-note">${TODAY>=GENERAL_WINDOW?`${Math.round(genPct)}% elapsed`:`Opens in ${daysTo(GENERAL_WINDOW)}d · Sep 4, 2026`}</div>
     </div>
-
-    <div class="dsec">
-      <div class="dlabel">Declared Candidates</div>
-      ${candHTML}
-    </div>
-
+    <div class="dsec"><div class="dlabel">Declared Candidates</div>${candHTML}</div>
     <div class="dsec" style="border-bottom:none">
       <div class="dlabel">Market Intel</div>
-      <div style="font-family:var(--sans);font-size:0.74rem;color:var(--text-muted);line-height:1.55">${s.notes || '—'}</div>
+      <div style="font-family:var(--sans);font-size:0.74rem;color:var(--text-muted);line-height:1.55">${s.notes||'—'}</div>
     </div>
   </div>`;
 }
 
-// ── TABLE ─────────────────────────────────────────────────────────────────────
+// ── PICK (select state) ────────────────────────────────────────────────────────
+let sel = null;
+
+function pick(abbr) {
+  document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
+  document.querySelectorAll('.row-selected').forEach(r => r.classList.remove('row-selected'));
+
+  if (sel === abbr && !isMobile()) { sel = null; emptyDetail(); return; }
+  sel = abbr;
+
+  const tile = document.querySelector(`[data-abbr="${abbr}"]`);
+  if (tile) tile.classList.add('selected');
+
+  if (isMobile()) {
+    openDrawer(abbr);
+  } else {
+    document.getElementById('detailPanel').innerHTML = buildDetailHTML(abbr);
+    const row = document.querySelector(`tr[data-abbr="${abbr}"]`);
+    if (row) { row.classList.add('row-selected'); row.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+    const mobileCard = document.querySelector(`.mobile-state-card[data-abbr="${abbr}"]`);
+    if (mobileCard) mobileCard.classList.add('row-selected');
+  }
+}
+
+function emptyDetail() {
+  document.getElementById('detailPanel').innerHTML = `<div class="no-sel"><div class="no-sel-icon">🗳</div><div class="no-sel-txt">SELECT A STATE<br>TO VIEW FCC WINDOW<br>&amp; DECLARED CANDIDATES</div></div>`;
+}
+
+// ── MOBILE DRAWER ──────────────────────────────────────────────────────────────
+function openDrawer(abbr) {
+  document.getElementById('drawerContent').innerHTML = buildDetailHTML(abbr);
+  document.getElementById('mobileDrawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // highlight mobile card
+  const card = document.querySelector(`.mobile-state-card[data-abbr="${abbr}"]`);
+  document.querySelectorAll('.mobile-state-card.row-selected').forEach(c => c.classList.remove('row-selected'));
+  if (card) card.classList.add('row-selected');
+}
+function closeDrawer() {
+  document.getElementById('mobileDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
+
+// ── TABLE (desktop) ────────────────────────────────────────────────────────────
 const COLS = [
-  { k:'name',  l:'State',            sort:true },
-  { k:'status',l:'Window Status',    sort:true },
-  { k:'pDate', l:'Primary',          sort:true },
-  { k:'pWindow',l:'FCC Opens',       sort:true },
-  { k:'dWin',  l:'Days to Window',   sort:true },
-  { k:'rDate', l:'Runoff',           sort:true },
-  { k:'races', l:'Races',            sort:false },
-  { k:'cands', l:'Key Candidates',   sort:false },
+  { k:'name',   l:'State',          sort:true },
+  { k:'status', l:'Window Status',  sort:true },
+  { k:'pDate',  l:'Primary',        sort:true },
+  { k:'pWindow',l:'FCC Opens',      sort:true },
+  { k:'dWin',   l:'Days to Window', sort:true },
+  { k:'rDate',  l:'Runoff',         sort:true,  cls:'col-runoff' },
+  { k:'races',  l:'Races',          sort:false, cls:'col-races' },
+  { k:'cands',  l:'Key Candidates', sort:false, cls:'col-cands' },
 ];
 let sk = 'dWin', sd = 1, q = '', rf = 'all';
-
 const SO = s => ({'window-open':0,'window-soon':1,'upcoming':2,'general-only':3,'inactive':4}[s]??5);
 const SPILL = {
   'window-open':  `<span class="spill spill-red">● OPEN</span>`,
@@ -660,6 +767,7 @@ function buildHead() {
   const tr = document.getElementById('tableHead'); tr.innerHTML = '';
   COLS.forEach(col => {
     const th = document.createElement('th');
+    if (col.cls) th.className = col.cls;
     const arrow = col.sort ? ` <span style="opacity:0.35">${sk===col.k?(sd===1?'↑':'↓'):'↕'}</span>` : '';
     th.innerHTML = col.l + arrow;
     if (col.sort) {
@@ -670,78 +778,101 @@ function buildHead() {
   });
 }
 
-function drawTable() {
-  const tb = document.getElementById('tableBody'); tb.innerHTML = '';
-  let data = STATES.filter(s => {
+function filteredSorted() {
+  return STATES.filter(s => {
     if (q && !s.name.toLowerCase().includes(q)) return false;
     if (rf !== 'all' && !s.races.includes(rf)) return false;
     return true;
-  }).sort((a, b) => {
-    let av = a[sk], bv = b[sk];
+  }).sort((a,b) => {
+    let av=a[sk], bv=b[sk];
     if (sk==='status') { av=SO(a.status); bv=SO(b.status); }
     if (sk==='races')  { av=a.races.join(''); bv=b.races.join(''); }
     if (sk==='cands')  { av=a.cands.length; bv=b.cands.length; }
     if (av==null) return 1; if (bv==null) return -1;
     return av<bv ? -sd : av>bv ? sd : 0;
   });
+}
+
+function drawTable() {
+  const data = filteredSorted();
   document.getElementById('tableInfo').textContent = `${data.length} of ${STATES.length} states`;
+  const tb = document.getElementById('tableBody'); tb.innerHTML = '';
 
   data.forEach(s => {
     const tr = document.createElement('tr');
     tr.dataset.abbr = s.abbr;
     if (s.abbr === sel) tr.classList.add('row-selected');
     tr.addEventListener('click', () => pick(s.abbr));
-
-    const rtags = s.races.map(r => {
-      const c = {Senate:'tag-senate',Governor:'tag-governor',House:'tag-house'}[r]||'';
-      return `<span class="itag ${c}">${r==='Governor'?'Gov':r}</span>`;
-    }).join('');
-
-    // Candidate mini preview
-    const flat = [];
-    s.cands.forEach(rc => rc.list.slice(0,2).forEach(c => flat.push(c)));
-    let miniHTML = '<div class="cand-mini">';
-    if (flat.length === 0) {
-      miniHTML += `<span style="color:var(--text-faint);font-size:0.6rem">—</span>`;
-    } else {
+    const rtags = s.races.map(r => `<span class="itag ${({Senate:'tag-senate',Governor:'tag-governor',House:'tag-house'}[r]||'')}">${r==='Governor'?'Gov':r}</span>`).join('');
+    const flat = []; s.cands.forEach(rc => rc.list.slice(0,2).forEach(c => flat.push(c)));
+    let mini = '<div class="cand-mini">';
+    if (!flat.length) { mini += `<span style="color:var(--text-faint);font-size:0.6rem">—</span>`; }
+    else {
       flat.slice(0,3).forEach(c => {
-        const pc = PARTY_COLOR[c.p] || 'var(--slate)';
-        miniHTML += `<div class="cand-mini-row">
-          <div class="cand-mini-dot" style="background:${pc}"></div>
-          <span style="font-size:0.63rem;color:var(--text)">${c.n}</span>
-          <span style="font-size:0.57rem;color:${pc}">(${c.p})</span>
-        </div>`;
+        const pc = PC[c.p]||'var(--slate)';
+        mini += `<div class="cand-mini-row"><div class="cand-mini-dot" style="background:${pc}"></div><span style="font-size:0.62rem;color:var(--text)">${c.n}</span><span style="font-size:0.56rem;color:${pc}">(${c.p})</span></div>`;
       });
       const total = s.cands.reduce((a,rc)=>a+rc.list.length,0);
-      if (total > 3) miniHTML += `<span style="color:var(--text-faint);font-size:0.57rem">+${total-3} more</span>`;
+      if (total>3) mini += `<span style="color:var(--text-faint);font-size:0.56rem">+${total-3} more</span>`;
     }
-    miniHTML += '</div>';
-
+    mini += '</div>';
     tr.innerHTML = `
       <td><div class="td-state"><div class="sbox">${s.abbr}</div><div class="sname">${s.name}</div></div></td>
       <td>${SPILL[s.status]||''}</td>
       <td style="color:var(--text)">${fmtS(s.pDate)}</td>
-      <td style="color:var(--text)">
-        ${fmtS(s.pWindow)}
-        ${s.status==='window-open'?'<span class="dbadge pulse" style="color:var(--red)">● ACTIVE NOW</span>':''}
-        ${s.status==='window-soon'?`<span class="dbadge" style="color:var(--amber)">in ${s.dWin}d</span>`:''}
-      </td>
+      <td style="color:var(--text)">${fmtS(s.pWindow)}${s.status==='window-open'?'<span class="dbadge pulse" style="color:var(--red)">● NOW</span>':s.status==='window-soon'?`<span class="dbadge" style="color:var(--amber)">in ${s.dWin}d</span>`:''}</td>
       <td style="color:var(--text)">${s.dWin===null?'—':s.dWin<=0?`<span style="color:var(--text-faint)">Past</span>`:s.dWin}</td>
-      <td style="color:${s.rDate?'var(--text)':'var(--text-faint)'}">${fmtS(s.rDate)}</td>
-      <td><div style="display:flex;flex-wrap:wrap;gap:3px">${rtags}</div></td>
-      <td>${miniHTML}</td>
+      <td class="col-runoff" style="color:${s.rDate?'var(--text)':'var(--text-faint)'}">${fmtS(s.rDate)}</td>
+      <td class="col-races"><div style="display:flex;flex-wrap:wrap;gap:3px">${rtags}</div></td>
+      <td class="col-cands">${mini}</td>
     `;
     tb.appendChild(tr);
   });
+
+  // also rebuild mobile list
+  drawMobileList(data);
 }
 
+// ── MOBILE CARD LIST ───────────────────────────────────────────────────────────
+function drawMobileList(data) {
+  const list = document.getElementById('mobileList'); list.innerHTML = '';
+  data.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'mobile-state-card';
+    card.dataset.abbr = s.abbr;
+    if (s.abbr === sel) card.classList.add('row-selected');
+    card.addEventListener('click', () => pick(s.abbr));
+
+    const flat = []; s.cands.forEach(rc => rc.list.slice(0,2).forEach(c => flat.push(c)));
+    const candPreview = flat.slice(0,2).map(c => {
+      const pc = PC[c.p]||'var(--slate)';
+      return `<span style="color:${pc}">●</span> ${c.n} (${c.p})`;
+    }).join(' · ');
+
+    card.innerHTML = `
+      <div class="msc-left">
+        <div class="msc-name">${s.name}</div>
+        <div class="msc-dates">Primary: ${fmtS(s.pDate)} · FCC Opens: ${fmtS(s.pWindow)}</div>
+        ${candPreview ? `<div class="msc-cands">${candPreview}</div>` : ''}
+      </div>
+      <div class="msc-right">
+        ${SPILL[s.status]||''}
+        ${s.dWin!==null&&s.dWin>0?`<span style="font-family:var(--mono);font-size:0.55rem;color:var(--text-faint)">${s.dWin}d to window</span>`:''}
+      </div>
+      <span class="msc-arrow">›</span>
+    `;
+    list.appendChild(card);
+  });
+}
+
+// ── FILTERS ────────────────────────────────────────────────────────────────────
 document.getElementById('searchInput').addEventListener('input', e => { q = e.target.value.toLowerCase().trim(); drawTable(); });
 document.querySelectorAll('[data-race]').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('[data-race]').forEach(b => b.classList.remove('active'));
   btn.classList.add('active'); rf = btn.dataset.race; drawTable();
 }));
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+// ── INIT ───────────────────────────────────────────────────────────────────────
 buildMap(); buildHead(); drawTable();
 document.getElementById('live-date').textContent =
   new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
