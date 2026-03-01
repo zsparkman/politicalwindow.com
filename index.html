@@ -256,14 +256,19 @@
 
   /* Mobile: 640px and below — full mobile layout */
   @media (max-width: 640px) {
-    header { padding:0 1rem; height:48px; }
-    .logo-text { font-size:1.3rem; }
-    .logo-badge { font-size:0.55rem; padding:2px 4px; }
+    header {
+      padding: 0 1rem;
+      padding-left: max(1rem, env(safe-area-inset-left));
+      padding-right: max(1rem, env(safe-area-inset-right));
+      height: 56px;
+    }
+    .logo-text { font-size:1.5rem; }
+    .logo-badge { font-size:0.58rem; padding:2px 5px; }
     .header-meta { display:none; }
 
     main { padding:0.75rem 0.75rem 5rem; gap:0.75rem; }
 
-    /* Status bar: legend wraps, filters wrap below */
+    /* Status bar */
     .status-bar { gap:0.75rem; padding:0.7rem 0.875rem; }
     .status-bar-label { font-size:0.58rem; }
     .legend { gap:0.75rem; }
@@ -271,12 +276,18 @@
     .filter-group { margin-left:0; width:100%; justify-content:flex-start; }
     .filter-btn { padding:6px 12px; font-size:0.6rem; }
 
-    /* Map card */
-    .map-card { padding:0.875rem; }
+    /* Map card — make tiles fit screen width */
+    .map-card { padding:0.75rem 0.5rem; }
     .card-header { flex-direction:column; gap:0.3rem; }
     .card-sub { font-size:0.58rem; }
-    .tile-grid { grid-template-rows:repeat(8,36px); gap:2px; min-width:400px; }
-    .tile { font-size:0.52rem; }
+    .map-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%; }
+    .tile-grid {
+      grid-template-rows:repeat(8,34px);
+      gap:2px;
+      min-width:360px;
+      max-width:100%;
+    }
+    .tile { font-size:0.5rem; border-radius:3px; }
 
     /* Desktop detail panel → hidden; use drawer instead */
     .detail-panel { display:none; }
@@ -290,8 +301,16 @@
     .table-toolbar { padding:0.75rem 0.875rem; }
     .card-title { font-size:0.9rem; }
 
-    /* Disclaimer */
-    .disclaimer { font-size:0.54rem; padding:0.75rem 0.875rem; }
+    /* Disclaimer — compact on mobile */
+    .disclaimer {
+      font-size:0.52rem;
+      padding:0.5rem 0.875rem;
+      line-height:1.5;
+      display:-webkit-box;
+      -webkit-line-clamp:3;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
 
     /* Hide desktop-only table columns */
     .col-runoff, .col-races, .col-cands { display:none; }
@@ -299,8 +318,9 @@
 
   /* Very small phones */
   @media (max-width: 375px) {
-    .tile-grid { min-width:360px; grid-template-rows:repeat(8,32px); }
-    .tile { font-size:0.48rem; }
+    .logo-text { font-size:1.25rem; }
+    .tile-grid { min-width:320px; grid-template-rows:repeat(8,30px); }
+    .tile { font-size:0.44rem; }
   }
 </style>
 </head>
