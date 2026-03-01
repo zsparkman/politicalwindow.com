@@ -838,7 +838,7 @@ function drawTable() {
   const filterNote = stateFilter
     ? `<span style="color:var(--amber);margin-left:0.5rem">▼ ${SM[stateFilter].name} <button onclick="clearStateFilter()" style="font-family:var(--mono);font-size:0.58rem;color:var(--text-muted);background:var(--navy-border);border:none;border-radius:2px;padding:1px 6px;cursor:pointer;margin-left:4px">✕ clear</button></span>`
     : '';
-  document.getElementById('tableInfo').innerHTML = `${data.length} of ${STATES.length} states + DC${filterNote} <span class="tbl-info-tip" title="Includes all 50 U.S. states plus Washington D.C. — 51 total jurisdictions tracked for FCC political advertising windows.">ⓘ</span>`;
+  document.getElementById('tableInfo').innerHTML = `${data.length} of 50 states + DC${filterNote} <span class="tbl-info-tip" title="Includes all 50 U.S. states plus Washington D.C. — 51 total jurisdictions tracked for FCC political advertising windows.">ⓘ</span>`;
   const tb = document.getElementById('tableBody'); tb.innerHTML = '';
 
   data.forEach(s => {
