@@ -980,17 +980,25 @@ const DATA_BADGE = document.getElementById('data-badge');
 
 async function loadLiveData() {
   try {
-    const [statesResp, candsResp] = await Promise.all([
+    const [statesResp, candsResp, ballotResp] = await Promise.all([
       fetch(`${API_BASE}/api/states`),
       fetch(`${API_BASE}/api/candidates`),
+      fetch(`${API_BASE}/api/ballot-measures`),
     ]);
 
     if (!statesResp.ok || !candsResp.ok) throw new Error('API returned error status');
 
     const statesJson = await statesResp.json();
     const candsJson  = await candsResp.json();
+    const ballotJson = ballotResp.ok ? await ballotResp.json() : { ok: false };
 
     if (!statesJson.ok || !candsJson.ok) throw new Error('API data invalid');
+
+    // Update BALLOT from API
+    if (ballotJson.ok && ballotJson.data) {
+      Object.keys(BALLOT).forEach(k => delete BALLOT[k]);
+      Object.assign(BALLOT, ballotJson.data);
+    }
 
     // Update RAW from API states
     RAW = statesJson.data.map(s => ({
@@ -1048,40 +1056,8 @@ async function loadLiveData() {
 }
 
 
-// ── BALLOT MEASURES ───────────────────────────────────────────────────────────
-const BALLOT = {
-  CA: [
-    { title:'Prop 33 — Rent Control Expansion', desc:'Would allow local governments to expand rent control to all rental housing.', yes:'Housing Is A Human Right Coalition', no:'California Apartment Association', spend:'high', fcc:'Issue advertisers — not subject to LUR' },
-    { title:'Prop 35 — Medi-Cal Funding', desc:'Permanent tax on managed care health plans to fund Medi-Cal services.', yes:'Medi-Cal Providers Coalition', no:'Health Plan Industry', spend:'medium', fcc:'Issue advertisers — not subject to LUR' },
-  ],
-  AZ: [
-    { title:'Prop 140 — Open Primary', desc:'Would establish a single open primary election with top candidates advancing regardless of party.', yes:'Unite Arizona', no:'AZ GOP / AZ Democrats', spend:'medium', fcc:'Issue advertisers — not subject to LUR' },
-  ],
-  CO: [
-    { title:'Amendment G — Property Tax Exemption', desc:'Expands property tax exemption for disabled veterans.', yes:'Veterans Coalition', no:'None organized', spend:'low', fcc:'Issue advertisers — not subject to LUR' },
-  ],
-  FL: [
-    { title:'Amendment 4 — Abortion Rights', desc:'Would enshrine abortion rights in the state constitution up to viability.', yes:'Floridians Protecting Freedom', no:'Florida Voice for the Unborn', spend:'high', fcc:'Issue advertisers — not subject to LUR' },
-  ],
-  OH: [
-    { title:'Issue 1 — Redistricting Reform', desc:'Would create an independent citizens redistricting commission.', yes:'Citizens Not Politicians', no:'Ohio GOP', spend:'high', fcc:'Issue advertisers — not subject to LUR' },
-  ],
-  NV: [
-    { title:'Question 3 — Open Primary', desc:'Ranked-choice voting in general elections with top-5 open primary.', yes:'Nevada Voters First', no:'Nevada GOP / Nevada Democrats', spend:'medium', fcc:'Issue advertisers — not subject to LUR' },
-  ],
-  WA: [
-    { title:'I-2109 — Capital Gains Tax Repeal', desc:'Would repeal the 7% capital gains tax on high earners.', yes:"Let's Go Washington", no:'Invest in WA Now', spend:'high', fcc:'Issue advertisers — not subject to LUR' },
-  ],
-  OR: [
-    { title:'Measure 117 — Ranked Choice Voting', desc:'Would implement ranked-choice voting for statewide elections.', yes:'All Oregon Voters', no:'Traditional Values Coalition', spend:'medium', fcc:'Issue advertisers — not subject to LUR' },
-  ],
-  TX: [
-    { title:'Prop 3 — Property Tax Relief', desc:'Constitutional amendment to limit appraisal increases on homestead properties.', yes:'TX Homeowners Alliance', no:'None organized', spend:'low', fcc:'Issue advertisers — not subject to LUR' },
-  ],
-  IL: [
-    { title:'Safe-T Act Referendum', desc:'Advisory referendum on whether to retain the cash bail elimination law.', yes:'Coalition to End Money Bond', no:'Law Enforcement Coalition', spend:'medium', fcc:'Issue advertisers — not subject to LUR' },
-  ],
-};
+// ── BALLOT MEASURES (populated from API via loadLiveData) ───────────────────────
+const BALLOT = {};
 
 function stateHasBallot(abbr) { return !!(BALLOT[abbr] && BALLOT[abbr].length > 0); }
 
