@@ -929,7 +929,22 @@ async function loadLiveData() {
     }));
 
     // Update CANDS from API candidates
-    CANDS = candsJson.data;
+    // Transform flat API format → {STATE: [{race, list:[{n,p,s,note}]}]} format
+    const rawCands = candsJson.data; // { TX: [{race, party, name, status, notes}] }
+    CANDS = {};
+    for (const [abbr, list] of Object.entries(rawCands)) {
+      const byRace = {};
+      for (const c of list) {
+        if (!byRace[c.race]) byRace[c.race] = [];
+        byRace[c.race].push({
+          n: c.name,
+          p: c.party,
+          s: c.incumbent ? 'inc' : (c.status === 'exploring' ? 'exp' : 'dec'),
+          note: c.notes || undefined,
+        });
+      }
+      CANDS[abbr] = Object.entries(byRace).map(([race, list]) => ({ race, list }));
+    }
 
     // Rebuild derived state
     STATES = buildStates();
