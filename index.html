@@ -193,6 +193,39 @@
   .cand-mini-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
   .disclaimer { padding:0.75rem 1rem; font-family:var(--mono); font-size:0.56rem; color:var(--text-faint); border-top:1px solid var(--navy-border); line-height:1.75; }
 
+
+  /* ── BALLOT MEASURES ── */
+  .ballot-section { margin-top:0.75rem; }
+  .ballot-label { font-family:var(--mono); font-size:0.56rem; letter-spacing:0.1em; color:var(--text-faint); text-transform:uppercase; margin-bottom:0.5rem; }
+  .ballot-measure {
+    background:rgba(120,80,255,0.08);
+    border:1px solid rgba(120,80,255,0.25);
+    border-radius:4px;
+    padding:0.6rem 0.75rem;
+    margin-bottom:0.5rem;
+  }
+  .ballot-measure-title { font-family:var(--sans); font-size:0.75rem; color:#c4b5fd; font-weight:600; margin-bottom:0.25rem; }
+  .ballot-measure-desc { font-family:var(--mono); font-size:0.58rem; color:var(--text-muted); line-height:1.5; margin-bottom:0.4rem; }
+  .ballot-measure-meta { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; }
+  .ballot-spend-tag {
+    font-family:var(--mono); font-size:0.52rem; letter-spacing:0.06em;
+    padding:2px 6px; border-radius:2px; font-weight:600;
+  }
+  .spend-high   { background:rgba(255,80,80,0.15);  color:#f87171; border:1px solid rgba(255,80,80,0.3); }
+  .spend-medium { background:rgba(255,170,0,0.15);  color:#fbbf24; border:1px solid rgba(255,170,0,0.3); }
+  .spend-low    { background:rgba(100,200,100,0.15);color:#86efac; border:1px solid rgba(100,200,100,0.3); }
+  .ballot-fcc-note { font-family:var(--mono); font-size:0.52rem; color:var(--text-faint); }
+  .ballot-camps { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); margin-top:0.3rem; }
+  .ballot-yes { color:#86efac; } .ballot-no { color:#f87171; }
+  /* map dot indicator for ballot measures */
+  .tile.has-ballot::after {
+    content:'';
+    position:absolute; bottom:3px; right:3px;
+    width:4px; height:4px;
+    background:#a78bfa; border-radius:50%;
+  }
+  /* legend item */
+  .legend-ballot { color:#a78bfa; }
   /* ── MOBILE STATE CARD (shown instead of table row on mobile) ── */
   .mobile-state-list { display:none; }
   .mobile-state-card {
@@ -357,6 +390,7 @@
       <button class="filter-btn" data-race="Senate">Senate</button>
       <button class="filter-btn" data-race="Governor">Gov</button>
       <button class="filter-btn" data-race="House">House</button>
+      <button class="filter-btn" data-race="Ballot">Ballot</button>
     </div>
   </div>
 
@@ -723,6 +757,24 @@ function buildDetailHTML(abbr) {
       <div class="dlabel">Market Intel</div>
       <div style="font-family:var(--sans);font-size:0.74rem;color:var(--text-muted);line-height:1.55">${s.notes||'—'}</div>
     </div>
+
+    ${stateHasBallot(s.abbr) ? `
+    <div class="dsec ballot-section" style="border-bottom:none; margin-top:0.5rem;">
+      <div class="dlabel">Ballot Measures / Props</div>
+      ${BALLOT[s.abbr].map(m => `
+        <div class="ballot-measure">
+          <div class="ballot-measure-title">${m.title}</div>
+          <div class="ballot-measure-desc">${m.desc}</div>
+          <div class="ballot-camps">
+            <span class="ballot-yes">✓ YES: ${m.yes}</span><br>
+            <span class="ballot-no">✗ NO: ${m.no}</span>
+          </div>
+          <div class="ballot-measure-meta" style="margin-top:0.4rem;">
+            <span class="ballot-spend-tag spend-${m.spend}">${m.spend.toUpperCase()} SPEND</span>
+            <span class="ballot-fcc-note">${m.fcc}</span>
+          </div>
+        </div>`).join('')}
+    </div>` : ''}
   </div>`;
 }
 
@@ -993,6 +1045,44 @@ async function loadLiveData() {
     }
   }
 }
+
+
+// ── BALLOT MEASURES ───────────────────────────────────────────────────────────
+const BALLOT = {
+  CA: [
+    { title:'Prop 33 — Rent Control Expansion', desc:'Would allow local governments to expand rent control to all rental housing.', yes:'Housing Is A Human Right Coalition', no:'California Apartment Association', spend:'high', fcc:'Issue advertisers — not subject to LUR' },
+    { title:'Prop 35 — Medi-Cal Funding', desc:'Permanent tax on managed care health plans to fund Medi-Cal services.', yes:'Medi-Cal Providers Coalition', no:'Health Plan Industry', spend:'medium', fcc:'Issue advertisers — not subject to LUR' },
+  ],
+  AZ: [
+    { title:'Prop 140 — Open Primary', desc:'Would establish a single open primary election with top candidates advancing regardless of party.', yes:'Unite Arizona', no:'AZ GOP / AZ Democrats', spend:'medium', fcc:'Issue advertisers — not subject to LUR' },
+  ],
+  CO: [
+    { title:'Amendment G — Property Tax Exemption', desc:'Expands property tax exemption for disabled veterans.', yes:'Veterans Coalition', no:'None organized', spend:'low', fcc:'Issue advertisers — not subject to LUR' },
+  ],
+  FL: [
+    { title:'Amendment 4 — Abortion Rights', desc:'Would enshrine abortion rights in the state constitution up to viability.', yes:'Floridians Protecting Freedom', no:'Florida Voice for the Unborn', spend:'high', fcc:'Issue advertisers — not subject to LUR' },
+  ],
+  OH: [
+    { title:'Issue 1 — Redistricting Reform', desc:'Would create an independent citizens redistricting commission.', yes:'Citizens Not Politicians', no:'Ohio GOP', spend:'high', fcc:'Issue advertisers — not subject to LUR' },
+  ],
+  NV: [
+    { title:'Question 3 — Open Primary', desc:'Ranked-choice voting in general elections with top-5 open primary.', yes:'Nevada Voters First', no:'Nevada GOP / Nevada Democrats', spend:'medium', fcc:'Issue advertisers — not subject to LUR' },
+  ],
+  WA: [
+    { title:'I-2109 — Capital Gains Tax Repeal', desc:'Would repeal the 7% capital gains tax on high earners.', yes:'Let's Go Washington', no:'Invest in WA Now', spend:'high', fcc:'Issue advertisers — not subject to LUR' },
+  ],
+  OR: [
+    { title:'Measure 117 — Ranked Choice Voting', desc:'Would implement ranked-choice voting for statewide elections.', yes:'All Oregon Voters', no:'Traditional Values Coalition', spend:'medium', fcc:'Issue advertisers — not subject to LUR' },
+  ],
+  TX: [
+    { title:'Prop 3 — Property Tax Relief', desc:'Constitutional amendment to limit appraisal increases on homestead properties.', yes:'TX Homeowners Alliance', no:'None organized', spend:'low', fcc:'Issue advertisers — not subject to LUR' },
+  ],
+  IL: [
+    { title:'Safe-T Act Referendum', desc:'Advisory referendum on whether to retain the cash bail elimination law.', yes:'Coalition to End Money Bond', no:'Law Enforcement Coalition', spend:'medium', fcc:'Issue advertisers — not subject to LUR' },
+  ],
+};
+
+function stateHasBallot(abbr) { return !!(BALLOT[abbr] && BALLOT[abbr].length > 0); }
 
 // ── INIT ───────────────────────────────────────────────────────────────────────
 buildMap(); buildHead(); drawTable();
