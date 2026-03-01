@@ -805,12 +805,8 @@ function buildDetailHTML(abbr) {
 
 
 // ── RATE INTEL — fetch and render ad spend data ───────────────────────────────
-const STATE_DMA_MAP = {
-  TX: 'texas', CA: 'california', IL: 'illinois', NY: 'new york',
-  FL: 'florida', PA: 'pennsylvania', OH: 'ohio', GA: 'georgia',
-  AZ: 'arizona', NC: 'north carolina', WI: 'wisconsin', MI: 'michigan',
-  NV: 'nevada', MN: 'minnesota', CO: 'colorado', WA: 'washington',
-};
+// States with rate intel coverage (backed by FCC data in ratewindow-api)
+const RATES_STATES = new Set(['TX','CA','IL','NY','FL','PA','OH','GA','AZ','NC','WI','MI','NV','MN','CO','WA']);
 
 async function loadRatesForState(abbr) {
   const loadEl = document.getElementById(`ratesLoading-${abbr}`);
@@ -818,7 +814,7 @@ async function loadRatesForState(abbr) {
   if (!loadEl || !contentEl) return;
 
   try {
-    const res = await fetch(`${RATES_API}/api/rates?dma=${encodeURIComponent(STATE_DMA_MAP[abbr] || abbr)}&limit=20`);
+    const res = await fetch(`${RATES_API}/api/rates?state=${encodeURIComponent(abbr)}&limit=20`);
     const json = await res.json();
     const rows = json.data || [];
 
