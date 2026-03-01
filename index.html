@@ -78,10 +78,10 @@
   .filter-btn.active { background:var(--blue-glow); border-color:var(--blue); color:var(--blue-light); }
 
   /* ── TOP SECTION: MAP + DETAIL ── */
-  .top-section { display:grid; grid-template-columns:1fr 370px; gap:1rem; align-items:start; }
+  .top-section { display:grid; grid-template-columns:1fr 370px; gap:1rem; align-items:stretch; }
 
   /* ── MAP CARD ── */
-  .map-card { background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px; padding:1.25rem; }
+  .map-card { background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px; padding:1.25rem; align-self:start; }
   .card-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1rem; gap:0.5rem; }
   .card-title { font-family:var(--display); font-size:1.1rem; letter-spacing:0.05em; color:#fff; }
   .card-sub { font-family:var(--mono); font-size:0.6rem; color:var(--text-muted); line-height:1.6; }
@@ -115,6 +115,7 @@
   .detail-panel {
     background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px;
     padding:1.25rem; overflow-y:auto;
+    max-height:600px;
   }
   .detail-state-name { font-family:var(--display); font-size:1.85rem; letter-spacing:0.05em; color:#fff; line-height:1; }
   .detail-state-abbr { font-family:var(--mono); font-size:0.65rem; color:var(--text-muted); margin-top:2px; margin-bottom:0.875rem; }
