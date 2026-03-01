@@ -681,7 +681,7 @@ function buildMap() {
   Object.entries(GRID).forEach(([abbr,[row,col]]) => {
     const el = cells[`${row},${col}`];
     const s = SM[abbr];
-    el.className = `tile tile-${s ? s.status : 'inactive'}`;
+    el.className = `tile tile-${s ? s.status : 'inactive'}${s && stateHasBallot(s.abbr) ? ' has-ballot' : ''}`;
     el.textContent = abbr; el.title = s ? s.name : abbr; el.dataset.abbr = abbr;
     if (s) el.addEventListener('click', () => pick(abbr));
   });
@@ -873,6 +873,7 @@ function filteredSorted() {
   return STATES.filter(s => {
     if (stateFilter && s.abbr !== stateFilter) return false;
     if (q && !s.name.toLowerCase().includes(q)) return false;
+    if (rf === 'Ballot') return stateHasBallot(s.abbr);
     if (rf !== 'all' && !s.races.includes(rf)) return false;
     return true;
   }).sort((a,b) => {
