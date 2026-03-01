@@ -314,6 +314,7 @@
   <div class="header-right">
     <span class="header-fcc header-meta">FCC Political Ad Intelligence · Broadcast &amp; Cable</span>
     <span class="header-meta" id="live-date"></span>
+    <span class="header-meta" id="data-badge" style="color:var(--text-faint);font-size:0.55rem;letter-spacing:0.05em">⬤ CACHED SNAPSHOT · FEB 2026</span>
   </div>
 </header>
 
@@ -413,7 +414,7 @@ const fmtL       = d => d ? d.toLocaleDateString('en-US',{month:'short',day:'num
 const isMobile   = () => window.innerWidth <= 640;
 
 // ── CANDIDATE DATA ─────────────────────────────────────────────────────────────
-const CANDS = {
+let CANDS = {
   TX:[
     {race:'Senate', list:[
       {n:'John Cornyn',     p:'R', s:'inc'},
@@ -529,7 +530,7 @@ const CANDS = {
 };
 
 // ── ELECTION DATA ─────────────────────────────────────────────────────────────
-const RAW=[
+let RAW=[
   {abbr:'TX',name:'Texas',        primary:'2026-03-03',races:['Senate','Governor','House'],runoff:'2026-05-26',notes:'TX Senate: Cornyn vs Hunt vs Paxton R primary. Crockett leading D field. Massive spend market.'},
   {abbr:'IL',name:'Illinois',     primary:'2026-03-17',races:['Senate','Governor','House'],notes:'Pritzker (D) running for 3rd term. Durbin retiring opens Senate seat.'},
   {abbr:'OH',name:'Ohio',         primary:'2026-05-05',races:['Senate','House'],notes:'Marquee: Husted (R-appointed) vs Brown (D-fmr Senator). Special election for former Vance seat.'},
@@ -583,7 +584,7 @@ const RAW=[
   {abbr:'DC',name:'D.C.',         primary:'2026-06-23',races:['House'],notes:'Non-voting delegate race only. Eleanor Holmes Norton (D). No Senate or Gov race.'},
 ];
 
-const STATES = (() => {
+function buildStates() {
   const seen = new Set();
   return RAW.filter(s => { if(seen.has(s.abbr)) return false; seen.add(s.abbr); return true; }).map(s => {
     const pDate   = s.primary ? new Date(s.primary) : null;
@@ -599,8 +600,9 @@ const STATES = (() => {
     else status = 'inactive';
     return { ...s, pDate, rDate, pWindow, dWin, dPrim, status, cands: CANDS[s.abbr] || [] };
   });
-})();
-const SM = Object.fromEntries(STATES.map(s => [s.abbr, s]));
+}
+let STATES = buildStates();
+let SM = Object.fromEntries(STATES.map(s => [s.abbr, s]));
 
 // ── TILE MAP ──────────────────────────────────────────────────────────────────
 const GRID = {
@@ -898,10 +900,71 @@ function clearStateFilter() {
   emptyDetail(); drawTable();
 }
 
+// ── API LIVE DATA ─────────────────────────────────────────────────────────────
+const API_BASE = 'http://api.politicalwindow.com';
+const DATA_BADGE = document.getElementById('data-badge');
+
+async function loadLiveData() {
+  try {
+    const [statesResp, candsResp] = await Promise.all([
+      fetch(`${API_BASE}/api/states`),
+      fetch(`${API_BASE}/api/candidates`),
+    ]);
+
+    if (!statesResp.ok || !candsResp.ok) throw new Error('API returned error status');
+
+    const statesJson = await statesResp.json();
+    const candsJson  = await candsResp.json();
+
+    if (!statesJson.ok || !candsJson.ok) throw new Error('API data invalid');
+
+    // Update RAW from API states
+    RAW = statesJson.data.map(s => ({
+      abbr:  s.abbr,
+      name:  s.name,
+      primary: s.primary,
+      runoff:  s.runoff,
+      races:   s.races,
+      notes:   s.notes,
+    }));
+
+    // Update CANDS from API candidates
+    CANDS = candsJson.data;
+
+    // Rebuild derived state
+    STATES = buildStates();
+    SM = Object.fromEntries(STATES.map(s => [s.abbr, s]));
+
+    // Re-render
+    buildMap();
+    buildHead();
+    drawTable();
+    if (isMobile()) drawMobileList();
+
+    // Update badge to show live status
+    const updatedAt = new Date(statesJson.generatedAt);
+    const timeStr = updatedAt.toLocaleDateString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+    if (DATA_BADGE) {
+      DATA_BADGE.style.color = '#4ade80';
+      DATA_BADGE.textContent = `⬤ LIVE · UPDATED ${timeStr.toUpperCase()}`;
+    }
+
+  } catch (err) {
+    console.warn('[PoliticalWindow] Could not fetch live data, using cached snapshot:', err.message);
+    if (DATA_BADGE) {
+      DATA_BADGE.style.color = 'var(--amber)';
+      DATA_BADGE.textContent = '⬤ CACHED SNAPSHOT · FEB 2026';
+    }
+  }
+}
+
 // ── INIT ───────────────────────────────────────────────────────────────────────
 buildMap(); buildHead(); drawTable();
 document.getElementById('live-date').textContent =
   new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
+
+// Attempt to load live data (non-blocking)
+loadLiveData();
 </script>
 </body>
 </html>
