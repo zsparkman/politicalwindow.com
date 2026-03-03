@@ -76,6 +76,7 @@
   }
   .filter-btn:hover  { border-color:var(--blue); color:var(--blue-light); }
   .filter-btn.active { background:var(--blue-glow); border-color:var(--blue); color:var(--blue-light); }
+  .tile-dimmed { opacity: 0.15; }
 
   /* ── TOP SECTION: MAP + DETAIL ── */
   .top-section { display:grid; grid-template-columns:1fr 370px; gap:1rem; align-items:stretch; }
@@ -691,6 +692,7 @@ const GRID = {
 
 function buildMap() {
   const g = document.getElementById('tileGrid');
+  g.innerHTML = '';
   const cells = {};
   for (let r = 0; r < 8; r++) for (let c = 0; c < 12; c++) {
     const el = document.createElement('div');
@@ -703,6 +705,18 @@ function buildMap() {
     el.className = `tile tile-${s ? s.status : 'inactive'}${s && stateHasBallot(s.abbr) ? ' has-ballot' : ''}`;
     el.textContent = abbr; el.title = s ? s.name : abbr; el.dataset.abbr = abbr;
     if (s) el.addEventListener('click', () => pick(abbr));
+  });
+}
+
+function applyMapFilter() {
+  document.querySelectorAll('.tile[data-abbr]').forEach(el => {
+    const abbr = el.dataset.abbr;
+    const s = SM[abbr];
+    let matches;
+    if (rf === 'all') matches = true;
+    else if (rf === 'Ballot') matches = stateHasBallot(abbr);
+    else matches = s && s.races && s.races.includes(rf);
+    el.classList.toggle('tile-dimmed', !matches);
   });
 }
 
@@ -1063,7 +1077,7 @@ function drawMobileList(data) {
 document.getElementById('searchInput').addEventListener('input', e => { q = e.target.value.toLowerCase().trim(); drawTable(); });
 document.querySelectorAll('[data-race]').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('[data-race]').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active'); rf = btn.dataset.race; drawTable();
+  btn.classList.add('active'); rf = btn.dataset.race; drawTable(); applyMapFilter();
 }));
 
 function clearStateFilter() {
@@ -1133,6 +1147,7 @@ async function loadLiveData() {
 
     // Re-render
     buildMap();
+    applyMapFilter();
     buildHead();
     drawTable();
     if (isMobile()) drawMobileList();
@@ -1161,7 +1176,7 @@ const BALLOT = {};
 function stateHasBallot(abbr) { return !!(BALLOT[abbr] && BALLOT[abbr].length > 0); }
 
 // ── INIT ───────────────────────────────────────────────────────────────────────
-buildMap(); buildHead(); drawTable();
+buildMap(); applyMapFilter(); buildHead(); drawTable();
 document.getElementById('live-date').textContent =
   new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
 
