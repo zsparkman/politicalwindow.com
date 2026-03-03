@@ -33,7 +33,7 @@ input{width:170px}
 .sort-btn{background:transparent;border:none;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.08em;color:#94a3b8;padding:2px 6px}
 .sort-btn.active{color:#f59e0b;font-weight:700}
 #main{padding:16px 24px;display:flex;flex-direction:column;gap:14px}
-#grouped{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
+#grouped{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:clip}
 #grouped-header{display:flex;padding:8px 14px;border-bottom:1px solid #1e3050;align-items:center}
 #grouped-count{margin-left:auto;font-size:0.62rem;color:#64748b}
 .group-row{border-bottom:1px solid #0f1f33}
@@ -50,6 +50,7 @@ input{width:170px}
 .g-arrow{text-align:right;font-size:0.65rem;color:#64748b}
 .detail-wrap{background:#060d18;border-bottom:1px solid #1e3050;padding:10px 14px 14px;overflow-x:auto;display:none}
 .detail-wrap.open{display:block}
+.detail-wrap td{max-width:none;white-space:normal;word-break:break-word}
 .detail-title{font-size:0.62rem;color:#94a3b8;letter-spacing:0.1em;margin-bottom:8px}
 table{width:100%;border-collapse:collapse;font-size:0.68rem}
 th{text-align:left;padding:6px 8px;border-bottom:1px solid #1e3050;font-weight:700;letter-spacing:0.06em;color:#94a3b8;white-space:nowrap;background:#0a1525;font-size:0.62rem}
@@ -72,6 +73,16 @@ tr:hover td{background:#0d1f35}
 #loading{display:flex;align-items:center;justify-content:center;height:200px;font-size:0.8rem;color:#f59e0b;letter-spacing:0.15em}
 #error-msg{color:#ef4444;text-align:center;padding:40px;font-size:0.8rem;display:none}
 footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;padding:20px}
+@media(max-width:700px){
+  #stats{gap:14px}
+  .stat-val{font-size:0.8rem}
+  .detail-wrap th:nth-child(2),.detail-wrap td:nth-child(2),
+  .detail-wrap th:nth-child(4),.detail-wrap td:nth-child(4),
+  .detail-wrap th:nth-child(6),.detail-wrap td:nth-child(6){display:none}
+  #raw-wrap th:nth-child(2),#raw-wrap td:nth-child(2),
+  #raw-wrap th:nth-child(4),#raw-wrap td:nth-child(4),
+  #raw-wrap th:nth-child(6),#raw-wrap td:nth-child(6){display:none}
+}
 </style>
 </head>
 <body>
@@ -160,6 +171,8 @@ function pill(label,color,bg){return'<span class="pill" style="color:'+(color||'
 function partyPill(p){var c={R:'#ef4444',D:'#3b82f6',I:'#a78bfa'},b={R:'rgba(239,68,68,0.12)',D:'rgba(59,130,246,0.12)',I:'rgba(167,139,250,0.12)'};return pill(p,c[p],b[p]);}
 function fmtDate(d){if(!d)return'';return d.slice(5,10).replace('-','/');}
 function fmtDates(r){var s=fmtDate(r.start_date),e=fmtDate(r.end_date);if(!s&&!e)return'—';if(!e)return s;if(!s)return e;return s+'–'+e;}
+var DAYPART_CODES={'Early Morning':'EM','Daytime':'DT','Early Fringe':'EF','Early News':'EN','Prime Access':'PA','Primetime':'PT','Late News':'LN','Late Fringe':'LF','Overnight':'ON'};
+function fmtDayparts(str){if(!str)return'—';return str.split(/[,;\/+|&]+/).map(function(s){var t=s.trim();return DAYPART_CODES[t]||t;}).filter(Boolean).join(' · ');}
 function fccLink(r){return r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:#f59e0b;font-size:0.6rem">PDF ↗</a>':'—';}
 // Resolved candidate name, falling back to raw advertiser
 function candKey(r){return r.candidate||r.advertiser||'Unknown';}
@@ -208,7 +221,7 @@ function detailRow(r){
     '<td class="c-muted" title="'+esc(r.dma_name||'')+'">'+esc(r.dma_name||'—')+'</td>'+
     '<td class="c-amber">'+esc(r.callsign||'—')+'</td>'+
     '<td class="c-muted">'+esc(fmtDates(r))+'</td>'+
-    '<td class="c-muted">'+esc(r.daypart||'—')+'</td>'+
+    '<td class="c-muted">'+esc(fmtDayparts(r.daypart))+'</td>'+
     '<td class="c-green">'+fmt$(r.gross_total)+'</td>'+
     '<td>'+fccLink(r)+'</td>'+
   '</tr>';
