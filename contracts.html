@@ -20,6 +20,9 @@ select,input,button{font-family:'Courier New',monospace;outline:none}
 .stat-val{font-size:1rem;font-weight:700;color:#f59e0b;text-align:right}
 .stat-lbl{font-size:0.58rem;color:#94a3b8;letter-spacing:0.1em;text-align:right}
 #controls{padding:12px 24px;border-bottom:1px solid #1e3050;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.tab-group{display:flex;gap:6px}
+.tab{font-size:0.62rem;font-weight:700;letter-spacing:0.1em;padding:5px 14px;border:1px solid #1e3050;border-radius:2px;cursor:pointer;background:transparent;color:#94a3b8}
+.tab.active{border-color:#f59e0b;background:rgba(245,158,11,0.12);color:#f59e0b}
 .filter-wrap{display:flex;flex-direction:column;gap:3px}
 .filter-lbl{font-size:0.62rem;color:#94a3b8;letter-spacing:0.1em}
 select,input{font-size:0.65rem;color:#cbd5e1;background:#0d1829;border:1px solid #1e3050;border-radius:2px;padding:4px 8px}
@@ -27,12 +30,31 @@ input{width:170px}
 #sort-wrap{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:0.65rem;color:#94a3b8}
 .sort-btn{background:transparent;border:none;cursor:pointer;font-family:'Courier New',monospace;font-size:0.65rem;letter-spacing:0.08em;color:#94a3b8;padding:2px 6px}
 .sort-btn.active{color:#f59e0b;font-weight:700}
-#main{padding:16px 24px}
-#tbl-wrap{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow-x:auto}
-#tbl-header{padding:8px 14px;border-bottom:1px solid #1e3050;font-size:0.62rem;color:#94a3b8;letter-spacing:0.08em;display:flex;justify-content:space-between;align-items:center}
+#main{padding:16px 24px;display:flex;flex-direction:column;gap:14px}
+/* grouped view */
+#grouped{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
+#grouped-header{display:flex;padding:8px 14px;border-bottom:1px solid #1e3050;align-items:center}
+#grouped-count{margin-left:auto;font-size:0.62rem;color:#64748b}
+.group-row{border-bottom:1px solid #0f1f33}
+.group-main{display:grid;grid-template-columns:1fr 80px 100px 40px;gap:8px;padding:10px 14px;align-items:center;cursor:pointer}
+.group-main:hover{background:rgba(30,48,80,0.3)}
+.g-bar{width:3px;height:28px;border-radius:2px;flex-shrink:0}
+.g-name{font-size:0.7rem;color:#e2e8f0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-pills{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap}
+.pill{font-size:0.56rem;font-weight:700;padding:2px 6px;border-radius:2px;letter-spacing:0.08em;border:1px solid}
+.g-num{text-align:right}
+.g-num-val{font-size:0.82rem;font-weight:600;color:#cbd5e1}
+.g-num-lbl{font-size:0.62rem;color:#94a3b8}
+.g-spend{color:#10b981!important;font-size:0.85rem!important}
+.g-arrow{text-align:right;font-size:0.65rem;color:#64748b}
+.detail-wrap{background:#060d18;border-bottom:1px solid #1e3050;padding:10px 14px 14px;overflow-x:auto;display:none}
+.detail-wrap.open{display:block}
+.detail-title{font-size:0.62rem;color:#94a3b8;letter-spacing:0.1em;margin-bottom:8px}
+/* shared table */
 table{width:100%;border-collapse:collapse;font-size:0.68rem}
-th{text-align:left;padding:7px 8px;border-bottom:1px solid #1e3050;font-weight:700;letter-spacing:0.06em;color:#94a3b8;white-space:nowrap;background:#0a1525;font-size:0.62rem;cursor:pointer;user-select:none}
-th:hover{color:#f59e0b}
+th{text-align:left;padding:6px 8px;border-bottom:1px solid #1e3050;font-weight:700;letter-spacing:0.06em;color:#94a3b8;white-space:nowrap;background:#0a1525;font-size:0.62rem}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable:hover{color:#f59e0b}
 th.sort-asc::after{content:' ▲'}
 th.sort-desc::after{content:' ▼'}
 td{padding:5px 8px;border-bottom:1px solid #0f1f33;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}
@@ -45,6 +67,9 @@ tr:hover td{background:#0d1f35}
 .c-r{color:#ef4444;font-weight:700}
 .c-d{color:#3b82f6;font-weight:700}
 .c-blue{color:#38bdf8}
+/* flat contracts table */
+#raw-wrap{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow-x:auto}
+#raw-header{padding:8px 14px;border-bottom:1px solid #1e3050;font-size:0.62rem;color:#94a3b8;letter-spacing:0.08em}
 #loading{display:flex;align-items:center;justify-content:center;height:200px;font-size:0.8rem;color:#f59e0b;letter-spacing:0.15em}
 #error-msg{color:#ef4444;text-align:center;padding:40px;font-size:0.8rem;display:none}
 footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;padding:20px}
@@ -69,6 +94,12 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   </div>
 </div>
 <div id="controls">
+  <div class="tab-group">
+    <button class="tab active" data-view="advertiser">BY ADVERTISER</button>
+    <button class="tab" data-view="dma">BY DMA</button>
+    <button class="tab" data-view="station">BY STATION</button>
+    <button class="tab" data-view="raw">CONTRACTS</button>
+  </div>
   <div class="filter-wrap">
     <div class="filter-lbl">PARTY</div>
     <select id="f-party"><option value="ALL">All Parties</option><option>R</option><option>D</option><option>I</option></select>
@@ -87,41 +118,84 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   </div>
   <div id="sort-wrap">SORT:
     <button class="sort-btn active" data-sort="spend">SPEND</button>
-    <button class="sort-btn" data-sort="dates">DATES</button>
+    <button class="sort-btn" data-sort="contracts">CONTRACTS</button>
   </div>
 </div>
 <div id="main">
   <div id="loading">LOADING FCC DATA...</div>
   <div id="error-msg"></div>
-  <div id="tbl-wrap" style="display:none">
-    <div id="tbl-header"><span id="tbl-count"></span></div>
+  <div id="grouped" style="display:none">
+    <div id="grouped-header"><div id="grouped-count"></div></div>
+    <div id="grouped-body"></div>
+  </div>
+  <div id="raw-wrap" style="display:none">
+    <div id="raw-header"></div>
     <table>
       <thead><tr>
-        <th data-col="advertiser">ADVERTISER</th>
-        <th data-col="party">PARTY</th>
-        <th data-col="office_type">OFFICE</th>
-        <th data-col="state">STATE</th>
-        <th data-col="dma_name">DMA</th>
-        <th data-col="callsign">STATION</th>
-        <th data-col="contract_number">CONTRACT #</th>
-        <th data-col="start_date">DATES</th>
-        <th data-col="daypart">DAYPART(S)</th>
-        <th data-col="gross_total" class="sort-desc">TOTAL</th>
+        <th class="sortable" data-col="advertiser">ADVERTISER</th>
+        <th class="sortable" data-col="party">PARTY</th>
+        <th class="sortable" data-col="office_type">OFFICE</th>
+        <th class="sortable" data-col="state">STATE</th>
+        <th class="sortable" data-col="dma_name">DMA</th>
+        <th class="sortable" data-col="callsign">STATION</th>
+        <th class="sortable sort-desc" data-col="start_date">DATES</th>
+        <th class="sortable" data-col="daypart">DAYPART(S)</th>
+        <th class="sortable" data-col="gross_total">TOTAL</th>
         <th>DOC</th>
       </tr></thead>
-      <tbody id="tbl-body"></tbody>
+      <tbody id="raw-body"></tbody>
     </table>
   </div>
 </div>
 <footer>DATA SOURCE: FCC OPIF PUBLIC FILES · PARSED VIA CLAUDE SONNET · POLITICALWINDOW.COM © 2026</footer>
 <script>
-var API='https://rates.politicalwindow.com',ALL_DATA=[],currentSort={col:'gross_total',dir:'desc'};
+var API='https://rates.politicalwindow.com';
+var CANDS_API='https://api.politicalwindow.com';
+var ALL_DATA=[],currentView='advertiser',currentSort='spend';
+var rawSort={col:'start_date',dir:'desc'};
+var CANDIDATES=[],CAND_MAP={};
 
 function fmt$(n){if(!n&&n!==0)return'—';var v=parseFloat(n);if(isNaN(v))return'—';if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';if(v>=1000)return'$'+(v/1000).toFixed(0)+'K';return'$'+v.toFixed(0);}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function pc(p){return p==='R'?'c-r':p==='D'?'c-d':'c-muted';}
-function fmtDate(d){if(!d)return'';var s=d.slice(5,10);return s.replace('-','/');}
+function pill(label,color,bg){return'<span class="pill" style="color:'+(color||'#94a3b8')+';background:'+(bg||'rgba(148,163,184,0.1)')+';border-color:'+(color||'#94a3b8')+'44">'+esc(label)+'</span>';}
+function partyPill(p){var c={R:'#ef4444',D:'#3b82f6',I:'#a78bfa'},b={R:'rgba(239,68,68,0.12)',D:'rgba(59,130,246,0.12)',I:'rgba(167,139,250,0.12)'};return pill(p,c[p],b[p]);}
+function fmtDate(d){if(!d)return'';return d.slice(5,10).replace('-','/');}
 function fmtDates(r){var s=fmtDate(r.start_date),e=fmtDate(r.end_date);if(!s&&!e)return'—';if(!e)return s;if(!s)return e;return s+'–'+e;}
+function fccLink(r){return r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:#f59e0b;font-size:0.6rem">PDF ↗</a>':'—';}
+
+// ── Candidate name normalization (same logic as explorer-v2.html) ──────────
+function normKey(s){
+  var v=(s||'').trim(),vl=v.toLowerCase();
+  for(var i=0;i<CANDIDATES.length;i++){if(vl.indexOf(CANDIDATES[i])>=0)return CANDIDATES[i];}
+  var m=v.match(/^POL\s*\/\s*([^\/]+)/i);if(m)v=m[1].trim();
+  v=v.replace(/\s+for\s+(governor|lt\.?\s*governor|u\.?s\.?\s*senate|senate|u\.?s\.?\s*house|congress|president|mayor|assembly|attorney general|secretary of state|treasurer|controller)\b.*/i,'');
+  v=v.replace(/\s+20\d\d\b.*/,'');
+  v=v.replace(/\s+of\s+[A-Z]{2}\b.*/i,'');
+  return v.trim().replace(/\s+/g,' ').toLowerCase();
+}
+function canonLabel(s){var k=normKey(s);return CAND_MAP[k]||(s||'').trim();}
+
+function loadCandidates(){
+  return fetch(CANDS_API+'/api/candidates')
+    .then(function(r){return r.json();})
+    .then(function(j){
+      var states=j.data||j||{};
+      Object.keys(states).forEach(function(st){
+        var races=states[st];if(!Array.isArray(races))return;
+        races.forEach(function(race){
+          if(!race.list)return;
+          race.list.forEach(function(c){
+            if(c.n&&c.n.trim().split(/\s+/).length>=2){
+              var display=c.n.trim(),lower=display.toLowerCase();
+              CANDIDATES.push(lower);CAND_MAP[lower]=display;
+            }
+          });
+        });
+      });
+      CANDIDATES.sort(function(a,b){return b.length-a.length;});
+    }).catch(function(){});
+}
 
 function getFiltered(){
   var party=document.getElementById('f-party').value,state=document.getElementById('f-state').value,dma=document.getElementById('f-dma').value,search=document.getElementById('f-search').value.toLowerCase();
@@ -129,20 +203,8 @@ function getFiltered(){
     if(party!=='ALL'&&r.party!==party)return false;
     if(state!=='ALL'&&r.state!==state)return false;
     if(dma!=='ALL'&&r.dma_name!==dma)return false;
-    if(search)return(r.advertiser||'').toLowerCase().includes(search)||(r.callsign||'').toLowerCase().includes(search)||(r.dma_name||'').toLowerCase().includes(search)||(r.candidate_name||'').toLowerCase().includes(search)||(r.contract_number||'').toLowerCase().includes(search);
+    if(search)return(r.advertiser||'').toLowerCase().includes(search)||(r.callsign||'').toLowerCase().includes(search)||(r.dma_name||'').toLowerCase().includes(search)||(r.candidate_name||'').toLowerCase().includes(search);
     return true;
-  });
-}
-
-function getSorted(rows){
-  var col=currentSort.col,dir=currentSort.dir;
-  var NUMS={gross_total:1,unit_rate:1,spots_count:1};
-  return rows.slice().sort(function(a,b){
-    var av=a[col]||'',bv=b[col]||'';
-    if(NUMS[col]){av=parseFloat(av)||0;bv=parseFloat(bv)||0;}
-    if(av<bv)return dir==='asc'?-1:1;
-    if(av>bv)return dir==='asc'?1:-1;
-    return 0;
   });
 }
 
@@ -150,76 +212,137 @@ function updateStats(rows){
   var spend=rows.reduce(function(s,r){return s+(parseFloat(r.gross_total)||0);},0);
   document.getElementById('s-spend').textContent=fmt$(spend);
   document.getElementById('s-contracts').textContent=rows.length.toLocaleString();
-  document.getElementById('s-advertisers').textContent=new Set(rows.map(function(r){return r.advertiser;}).filter(Boolean)).size;
+  document.getElementById('s-advertisers').textContent=new Set(rows.map(function(r){return normKey(r.advertiser);}).filter(Boolean)).size;
   document.getElementById('s-stations').textContent=new Set(rows.map(function(r){return r.callsign;}).filter(Boolean)).size;
 }
 
-function render(){
-  var rows=getFiltered(),sorted=getSorted(rows);
-  updateStats(rows);
-  document.getElementById('tbl-count').textContent=rows.length.toLocaleString()+' CONTRACTS';
-  document.getElementById('tbl-body').innerHTML=sorted.map(function(r){
-    var fccLink=r.folder_id&&r.file_manager_id
-      ?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:#f59e0b;font-size:0.6rem;letter-spacing:0.05em">PDF ↗</a>'
-      :'—';
-    return'<tr>'+
-      '<td class="'+pc(r.party)+'" title="'+esc(r.advertiser||r.candidate_name||'')+'">'+esc(r.advertiser||r.candidate_name||'—')+'</td>'+
-      '<td class="'+pc(r.party)+'">'+esc(r.party||'—')+'</td>'+
-      '<td class="c-muted">'+esc(r.office_type||'—')+'</td>'+
-      '<td class="c-blue">'+esc(r.state||'—')+'</td>'+
-      '<td class="c-muted" title="'+esc(r.dma_name||'')+'">'+esc(r.dma_name||'—')+'</td>'+
-      '<td class="c-amber">'+esc(r.callsign||'—')+'</td>'+
-      '<td class="c-muted">'+esc(r.contract_number||'—')+'</td>'+
-      '<td class="c-muted">'+esc(fmtDates(r))+'</td>'+
-      '<td class="c-muted">'+esc(r.daypart||'—')+'</td>'+
-      '<td class="c-green">'+fmt$(r.gross_total)+'</td>'+
-      '<td>'+fccLink+'</td>'+
-    '</tr>';
+function buildGroups(rows){
+  var map={};
+  rows.forEach(function(r){
+    var rawKey=currentView==='advertiser'?r.advertiser:currentView==='dma'?r.dma_name:r.callsign;
+    var k=currentView==='advertiser'?normKey(r.advertiser):(rawKey||'Unknown');
+    if(!map[k])map[k]={label:currentView==='advertiser'?canonLabel(r.advertiser):(rawKey||'Unknown'),contracts:0,spend:0,parties:new Set(),states:new Set(),dmas:new Set(),stations:new Set(),rows:[]};
+    map[k].contracts++;map[k].spend+=parseFloat(r.gross_total)||0;
+    if(r.party)map[k].parties.add(r.party);if(r.state)map[k].states.add(r.state);
+    if(r.dma_name)map[k].dmas.add(r.dma_name);if(r.callsign)map[k].stations.add(r.callsign);
+    map[k].rows.push(r);
+  });
+  return Object.values(map).sort(function(a,b){return currentSort==='spend'?b.spend-a.spend:b.contracts-a.contracts;});
+}
+
+function detailRow(r){
+  return'<tr>'+
+    '<td class="'+pc(r.party)+'" title="'+esc(r.advertiser||r.candidate_name||'')+'">'+esc(r.advertiser||r.candidate_name||'—')+'</td>'+
+    '<td class="'+pc(r.party)+'">'+esc(r.party||'—')+'</td>'+
+    '<td class="c-muted">'+esc(r.office_type||'—')+'</td>'+
+    '<td class="c-blue">'+esc(r.state||'—')+'</td>'+
+    '<td class="c-muted" title="'+esc(r.dma_name||'')+'">'+esc(r.dma_name||'—')+'</td>'+
+    '<td class="c-amber">'+esc(r.callsign||'—')+'</td>'+
+    '<td class="c-muted">'+esc(fmtDates(r))+'</td>'+
+    '<td class="c-muted">'+esc(r.daypart||'—')+'</td>'+
+    '<td class="c-green">'+fmt$(r.gross_total)+'</td>'+
+    '<td>'+fccLink(r)+'</td>'+
+  '</tr>';
+}
+
+var DETAIL_TH='<tr><th>ADVERTISER</th><th>PARTY</th><th>OFFICE</th><th>STATE</th><th>DMA</th><th>STATION</th><th>DATES</th><th>DAYPART(S)</th><th>TOTAL</th><th>DOC</th></tr>';
+
+function renderGrouped(groups){
+  document.getElementById('grouped-count').textContent=groups.length+' GROUPS · '+getFiltered().length+' CONTRACTS';
+  document.getElementById('grouped-body').innerHTML=groups.map(function(g,i){
+    var barColor=i<3?'#f59e0b':'#1e3050';
+    var pills=[...g.parties].map(partyPill).join('');
+    if(currentView==='advertiser'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#38bdf8','rgba(56,189,248,0.1)');});pills+=pill(g.dmas.size+' DMA'+(g.dmas.size!==1?'s':''));pills+=pill(g.stations.size+' STN');}
+    if(currentView==='dma'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#38bdf8','rgba(56,189,248,0.1)');});pills+=pill(g.stations.size+' stations');}
+    if(currentView==='station'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#38bdf8','rgba(56,189,248,0.1)');});}
+    return'<div class="group-row">'+
+      '<div class="group-main" onclick="toggleDetail('+i+')">'+
+        '<div style="display:flex;align-items:center;gap:8px;min-width:0">'+
+          '<div class="g-bar" style="background:'+barColor+'"></div>'+
+          '<div style="min-width:0"><div class="g-name">'+esc(g.label)+'</div><div class="g-pills">'+pills+'</div></div>'+
+        '</div>'+
+        '<div class="g-num"><div class="g-num-val">'+g.contracts+'</div><div class="g-num-lbl">CONTRACTS</div></div>'+
+        '<div class="g-num"><div class="g-num-val g-spend">'+fmt$(g.spend)+'</div><div class="g-num-lbl">GROSS SPEND</div></div>'+
+        '<div class="g-arrow" id="arrow-'+i+'">▼</div>'+
+      '</div>'+
+      '<div class="detail-wrap" id="detail-'+i+'">'+
+        '<div class="detail-title">CONTRACT DETAIL — '+g.rows.length+' RECORDS</div>'+
+        '<table><thead>'+DETAIL_TH+'</thead><tbody>'+g.rows.map(detailRow).join('')+'</tbody></table>'+
+      '</div>'+
+    '</div>';
   }).join('');
-  updateSortHeaders();
 }
 
-function updateSortHeaders(){
-  document.querySelectorAll('th[data-col]').forEach(function(th){
+function renderRaw(rows){
+  var col=rawSort.col,dir=rawSort.dir;
+  var NUMS={gross_total:1};
+  var sorted=rows.slice().sort(function(a,b){
+    var av=a[col]||'',bv=b[col]||'';
+    if(NUMS[col]){av=parseFloat(av)||0;bv=parseFloat(bv)||0;}
+    if(av<bv)return dir==='asc'?-1:1;
+    if(av>bv)return dir==='asc'?1:-1;
+    return 0;
+  });
+  document.getElementById('raw-header').textContent=rows.length.toLocaleString()+' CONTRACTS';
+  document.getElementById('raw-body').innerHTML=sorted.map(detailRow).join('');
+  document.querySelectorAll('#raw-wrap th.sortable').forEach(function(th){
     th.classList.remove('sort-asc','sort-desc');
-    if(th.dataset.col===currentSort.col)th.classList.add('sort-'+currentSort.dir);
+    if(th.dataset.col===rawSort.col)th.classList.add('sort-'+rawSort.dir);
   });
 }
 
-fetch(API+'/api/rates?limit=500')
-  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
-  .then(function(j){
-    ALL_DATA=j.data||[];
-    document.getElementById('loading').style.display='none';
-    document.getElementById('tbl-wrap').style.display='block';
-    document.getElementById('header-sub').textContent=ALL_DATA.length+' contracts indexed · TX + CA + IL · 2026 cycle';
-    var states=Array.from(new Set(ALL_DATA.map(function(r){return r.state;}).filter(Boolean))).sort();
-    var stateEl=document.getElementById('f-state');
-    states.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;stateEl.appendChild(o);});
-    var dmas=Array.from(new Set(ALL_DATA.map(function(r){return r.dma_name;}).filter(Boolean))).sort();
-    var dmaEl=document.getElementById('f-dma');
-    dmas.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;dmaEl.appendChild(o);});
-    render();
-  })
-  .catch(function(e){
-    document.getElementById('loading').style.display='none';
-    var em=document.getElementById('error-msg');em.style.display='block';em.textContent='API ERROR: '+e.message;
-  });
+function render(){
+  var rows=getFiltered();
+  updateStats(rows);
+  var isRaw=currentView==='raw';
+  document.getElementById('grouped').style.display=isRaw?'none':'block';
+  document.getElementById('raw-wrap').style.display=isRaw?'block':'none';
+  if(isRaw){renderRaw(rows);}else{renderGrouped(buildGroups(rows));}
+}
 
-document.querySelectorAll('th[data-col]').forEach(function(th){
-  th.addEventListener('click',function(){
-    var col=th.dataset.col;
-    if(currentSort.col===col){currentSort.dir=currentSort.dir==='asc'?'desc':'asc';}
-    else{currentSort.col=col;currentSort.dir=(['gross_total','spots_count'].indexOf(col)>=0)?'desc':'asc';}
-    render();
+window.toggleDetail=function(i){
+  var d=document.getElementById('detail-'+i),a=document.getElementById('arrow-'+i),open=d.classList.contains('open');
+  document.querySelectorAll('.detail-wrap.open').forEach(function(el){el.classList.remove('open');});
+  document.querySelectorAll('.g-arrow').forEach(function(el){el.textContent='▼';});
+  if(!open){d.classList.add('open');a.textContent='▲';}
+};
+
+Promise.all([
+  fetch(API+'/api/rates?limit=500').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}),
+  loadCandidates()
+]).then(function(res){
+  ALL_DATA=res[0].data||[];
+  document.getElementById('loading').style.display='none';
+  document.getElementById('header-sub').textContent=ALL_DATA.length+' contracts indexed · TX + CA + IL · 2026 cycle';
+  var states=Array.from(new Set(ALL_DATA.map(function(r){return r.state;}).filter(Boolean))).sort();
+  var stateEl=document.getElementById('f-state');
+  states.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;stateEl.appendChild(o);});
+  var dmas=Array.from(new Set(ALL_DATA.map(function(r){return r.dma_name;}).filter(Boolean))).sort();
+  var dmaEl=document.getElementById('f-dma');
+  dmas.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;dmaEl.appendChild(o);});
+  render();
+}).catch(function(e){
+  document.getElementById('loading').style.display='none';
+  var em=document.getElementById('error-msg');em.style.display='block';em.textContent='API ERROR: '+e.message;
+});
+
+document.querySelectorAll('.tab').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');currentView=btn.dataset.view;render();
   });
 });
 document.querySelectorAll('.sort-btn').forEach(function(btn){
   btn.addEventListener('click',function(){
     document.querySelectorAll('.sort-btn').forEach(function(b){b.classList.remove('active');});
-    btn.classList.add('active');
-    if(btn.dataset.sort==='spend'){currentSort={col:'gross_total',dir:'desc'};}
-    else{currentSort={col:'start_date',dir:'desc'};}
+    btn.classList.add('active');currentSort=btn.dataset.sort;render();
+  });
+});
+document.querySelectorAll('#raw-wrap th.sortable').forEach(function(th){
+  th.addEventListener('click',function(){
+    var col=th.dataset.col;
+    if(rawSort.col===col){rawSort.dir=rawSort.dir==='asc'?'desc':'asc';}
+    else{rawSort.col=col;rawSort.dir=col==='gross_total'?'desc':'asc';}
     render();
   });
 });
