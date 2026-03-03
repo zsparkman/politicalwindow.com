@@ -113,7 +113,8 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
     <span class="logo-badge">2026</span>
   </div>
   <div class="header-right">
-    <span class="header-meta">PUBLIC FILE ACTIVITY</span>
+    <span class="header-fcc header-meta">FCC Public File Activity</span>
+    <span class="header-meta" id="live-date"></span>
     <span class="header-meta" id="data-badge" style="color:var(--text-faint);font-size:0.55rem;letter-spacing:0.05em">⬤ LOADING…</span>
   </div>
 </header>
@@ -192,6 +193,9 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 </div>
 <footer>DATA SOURCE: FCC OPIF PUBLIC FILES · PARSED VIA CLAUDE SONNET · POLITICALWINDOW.COM © 2026</footer>
 <script>
+document.getElementById('live-date').textContent =
+  new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
+
 var API='https://rates.politicalwindow.com';
 var ALL_DATA=[],currentView='candidate',currentSort='spend';
 var rawSort={col:'start_date',dir:'desc'};
