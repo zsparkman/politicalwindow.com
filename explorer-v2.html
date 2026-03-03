@@ -221,7 +221,9 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 
 <script>
 var API='https://rates.politicalwindow.com';
+var CANDS_API='https://api.politicalwindow.com';
 var ALL_DATA=[];
+var CANDIDATES=[]; // lowercase candidate names loaded from /api/candidates
 var currentView='pivot';
 var pivotGroupBy='advertiser';
 var pivotSortBy='spend';
@@ -254,7 +256,46 @@ function hexToRgba(hex,alpha){
   return'rgba('+r+','+g+','+b+','+alpha+')';
 }
 function destroyChart(){if(chartInstance){chartInstance.destroy();chartInstance=null;}}
-function normKey(s){return(s||'').trim().replace(/\s+/g,' ').toLowerCase();}
+function normKey(s){
+  var v=(s||'').trim();
+  var vl=v.toLowerCase();
+  // Data-driven: check if any known candidate name is contained in the string
+  for(var i=0;i<CANDIDATES.length;i++){
+    if(vl.indexOf(CANDIDATES[i])>=0) return CANDIDATES[i];
+  }
+  // Structural fallback: FCC "POL/Name/Office/State/Party" format
+  var m=v.match(/^POL\s*\/\s*([^\/]+)/i);
+  if(m)v=m[1].trim();
+  // Strip "for [office]" and everything after
+  v=v.replace(/\s+for\s+(governor|lt\.?\s*governor|u\.?s\.?\s*senate|senate|u\.?s\.?\s*house|congress|president|mayor|assembly|attorney general|secretary of state|treasurer|controller)\b.*/i,'');
+  // Strip trailing year
+  v=v.replace(/\s+20\d\d\b.*/,'');
+  // Strip "of [2-letter state]" at end
+  v=v.replace(/\s+of\s+[A-Z]{2}\b.*/i,'');
+  return v.trim().replace(/\s+/g,' ').toLowerCase();
+}
+function loadCandidates(){
+  return fetch(CANDS_API+'/api/candidates')
+    .then(function(r){return r.json();})
+    .then(function(j){
+      var states=j.data||j||{};
+      Object.keys(states).forEach(function(st){
+        var races=states[st];
+        if(!Array.isArray(races))return;
+        races.forEach(function(race){
+          if(!race.list)return;
+          race.list.forEach(function(c){
+            // Only use full names (first + last) to avoid false-positive substring matches
+            if(c.n&&c.n.trim().split(/\s+/).length>=2)
+              CANDIDATES.push(c.n.trim().toLowerCase());
+          });
+        });
+      });
+      // Longer names first so "Tom Steyer" matches before a hypothetical "Tom"
+      CANDIDATES.sort(function(a,b){return b.length-a.length;});
+    })
+    .catch(function(){}); // fail silently — structural fallback still applies
+}
 
 function buildDropdowns(){
   function pop(id,vals){
@@ -576,19 +617,20 @@ window.togglePivot=function(i){
   if(!open){d.classList.add('open');a.textContent='▲';}
 };
 
-fetch(API+'/api/lines?limit=5000')
-  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
-  .then(function(j){
-    ALL_DATA=j.data||j||[];
-    document.getElementById('loading').style.display='none';
-    document.getElementById('header-sub').textContent=ALL_DATA.length.toLocaleString()+' rate lines indexed · 2026 cycle';
-    buildDropdowns();
-    render();
-  })
-  .catch(function(e){
-    document.getElementById('loading').style.display='none';
-    var em=document.getElementById('error-msg');em.style.display='block';em.textContent='API ERROR: '+e.message;
-  });
+Promise.all([
+  fetch(API+'/api/lines?limit=5000').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}),
+  loadCandidates()
+]).then(function(res){
+  var j=res[0];
+  ALL_DATA=j.data||j||[];
+  document.getElementById('loading').style.display='none';
+  document.getElementById('header-sub').textContent=ALL_DATA.length.toLocaleString()+' rate lines indexed · 2026 cycle';
+  buildDropdowns();
+  render();
+}).catch(function(e){
+  document.getElementById('loading').style.display='none';
+  var em=document.getElementById('error-msg');em.style.display='block';em.textContent='API ERROR: '+e.message;
+});
 
 document.querySelectorAll('.tab').forEach(function(btn){
   btn.addEventListener('click',function(){
