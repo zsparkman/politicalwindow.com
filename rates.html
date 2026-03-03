@@ -268,6 +268,7 @@ function fmtN(n){
 }
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function pc(p){return p==='R'?'c-r':p==='D'?'c-d':'c-muted';}
+function fmtWeek(w){if(!w)return'—';return w.slice(5,7)+'/'+w.slice(8,10)+'/'+w.slice(2,4);}
 function pill(label,color,bg){return'<span class="pill" style="color:'+(color||'#94a3b8')+';background:'+(bg||'rgba(148,163,184,0.1)')+';border-color:'+(color||'#94a3b8')+'44">'+esc(label)+'</span>';}
 function partyPill(p){
   var c={R:'#ef4444',D:'#3b82f6',I:'#a78bfa'};
@@ -372,7 +373,7 @@ function renderPivotTable(groups){
         '<td class="c-muted">'+esc(r.dma||'—')+'</td>'+
         '<td>'+esc(r.description||'—')+'</td>'+
         '<td class="c-muted">'+esc(r.daypart||'—')+'</td>'+
-        '<td class="c-muted">'+esc(r.week_of||'—')+'</td>'+
+        '<td class="c-muted">'+fmtWeek(r.week_of)+'</td>'+
         '<td class="c-bright" style="text-align:right">'+(r.rate?'$'+parseFloat(r.rate).toLocaleString():'—')+'</td>'+
         '<td style="text-align:right">'+(r.units||'—')+'</td>'+
         '<td class="c-green" style="text-align:right">'+fmt$(r.line_total)+'</td>'+
@@ -481,7 +482,7 @@ function renderTrend(rows){
   var ctx=document.getElementById('chart-canvas').getContext('2d');
   chartInstance=new Chart(ctx,{
     type:'line',
-    data:{labels:weeks,datasets:datasets},
+    data:{labels:weeks.map(fmtWeek),datasets:datasets},
     options:{
       responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
@@ -503,7 +504,7 @@ function renderTrend(rows){
   '</tr>';
   var bodyRows=weeks.map(function(w){
     var wkTotal=top8.reduce(function(s,adv){return s+((matrix[w]&&matrix[w][adv])||0);},0);
-    return'<tr><td class="c-amber">'+esc(w)+'</td>'+
+    return'<tr><td class="c-amber">'+fmtWeek(w)+'</td>'+
       top8.map(function(adv){var v=(matrix[w]&&matrix[w][adv])||0;return'<td style="text-align:right">'+(v?fmt$(v):'—')+'</td>';}).join('')+
       '<td class="c-bright" style="text-align:right">'+fmt$(wkTotal)+'</td>'+
     '</tr>';
@@ -552,6 +553,7 @@ function renderLines(rows){
       var disp='';
       if(c.key==='candidate')disp=esc(v||r.advertiser||'—');
       else if(c.key==='rate'||c.key==='line_total')disp=v?'$'+parseFloat(v).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2}):'—';
+      else if(c.key==='week_of')disp=fmtWeek(v);
       else disp=esc(v||'—');
       return'<td class="'+cls+'">'+disp+'</td>';
     }).join('')+'</tr>';
