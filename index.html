@@ -285,8 +285,10 @@
 
   /* ── Rate Intel section ─────────────────────────────── */
   .rate-table { width:100%; border-collapse:collapse; margin-top:0.5rem; }
-  .rate-table th { font-family:var(--mono); font-size:0.55rem; letter-spacing:0.08em; color:var(--text-faint); text-transform:uppercase; padding:0.25rem 0.4rem; border-bottom:1px solid var(--border); text-align:left; }
-  .rate-table td { font-family:var(--mono); font-size:0.65rem; color:var(--text-muted); padding:0.3rem 0.4rem; border-bottom:1px solid rgba(255,255,255,0.04); }
+  .rate-table th { font-family:var(--mono); font-size:0.52rem; letter-spacing:0.08em; color:var(--text-faint); text-transform:uppercase; padding:0.2rem 0.3rem; border-bottom:1px solid var(--border); text-align:left; }
+  .rate-table td { font-family:var(--mono); font-size:0.58rem; color:var(--text-muted); padding:0.2rem 0.3rem; border-bottom:1px solid rgba(255,255,255,0.04); }
+  .rate-table td:first-child { max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .rate-table td:nth-child(4), .rate-table td:nth-child(5) { white-space:nowrap; }
   .rate-table td.val { color:var(--text-bright); font-weight:600; }
   .rate-table td.green { color:var(--green); }
   .rate-table td.red { color:var(--red); }
@@ -849,6 +851,7 @@ async function loadRatesForState(abbr) {
           <div class="rate-stat-lbl">Avg Unit Rate</div>
         </div>` : ''}
       </div>
+      <div style="overflow-x:auto">
       <table class="rate-table">
         <thead><tr>
           <th>Advertiser</th>
@@ -867,6 +870,7 @@ async function loadRatesForState(abbr) {
           </tr>`).join('')}
         </tbody>
       </table>
+      </div>
       ${rows.length > 10 ? `<div class="rates-loading" style="padding-top:0.4rem">${rows.length - 10} more contracts not shown</div>` : ''}
     `;
   } catch(e) {
