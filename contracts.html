@@ -153,7 +153,7 @@ var API='https://rates.politicalwindow.com';
 var CANDS_API='https://api.politicalwindow.com';
 var ALL_DATA=[],currentView='advertiser',currentSort='spend';
 var rawSort={col:'start_date',dir:'desc'};
-var CANDIDATES=[],CAND_MAP={};
+var CANDIDATES=[],CAND_MAP={},LAST_NAME_MAP={};
 
 function fmt$(n){if(!n&&n!==0)return'—';var v=parseFloat(n);if(isNaN(v))return'—';if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';if(v>=1000)return'$'+(v/1000).toFixed(0)+'K';return'$'+v.toFixed(0);}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -164,15 +164,26 @@ function fmtDate(d){if(!d)return'';return d.slice(5,10).replace('-','/');}
 function fmtDates(r){var s=fmtDate(r.start_date),e=fmtDate(r.end_date);if(!s&&!e)return'—';if(!e)return s;if(!s)return e;return s+'–'+e;}
 function fccLink(r){return r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:#f59e0b;font-size:0.6rem">PDF ↗</a>':'—';}
 
-// ── Candidate name normalization (same logic as explorer-v2.html) ──────────
+// ── Candidate name normalization ──────────────────────────────────────────
 function normKey(s){
   var v=(s||'').trim(),vl=v.toLowerCase();
+  // 1. Full-name substring match (e.g. "POL/ Tom Steyer / D / Governor / CA")
   for(var i=0;i<CANDIDATES.length;i++){if(vl.indexOf(CANDIDATES[i])>=0)return CANDIDATES[i];}
-  var m=v.match(/^POL\s*\/\s*([^\/]+)/i);if(m)v=m[1].trim();
+  // 2. Strip FCC POL/Name/Party/Office/State prefix
+  var m=v.match(/^POL\s*\/\s*([^\/]+)/i);if(m){v=m[1].trim();vl=v.toLowerCase();}
+  // 3. Strip Name/Party/Office slash format — take name segment only (e.g. "Steyer/D/Governor")
+  if(v.indexOf('/')>=0){v=v.split('/')[0].trim();vl=v.toLowerCase();}
+  // 4. Strip "for [full office]"
   v=v.replace(/\s+for\s+(governor|lt\.?\s*governor|u\.?s\.?\s*senate|senate|u\.?s\.?\s*house|congress|president|mayor|assembly|attorney general|secretary of state|treasurer|controller)\b.*/i,'');
+  // 5. Strip "for [STATE ABBR] [anything]" (e.g. "FOR CA GOV", "FOR TX SEN")
+  v=v.replace(/\s+for\s+[a-z]{2}\b.*/i,'');
+  // 6. Strip trailing year and "of [STATE]"
   v=v.replace(/\s+20\d\d\b.*/,'');
   v=v.replace(/\s+of\s+[A-Z]{2}\b.*/i,'');
-  return v.trim().replace(/\s+/g,' ').toLowerCase();
+  v=v.trim().replace(/\s+/g,' ').toLowerCase();
+  // 7. Last-name reverse lookup (e.g. "steyer" → "tom steyer")
+  if(LAST_NAME_MAP[v])return LAST_NAME_MAP[v];
+  return v;
 }
 function canonLabel(s){var k=normKey(s);return CAND_MAP[k]||(s||'').trim();}
 
@@ -189,6 +200,12 @@ function loadCandidates(){
             if(c.n&&c.n.trim().split(/\s+/).length>=2){
               var display=c.n.trim(),lower=display.toLowerCase();
               CANDIDATES.push(lower);CAND_MAP[lower]=display;
+              // Build last-name lookup; mark null on collision to avoid false matches
+              var lastName=lower.split(' ').pop();
+              if(lastName&&lastName.length>2){
+                if(LAST_NAME_MAP[lastName]===undefined)LAST_NAME_MAP[lastName]=lower;
+                else if(LAST_NAME_MAP[lastName]!==lower)LAST_NAME_MAP[lastName]=null;
+              }
             }
           });
         });
