@@ -10,12 +10,17 @@
 body{background:#080e1a;color:#cbd5e1;font-family:'DM Sans',sans-serif;min-height:100vh}
 a{color:#f59e0b;text-decoration:none}
 select,input,button{font-family:'IBM Plex Mono',monospace;outline:none}
-#nav,#nav a,.stat-val,.stat-lbl,.filter-lbl,.tab,#sort-wrap,.sort-btn,#grouped-count,.g-name,.g-num-val,.g-num-lbl,.pill,.detail-title,#raw-header,th,td,#loading,footer{font-family:'IBM Plex Mono',monospace}
+.stat-val,.stat-lbl,.filter-lbl,.tab,#sort-wrap,.sort-btn,#grouped-count,.g-name,.g-num-val,.g-num-lbl,.pill,.detail-title,#raw-header,th,td,#loading,footer{font-family:'IBM Plex Mono',monospace}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-thumb{background:#1e3050;border-radius:3px}
-#nav{background:#060d18;border-bottom:1px solid #1e3050;padding:10px 24px;display:flex;align-items:center;gap:10px;font-size:0.7rem}
-#nav .sep{color:#1e3050}
-#nav .cur{color:#f59e0b;letter-spacing:0.08em}
+header{background:#0d1a2e;border-bottom:1px solid #1a3156;padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:baseline;gap:0.5rem}
+.logo-text{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.04em;color:#fff;line-height:1}
+.logo-dot{color:#1e6fff}
+.logo-dim{color:#4a6080}
+.logo-badge{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:600;color:#f5a623;background:rgba(245,166,35,0.15);border:1px solid #f5a623;border-radius:2px;padding:2px 5px;letter-spacing:0.08em}
+.header-right{display:flex;align-items:center;gap:1rem}
+.header-meta{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:#6b85a8}
 #header{border-bottom:1px solid #1e3050;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .sub{font-size:0.65rem;color:#94a3b8;margin-top:2px}
 #stats{display:flex;gap:24px}
@@ -86,11 +91,15 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 </style>
 </head>
 <body>
-<div id="nav">
-  <a href="/">POLITICALWINDOW.COM</a>
-  <span class="sep">›</span>
-  <span class="cur">PUBLIC FILE</span>
-</div>
+<header>
+  <div class="logo">
+    <a href="/" style="text-decoration:none"><span class="logo-text">Political<span class="logo-dot">Window</span><span class="logo-dim">.com</span></span></a>
+    <span class="logo-badge">2026</span>
+  </div>
+  <div class="header-right">
+    <span class="header-meta">PUBLIC FILE ACTIVITY</span>
+  </div>
+</header>
 <div id="header">
   <div>
     <div style="font-size:0.95rem;font-weight:700;color:#fff;letter-spacing:0.06em;font-family:'IBM Plex Mono',monospace">PUBLIC FILE ACTIVITY</div>
