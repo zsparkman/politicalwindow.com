@@ -224,6 +224,7 @@ var API='https://rates.politicalwindow.com';
 var CANDS_API='https://api.politicalwindow.com';
 var ALL_DATA=[];
 var CANDIDATES=[]; // lowercase candidate names loaded from /api/candidates
+var CAND_MAP={};   // {lowercase: "Proper Case"} for display labels
 var currentView='pivot';
 var pivotGroupBy='advertiser';
 var pivotSortBy='spend';
@@ -286,8 +287,12 @@ function loadCandidates(){
           if(!race.list)return;
           race.list.forEach(function(c){
             // Only use full names (first + last) to avoid false-positive substring matches
-            if(c.n&&c.n.trim().split(/\s+/).length>=2)
-              CANDIDATES.push(c.n.trim().toLowerCase());
+            if(c.n&&c.n.trim().split(/\s+/).length>=2){
+              var display=c.n.trim();
+              var lower=display.toLowerCase();
+              CANDIDATES.push(lower);
+              CAND_MAP[lower]=display;
+            }
           });
         });
       });
@@ -295,6 +300,10 @@ function loadCandidates(){
       CANDIDATES.sort(function(a,b){return b.length-a.length;});
     })
     .catch(function(){}); // fail silently — structural fallback still applies
+}
+function canonLabel(s){
+  var k=normKey(s);
+  return CAND_MAP[k]||(s||'').trim();
 }
 
 function buildDropdowns(){
@@ -353,7 +362,7 @@ function buildPivot(rows){
   rows.forEach(function(r){
     var raw=r[key]||'Unknown';
     var k=normKey(raw);
-    if(!map[k])map[k]={label:raw,spend:0,units:0,lines:0,rates:[],orders:new Set(),rows:[],parties:new Set()};
+    if(!map[k])map[k]={label:canonLabel(raw),spend:0,units:0,lines:0,rates:[],orders:new Set(),rows:[],parties:new Set()};
     var g=map[k];
     g.spend+=parseFloat(r.line_total)||0;
     g.units+=parseInt(r.units)||0;
@@ -466,7 +475,7 @@ function renderTrend(rows){
     if(!r.advertiser)return;
     var nk=normKey(r.advertiser);
     advMap[nk]=(advMap[nk]||0)+(parseFloat(r.line_total)||0);
-    if(!advLabel[nk])advLabel[nk]=r.advertiser;
+    if(!advLabel[nk])advLabel[nk]=canonLabel(r.advertiser);
   });
   var top8=Object.keys(advMap).sort(function(a,b){return advMap[b]-advMap[a];}).slice(0,8);
   var advParty={};
