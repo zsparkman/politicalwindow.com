@@ -87,13 +87,13 @@
   .card-sub { font-family:var(--mono); font-size:0.6rem; color:var(--text-muted); line-height:1.6; }
 
   /* Map scroll wrapper — enables horizontal scroll on mobile */
-  .map-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:4px; padding-left:8px; padding-top:6px; }
+  .map-scroll { overflow:visible; padding-bottom:4px; padding-left:8px; padding-top:6px; padding-right:8px; }
   .tile-grid {
     display:grid;
     grid-template-columns:repeat(12,1fr);
     grid-template-rows:repeat(8,40px);
     gap:3px;
-    min-width:480px; /* prevents tiles from becoming unusably small */
+    width:100%;
   }
   .tile {
     display:flex; align-items:center; justify-content:center;
