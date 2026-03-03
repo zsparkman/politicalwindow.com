@@ -3,13 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rate Explorer v2 — PoliticalWindow.com</title>
+<title>Candidate Rate Intelligence — PoliticalWindow.com</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#080e1a;color:#cbd5e1;font-family:'Courier New',monospace;min-height:100vh}
+body{background:#080e1a;color:#cbd5e1;font-family:'DM Sans',sans-serif;min-height:100vh}
 a{color:#f59e0b;text-decoration:none}
-select,input,button{font-family:'Courier New',monospace;outline:none}
+select,input,button{font-family:'IBM Plex Mono',monospace;outline:none}
+#nav,#nav a,.stat-val,.stat-lbl,.filter-lbl,.ctrl-lbl,.tab,.tbl-hdr,.pivot-col-hdr span,.g-name,.g-num-val,.g-num-lbl,.detail-title,.pill,th,td,#loading,footer{font-family:'IBM Plex Mono',monospace}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-thumb{background:#1e3050;border-radius:3px}
 #nav{background:#060d18;border-bottom:1px solid #1e3050;padding:10px 24px;display:flex;align-items:center;gap:10px;font-size:0.7rem}
@@ -79,12 +81,12 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 <div id="nav">
   <a href="/">POLITICALWINDOW.COM</a>
   <span class="sep">›</span>
-  <span class="cur">RATE EXPLORER v2</span>
+  <span class="cur">CANDIDATE RATE INTELLIGENCE</span>
 </div>
 
 <div id="header">
   <div>
-    <div style="font-size:0.95rem;font-weight:700;color:#fff;letter-spacing:0.06em">📊 RATE LINE INTELLIGENCE</div>
+    <div style="font-size:0.95rem;font-weight:700;color:#fff;letter-spacing:0.06em;font-family:'IBM Plex Mono',monospace">RATE ANALYTICS</div>
     <div class="sub" id="header-sub">Loading rate lines…</div>
   </div>
   <div id="stats">
@@ -457,11 +459,11 @@ function renderPivotChart(groups){
       },
       scales:{
         x:{
-          ticks:{color:'#475569',font:{family:'Courier New',size:10},
+          ticks:{color:'#475569',font:{family:'IBM Plex Mono',size:10},
             callback:function(v){return isMoney?'$'+(v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v):''+v;}},
           grid:{color:'#1e3050'}
         },
-        y:{ticks:{color:'#94a3b8',font:{family:'Courier New',size:10}},grid:{color:'#0f1f33'}}
+        y:{ticks:{color:'#94a3b8',font:{family:'IBM Plex Mono',size:10}},grid:{color:'#0f1f33'}}
       }
     }
   });
@@ -516,12 +518,12 @@ function renderTrend(rows){
       responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{
-        legend:{labels:{color:'#94a3b8',font:{family:'Courier New',size:9},boxWidth:12}},
+        legend:{labels:{color:'#94a3b8',font:{family:'IBM Plex Mono',size:9},boxWidth:12}},
         tooltip:{callbacks:{label:function(c){return' '+c.dataset.label+': $'+c.raw.toLocaleString(undefined,{maximumFractionDigits:0});}}}
       },
       scales:{
-        x:{ticks:{color:'#94a3b8',font:{family:'Courier New',size:9},maxRotation:45},grid:{color:'#1e3050'}},
-        y:{ticks:{color:'#94a3b8',font:{family:'Courier New',size:9},callback:function(v){return'$'+(v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v);}},grid:{color:'#1e3050'}}
+        x:{ticks:{color:'#94a3b8',font:{family:'IBM Plex Mono',size:9},maxRotation:45},grid:{color:'#1e3050'}},
+        y:{ticks:{color:'#94a3b8',font:{family:'IBM Plex Mono',size:9},callback:function(v){return'$'+(v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v);}},grid:{color:'#1e3050'}}
       }
     }
   });
