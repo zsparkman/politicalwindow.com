@@ -105,6 +105,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   </div>
   <div class="header-right">
     <span class="header-meta">PUBLIC FILE ACTIVITY</span>
+    <span class="header-meta" id="data-badge" style="color:var(--text-faint);font-size:0.55rem;letter-spacing:0.05em">⬤ LOADING…</span>
   </div>
 </header>
 <nav class="site-nav">
@@ -171,7 +172,6 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
         <th class="sortable" data-col="dma_name">DMA</th>
         <th class="sortable" data-col="callsign">STATION</th>
         <th class="sortable sort-desc" data-col="start_date">DATES</th>
-        <th class="sortable" data-col="daypart">DAYPART(S)</th>
         <th class="sortable" data-col="class_of_time">CLASS</th>
         <th class="sortable" data-col="gross_total">TOTAL</th>
         <th>DOC</th>
@@ -233,7 +233,7 @@ function buildGroups(rows){
   return Object.values(map).sort(function(a,b){return currentSort==='spend'?b.spend-a.spend:b.contracts-a.contracts;});
 }
 
-var DETAIL_TH='<tr><th>CANDIDATE</th><th>ADVERTISER</th><th>PARTY</th><th>OFFICE</th><th>STATE</th><th>DMA</th><th>STATION</th><th>DATES</th><th>DAYPART(S)</th><th>CLASS</th><th>TOTAL</th><th>DOC</th></tr>';
+var DETAIL_TH='<tr><th>CANDIDATE</th><th>ADVERTISER</th><th>PARTY</th><th>OFFICE</th><th>STATE</th><th>DMA</th><th>STATION</th><th>DATES</th><th>CLASS</th><th>TOTAL</th><th>DOC</th></tr>';
 
 function detailRow(r){
   return'<tr>'+
@@ -245,7 +245,6 @@ function detailRow(r){
     '<td class="c-muted" title="'+esc(r.dma_name||'')+'">'+esc(r.dma_name||'—')+'</td>'+
     '<td class="c-amber">'+esc(r.callsign||'—')+'</td>'+
     '<td class="c-muted">'+esc(fmtDates(r))+'</td>'+
-    '<td class="c-muted">'+esc(fmtDaypartCodes(r))+'</td>'+
     '<td class="c-muted">'+esc(r.class_of_time||'—')+'</td>'+
     '<td class="c-green">'+fmt$(r.gross_total)+'</td>'+
     '<td>'+fccLink(r)+'</td>'+
@@ -310,12 +309,14 @@ window.toggleDetail=function(i){
   if(!open){d.classList.add('open');a.textContent='▲';}
 };
 
+var DATA_BADGE=document.getElementById('data-badge');
 fetch(API+'/api/rates?limit=500')
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(j){
     ALL_DATA=j.data||[];
     document.getElementById('loading').style.display='none';
     document.getElementById('header-sub').textContent=ALL_DATA.length+' contracts indexed · TX + CA + IL · 2026 cycle';
+    if(DATA_BADGE){var t=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});DATA_BADGE.style.color='#4ade80';DATA_BADGE.textContent='⬤ LIVE · UPDATED '+t.toUpperCase();}
     var states=Array.from(new Set(ALL_DATA.map(function(r){return r.state;}).filter(Boolean))).sort();
     var stateEl=document.getElementById('f-state');
     states.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;stateEl.appendChild(o);});
@@ -327,6 +328,7 @@ fetch(API+'/api/rates?limit=500')
   .catch(function(e){
     document.getElementById('loading').style.display='none';
     var em=document.getElementById('error-msg');em.style.display='block';em.textContent='API ERROR: '+e.message;
+    if(DATA_BADGE){DATA_BADGE.style.color='var(--amber)';DATA_BADGE.textContent='⬤ API OFFLINE';}
   });
 
 document.querySelectorAll('.tab').forEach(function(btn){

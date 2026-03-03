@@ -99,6 +99,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   </div>
   <div class="header-right">
     <span class="header-meta">CANDIDATE RATE INTELLIGENCE</span>
+    <span class="header-meta" id="data-badge" style="color:var(--text-faint);font-size:0.55rem;letter-spacing:0.05em">⬤ LOADING…</span>
   </div>
 </header>
 <nav class="site-nav">
@@ -600,17 +601,20 @@ window.togglePivot=function(i){
   if(!open){d.classList.add('open');a.textContent='▲';}
 };
 
+var DATA_BADGE=document.getElementById('data-badge');
 fetch(API+'/api/lines?limit=5000')
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(j){
   ALL_DATA=j.data||j||[];
   document.getElementById('loading').style.display='none';
   document.getElementById('header-sub').textContent=ALL_DATA.length.toLocaleString()+' rate lines indexed · 2026 cycle';
+  if(DATA_BADGE){var t=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});DATA_BADGE.style.color='#4ade80';DATA_BADGE.textContent='⬤ LIVE · UPDATED '+t.toUpperCase();}
   buildDropdowns();
   render();
 }).catch(function(e){
   document.getElementById('loading').style.display='none';
   var em=document.getElementById('error-msg');em.style.display='block';em.textContent='API ERROR: '+e.message;
+  if(DATA_BADGE){DATA_BADGE.style.color='var(--amber)';DATA_BADGE.textContent='⬤ API OFFLINE';}
 });
 
 document.querySelectorAll('.tab').forEach(function(btn){
