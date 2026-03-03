@@ -720,6 +720,15 @@ function applyMapFilter() {
   });
 }
 
+// ── HOUSE SEAT COUNTS (post-2020 apportionment) ────────────────────────────────
+const HOUSE_SEATS = {
+  AL:7,  AK:1,  AZ:9,  AR:4,  CA:52, CO:8,  CT:5,  DC:1,  DE:1,  FL:28,
+  GA:14, HI:2,  ID:2,  IL:17, IN:9,  IA:4,  KS:4,  KY:6,  LA:6,  ME:2,
+  MD:8,  MA:9,  MI:13, MN:8,  MS:4,  MO:8,  MT:2,  NE:3,  NV:4,  NH:2,
+  NJ:12, NM:3,  NY:26, NC:14, ND:1,  OH:15, OK:5,  OR:6,  PA:17, RI:2,
+  SC:7,  SD:1,  TN:9,  TX:38, UT:4,  VT:1,  VA:11, WA:10, WV:2,  WI:8,  WY:1,
+};
+
 // ── SHARED DETAIL HTML BUILDER ─────────────────────────────────────────────────
 const PC = { D:'var(--dem)', R:'var(--rep)', I:'var(--ind)' };
 const SL = {
@@ -738,23 +747,45 @@ function buildDetailHTML(abbr) {
   const genPct = Math.max(0, Math.min(100, ((TODAY - GENERAL_WINDOW) / (GENERAL - GENERAL_WINDOW)) * 100));
   const wc = WC[s.status] || 'var(--blue)';
   const raceTags = s.races.map(r => `<span class="race-tag tag-${r.toLowerCase().replace(/[^a-z]/g,'')}">${r}</span>`).join('');
+  const _candRow = c => {
+    const pc = PC[c.p] || 'var(--slate)';
+    const badge = c.s === 'inc' ? `<span class="cbadge cbadge-inc">INCUMBENT</span>` : `<span class="cbadge cbadge-dec">DECLARED</span>`;
+    return `<div class="cand-row"><div class="pdot" style="background:${pc}"></div><div class="cname">${c.n}${c.note ? `<span class="cnote">${c.note}</span>` : ''}</div><span class="cparty" style="color:${pc}">${c.p}</span>${badge}</div>`;
+  };
   let candHTML = '';
-  if (s.cands.length === 0) {
-    candHTML = `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No major candidates on file yet</div>`;
-  } else {
-    s.cands.forEach(rc => {
-      const rb = {Senate:'tag-senate',Governor:'tag-governor',House:'tag-house'}[rc.race] || 'tag-house';
-      candHTML += `<div class="cand-race-block"><span class="cand-race-label ${rb}">${rc.race}</span>`;
-      rc.list.forEach(c => {
-        const pc = PC[c.p] || 'var(--slate)';
-        const badge = c.s === 'inc' ? `<span class="cbadge cbadge-inc">INCUMBENT</span>` : `<span class="cbadge cbadge-dec">DECLARED</span>`;
-        candHTML += `<div class="cand-row">
-          <div class="pdot" style="background:${pc}"></div>
-          <div class="cname">${c.n}${c.note ? `<span class="cnote">${c.note}</span>` : ''}</div>
-          <span class="cparty" style="color:${pc}">${c.p}</span>${badge}</div>`;
+  // Non-House races (Senate, Governor, etc.)
+  s.cands.filter(rc => rc.race !== 'House').forEach(rc => {
+    const rb = {Senate:'tag-senate',Governor:'tag-governor'}[rc.race] || 'tag-house';
+    candHTML += `<div class="cand-race-block"><span class="cand-race-label ${rb}">${rc.race}</span>`;
+    rc.list.forEach(c => { candHTML += _candRow(c); });
+    candHTML += `</div>`;
+  });
+  // House races — always render if state has House, even with no candidates
+  if (s.races && s.races.includes('House')) {
+    const seats = HOUSE_SEATS[s.abbr] || 0;
+    const seatLabel = seats === 1 ? 'At-Large' : `${seats} Districts`;
+    candHTML += `<div class="cand-race-block"><span class="cand-race-label tag-house">House — ${seatLabel}</span>`;
+    const houseGroup = s.cands.find(rc => rc.race === 'House');
+    if (!houseGroup || houseGroup.list.length === 0) {
+      candHTML += `<div style="font-family:var(--mono);font-size:0.65rem;color:var(--text-faint);padding:4px 0">No candidate filings on record — field forming</div>`;
+    } else {
+      const byDist = {}, noDist = [];
+      houseGroup.list.forEach(c => { c.d != null ? (byDist[c.d] = byDist[c.d] || [], byDist[c.d].push(c)) : noDist.push(c); });
+      Object.keys(byDist).map(Number).sort((a,b) => a-b).forEach(d => {
+        if (seats > 1) candHTML += `<div style="font-family:var(--mono);font-size:0.57rem;color:var(--text-faint);margin-top:5px;letter-spacing:0.08em">CD-${d}</div>`;
+        byDist[d].forEach(c => { candHTML += _candRow(c); });
       });
-      candHTML += `</div>`;
-    });
+      noDist.forEach(c => { candHTML += _candRow(c); });
+      const districtsShown = Object.keys(byDist).length;
+      if (seats > 1 && districtsShown < seats) {
+        const rem = seats - districtsShown;
+        candHTML += `<div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-faint);padding:4px 0 0">+ ${rem} district${rem !== 1 ? 's' : ''} — candidates TBD</div>`;
+      }
+    }
+    candHTML += `</div>`;
+  }
+  if (!candHTML) {
+    candHTML = `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No major candidates on file yet</div>`;
   }
   return `<div class="fade-in">
     <div style="font-family:var(--mono);font-size:0.57rem;letter-spacing:0.08em;margin-bottom:0.4rem">${SL[s.status]||''}</div>
@@ -1136,6 +1167,7 @@ async function loadLiveData() {
           p: c.party,
           s: c.incumbent ? 'inc' : (c.status === 'exploring' ? 'exp' : 'dec'),
           note: c.notes || undefined,
+          d: c.district != null ? c.district : undefined,
         });
       }
       CANDS[abbr] = Object.entries(byRace).map(([race, list]) => ({ race, list }));
