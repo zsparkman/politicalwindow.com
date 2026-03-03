@@ -98,6 +98,10 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
     <select id="f-party"><option value="ALL">All Parties</option><option>R</option><option>D</option><option>I</option></select>
   </div>
   <div class="filter-wrap">
+    <div class="filter-lbl">STATE</div>
+    <select id="f-state"><option value="ALL">All States</option></select>
+  </div>
+  <div class="filter-wrap">
     <div class="filter-lbl">DMA</div>
     <select id="f-dma"><option value="ALL">All DMAs</option></select>
   </div>
@@ -124,7 +128,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   <div id="raw-wrap" style="display:none">
     <div id="raw-header"></div>
     <table><thead><tr>
-      <th>ADVERTISER</th><th>PARTY</th><th>OFFICE</th><th>STATION</th>
+      <th>ADVERTISER</th><th>PARTY</th><th>STATE</th><th>OFFICE</th><th>STATION</th>
       <th>DMA</th><th>START</th><th>END</th><th>UNIT RATE</th>
       <th>SPOTS</th><th>GROSS TOTAL</th><th>AGENCY</th><th>DOC</th>
     </tr></thead><tbody id="raw-body"></tbody></table>
@@ -140,9 +144,10 @@ function pc(p){return p==='R'?'c-r':p==='D'?'c-d':'c-muted';}
 function pill(label,color,bg){return'<span class="pill" style="color:'+(color||'#94a3b8')+';background:'+(bg||'rgba(148,163,184,0.1)')+';border-color:'+(color||'#94a3b8')+'44">'+esc(label)+'</span>';}
 function partyPill(p){var c={R:'#ef4444',D:'#3b82f6',I:'#a78bfa'},b={R:'rgba(239,68,68,0.12)',D:'rgba(59,130,246,0.12)',I:'rgba(167,139,250,0.12)'};return pill(p,c[p],b[p]);}
 function getFiltered(){
-  var party=document.getElementById('f-party').value,dma=document.getElementById('f-dma').value,adv=document.getElementById('f-adv').value,search=document.getElementById('f-search').value.toLowerCase();
+  var party=document.getElementById('f-party').value,state=document.getElementById('f-state').value,dma=document.getElementById('f-dma').value,adv=document.getElementById('f-adv').value,search=document.getElementById('f-search').value.toLowerCase();
   return ALL_DATA.filter(function(r){
     if(party!=='ALL'&&r.party!==party)return false;
+    if(state!=='ALL'&&r.state!==state)return false;
     if(dma!=='ALL'&&r.dma_name!==dma)return false;
     if(adv!=='ALL'&&r.advertiser!==adv)return false;
     if(search)return(r.advertiser||'').toLowerCase().includes(search)||(r.callsign||'').toLowerCase().includes(search)||(r.dma_name||'').toLowerCase().includes(search)||(r.candidate_name||'').toLowerCase().includes(search);
@@ -160,10 +165,10 @@ function buildGroups(rows){
   var key=currentView==='advertiser'?'advertiser':currentView==='dma'?'dma_name':'callsign',map={};
   rows.forEach(function(r){
     var k=r[key]||'Unknown';
-    if(!map[k])map[k]={label:k,contracts:0,spend:0,rates:[],parties:new Set(),dmas:new Set(),stations:new Set(),rows:[]};
+    if(!map[k])map[k]={label:k,contracts:0,spend:0,rates:[],parties:new Set(),states:new Set(),dmas:new Set(),stations:new Set(),rows:[]};
     map[k].contracts++;map[k].spend+=parseFloat(r.gross_total)||0;
     if(r.unit_rate)map[k].rates.push(parseFloat(r.unit_rate));
-    if(r.party)map[k].parties.add(r.party);if(r.dma_name)map[k].dmas.add(r.dma_name);if(r.callsign)map[k].stations.add(r.callsign);
+    if(r.party)map[k].parties.add(r.party);if(r.state)map[k].states.add(r.state);if(r.dma_name)map[k].dmas.add(r.dma_name);if(r.callsign)map[k].stations.add(r.callsign);
     map[k].rows.push(r);
   });
   return Object.values(map).sort(function(a,b){return currentSort==='spend'?b.spend-a.spend:b.contracts-a.contracts;});
@@ -176,20 +181,21 @@ function renderGrouped(groups){
     var avgRate=g.rates.length?g.rates.reduce(function(a,b){return a+b;},0)/g.rates.length:null;
     var barColor=i<3?'#f59e0b':'#1e3050';
     var pills=[...g.parties].map(partyPill).join('');
-    if(currentView==='advertiser'){pills+=pill(g.dmas.size+' DMA'+(g.dmas.size!==1?'s':''));pills+=pill(g.stations.size+' STN');}
-    if(currentView==='dma'){pills+=pill(g.stations.size+' stations');}
+    if(currentView==='advertiser'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#38bdf8','rgba(56,189,248,0.1)');});pills+=pill(g.dmas.size+' DMA'+(g.dmas.size!==1?'s':''));pills+=pill(g.stations.size+' STN');}
+    if(currentView==='dma'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#38bdf8','rgba(56,189,248,0.1)');});pills+=pill(g.stations.size+' stations');}
+    if(currentView==='station'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#38bdf8','rgba(56,189,248,0.1)');});}
     var detailRows=g.rows.map(function(r){
       var fccLink=r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:#f59e0b;font-size:0.56rem">PDF ↗</a>':'—';
-      return'<tr><td class="'+pc(r.party)+'" style="max-width:160px;overflow:hidden;text-overflow:ellipsis">'+esc(r.advertiser||r.candidate_name||'—')+'</td><td class="'+pc(r.party)+'">'+esc(r.party||'—')+'</td><td class="c-amber">'+esc(r.callsign||'—')+'</td><td class="c-muted">'+esc(r.dma_name||'—')+'</td><td class="c-muted">'+(r.start_date?r.start_date.slice(5,10):'—')+(r.end_date?'→'+r.end_date.slice(5,10):'')+'</td><td class="c-bright">'+fmtR(r.unit_rate)+'</td><td class="c-muted" style="text-align:right">'+(r.spots_count||'—')+'</td><td class="c-green">'+fmt$(r.gross_total)+'</td><td class="c-muted">'+esc(r.office_type||'—')+'</td><td>'+fccLink+'</td></tr>';
+      return'<tr><td class="'+pc(r.party)+'" style="max-width:160px;overflow:hidden;text-overflow:ellipsis">'+esc(r.advertiser||r.candidate_name||'—')+'</td><td class="'+pc(r.party)+'">'+esc(r.party||'—')+'</td><td style="color:#38bdf8">'+esc(r.state||'—')+'</td><td class="c-amber">'+esc(r.callsign||'—')+'</td><td class="c-muted">'+esc(r.dma_name||'—')+'</td><td class="c-muted">'+(r.start_date?r.start_date.slice(5,10):'—')+(r.end_date?'→'+r.end_date.slice(5,10):'')+'</td><td class="c-bright">'+fmtR(r.unit_rate)+'</td><td class="c-muted" style="text-align:right">'+(r.spots_count||'—')+'</td><td class="c-green">'+fmt$(r.gross_total)+'</td><td class="c-muted">'+esc(r.office_type||'—')+'</td><td>'+fccLink+'</td></tr>';
     }).join('');
-    return'<div class="group-row"><div class="group-main" onclick="toggleDetail('+i+')"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div class="g-bar" style="background:'+barColor+'"></div><div style="min-width:0"><div class="g-name">'+esc(g.label)+'</div><div class="g-pills">'+pills+'</div></div></div><div class="g-num"><div class="g-num-val">'+g.contracts+'</div><div class="g-num-lbl">CONTRACTS</div></div><div class="g-num"><div class="g-num-val g-spend">'+fmt$(g.spend)+'</div><div class="g-num-lbl">GROSS SPEND</div></div><div class="g-num"><div class="g-num-val g-rate">'+(avgRate?fmtR(avgRate):'—')+'</div><div class="g-num-lbl">AVG RATE</div></div><div class="g-arrow" id="arrow-'+i+'">▼</div></div><div class="detail-wrap" id="detail-'+i+'"><div class="detail-title">CONTRACT DETAIL — '+g.rows.length+' RECORDS</div><table><thead><tr><th>ADVERTISER</th><th>PARTY</th><th>STATION</th><th>DMA</th><th>DATES</th><th>RATE</th><th>SPOTS</th><th>TOTAL</th><th>OFFICE</th><th>DOC</th></tr></thead><tbody>'+detailRows+'</tbody></table></div></div>';
+    return'<div class="group-row"><div class="group-main" onclick="toggleDetail('+i+')"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div class="g-bar" style="background:'+barColor+'"></div><div style="min-width:0"><div class="g-name">'+esc(g.label)+'</div><div class="g-pills">'+pills+'</div></div></div><div class="g-num"><div class="g-num-val">'+g.contracts+'</div><div class="g-num-lbl">CONTRACTS</div></div><div class="g-num"><div class="g-num-val g-spend">'+fmt$(g.spend)+'</div><div class="g-num-lbl">GROSS SPEND</div></div><div class="g-num"><div class="g-num-val g-rate">'+(avgRate?fmtR(avgRate):'—')+'</div><div class="g-num-lbl">AVG RATE</div></div><div class="g-arrow" id="arrow-'+i+'">▼</div></div><div class="detail-wrap" id="detail-'+i+'"><div class="detail-title">CONTRACT DETAIL — '+g.rows.length+' RECORDS</div><table><thead><tr><th>ADVERTISER</th><th>PARTY</th><th>STATE</th><th>STATION</th><th>DMA</th><th>DATES</th><th>RATE</th><th>SPOTS</th><th>TOTAL</th><th>OFFICE</th><th>DOC</th></tr></thead><tbody>'+detailRows+'</tbody></table></div></div>';
   }).join('');
 }
 function renderRaw(rows){
   document.getElementById('raw-header').textContent=rows.length+' RECORDS';
   document.getElementById('raw-body').innerHTML=rows.map(function(r){
     var fccLink=r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:#f59e0b;font-size:0.56rem">PDF ↗</a>':'—';
-    return'<tr><td class="'+pc(r.party)+'" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">'+esc(r.advertiser||r.candidate_name||'—')+'</td><td class="'+pc(r.party)+'">'+esc(r.party||'—')+'</td><td class="c-muted">'+esc(r.office_type||'—')+'</td><td class="c-amber">'+esc(r.callsign||'—')+'</td><td class="c-muted">'+esc(r.dma_name||'—')+'</td><td class="c-muted">'+(r.start_date?r.start_date.slice(0,10):'—')+'</td><td class="c-muted">'+(r.end_date?r.end_date.slice(0,10):'—')+'</td><td class="c-bright" style="text-align:right">'+fmtR(r.unit_rate)+'</td><td class="c-muted" style="text-align:right">'+(r.spots_count||'—')+'</td><td class="c-green">'+fmt$(r.gross_total)+'</td><td class="c-muted">'+esc(r.agency_name||'—')+'</td><td>'+fccLink+'</td></tr>';
+    return'<tr><td class="'+pc(r.party)+'" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">'+esc(r.advertiser||r.candidate_name||'—')+'</td><td class="'+pc(r.party)+'">'+esc(r.party||'—')+'</td><td style="color:#38bdf8">'+esc(r.state||'—')+'</td><td class="c-muted">'+esc(r.office_type||'—')+'</td><td class="c-amber">'+esc(r.callsign||'—')+'</td><td class="c-muted">'+esc(r.dma_name||'—')+'</td><td class="c-muted">'+(r.start_date?r.start_date.slice(0,10):'—')+'</td><td class="c-muted">'+(r.end_date?r.end_date.slice(0,10):'—')+'</td><td class="c-bright" style="text-align:right">'+fmtR(r.unit_rate)+'</td><td class="c-muted" style="text-align:right">'+(r.spots_count||'—')+'</td><td class="c-green">'+fmt$(r.gross_total)+'</td><td class="c-muted">'+esc(r.agency_name||'—')+'</td><td>'+fccLink+'</td></tr>';
   }).join('');
 }
 function render(){
@@ -213,6 +219,9 @@ fetch(API+'/api/rates?limit=500')
     ALL_DATA=j.data||[];
     document.getElementById('loading').style.display='none';
     document.getElementById('header-sub').textContent=ALL_DATA.length+' contracts indexed · TX + CA · 2026 cycle';
+    var states=Array.from(new Set(ALL_DATA.map(function(r){return r.state;}).filter(Boolean))).sort();
+    var stateEl=document.getElementById('f-state');
+    states.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;stateEl.appendChild(o);});
     var dmas=Array.from(new Set(ALL_DATA.map(function(r){return r.dma_name;}).filter(Boolean))).sort();
     var dmaEl=document.getElementById('f-dma');
     dmas.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;dmaEl.appendChild(o);});
@@ -231,7 +240,7 @@ document.querySelectorAll('.tab').forEach(function(btn){
 document.querySelectorAll('.sort-btn').forEach(function(btn){
   btn.addEventListener('click',function(){document.querySelectorAll('.sort-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');currentSort=btn.dataset.sort;render();});
 });
-['f-party','f-dma','f-adv'].forEach(function(id){document.getElementById(id).addEventListener('change',render);});
+['f-party','f-state','f-dma','f-adv'].forEach(function(id){document.getElementById(id).addEventListener('change',render);});
 document.getElementById('f-search').addEventListener('input',render);
 </script>
 </body>
