@@ -93,7 +93,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
     <div><div class="stat-val" id="s-spend">—</div><div class="stat-lbl">GROSS SPEND</div></div>
     <div><div class="stat-val" id="s-units">—</div><div class="stat-lbl">UNITS</div></div>
 
-    <div><div class="stat-val" id="s-advertisers">—</div><div class="stat-lbl">ADVERTISERS</div></div>
+    <div><div class="stat-val" id="s-advertisers">—</div><div class="stat-lbl">CANDIDATES</div></div>
     <div><div class="stat-val" id="s-weeks">—</div><div class="stat-lbl">WEEKS</div></div>
   </div>
 </div>
@@ -160,7 +160,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
     <div class="ctrl-wrap">
       <div class="ctrl-lbl">GROUP BY</div>
       <select id="c-groupby">
-        <option value="advertiser">Advertiser</option>
+        <option value="candidate">Candidate</option>
         <option value="station">Station</option>
         <option value="dma">DMA</option>
         <option value="daypart">Daypart</option>
@@ -223,12 +223,9 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 
 <script>
 var API='https://rates.politicalwindow.com';
-var CANDS_API='https://api.politicalwindow.com';
 var ALL_DATA=[];
-var CANDIDATES=[]; // lowercase candidate names loaded from /api/candidates
-var CAND_MAP={};   // {lowercase: "Proper Case"} for display labels
 var currentView='pivot';
-var pivotGroupBy='advertiser';
+var pivotGroupBy='candidate';
 var pivotSortBy='spend';
 var linesSort={col:'line_total',dir:'desc'};
 var chartInstance=null;
@@ -259,54 +256,6 @@ function hexToRgba(hex,alpha){
   return'rgba('+r+','+g+','+b+','+alpha+')';
 }
 function destroyChart(){if(chartInstance){chartInstance.destroy();chartInstance=null;}}
-function normKey(s){
-  var v=(s||'').trim();
-  var vl=v.toLowerCase();
-  // Data-driven: check if any known candidate name is contained in the string
-  for(var i=0;i<CANDIDATES.length;i++){
-    if(vl.indexOf(CANDIDATES[i])>=0) return CANDIDATES[i];
-  }
-  // Structural fallback: FCC "POL/Name/Office/State/Party" format
-  var m=v.match(/^POL\s*\/\s*([^\/]+)/i);
-  if(m)v=m[1].trim();
-  // Strip "for [office]" and everything after
-  v=v.replace(/\s+for\s+(governor|lt\.?\s*governor|u\.?s\.?\s*senate|senate|u\.?s\.?\s*house|congress|president|mayor|assembly|attorney general|secretary of state|treasurer|controller)\b.*/i,'');
-  // Strip trailing year
-  v=v.replace(/\s+20\d\d\b.*/,'');
-  // Strip "of [2-letter state]" at end
-  v=v.replace(/\s+of\s+[A-Z]{2}\b.*/i,'');
-  return v.trim().replace(/\s+/g,' ').toLowerCase();
-}
-function loadCandidates(){
-  return fetch(CANDS_API+'/api/candidates')
-    .then(function(r){return r.json();})
-    .then(function(j){
-      var states=j.data||j||{};
-      Object.keys(states).forEach(function(st){
-        var races=states[st];
-        if(!Array.isArray(races))return;
-        races.forEach(function(race){
-          if(!race.list)return;
-          race.list.forEach(function(c){
-            // Only use full names (first + last) to avoid false-positive substring matches
-            if(c.n&&c.n.trim().split(/\s+/).length>=2){
-              var display=c.n.trim();
-              var lower=display.toLowerCase();
-              CANDIDATES.push(lower);
-              CAND_MAP[lower]=display;
-            }
-          });
-        });
-      });
-      // Longer names first so "Tom Steyer" matches before a hypothetical "Tom"
-      CANDIDATES.sort(function(a,b){return b.length-a.length;});
-    })
-    .catch(function(){}); // fail silently — structural fallback still applies
-}
-function canonLabel(s){
-  var k=normKey(s);
-  return CAND_MAP[k]||(s||'').trim();
-}
 
 function buildDropdowns(){
   function pop(id,vals){
@@ -337,7 +286,8 @@ function getFiltered(){
     if(wkFrom&&r.week_of<wkFrom)return false;
     if(wkTo&&r.week_of>wkTo)return false;
     if(search){
-      return(r.advertiser||'').toLowerCase().includes(search)||
+      return(r.candidate||'').toLowerCase().includes(search)||
+             (r.advertiser||'').toLowerCase().includes(search)||
              (r.station||'').toLowerCase().includes(search)||
              (r.description||'').toLowerCase().includes(search)||
              (r.buyer||'').toLowerCase().includes(search)||
@@ -353,19 +303,18 @@ function updateStats(rows){
   document.getElementById('s-spend').textContent=fmt$(spend);
   document.getElementById('s-units').textContent=fmtN(units);
 
-  document.getElementById('s-advertisers').textContent=new Set(rows.map(function(r){return normKey(r.advertiser);}).filter(Boolean)).size;
+  document.getElementById('s-advertisers').textContent=new Set(rows.map(function(r){return r.candidate;}).filter(Boolean)).size;
   document.getElementById('s-weeks').textContent=new Set(rows.map(function(r){return r.week_of;}).filter(Boolean)).size;
 }
 
 function buildPivot(rows){
-  var keyMap={advertiser:'advertiser',station:'station',dma:'dma',daypart:'daypart',office:'office',agency:'agency',buyer:'buyer',party:'party'};
-  var key=keyMap[pivotGroupBy]||'advertiser';
+  var keyMap={candidate:'candidate',station:'station',dma:'dma',daypart:'daypart',office:'office',agency:'agency',buyer:'buyer',party:'party'};
+  var key=keyMap[pivotGroupBy]||'candidate';
   var map={};
   rows.forEach(function(r){
     var raw=r[key]||'Unknown';
-    var k=normKey(raw);
-    if(!map[k])map[k]={label:canonLabel(raw),spend:0,units:0,lines:0,rates:[],orders:new Set(),rows:[],parties:new Set()};
-    var g=map[k];
+    if(!map[raw])map[raw]={label:raw,spend:0,units:0,lines:0,rates:[],orders:new Set(),rows:[],parties:new Set()};
+    var g=map[raw];
     g.spend+=parseFloat(r.line_total)||0;
     g.units+=parseInt(r.units)||0;
     g.lines++;
@@ -472,20 +421,17 @@ function renderPivotChart(groups){
 function renderTrend(rows){
   var weeks=Array.from(new Set(rows.map(function(r){return r.week_of;}).filter(Boolean))).sort();
   var advMap={};
-  var advLabel={};
   rows.forEach(function(r){
-    if(!r.advertiser)return;
-    var nk=normKey(r.advertiser);
-    advMap[nk]=(advMap[nk]||0)+(parseFloat(r.line_total)||0);
-    if(!advLabel[nk])advLabel[nk]=canonLabel(r.advertiser);
+    if(!r.candidate)return;
+    advMap[r.candidate]=(advMap[r.candidate]||0)+(parseFloat(r.line_total)||0);
   });
   var top8=Object.keys(advMap).sort(function(a,b){return advMap[b]-advMap[a];}).slice(0,8);
   var advParty={};
-  rows.forEach(function(r){if(r.advertiser&&r.party)advParty[normKey(r.advertiser)]=r.party;});
+  rows.forEach(function(r){if(r.candidate&&r.party)advParty[r.candidate]=r.party;});
   var matrix={};
   rows.forEach(function(r){
-    if(!r.week_of||!r.advertiser)return;
-    var nk=normKey(r.advertiser);
+    if(!r.week_of||!r.candidate)return;
+    var nk=r.candidate;
     if(top8.indexOf(nk)<0)return;
     if(!matrix[r.week_of])matrix[r.week_of]={};
     matrix[r.week_of][nk]=(matrix[r.week_of][nk]||0)+(parseFloat(r.line_total)||0);
@@ -501,9 +447,8 @@ function renderTrend(rows){
   });
   var datasets=top8.map(function(adv){
     var color=advColors[adv];
-    var lbl=advLabel[adv]||adv;
     return{
-      label:lbl.length>22?lbl.slice(0,20)+'…':lbl,
+      label:adv.length>22?adv.slice(0,20)+'…':adv,
       data:weeks.map(function(w){return(matrix[w]&&matrix[w][adv])||0;}),
       borderColor:color,backgroundColor:hexToRgba(color,0.08),
       fill:true,tension:0.3,pointRadius:3,borderWidth:2
@@ -527,7 +472,7 @@ function renderTrend(rows){
       }
     }
   });
-  var headerCols=top8.map(function(adv){var lbl=advLabel[adv]||adv;return'<th style="color:'+advColors[adv]+'">'+esc(lbl.length>14?lbl.slice(0,12)+'…':lbl)+'</th>';}).join('');
+  var headerCols=top8.map(function(adv){return'<th style="color:'+advColors[adv]+'">'+esc(adv.length>14?adv.slice(0,12)+'…':adv)+'</th>';}).join('');
   var colTotals=top8.map(function(adv){return weeks.reduce(function(s,w){return s+((matrix[w]&&matrix[w][adv])||0);},0);});
   var totalRow='<tr style="border-top:1px solid #1e3050"><td style="color:#f59e0b;font-weight:700">TOTAL</td>'+
     colTotals.map(function(t){return'<td class="c-green" style="text-align:right">'+fmt$(t)+'</td>';}).join('')+
@@ -542,11 +487,11 @@ function renderTrend(rows){
   }).join('');
   document.getElementById('trend-body').innerHTML=
     '<table><thead><tr><th>WEEK OF</th>'+headerCols+'<th>WEEK TOTAL</th></tr></thead><tbody>'+bodyRows+totalRow+'</tbody></table>';
-  document.getElementById('trend-count').textContent=weeks.length+' WEEKS · TOP 8 ADVERTISERS';
+  document.getElementById('trend-count').textContent=weeks.length+' WEEKS · TOP 8 CANDIDATES';
 }
 
 var LINE_COLS=[
-  {key:'advertiser',label:'ADVERTISER'},{key:'party',label:'PARTY'},{key:'office',label:'OFFICE'},
+  {key:'candidate',label:'CANDIDATE'},{key:'party',label:'PARTY'},{key:'office',label:'OFFICE'},
   {key:'state',label:'STATE'},{key:'dma',label:'DMA'},{key:'station',label:'STATION'},
   {key:'agency',label:'AGENCY'},{key:'buyer',label:'BUYER'},{key:'sales_office',label:'SALES OFFICE'},
   {key:'salesperson',label:'SALESPERSON'},{key:'order_number',label:'ORDER #'},{key:'line_number',label:'LINE #'},
@@ -576,6 +521,7 @@ function renderLines(rows){
       var v=r[c.key];
       var cls='';
       if(c.key==='party')cls=pc(v);
+      else if(c.key==='candidate')cls=pc(r.party);
       else if(c.key==='line_total')cls='c-green';
       else if(c.key==='station')cls='c-amber';
       else if(c.key==='state')cls='c-blue';
@@ -628,11 +574,9 @@ window.togglePivot=function(i){
   if(!open){d.classList.add('open');a.textContent='▲';}
 };
 
-Promise.all([
-  fetch(API+'/api/lines?limit=5000').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}),
-  loadCandidates()
-]).then(function(res){
-  var j=res[0];
+fetch(API+'/api/lines?limit=5000')
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(j){
   ALL_DATA=j.data||j||[];
   document.getElementById('loading').style.display='none';
   document.getElementById('header-sub').textContent=ALL_DATA.length.toLocaleString()+' rate lines indexed · 2026 cycle';
