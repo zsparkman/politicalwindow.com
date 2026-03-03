@@ -34,10 +34,20 @@ input{width:170px}
 #main{padding:16px 24px;display:flex;flex-direction:column;gap:14px}
 #chart-wrap{background:#0d1829;border:1px solid #1e3050;border-radius:4px;padding:14px}
 .chart-title{font-size:0.5rem;color:#475569;letter-spacing:0.1em;margin-bottom:10px}
-#bars{display:flex;align-items:flex-end;gap:4px;height:100px}
-.bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:0}
-.bar{width:100%;border-radius:2px 2px 0 0}
-.bar-lbl{font-size:0.48rem;color:#475569;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;max-width:56px}
+#chart-body{display:flex;gap:0}
+#y-axis{width:52px;position:relative;flex-shrink:0;height:140px}
+.y-tick{position:absolute;right:8px;font-size:0.42rem;color:#475569;line-height:1;white-space:nowrap;transform:translateY(-50%)}
+.y-axis-line{position:absolute;right:0;top:0;bottom:0;border-right:1px solid #1e3050}
+#chart-right{flex:1;display:flex;flex-direction:column}
+#chart-plot{position:relative;height:140px;border-bottom:1px solid #1e3050;overflow:visible}
+#gridlines{position:absolute;inset:0;pointer-events:none;z-index:0}
+.gridline{position:absolute;left:0;right:0;border-top:1px solid #0f1f33}
+#bar-vals{position:absolute;inset:0;display:flex;align-items:flex-start;gap:3px;padding:0 6px;z-index:2;pointer-events:none}
+.bv{flex:1;min-width:0;font-size:0.37rem;color:#94a3b8;text-align:center;overflow:hidden}
+#bars{position:absolute;left:6px;right:6px;bottom:0;height:120px;display:flex;align-items:flex-end;gap:3px;z-index:1}
+.bar{flex:1;min-width:0;border-radius:2px 2px 0 0}
+#x-labels{display:flex;gap:3px;padding:6px 6px 0}
+.x-label{flex:1;min-width:0;font-size:0.42rem;color:#475569;writing-mode:vertical-rl;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:110px}
 #grouped{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
 #grouped-header{display:flex;padding:8px 14px;border-bottom:1px solid #1e3050;align-items:center}
 #grouped-count{margin-left:auto;font-size:0.52rem;color:#334155}
@@ -123,8 +133,18 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   <div id="loading">LOADING FCC DATA...</div>
   <div id="error-msg"></div>
   <div id="chart-wrap" style="display:none">
-    <div class="chart-title">TOP 10 BY GROSS SPEND</div>
-    <div id="bars"></div>
+    <div class="chart-title">TOP 20 BY GROSS SPEND</div>
+    <div id="chart-body">
+      <div id="y-axis"><div class="y-axis-line"></div></div>
+      <div id="chart-right">
+        <div id="chart-plot">
+          <div id="gridlines"></div>
+          <div id="bar-vals"></div>
+          <div id="bars"></div>
+        </div>
+        <div id="x-labels"></div>
+      </div>
+    </div>
   </div>
   <div id="grouped" style="display:none">
     <div id="grouped-header"><div id="grouped-count"></div></div>
@@ -178,11 +198,35 @@ function buildGroups(rows){
   return Object.values(map).sort(function(a,b){return currentSort==='spend'?b.spend-a.spend:b.contracts-a.contracts;});
 }
 function renderChart(groups){
-  var top=groups.slice(0,10),max=Math.max.apply(null,top.map(function(g){return g.spend;}));max=max||1;
-  var colors=['#f59e0b','#3b82f6','#3b82f6','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f'];
+  var top=groups.slice(0,20);
+  var max=Math.max.apply(null,top.map(function(g){return g.spend;}));max=max||1;
+  var BAR_H=120,CHART_H=140; // bars fill 120px at bottom of 140px chart-plot
+  var colors=['#f59e0b','#3b82f6','#3b82f6','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f','#1e3a5f'];
+  var tickPcts=[1,0.75,0.5,0.25,0];
+  // Y-axis labels: each tick aligned to its gridline height in chart-plot
+  document.getElementById('y-axis').innerHTML='<div class="y-axis-line"></div>'+tickPcts.map(function(t){
+    var topPx=(CHART_H-BAR_H)+BAR_H*(1-t);
+    return'<div class="y-tick" style="top:'+topPx+'px">'+fmt$(t*max)+'</div>';
+  }).join('');
+  // Gridlines at each tick (skip 0% — border-bottom is the x-axis)
+  document.getElementById('gridlines').innerHTML=tickPcts.slice(0,-1).map(function(t){
+    var topPx=(CHART_H-BAR_H)+BAR_H*(1-t);
+    return'<div class="gridline" style="top:'+topPx+'px"></div>';
+  }).join('');
+  // Bars (heights in px, bottom-aligned via flexbox)
   document.getElementById('bars').innerHTML=top.map(function(g,i){
-    var pct=Math.max(4,Math.round((g.spend/max)*100)),lbl=g.label.length>12?g.label.slice(0,11)+'…':g.label;
-    return'<div class="bar-col" title="'+esc(g.label)+': '+fmt$(g.spend)+'"><div class="bar" style="height:'+pct+'px;background:'+colors[i]+'"></div><div class="bar-lbl">'+esc(lbl)+'</div></div>';
+    var h=Math.max(3,Math.round((g.spend/max)*BAR_H));
+    return'<div class="bar" style="height:'+h+'px;background:'+colors[i]+'" title="'+esc(g.label)+': '+fmt$(g.spend)+'"></div>';
+  }).join('');
+  // Dollar value overlay: padding-top positions each label just above its bar's top
+  document.getElementById('bar-vals').innerHTML=top.map(function(g){
+    var h=Math.max(3,Math.round((g.spend/max)*BAR_H));
+    var padTop=Math.max(0,CHART_H-h-12);
+    return'<div class="bv" style="padding-top:'+padTop+'px">'+fmt$(g.spend)+'</div>';
+  }).join('');
+  // X-axis labels below chart
+  document.getElementById('x-labels').innerHTML=top.map(function(g){
+    return'<div class="x-label" title="'+esc(g.label)+'">'+esc(g.label)+'</div>';
   }).join('');
 }
 function renderGrouped(groups){
