@@ -4,10 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FCC Rate Intelligence — PoliticalWindow.com</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.8.0/Recharts.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #080e1a; color: #cbd5e1; font-family: 'Courier New', monospace; }
@@ -21,8 +20,6 @@
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useEffect, useMemo } = React;
-const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } = Recharts;
-
 const API = "https://rates.politicalwindow.com";
 const PARTY_COLOR = { R: "#ef4444", D: "#3b82f6", I: "#a78bfa" };
 const PARTY_BG    = { R: "rgba(239,68,68,0.12)", D: "rgba(59,130,246,0.12)", I: "rgba(167,139,250,0.12)" };
@@ -169,22 +166,32 @@ function App() {
 
       <div style={{ padding:"16px 24px", display:"flex", flexDirection:"column", gap:16 }}>
 
-        {/* Chart */}
-        {view !== "raw" && chartData.length > 0 && (
-          <div style={{ ...s.card, padding:"16px 16px 8px" }}>
-            <div style={{ fontSize:"0.5rem", color:"#475569", letterSpacing:"0.1em", marginBottom:10 }}>TOP 10 BY GROSS SPEND</div>
-            <ResponsiveContainer width="100%" height={150}>
-              <BarChart data={chartData} margin={{ top:0, right:0, bottom:0, left:0 }}>
-                <XAxis dataKey="name" tick={{ fontFamily:"monospace", fontSize:9, fill:"#475569" }} axisLine={false} tickLine={false} />
-                <YAxis hide />
-                <Tooltip contentStyle={{ background:"#0d1829", border:"1px solid #1e3050", fontFamily:"monospace", fontSize:"0.65rem", color:"#cbd5e1" }} formatter={v=>[fmt$(v),"Spend"]} />
-                <Bar dataKey="spend" radius={[2,2,0,0]}>
-                  {chartData.map((_,i) => <Cell key={i} fill={i===0?"#f59e0b":i<3?"#3b82f6":"#1e3a5f"} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+        {/* Chart — plain SVG, no dependencies */}
+        {view !== "raw" && chartData.length > 0 && (() => {
+          const max = Math.max(...chartData.map(d=>d.spend));
+          const W = 680, H = 120, pad = 8, barW = Math.floor((W - pad*(chartData.length+1)) / chartData.length);
+          return (
+            <div style={{ ...s.card, padding:"16px 16px 10px" }}>
+              <div style={{ fontSize:"0.5rem", color:"#475569", letterSpacing:"0.1em", marginBottom:10 }}>TOP 10 BY GROSS SPEND</div>
+              <svg viewBox={`0 0 ${W} ${H+24}`} style={{ width:"100%", height:"auto" }}>
+                {chartData.map((d,i) => {
+                  const bh = Math.max(4, Math.round((d.spend/max)*(H-10)));
+                  const x  = pad + i*(barW+pad);
+                  const y  = H - bh;
+                  const fill = i===0?"#f59e0b":i<3?"#3b82f6":"#1e3a5f";
+                  return (
+                    <g key={i}>
+                      <rect x={x} y={y} width={barW} height={bh} fill={fill} rx={2} />
+                      <text x={x+barW/2} y={H+14} textAnchor="middle" fill="#475569" fontSize={8} fontFamily="monospace"
+                        style={{ overflow:"hidden" }}>{d.name.length>10?d.name.slice(0,9)+"…":d.name}</text>
+                      <title>{d.name}: {fmt$(d.spend)}</title>
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+          );
+        })()}
 
         {/* Grouped rows */}
         {view !== "raw" && (
