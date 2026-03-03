@@ -8,27 +8,27 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --navy:       #080e1a;
-    --navy-mid:   #060d18;
-    --navy-card:  #0d1829;
-    --navy-border:#1e3050;
-    --blue:       #3b82f6;
-    --blue-light: #38bdf8;
-    --blue-glow:  rgba(30,48,80,0.3);
-    --amber:      #f59e0b;
-    --amber-dim:  rgba(245,158,11,0.12);
-    --red:        #ef4444;
-    --red-dim:    rgba(239,68,68,0.15);
-    --green:      #10b981;
-    --green-dim:  rgba(16,185,129,0.12);
-    --slate:      #64748b;
-    --slate-dim:  rgba(100,116,139,0.2);
-    --dem:        #3b82f6;
-    --rep:        #ef4444;
+    --navy:       #08111F;
+    --navy-mid:   #0D1A2E;
+    --navy-card:  #0F2040;
+    --navy-border:#1A3156;
+    --blue:       #1E6FFF;
+    --blue-light: #4A9DFF;
+    --blue-glow:  rgba(30,111,255,0.18);
+    --amber:      #F5A623;
+    --amber-dim:  rgba(245,166,35,0.15);
+    --red:        #FF3D5A;
+    --red-dim:    rgba(255,61,90,0.15);
+    --green:      #00C48C;
+    --green-dim:  rgba(0,196,140,0.12);
+    --slate:      #4A6080;
+    --slate-dim:  rgba(74,96,128,0.2);
+    --dem:        #4A9DFF;
+    --rep:        #FF6B6B;
     --ind:        #A78BFA;
-    --text:       #cbd5e1;
-    --text-muted: #94a3b8;
-    --text-faint: #475569;
+    --text:       #D6E4F7;
+    --text-muted: #6B85A8;
+    --text-faint: #3A506E;
     --mono:       'IBM Plex Mono', monospace;
     --sans:       'DM Sans', sans-serif;
     --display:    'Bebas Neue', sans-serif;
@@ -76,19 +76,18 @@
   }
   .filter-btn:hover  { border-color:var(--blue); color:var(--blue-light); }
   .filter-btn.active { background:var(--blue-glow); border-color:var(--blue); color:var(--blue-light); }
-  .tile-dimmed { opacity: 0.15; }
 
   /* ── TOP SECTION: MAP + DETAIL ── */
-  .top-section { display:grid; grid-template-columns:1fr 370px; gap:1rem; align-items:stretch; }
+  .top-section { display:grid; grid-template-columns:minmax(0,1fr) 370px; gap:1rem; align-items:stretch; }
 
   /* ── MAP CARD ── */
-  .map-card { background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px; padding:1.25rem 1.25rem 1.25rem 1.5rem; align-self:start; overflow:visible; }
+  .map-card { background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px; padding:1.25rem 1rem 1.25rem 1.25rem; align-self:start; overflow:visible; min-width:0; }
   .card-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1rem; gap:0.5rem; }
   .card-title { font-family:var(--display); font-size:1.1rem; letter-spacing:0.05em; color:#fff; }
   .card-sub { font-family:var(--mono); font-size:0.6rem; color:var(--text-muted); line-height:1.6; }
 
   /* Map scroll wrapper — enables horizontal scroll on mobile */
-  .map-scroll { overflow:visible; padding-bottom:4px; padding-left:8px; padding-top:6px; padding-right:8px; }
+  .map-scroll { overflow:hidden; padding:6px 0 4px 4px; width:100%; }
   .tile-grid {
     display:grid;
     grid-template-columns:repeat(12,1fr);
@@ -301,6 +300,15 @@
   .rate-stat-val { font-size:1rem; color:var(--text-bright); font-weight:700; }
   .rate-stat-lbl { font-size:0.55rem; color:var(--text-faint); letter-spacing:0.08em; text-transform:uppercase; margin-top:1px; }
 
+
+  /* ── NAV BAR ── */
+  .site-nav { background:var(--navy); border-bottom:1px solid var(--navy-border); display:flex; justify-content:center; gap:0; }
+  .nav-link { font-family:var(--mono); font-size:0.62rem; font-weight:600; letter-spacing:0.09em; text-transform:uppercase;
+    color:var(--text-faint); text-decoration:none; padding:0.55rem 1.5rem; border-bottom:2px solid transparent;
+    transition:color 0.15s, border-color 0.15s; white-space:nowrap; }
+  .nav-link:hover { color:var(--text-bright); }
+  .nav-link.active { color:var(--amber); border-bottom-color:var(--amber); }
+
   /* Tablet: 900px and below — stack map + detail */
   @media (max-width: 900px) {
     .top-section { grid-template-columns: 1fr; }
@@ -320,6 +328,9 @@
     .logo-badge { font-size:0.58rem; padding:2px 5px; }
     .header-meta { display:none; }
 
+
+    .site-nav { gap:0; }
+    .nav-link { font-size:0.56rem; padding:0.5rem 0.875rem; letter-spacing:0.06em; }
     main { padding:0.75rem 0.75rem 5rem; gap:0.75rem; }
 
     /* Status bar */
@@ -334,12 +345,11 @@
     .map-card { padding:0.75rem 0.5rem; }
     .card-header { flex-direction:column; gap:0.3rem; }
     .card-sub { font-size:0.58rem; }
-    .map-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%; max-width:100%; }
+    .map-scroll { overflow:hidden; width:100%; }
     .tile-grid {
       grid-template-rows:repeat(8,34px);
       gap:2px;
-      min-width:360px;
-      max-width:100%;
+      width:100%;
     }
     .tile { font-size:0.5rem; border-radius:3px; }
 
@@ -373,7 +383,7 @@
   /* Very small phones */
   @media (max-width: 375px) {
     .logo-text { font-size:1.25rem; }
-    .tile-grid { min-width:320px; grid-template-rows:repeat(8,30px); }
+    .tile-grid { width:100%; grid-template-rows:repeat(8,30px); }
     .tile { font-size:0.44rem; }
   }
 </style>
@@ -386,11 +396,17 @@
     <span class="logo-badge">2026</span>
   </div>
   <div class="header-right">
-    <span class="header-fcc header-meta">FCC Political Ad Intelligence · Broadcast &amp; Cable</span>
+    <span class="header-fcc header-meta">Election Data &amp; FCC Public File Intelligence</span>
     <span class="header-meta" id="live-date"></span>
     <span class="header-meta" id="data-badge" style="color:var(--text-faint);font-size:0.55rem;letter-spacing:0.05em">⬤ CACHED SNAPSHOT · FEB 2026</span>
   </div>
 </header>
+
+<nav class="site-nav">
+  <a href="/" class="nav-link active">Election Intelligence</a>
+  <a href="/public-file" class="nav-link">Public File Activity</a>
+  <a href="/rates" class="nav-link">Rate Analytics</a>
+</nav>
 
 <main>
 
@@ -692,7 +708,6 @@ const GRID = {
 
 function buildMap() {
   const g = document.getElementById('tileGrid');
-  g.innerHTML = '';
   const cells = {};
   for (let r = 0; r < 8; r++) for (let c = 0; c < 12; c++) {
     const el = document.createElement('div');
@@ -707,27 +722,6 @@ function buildMap() {
     if (s) el.addEventListener('click', () => pick(abbr));
   });
 }
-
-function applyMapFilter() {
-  document.querySelectorAll('.tile[data-abbr]').forEach(el => {
-    const abbr = el.dataset.abbr;
-    const s = SM[abbr];
-    let matches;
-    if (rf === 'all') matches = true;
-    else if (rf === 'Ballot') matches = stateHasBallot(abbr);
-    else matches = s && s.races && s.races.includes(rf);
-    el.classList.toggle('tile-dimmed', !matches);
-  });
-}
-
-// ── HOUSE SEAT COUNTS (post-2020 apportionment) ────────────────────────────────
-const HOUSE_SEATS = {
-  AL:7,  AK:1,  AZ:9,  AR:4,  CA:52, CO:8,  CT:5,  DC:1,  DE:1,  FL:28,
-  GA:14, HI:2,  ID:2,  IL:17, IN:9,  IA:4,  KS:4,  KY:6,  LA:6,  ME:2,
-  MD:8,  MA:9,  MI:13, MN:8,  MS:4,  MO:8,  MT:2,  NE:3,  NV:4,  NH:2,
-  NJ:12, NM:3,  NY:26, NC:14, ND:1,  OH:15, OK:5,  OR:6,  PA:17, RI:2,
-  SC:7,  SD:1,  TN:9,  TX:38, UT:4,  VT:1,  VA:11, WA:10, WV:2,  WI:8,  WY:1,
-};
 
 // ── SHARED DETAIL HTML BUILDER ─────────────────────────────────────────────────
 const PC = { D:'var(--dem)', R:'var(--rep)', I:'var(--ind)' };
@@ -747,45 +741,23 @@ function buildDetailHTML(abbr) {
   const genPct = Math.max(0, Math.min(100, ((TODAY - GENERAL_WINDOW) / (GENERAL - GENERAL_WINDOW)) * 100));
   const wc = WC[s.status] || 'var(--blue)';
   const raceTags = s.races.map(r => `<span class="race-tag tag-${r.toLowerCase().replace(/[^a-z]/g,'')}">${r}</span>`).join('');
-  const _candRow = c => {
-    const pc = PC[c.p] || 'var(--slate)';
-    const badge = c.s === 'inc' ? `<span class="cbadge cbadge-inc">INCUMBENT</span>` : `<span class="cbadge cbadge-dec">DECLARED</span>`;
-    return `<div class="cand-row"><div class="pdot" style="background:${pc}"></div><div class="cname">${c.n}${c.note ? `<span class="cnote">${c.note}</span>` : ''}</div><span class="cparty" style="color:${pc}">${c.p}</span>${badge}</div>`;
-  };
   let candHTML = '';
-  // Non-House races (Senate, Governor, etc.)
-  s.cands.filter(rc => rc.race !== 'House').forEach(rc => {
-    const rb = {Senate:'tag-senate',Governor:'tag-governor'}[rc.race] || 'tag-house';
-    candHTML += `<div class="cand-race-block"><span class="cand-race-label ${rb}">${rc.race}</span>`;
-    rc.list.forEach(c => { candHTML += _candRow(c); });
-    candHTML += `</div>`;
-  });
-  // House races — always render if state has House, even with no candidates
-  if (s.races && s.races.includes('House')) {
-    const seats = HOUSE_SEATS[s.abbr] || 0;
-    const seatLabel = seats === 1 ? 'At-Large' : `${seats} Districts`;
-    candHTML += `<div class="cand-race-block"><span class="cand-race-label tag-house">House — ${seatLabel}</span>`;
-    const houseGroup = s.cands.find(rc => rc.race === 'House');
-    if (!houseGroup || houseGroup.list.length === 0) {
-      candHTML += `<div style="font-family:var(--mono);font-size:0.65rem;color:var(--text-faint);padding:4px 0">No candidate filings on record — field forming</div>`;
-    } else {
-      const byDist = {}, noDist = [];
-      houseGroup.list.forEach(c => { c.d != null ? (byDist[c.d] = byDist[c.d] || [], byDist[c.d].push(c)) : noDist.push(c); });
-      Object.keys(byDist).map(Number).sort((a,b) => a-b).forEach(d => {
-        if (seats > 1) candHTML += `<div style="font-family:var(--mono);font-size:0.57rem;color:var(--text-faint);margin-top:5px;letter-spacing:0.08em">CD-${d}</div>`;
-        byDist[d].forEach(c => { candHTML += _candRow(c); });
-      });
-      noDist.forEach(c => { candHTML += _candRow(c); });
-      const districtsShown = Object.keys(byDist).length;
-      if (seats > 1 && districtsShown < seats) {
-        const rem = seats - districtsShown;
-        candHTML += `<div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-faint);padding:4px 0 0">+ ${rem} district${rem !== 1 ? 's' : ''} — candidates TBD</div>`;
-      }
-    }
-    candHTML += `</div>`;
-  }
-  if (!candHTML) {
+  if (s.cands.length === 0) {
     candHTML = `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No major candidates on file yet</div>`;
+  } else {
+    s.cands.forEach(rc => {
+      const rb = {Senate:'tag-senate',Governor:'tag-governor',House:'tag-house'}[rc.race] || 'tag-house';
+      candHTML += `<div class="cand-race-block"><span class="cand-race-label ${rb}">${rc.race}</span>`;
+      rc.list.forEach(c => {
+        const pc = PC[c.p] || 'var(--slate)';
+        const badge = c.s === 'inc' ? `<span class="cbadge cbadge-inc">INCUMBENT</span>` : `<span class="cbadge cbadge-dec">DECLARED</span>`;
+        candHTML += `<div class="cand-row">
+          <div class="pdot" style="background:${pc}"></div>
+          <div class="cname">${c.n}${c.note ? `<span class="cnote">${c.note}</span>` : ''}</div>
+          <span class="cparty" style="color:${pc}">${c.p}</span>${badge}</div>`;
+      });
+      candHTML += `</div>`;
+    });
   }
   return `<div class="fade-in">
     <div style="font-family:var(--mono);font-size:0.57rem;letter-spacing:0.08em;margin-bottom:0.4rem">${SL[s.status]||''}</div>
@@ -1108,7 +1080,7 @@ function drawMobileList(data) {
 document.getElementById('searchInput').addEventListener('input', e => { q = e.target.value.toLowerCase().trim(); drawTable(); });
 document.querySelectorAll('[data-race]').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('[data-race]').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active'); rf = btn.dataset.race; drawTable(); applyMapFilter();
+  btn.classList.add('active'); rf = btn.dataset.race; drawTable();
 }));
 
 function clearStateFilter() {
@@ -1167,7 +1139,6 @@ async function loadLiveData() {
           p: c.party,
           s: c.incumbent ? 'inc' : (c.status === 'exploring' ? 'exp' : 'dec'),
           note: c.notes || undefined,
-          d: c.district != null ? c.district : undefined,
         });
       }
       CANDS[abbr] = Object.entries(byRace).map(([race, list]) => ({ race, list }));
@@ -1179,7 +1150,6 @@ async function loadLiveData() {
 
     // Re-render
     buildMap();
-    applyMapFilter();
     buildHead();
     drawTable();
     if (isMobile()) drawMobileList();
@@ -1208,7 +1178,7 @@ const BALLOT = {};
 function stateHasBallot(abbr) { return !!(BALLOT[abbr] && BALLOT[abbr].length > 0); }
 
 // ── INIT ───────────────────────────────────────────────────────────────────────
-buildMap(); applyMapFilter(); buildHead(); drawTable();
+buildMap(); buildHead(); drawTable();
 document.getElementById('live-date').textContent =
   new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
 
