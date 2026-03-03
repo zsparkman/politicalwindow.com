@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FCC Rate Intelligence — PoliticalWindow.com</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.8.0/Recharts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #080e1a; color: #cbd5e1; font-family: 'Courier New', monospace; }
+  select, input, button { outline: none; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0d1829; }
+  ::-webkit-scrollbar-thumb { background: #1e3050; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useMemo } = React;
+const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } = Recharts;
+
+const API = "https://rates.politicalwindow.com";
+const PARTY_COLOR = { R: "#ef4444", D: "#3b82f6", I: "#a78bfa" };
+const PARTY_BG    = { R: "rgba(239,68,68,0.12)", D: "rgba(59,130,246,0.12)", I: "rgba(167,139,250,0.12)" };
+
+const fmt$ = n => {
+  if (!n) return "—";
+  const v = parseFloat(n);
+  if (v >= 1000000) return `$${(v/1000000).toFixed(2)}M`;
+  if (v >= 1000)    return `$${(v/1000).toFixed(0)}K`;
+  return `$${v.toFixed(0)}`;
+};
+const fmtRate = n => n ? `$${parseFloat(n).toLocaleString()}` : "—";
+
+const Pill = ({ label, color, bg }) => (
+  <span style={{
+    fontFamily:"monospace", fontSize:"0.58rem", fontWeight:700,
+    padding:"2px 6px", borderRadius:2,
+    color: color||"#94a3b8", background: bg||"rgba(148,163,184,0.1)",
+    letterSpacing:"0.08em", border:`1px solid ${color||"#94a3b8"}33`
+  }}>{label}</span>
+);
+
+function App() {
+  const [data, setData]         = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(null);
+  const [view, setView]         = useState("advertiser");
+  const [filterParty, setFP]    = useState("ALL");
+  const [filterDMA, setFD]      = useState("ALL");
+  const [filterAdv, setFA]      = useState("ALL");
+  const [search, setSearch]     = useState("");
+  const [sortCol, setSortCol]   = useState("spend");
+  const [expanded, setExpanded] = useState(null);
+
+  useEffect(() => {
+    fetch(`${API}/api/rates?limit=500`)
+      .then(r => r.json())
+      .then(j => { setData(j.data || []); setLoading(false); })
+      .catch(e => { setError(e.message); setLoading(false); });
+  }, []);
+
+  const dmas        = useMemo(() => ["ALL", ...Array.from(new Set(data.map(r => r.dma_name).filter(Boolean))).sort()], [data]);
+  const advertisers = useMemo(() => ["ALL", ...Array.from(new Set(data.map(r => r.advertiser).filter(Boolean))).sort()], [data]);
+
+  const filtered = useMemo(() => data.filter(r => {
+    if (filterParty !== "ALL" && r.party !== filterParty) return false;
+    if (filterDMA   !== "ALL" && r.dma_name !== filterDMA) return false;
+    if (filterAdv   !== "ALL" && r.advertiser !== filterAdv) return false;
+    if (search) {
+      const s = search.toLowerCase();
+      return (r.advertiser||"").toLowerCase().includes(s) ||
+             (r.callsign||"").toLowerCase().includes(s)   ||
+             (r.dma_name||"").toLowerCase().includes(s)   ||
+             (r.candidate_name||"").toLowerCase().includes(s);
+    }
+    return true;
+  }), [data, filterParty, filterDMA, filterAdv, search]);
+
+  const grouped = useMemo(() => {
+    const key = view==="advertiser" ? "advertiser" : view==="dma" ? "dma_name" : "callsign";
+    const map = {};
+    filtered.forEach(r => {
+      const k = r[key] || "Unknown";
+      if (!map[k]) map[k] = { label:k, contracts:0, spend:0, rates:[], parties:new Set(), dmas:new Set(), stations:new Set(), rows:[] };
+      map[k].contracts++;
+      map[k].spend += parseFloat(r.gross_total)||0;
+      if (r.unit_rate) map[k].rates.push(parseFloat(r.unit_rate));
+      if (r.party)    map[k].parties.add(r.party);
+      if (r.dma_name) map[k].dmas.add(r.dma_name);
+      if (r.callsign) map[k].stations.add(r.callsign);
+      map[k].rows.push(r);
+    });
+    return Object.values(map).sort((a,b) => sortCol==="spend" ? b.spend-a.spend : b.contracts-a.contracts);
+  }, [filtered, view, sortCol]);
+
+  const totalSpend  = useMemo(() => filtered.reduce((s,r) => s+(parseFloat(r.gross_total)||0), 0), [filtered]);
+  const chartData   = grouped.slice(0,10).map(g => ({ name: g.label.length>18 ? g.label.slice(0,16)+"…" : g.label, spend: Math.round(g.spend) }));
+
+  const s = {
+    header:   { borderBottom:"1px solid #1e3050", padding:"14px 24px", display:"flex", alignItems:"center", justifyContent:"space-between" },
+    controls: { padding:"12px 24px", borderBottom:"1px solid #1e3050", display:"flex", gap:16, flexWrap:"wrap", alignItems:"flex-end" },
+    tab:      (active) => ({ fontFamily:"monospace", fontSize:"0.62rem", fontWeight:700, letterSpacing:"0.1em", padding:"5px 14px", border:"1px solid", borderRadius:2, cursor:"pointer", borderColor:active?"#f59e0b":"#1e3050", background:active?"rgba(245,158,11,0.12)":"transparent", color:active?"#f59e0b":"#475569" }),
+    card:     { background:"#0d1829", border:"1px solid #1e3050", borderRadius:4, overflow:"hidden" },
+    th:       { textAlign:"left", padding:"7px 10px", borderBottom:"1px solid #1e3050", fontWeight:700, letterSpacing:"0.07em", whiteSpace:"nowrap", background:"#0a1525", fontSize:"0.58rem", color:"#475569" },
+    td:       { padding:"5px 10px", fontSize:"0.62rem" },
+  };
+
+  const Select = ({ label, val, setVal, opts }) => (
+    <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+      <div style={{ fontSize:"0.5rem", color:"#475569", letterSpacing:"0.1em" }}>{label.toUpperCase()}</div>
+      <select value={val} onChange={e => setVal(e.target.value)} style={{ fontFamily:"monospace", fontSize:"0.62rem", color:"#94a3b8", background:"#0d1829", border:"1px solid #1e3050", borderRadius:2, padding:"4px 8px", cursor:"pointer" }}>
+        {opts.map(o => <option key={o} value={o}>{o==="ALL" ? `All ${label}` : o.length>30 ? o.slice(0,28)+"…" : o}</option>)}
+      </select>
+    </div>
+  );
+
+  if (loading) return <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh" }}><div style={{ color:"#f59e0b", letterSpacing:"0.15em", fontSize:"0.8rem" }}>LOADING FCC DATA...</div></div>;
+  if (error)   return <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh" }}><div style={{ color:"#ef4444", fontSize:"0.8rem" }}>API ERROR: {error}</div></div>;
+
+  return (
+    <div style={{ minHeight:"100vh" }}>
+
+      {/* Nav */}
+      <div style={{ background:"#060d18", borderBottom:"1px solid #1e3050", padding:"10px 24px", display:"flex", alignItems:"center", gap:12 }}>
+        <a href="/" style={{ fontFamily:"monospace", fontSize:"0.7rem", fontWeight:700, color:"#fff", textDecoration:"none", letterSpacing:"0.06em" }}>POLITICALWINDOW.COM</a>
+        <span style={{ color:"#1e3050" }}>›</span>
+        <span style={{ color:"#f59e0b", fontSize:"0.65rem", letterSpacing:"0.08em" }}>FCC RATE EXPLORER</span>
+      </div>
+
+      {/* Header stats */}
+      <div style={s.header}>
+        <div>
+          <div style={{ fontSize:"0.95rem", fontWeight:700, color:"#fff", letterSpacing:"0.06em" }}>📡 RATE INTELLIGENCE</div>
+          <div style={{ fontSize:"0.55rem", color:"#475569", marginTop:2 }}>{data.length} contracts indexed · TX + CA · 2026 cycle</div>
+        </div>
+        <div style={{ display:"flex", gap:24 }}>
+          {[["GROSS SPEND", fmt$(totalSpend)], ["CONTRACTS", filtered.length], ["ADVERTISERS", new Set(filtered.map(r=>r.advertiser)).size], ["STATIONS", new Set(filtered.map(r=>r.callsign)).size]].map(([l,v]) => (
+            <div key={l} style={{ textAlign:"right" }}>
+              <div style={{ fontSize:"1rem", fontWeight:700, color:"#f59e0b" }}>{v}</div>
+              <div style={{ fontSize:"0.46rem", color:"#475569", letterSpacing:"0.1em" }}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div style={s.controls}>
+        <div style={{ display:"flex", gap:6 }}>
+          {[["advertiser","BY ADVERTISER"],["dma","BY DMA"],["station","BY STATION"],["raw","RAW DATA"]].map(([id,label]) => (
+            <button key={id} onClick={()=>{ setView(id); setExpanded(null); }} style={s.tab(view===id)}>{label}</button>
+          ))}
+        </div>
+        <div style={{ marginLeft:"auto", display:"flex", gap:14, flexWrap:"wrap", alignItems:"flex-end" }}>
+          <Select label="Party" val={filterParty} setVal={setFP} opts={["ALL","R","D","I"]} />
+          <Select label="DMA"   val={filterDMA}   setVal={setFD} opts={dmas} />
+          {view==="raw" && <Select label="Advertiser" val={filterAdv} setVal={setFA} opts={advertisers} />}
+          <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+            <div style={{ fontSize:"0.5rem", color:"#475569", letterSpacing:"0.1em" }}>SEARCH</div>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="name, station, DMA…"
+              style={{ fontFamily:"monospace", fontSize:"0.62rem", color:"#94a3b8", background:"#0d1829", border:"1px solid #1e3050", borderRadius:2, padding:"4px 8px", width:170 }} />
+          </div>
+        </div>
+      </div>
+
+      <div style={{ padding:"16px 24px", display:"flex", flexDirection:"column", gap:16 }}>
+
+        {/* Chart */}
+        {view !== "raw" && chartData.length > 0 && (
+          <div style={{ ...s.card, padding:"16px 16px 8px" }}>
+            <div style={{ fontSize:"0.5rem", color:"#475569", letterSpacing:"0.1em", marginBottom:10 }}>TOP 10 BY GROSS SPEND</div>
+            <ResponsiveContainer width="100%" height={150}>
+              <BarChart data={chartData} margin={{ top:0, right:0, bottom:0, left:0 }}>
+                <XAxis dataKey="name" tick={{ fontFamily:"monospace", fontSize:9, fill:"#475569" }} axisLine={false} tickLine={false} />
+                <YAxis hide />
+                <Tooltip contentStyle={{ background:"#0d1829", border:"1px solid #1e3050", fontFamily:"monospace", fontSize:"0.65rem", color:"#cbd5e1" }} formatter={v=>[fmt$(v),"Spend"]} />
+                <Bar dataKey="spend" radius={[2,2,0,0]}>
+                  {chartData.map((_,i) => <Cell key={i} fill={i===0?"#f59e0b":i<3?"#3b82f6":"#1e3a5f"} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* Grouped rows */}
+        {view !== "raw" && (
+          <div style={s.card}>
+            <div style={{ display:"flex", padding:"8px 14px", borderBottom:"1px solid #1e3050", gap:8 }}>
+              {["spend","contracts"].map(col => (
+                <button key={col} onClick={()=>setSortCol(col)} style={{ fontFamily:"monospace", fontSize:"0.52rem", letterSpacing:"0.08em", color:sortCol===col?"#f59e0b":"#475569", background:"transparent", border:"none", cursor:"pointer", textTransform:"uppercase", fontWeight:sortCol===col?700:400 }}>
+                  SORT: {col}
+                </button>
+              ))}
+              <span style={{ marginLeft:"auto", fontSize:"0.52rem", color:"#334155" }}>{grouped.length} GROUPS · {filtered.length} CONTRACTS</span>
+            </div>
+
+            {grouped.map((g, i) => (
+              <div key={g.label}>
+                <div onClick={()=>setExpanded(expanded===g.label?null:g.label)}
+                  style={{ display:"grid", gridTemplateColumns:"1fr 80px 100px 80px 60px", gap:8, padding:"10px 14px", borderBottom:"1px solid #0f1f33", cursor:"pointer", background:expanded===g.label?"rgba(245,158,11,0.04)":"transparent", alignItems:"center" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, minWidth:0 }}>
+                    <div style={{ width:3, height:28, background:i<3?"#f59e0b":"#1e3050", borderRadius:2, flexShrink:0 }} />
+                    <div style={{ minWidth:0 }}>
+                      <div style={{ fontSize:"0.7rem", color:"#e2e8f0", fontWeight:600, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{g.label}</div>
+                      <div style={{ display:"flex", gap:4, marginTop:3, flexWrap:"wrap" }}>
+                        {[...g.parties].map(p => <Pill key={p} label={p} color={PARTY_COLOR[p]} bg={PARTY_BG[p]} />)}
+                        {view==="advertiser" && <Pill label={`${g.dmas.size} DMA${g.dmas.size!==1?"s":""}`} />}
+                        {view==="advertiser" && <Pill label={`${g.stations.size} STN`} />}
+                        {view==="dma" && <Pill label={`${g.stations.size} stations`} />}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign:"right" }}>
+                    <div style={{ fontSize:"0.55rem", color:"#475569" }}>CONTRACTS</div>
+                    <div style={{ fontSize:"0.82rem", color:"#cbd5e1", fontWeight:600 }}>{g.contracts}</div>
+                  </div>
+                  <div style={{ textAlign:"right" }}>
+                    <div style={{ fontSize:"0.55rem", color:"#475569" }}>GROSS SPEND</div>
+                    <div style={{ fontSize:"0.85rem", color:"#10b981", fontWeight:700 }}>{fmt$(g.spend)}</div>
+                  </div>
+                  <div style={{ textAlign:"right" }}>
+                    <div style={{ fontSize:"0.55rem", color:"#475569" }}>AVG RATE</div>
+                    <div style={{ fontSize:"0.75rem", color:"#94a3b8" }}>{g.rates.length ? fmtRate(g.rates.reduce((a,b)=>a+b,0)/g.rates.length) : "—"}</div>
+                  </div>
+                  <div style={{ textAlign:"right", fontSize:"0.62rem", color:expanded===g.label?"#f59e0b":"#334155" }}>{expanded===g.label?"▲":"▼"}</div>
+                </div>
+
+                {expanded === g.label && (
+                  <div style={{ background:"#060d18", borderBottom:"1px solid #1e3050", padding:"10px 14px 14px", overflowX:"auto" }}>
+                    <div style={{ fontSize:"0.5rem", color:"#475569", letterSpacing:"0.1em", marginBottom:8 }}>CONTRACT DETAIL — {g.rows.length} RECORDS</div>
+                    <table style={{ width:"100%", borderCollapse:"collapse", fontSize:"0.6rem" }}>
+                      <thead>
+                        <tr>{["Advertiser","Party","Station","DMA","Dates","Rate","Spots","Total","Office"].map(h=>(
+                          <th key={h} style={{ textAlign:"left", padding:"4px 8px", borderBottom:"1px solid #1e3050", fontWeight:600, letterSpacing:"0.06em", color:"#475569", whiteSpace:"nowrap" }}>{h.toUpperCase()}</th>
+                        ))}</tr>
+                      </thead>
+                      <tbody>
+                        {g.rows.map((r,ri) => (
+                          <tr key={ri} style={{ borderBottom:"1px solid #0f1f33" }}>
+                            <td style={{ ...s.td, color:PARTY_COLOR[r.party]||"#cbd5e1", maxWidth:160, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{r.advertiser||r.candidate_name||"—"}</td>
+                            <td style={{ ...s.td, color:PARTY_COLOR[r.party]||"#64748b", fontWeight:700 }}>{r.party||"—"}</td>
+                            <td style={{ ...s.td, color:"#f59e0b", fontWeight:600 }}>{r.callsign||"—"}</td>
+                            <td style={{ ...s.td, color:"#64748b", whiteSpace:"nowrap", maxWidth:120, overflow:"hidden", textOverflow:"ellipsis" }}>{r.dma_name||"—"}</td>
+                            <td style={{ ...s.td, color:"#64748b", whiteSpace:"nowrap" }}>{r.start_date?r.start_date.slice(5,10):"—"}{r.end_date?"→"+r.end_date.slice(5,10):""}</td>
+                            <td style={{ ...s.td, color:"#cbd5e1", textAlign:"right" }}>{fmtRate(r.unit_rate)}</td>
+                            <td style={{ ...s.td, color:"#94a3b8", textAlign:"right" }}>{r.spots_count||"—"}</td>
+                            <td style={{ ...s.td, color:"#10b981", fontWeight:700, textAlign:"right" }}>{fmt$(r.gross_total)}</td>
+                            <td style={{ ...s.td, color:"#64748b", whiteSpace:"nowrap" }}>{r.office_type||"—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Raw view */}
+        {view === "raw" && (
+          <div style={{ ...s.card, overflowX:"auto" }}>
+            <div style={{ padding:"8px 14px", borderBottom:"1px solid #1e3050", fontSize:"0.52rem", color:"#475569", letterSpacing:"0.08em" }}>{filtered.length} RECORDS</div>
+            <table style={{ width:"100%", borderCollapse:"collapse", fontSize:"0.62rem" }}>
+              <thead>
+                <tr>{["Advertiser","Party","Office","Station","DMA","Start","End","Unit Rate","Spots","Gross Total","Agency"].map(h=>(
+                  <th key={h} style={s.th}>{h.toUpperCase()}</th>
+                ))}</tr>
+              </thead>
+              <tbody>
+                {filtered.map((r,i) => (
+                  <tr key={i} style={{ borderBottom:"1px solid #0f1f33", background:i%2===0?"transparent":"#08111e" }}>
+                    <td style={{ ...s.td, color:"#e2e8f0", whiteSpace:"nowrap", maxWidth:200, overflow:"hidden", textOverflow:"ellipsis" }}>{r.advertiser||r.candidate_name||"—"}</td>
+                    <td style={{ ...s.td, color:PARTY_COLOR[r.party]||"#64748b", fontWeight:700 }}>{r.party||"—"}</td>
+                    <td style={{ ...s.td, color:"#64748b", whiteSpace:"nowrap" }}>{r.office_type||"—"}</td>
+                    <td style={{ ...s.td, color:"#f59e0b", fontWeight:600 }}>{r.callsign||"—"}</td>
+                    <td style={{ ...s.td, color:"#64748b", whiteSpace:"nowrap" }}>{r.dma_name||"—"}</td>
+                    <td style={{ ...s.td, color:"#64748b", whiteSpace:"nowrap" }}>{r.start_date?r.start_date.slice(0,10):"—"}</td>
+                    <td style={{ ...s.td, color:"#64748b", whiteSpace:"nowrap" }}>{r.end_date?r.end_date.slice(0,10):"—"}</td>
+                    <td style={{ ...s.td, color:"#cbd5e1", textAlign:"right" }}>{fmtRate(r.unit_rate)}</td>
+                    <td style={{ ...s.td, color:"#94a3b8", textAlign:"right" }}>{r.spots_count||"—"}</td>
+                    <td style={{ ...s.td, color:"#10b981", fontWeight:700, textAlign:"right" }}>{fmt$(r.gross_total)}</td>
+                    <td style={{ ...s.td, color:"#64748b", whiteSpace:"nowrap" }}>{r.agency_name||"—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div style={{ fontSize:"0.5rem", color:"#1e3050", textAlign:"center", letterSpacing:"0.08em" }}>
+          DATA SOURCE: FCC OPIF PUBLIC FILES · PARSED VIA CLAUDE SONNET · POLITICALWINDOW.COM © 2026
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
