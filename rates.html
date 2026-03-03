@@ -79,6 +79,15 @@ tr:nth-child(even) td{background:#08111e}
 #loading{display:flex;align-items:center;justify-content:center;height:200px;font-size:0.8rem;color:#f59e0b;letter-spacing:0.15em}
 #error-msg{color:#ef4444;text-align:center;padding:40px;font-size:0.8rem;display:none}
 footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;padding:20px}
+:root{--navy:#08111f;--navy-border:#1a3156;--mono:'IBM Plex Mono',monospace;--text-faint:#3a506e;--text-bright:#e2e8f0;--amber:#f5a623}
+.site-nav{background:var(--navy);border-bottom:1px solid var(--navy-border);display:flex;justify-content:center;gap:0}
+.nav-link{font-family:var(--mono);font-size:0.62rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-faint);text-decoration:none;padding:0.55rem 1.5rem;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;white-space:nowrap}
+.nav-link:hover{color:var(--text-bright)}
+.nav-link.active{color:var(--amber);border-bottom-color:var(--amber)}
+@media(max-width:640px){
+  .site-nav{gap:0}
+  .nav-link{font-size:0.56rem;padding:0.5rem 0.875rem;letter-spacing:0.06em}
+}
 </style>
 </head>
 <body>
@@ -92,6 +101,11 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
     <span class="header-meta">CANDIDATE RATE INTELLIGENCE</span>
   </div>
 </header>
+<nav class="site-nav">
+  <a href="/" class="nav-link">Election Intelligence</a>
+  <a href="/public-file" class="nav-link">Public File Activity</a>
+  <a href="/rates" class="nav-link active">Rate Analytics</a>
+</nav>
 
 <div id="header">
   <div>
