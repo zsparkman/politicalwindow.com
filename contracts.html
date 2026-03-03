@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FCC Contracts — PoliticalWindow.com</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#080e1a;color:#cbd5e1;font-family:'Courier New',monospace;min-height:100vh}
+a{color:#f59e0b;text-decoration:none}
+select,input,button{font-family:'Courier New',monospace;outline:none}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#1e3050;border-radius:3px}
+#nav{background:#060d18;border-bottom:1px solid #1e3050;padding:10px 24px;display:flex;align-items:center;gap:10px;font-size:0.7rem}
+#nav .sep{color:#1e3050}
+#nav .cur{color:#f59e0b;letter-spacing:0.08em}
+#header{border-bottom:1px solid #1e3050;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.sub{font-size:0.65rem;color:#94a3b8;margin-top:2px}
+#stats{display:flex;gap:24px}
+.stat-val{font-size:1rem;font-weight:700;color:#f59e0b;text-align:right}
+.stat-lbl{font-size:0.58rem;color:#94a3b8;letter-spacing:0.1em;text-align:right}
+#controls{padding:12px 24px;border-bottom:1px solid #1e3050;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.filter-wrap{display:flex;flex-direction:column;gap:3px}
+.filter-lbl{font-size:0.62rem;color:#94a3b8;letter-spacing:0.1em}
+select,input{font-size:0.65rem;color:#cbd5e1;background:#0d1829;border:1px solid #1e3050;border-radius:2px;padding:4px 8px}
+input{width:170px}
+#sort-wrap{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:0.65rem;color:#94a3b8}
+.sort-btn{background:transparent;border:none;cursor:pointer;font-family:'Courier New',monospace;font-size:0.65rem;letter-spacing:0.08em;color:#94a3b8;padding:2px 6px}
+.sort-btn.active{color:#f59e0b;font-weight:700}
+#main{padding:16px 24px}
+#tbl-wrap{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow-x:auto}
+#tbl-header{padding:8px 14px;border-bottom:1px solid #1e3050;font-size:0.62rem;color:#94a3b8;letter-spacing:0.08em;display:flex;justify-content:space-between;align-items:center}
+table{width:100%;border-collapse:collapse;font-size:0.68rem}
+th{text-align:left;padding:7px 8px;border-bottom:1px solid #1e3050;font-weight:700;letter-spacing:0.06em;color:#94a3b8;white-space:nowrap;background:#0a1525;font-size:0.62rem;cursor:pointer;user-select:none}
+th:hover{color:#f59e0b}
+th.sort-asc::after{content:' ▲'}
+th.sort-desc::after{content:' ▼'}
+td{padding:5px 8px;border-bottom:1px solid #0f1f33;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+tr:nth-child(even) td{background:#08111e}
+tr:hover td{background:#0d1f35}
+.c-green{color:#10b981;font-weight:700}
+.c-amber{color:#f59e0b;font-weight:600}
+.c-muted{color:#64748b}
+.c-bright{color:#e2e8f0}
+.c-r{color:#ef4444;font-weight:700}
+.c-d{color:#3b82f6;font-weight:700}
+.c-blue{color:#38bdf8}
+#loading{display:flex;align-items:center;justify-content:center;height:200px;font-size:0.8rem;color:#f59e0b;letter-spacing:0.15em}
+#error-msg{color:#ef4444;text-align:center;padding:40px;font-size:0.8rem;display:none}
+footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;padding:20px}
+</style>
+</head>
+<body>
+<div id="nav">
+  <a href="/">POLITICALWINDOW.COM</a>
+  <span class="sep">›</span>
+  <span class="cur">FCC CONTRACTS</span>
+</div>
+<div id="header">
+  <div>
+    <div style="font-size:0.95rem;font-weight:700;color:#fff;letter-spacing:0.06em">📋 CONTRACT INTELLIGENCE</div>
+    <div class="sub" id="header-sub">Loading...</div>
+  </div>
+  <div id="stats">
+    <div><div class="stat-val" id="s-spend">—</div><div class="stat-lbl">GROSS SPEND</div></div>
+    <div><div class="stat-val" id="s-contracts">—</div><div class="stat-lbl">CONTRACTS</div></div>
+    <div><div class="stat-val" id="s-advertisers">—</div><div class="stat-lbl">ADVERTISERS</div></div>
+    <div><div class="stat-val" id="s-stations">—</div><div class="stat-lbl">STATIONS</div></div>
+  </div>
+</div>
+<div id="controls">
+  <div class="filter-wrap">
+    <div class="filter-lbl">PARTY</div>
+    <select id="f-party"><option value="ALL">All Parties</option><option>R</option><option>D</option><option>I</option></select>
+  </div>
+  <div class="filter-wrap">
+    <div class="filter-lbl">STATE</div>
+    <select id="f-state"><option value="ALL">All States</option></select>
+  </div>
+  <div class="filter-wrap">
+    <div class="filter-lbl">DMA</div>
+    <select id="f-dma"><option value="ALL">All DMAs</option></select>
+  </div>
+  <div class="filter-wrap">
+    <div class="filter-lbl">SEARCH</div>
+    <input id="f-search" placeholder="advertiser, station, DMA…">
+  </div>
+  <div id="sort-wrap">SORT:
+    <button class="sort-btn active" data-sort="spend">SPEND</button>
+    <button class="sort-btn" data-sort="dates">DATES</button>
+  </div>
+</div>
+<div id="main">
+  <div id="loading">LOADING FCC DATA...</div>
+  <div id="error-msg"></div>
+  <div id="tbl-wrap" style="display:none">
+    <div id="tbl-header"><span id="tbl-count"></span></div>
+    <table>
+      <thead><tr>
+        <th data-col="advertiser">ADVERTISER</th>
+        <th data-col="party">PARTY</th>
+        <th data-col="office_type">OFFICE</th>
+        <th data-col="state">STATE</th>
+        <th data-col="dma_name">DMA</th>
+        <th data-col="callsign">STATION</th>
+        <th data-col="contract_number">CONTRACT #</th>
+        <th data-col="start_date">DATES</th>
+        <th data-col="daypart">DAYPART(S)</th>
+        <th data-col="gross_total" class="sort-desc">TOTAL</th>
+        <th>DOC</th>
+      </tr></thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+  </div>
+</div>
+<footer>DATA SOURCE: FCC OPIF PUBLIC FILES · PARSED VIA CLAUDE SONNET · POLITICALWINDOW.COM © 2026</footer>
+<script>
+var API='https://rates.politicalwindow.com',ALL_DATA=[],currentSort={col:'gross_total',dir:'desc'};
+
+function fmt$(n){if(!n&&n!==0)return'—';var v=parseFloat(n);if(isNaN(v))return'—';if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';if(v>=1000)return'$'+(v/1000).toFixed(0)+'K';return'$'+v.toFixed(0);}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function pc(p){return p==='R'?'c-r':p==='D'?'c-d':'c-muted';}
+function fmtDate(d){if(!d)return'';var s=d.slice(5,10);return s.replace('-','/');}
+function fmtDates(r){var s=fmtDate(r.start_date),e=fmtDate(r.end_date);if(!s&&!e)return'—';if(!e)return s;if(!s)return e;return s+'–'+e;}
+
+function getFiltered(){
+  var party=document.getElementById('f-party').value,state=document.getElementById('f-state').value,dma=document.getElementById('f-dma').value,search=document.getElementById('f-search').value.toLowerCase();
+  return ALL_DATA.filter(function(r){
+    if(party!=='ALL'&&r.party!==party)return false;
+    if(state!=='ALL'&&r.state!==state)return false;
+    if(dma!=='ALL'&&r.dma_name!==dma)return false;
+    if(search)return(r.advertiser||'').toLowerCase().includes(search)||(r.callsign||'').toLowerCase().includes(search)||(r.dma_name||'').toLowerCase().includes(search)||(r.candidate_name||'').toLowerCase().includes(search)||(r.contract_number||'').toLowerCase().includes(search);
+    return true;
+  });
+}
+
+function getSorted(rows){
+  var col=currentSort.col,dir=currentSort.dir;
+  var NUMS={gross_total:1,unit_rate:1,spots_count:1};
+  return rows.slice().sort(function(a,b){
+    var av=a[col]||'',bv=b[col]||'';
+    if(NUMS[col]){av=parseFloat(av)||0;bv=parseFloat(bv)||0;}
+    if(av<bv)return dir==='asc'?-1:1;
+    if(av>bv)return dir==='asc'?1:-1;
+    return 0;
+  });
+}
+
+function updateStats(rows){
+  var spend=rows.reduce(function(s,r){return s+(parseFloat(r.gross_total)||0);},0);
+  document.getElementById('s-spend').textContent=fmt$(spend);
+  document.getElementById('s-contracts').textContent=rows.length.toLocaleString();
+  document.getElementById('s-advertisers').textContent=new Set(rows.map(function(r){return r.advertiser;}).filter(Boolean)).size;
+  document.getElementById('s-stations').textContent=new Set(rows.map(function(r){return r.callsign;}).filter(Boolean)).size;
+}
+
+function render(){
+  var rows=getFiltered(),sorted=getSorted(rows);
+  updateStats(rows);
+  document.getElementById('tbl-count').textContent=rows.length.toLocaleString()+' CONTRACTS';
+  document.getElementById('tbl-body').innerHTML=sorted.map(function(r){
+    var fccLink=r.folder_id&&r.file_manager_id
+      ?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:#f59e0b;font-size:0.6rem;letter-spacing:0.05em">PDF ↗</a>'
+      :'—';
+    return'<tr>'+
+      '<td class="'+pc(r.party)+'" title="'+esc(r.advertiser||r.candidate_name||'')+'">'+esc(r.advertiser||r.candidate_name||'—')+'</td>'+
+      '<td class="'+pc(r.party)+'">'+esc(r.party||'—')+'</td>'+
+      '<td class="c-muted">'+esc(r.office_type||'—')+'</td>'+
+      '<td class="c-blue">'+esc(r.state||'—')+'</td>'+
+      '<td class="c-muted" title="'+esc(r.dma_name||'')+'">'+esc(r.dma_name||'—')+'</td>'+
+      '<td class="c-amber">'+esc(r.callsign||'—')+'</td>'+
+      '<td class="c-muted">'+esc(r.contract_number||'—')+'</td>'+
+      '<td class="c-muted">'+esc(fmtDates(r))+'</td>'+
+      '<td class="c-muted">'+esc(r.daypart||'—')+'</td>'+
+      '<td class="c-green">'+fmt$(r.gross_total)+'</td>'+
+      '<td>'+fccLink+'</td>'+
+    '</tr>';
+  }).join('');
+  updateSortHeaders();
+}
+
+function updateSortHeaders(){
+  document.querySelectorAll('th[data-col]').forEach(function(th){
+    th.classList.remove('sort-asc','sort-desc');
+    if(th.dataset.col===currentSort.col)th.classList.add('sort-'+currentSort.dir);
+  });
+}
+
+fetch(API+'/api/rates?limit=500')
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(j){
+    ALL_DATA=j.data||[];
+    document.getElementById('loading').style.display='none';
+    document.getElementById('tbl-wrap').style.display='block';
+    document.getElementById('header-sub').textContent=ALL_DATA.length+' contracts indexed · TX + CA + IL · 2026 cycle';
+    var states=Array.from(new Set(ALL_DATA.map(function(r){return r.state;}).filter(Boolean))).sort();
+    var stateEl=document.getElementById('f-state');
+    states.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;stateEl.appendChild(o);});
+    var dmas=Array.from(new Set(ALL_DATA.map(function(r){return r.dma_name;}).filter(Boolean))).sort();
+    var dmaEl=document.getElementById('f-dma');
+    dmas.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;dmaEl.appendChild(o);});
+    render();
+  })
+  .catch(function(e){
+    document.getElementById('loading').style.display='none';
+    var em=document.getElementById('error-msg');em.style.display='block';em.textContent='API ERROR: '+e.message;
+  });
+
+document.querySelectorAll('th[data-col]').forEach(function(th){
+  th.addEventListener('click',function(){
+    var col=th.dataset.col;
+    if(currentSort.col===col){currentSort.dir=currentSort.dir==='asc'?'desc':'asc';}
+    else{currentSort.col=col;currentSort.dir=(['gross_total','spots_count'].indexOf(col)>=0)?'desc':'asc';}
+    render();
+  });
+});
+document.querySelectorAll('.sort-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.sort-btn').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    if(btn.dataset.sort==='spend'){currentSort={col:'gross_total',dir:'desc'};}
+    else{currentSort={col:'start_date',dir:'desc'};}
+    render();
+  });
+});
+['f-party','f-state','f-dma'].forEach(function(id){document.getElementById(id).addEventListener('change',render);});
+document.getElementById('f-search').addEventListener('input',render);
+</script>
+</body>
+</html>
