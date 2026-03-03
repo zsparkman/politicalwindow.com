@@ -172,6 +172,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
         <th class="sortable" data-col="callsign">STATION</th>
         <th class="sortable sort-desc" data-col="start_date">DATES</th>
         <th class="sortable" data-col="daypart">DAYPART(S)</th>
+        <th class="sortable" data-col="class_of_time">CLASS</th>
         <th class="sortable" data-col="gross_total">TOTAL</th>
         <th>DOC</th>
       </tr></thead>
@@ -194,6 +195,8 @@ function fmtDate(d){if(!d)return'';return d.slice(5,10).replace('-','/');}
 function fmtDates(r){var s=fmtDate(r.start_date),e=fmtDate(r.end_date);if(!s&&!e)return'—';if(!e)return s;if(!s)return e;return s+'–'+e;}
 var DAYPART_CODES={'Early Morning':'EM','Daytime':'DT','Early Fringe':'EF','Early News':'EN','Prime Access':'PA','Primetime':'PT','Late News':'LN','Late Fringe':'LF','Overnight':'ON'};
 function fmtDayparts(str){if(!str)return'—';return str.split(/[,;\/+|&]+/).map(function(s){var t=s.trim();return DAYPART_CODES[t]||t;}).filter(Boolean).join(' · ');}
+// Use line-level daypart_codes array from rate_lines when available; fall back to contract-level text parsing.
+function fmtDaypartCodes(r){var c=r.daypart_codes;if(c&&c.length)return c.join(' · ');return fmtDayparts(r.daypart);}
 function fccLink(r){return r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:#f59e0b;font-size:0.6rem">PDF ↗</a>':'—';}
 // Resolved candidate name, falling back to raw advertiser
 function candKey(r){return r.candidate||r.advertiser||'Unknown';}
@@ -230,7 +233,7 @@ function buildGroups(rows){
   return Object.values(map).sort(function(a,b){return currentSort==='spend'?b.spend-a.spend:b.contracts-a.contracts;});
 }
 
-var DETAIL_TH='<tr><th>CANDIDATE</th><th>ADVERTISER</th><th>PARTY</th><th>OFFICE</th><th>STATE</th><th>DMA</th><th>STATION</th><th>DATES</th><th>DAYPART(S)</th><th>TOTAL</th><th>DOC</th></tr>';
+var DETAIL_TH='<tr><th>CANDIDATE</th><th>ADVERTISER</th><th>PARTY</th><th>OFFICE</th><th>STATE</th><th>DMA</th><th>STATION</th><th>DATES</th><th>DAYPART(S)</th><th>CLASS</th><th>TOTAL</th><th>DOC</th></tr>';
 
 function detailRow(r){
   return'<tr>'+
@@ -242,7 +245,8 @@ function detailRow(r){
     '<td class="c-muted" title="'+esc(r.dma_name||'')+'">'+esc(r.dma_name||'—')+'</td>'+
     '<td class="c-amber">'+esc(r.callsign||'—')+'</td>'+
     '<td class="c-muted">'+esc(fmtDates(r))+'</td>'+
-    '<td class="c-muted">'+esc(fmtDayparts(r.daypart))+'</td>'+
+    '<td class="c-muted">'+esc(fmtDaypartCodes(r))+'</td>'+
+    '<td class="c-muted">'+esc(r.class_of_time||'—')+'</td>'+
     '<td class="c-green">'+fmt$(r.gross_total)+'</td>'+
     '<td>'+fccLink(r)+'</td>'+
   '</tr>';
