@@ -550,7 +550,8 @@ function renderLines(rows){
       else if(c.key==='state')cls='c-blue';
       else if(MUTED[c.key])cls='c-muted';
       var disp='';
-      if(c.key==='rate'||c.key==='line_total')disp=v?'$'+parseFloat(v).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2}):'—';
+      if(c.key==='candidate')disp=esc(v||r.advertiser||'—');
+      else if(c.key==='rate'||c.key==='line_total')disp=v?'$'+parseFloat(v).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2}):'—';
       else disp=esc(v||'—');
       return'<td class="'+cls+'">'+disp+'</td>';
     }).join('')+'</tr>';
