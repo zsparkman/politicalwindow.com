@@ -31,7 +31,6 @@ input{width:170px}
 .sort-btn{background:transparent;border:none;cursor:pointer;font-family:'Courier New',monospace;font-size:0.65rem;letter-spacing:0.08em;color:#94a3b8;padding:2px 6px}
 .sort-btn.active{color:#f59e0b;font-weight:700}
 #main{padding:16px 24px;display:flex;flex-direction:column;gap:14px}
-/* grouped view */
 #grouped{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
 #grouped-header{display:flex;padding:8px 14px;border-bottom:1px solid #1e3050;align-items:center}
 #grouped-count{margin-left:auto;font-size:0.62rem;color:#64748b}
@@ -50,7 +49,6 @@ input{width:170px}
 .detail-wrap{background:#060d18;border-bottom:1px solid #1e3050;padding:10px 14px 14px;overflow-x:auto;display:none}
 .detail-wrap.open{display:block}
 .detail-title{font-size:0.62rem;color:#94a3b8;letter-spacing:0.1em;margin-bottom:8px}
-/* shared table */
 table{width:100%;border-collapse:collapse;font-size:0.68rem}
 th{text-align:left;padding:6px 8px;border-bottom:1px solid #1e3050;font-weight:700;letter-spacing:0.06em;color:#94a3b8;white-space:nowrap;background:#0a1525;font-size:0.62rem}
 th.sortable{cursor:pointer;user-select:none}
@@ -67,7 +65,6 @@ tr:hover td{background:#0d1f35}
 .c-r{color:#ef4444;font-weight:700}
 .c-d{color:#3b82f6;font-weight:700}
 .c-blue{color:#38bdf8}
-/* flat contracts table */
 #raw-wrap{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow-x:auto}
 #raw-header{padding:8px 14px;border-bottom:1px solid #1e3050;font-size:0.62rem;color:#94a3b8;letter-spacing:0.08em}
 #loading{display:flex;align-items:center;justify-content:center;height:200px;font-size:0.8rem;color:#f59e0b;letter-spacing:0.15em}
@@ -89,13 +86,13 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   <div id="stats">
     <div><div class="stat-val" id="s-spend">—</div><div class="stat-lbl">GROSS SPEND</div></div>
     <div><div class="stat-val" id="s-contracts">—</div><div class="stat-lbl">CONTRACTS</div></div>
-    <div><div class="stat-val" id="s-advertisers">—</div><div class="stat-lbl">ADVERTISERS</div></div>
+    <div><div class="stat-val" id="s-candidates">—</div><div class="stat-lbl">CANDIDATES</div></div>
     <div><div class="stat-val" id="s-stations">—</div><div class="stat-lbl">STATIONS</div></div>
   </div>
 </div>
 <div id="controls">
   <div class="tab-group">
-    <button class="tab active" data-view="advertiser">BY ADVERTISER</button>
+    <button class="tab active" data-view="candidate">BY CANDIDATE</button>
     <button class="tab" data-view="dma">BY DMA</button>
     <button class="tab" data-view="station">BY STATION</button>
     <button class="tab" data-view="raw">CONTRACTS</button>
@@ -114,7 +111,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   </div>
   <div class="filter-wrap">
     <div class="filter-lbl">SEARCH</div>
-    <input id="f-search" placeholder="advertiser, station, DMA…">
+    <input id="f-search" placeholder="candidate, advertiser, station…">
   </div>
   <div id="sort-wrap">SORT:
     <button class="sort-btn active" data-sort="spend">SPEND</button>
@@ -131,7 +128,8 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   <div id="raw-wrap" style="display:none">
     <div id="raw-header"></div>
     <table>
-      <thead><tr>
+      <thead><tr id="raw-thead">
+        <th class="sortable" data-col="candidate">CANDIDATE</th>
         <th class="sortable" data-col="advertiser">ADVERTISER</th>
         <th class="sortable" data-col="party">PARTY</th>
         <th class="sortable" data-col="office_type">OFFICE</th>
@@ -150,10 +148,8 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 <footer>DATA SOURCE: FCC OPIF PUBLIC FILES · PARSED VIA CLAUDE SONNET · POLITICALWINDOW.COM © 2026</footer>
 <script>
 var API='https://rates.politicalwindow.com';
-var CANDS_API='https://api.politicalwindow.com';
-var ALL_DATA=[],currentView='advertiser',currentSort='spend';
+var ALL_DATA=[],currentView='candidate',currentSort='spend';
 var rawSort={col:'start_date',dir:'desc'};
-var CANDIDATES=[],CAND_MAP={},LAST_NAME_MAP={};
 
 function fmt$(n){if(!n&&n!==0)return'—';var v=parseFloat(n);if(isNaN(v))return'—';if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';if(v>=1000)return'$'+(v/1000).toFixed(0)+'K';return'$'+v.toFixed(0);}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -163,56 +159,8 @@ function partyPill(p){var c={R:'#ef4444',D:'#3b82f6',I:'#a78bfa'},b={R:'rgba(239
 function fmtDate(d){if(!d)return'';return d.slice(5,10).replace('-','/');}
 function fmtDates(r){var s=fmtDate(r.start_date),e=fmtDate(r.end_date);if(!s&&!e)return'—';if(!e)return s;if(!s)return e;return s+'–'+e;}
 function fccLink(r){return r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:#f59e0b;font-size:0.6rem">PDF ↗</a>':'—';}
-
-// ── Candidate name normalization ──────────────────────────────────────────
-function normKey(s){
-  var v=(s||'').trim(),vl=v.toLowerCase();
-  // 1. Full-name substring match (e.g. "POL/ Tom Steyer / D / Governor / CA")
-  for(var i=0;i<CANDIDATES.length;i++){if(vl.indexOf(CANDIDATES[i])>=0)return CANDIDATES[i];}
-  // 2. Strip FCC POL/Name/Party/Office/State prefix
-  var m=v.match(/^POL\s*\/\s*([^\/]+)/i);if(m){v=m[1].trim();vl=v.toLowerCase();}
-  // 3. Strip Name/Party/Office slash format — take name segment only (e.g. "Steyer/D/Governor")
-  if(v.indexOf('/')>=0){v=v.split('/')[0].trim();vl=v.toLowerCase();}
-  // 4. Strip "for [full office]"
-  v=v.replace(/\s+for\s+(governor|lt\.?\s*governor|u\.?s\.?\s*senate|senate|u\.?s\.?\s*house|congress|president|mayor|assembly|attorney general|secretary of state|treasurer|controller)\b.*/i,'');
-  // 5. Strip "for [STATE ABBR] [anything]" (e.g. "FOR CA GOV", "FOR TX SEN")
-  v=v.replace(/\s+for\s+[a-z]{2}\b.*/i,'');
-  // 6. Strip trailing year and "of [STATE]"
-  v=v.replace(/\s+20\d\d\b.*/,'');
-  v=v.replace(/\s+of\s+[A-Z]{2}\b.*/i,'');
-  v=v.trim().replace(/\s+/g,' ').toLowerCase();
-  // 7. Last-name reverse lookup (e.g. "steyer" → "tom steyer")
-  if(LAST_NAME_MAP[v])return LAST_NAME_MAP[v];
-  return v;
-}
-function canonLabel(s){var k=normKey(s);return CAND_MAP[k]||(s||'').trim();}
-
-function loadCandidates(){
-  return fetch(CANDS_API+'/api/candidates')
-    .then(function(r){return r.json();})
-    .then(function(j){
-      var states=j.data||j||{};
-      Object.keys(states).forEach(function(st){
-        var races=states[st];if(!Array.isArray(races))return;
-        races.forEach(function(race){
-          if(!race.list)return;
-          race.list.forEach(function(c){
-            if(c.n&&c.n.trim().split(/\s+/).length>=2){
-              var display=c.n.trim(),lower=display.toLowerCase();
-              CANDIDATES.push(lower);CAND_MAP[lower]=display;
-              // Build last-name lookup; mark null on collision to avoid false matches
-              var lastName=lower.split(' ').pop();
-              if(lastName&&lastName.length>2){
-                if(LAST_NAME_MAP[lastName]===undefined)LAST_NAME_MAP[lastName]=lower;
-                else if(LAST_NAME_MAP[lastName]!==lower)LAST_NAME_MAP[lastName]=null;
-              }
-            }
-          });
-        });
-      });
-      CANDIDATES.sort(function(a,b){return b.length-a.length;});
-    }).catch(function(){});
-}
+// Resolved candidate name, falling back to raw advertiser
+function candKey(r){return r.candidate||r.advertiser||'Unknown';}
 
 function getFiltered(){
   var party=document.getElementById('f-party').value,state=document.getElementById('f-state').value,dma=document.getElementById('f-dma').value,search=document.getElementById('f-search').value.toLowerCase();
@@ -220,7 +168,7 @@ function getFiltered(){
     if(party!=='ALL'&&r.party!==party)return false;
     if(state!=='ALL'&&r.state!==state)return false;
     if(dma!=='ALL'&&r.dma_name!==dma)return false;
-    if(search)return(r.advertiser||'').toLowerCase().includes(search)||(r.callsign||'').toLowerCase().includes(search)||(r.dma_name||'').toLowerCase().includes(search)||(r.candidate_name||'').toLowerCase().includes(search);
+    if(search)return(r.candidate||'').toLowerCase().includes(search)||(r.advertiser||'').toLowerCase().includes(search)||(r.callsign||'').toLowerCase().includes(search)||(r.dma_name||'').toLowerCase().includes(search);
     return true;
   });
 }
@@ -229,16 +177,15 @@ function updateStats(rows){
   var spend=rows.reduce(function(s,r){return s+(parseFloat(r.gross_total)||0);},0);
   document.getElementById('s-spend').textContent=fmt$(spend);
   document.getElementById('s-contracts').textContent=rows.length.toLocaleString();
-  document.getElementById('s-advertisers').textContent=new Set(rows.map(function(r){return normKey(r.advertiser);}).filter(Boolean)).size;
+  document.getElementById('s-candidates').textContent=new Set(rows.map(candKey).filter(Boolean)).size;
   document.getElementById('s-stations').textContent=new Set(rows.map(function(r){return r.callsign;}).filter(Boolean)).size;
 }
 
 function buildGroups(rows){
   var map={};
   rows.forEach(function(r){
-    var rawKey=currentView==='advertiser'?r.advertiser:currentView==='dma'?r.dma_name:r.callsign;
-    var k=currentView==='advertiser'?normKey(r.advertiser):(rawKey||'Unknown');
-    if(!map[k])map[k]={label:currentView==='advertiser'?canonLabel(r.advertiser):(rawKey||'Unknown'),contracts:0,spend:0,parties:new Set(),states:new Set(),dmas:new Set(),stations:new Set(),rows:[]};
+    var k=currentView==='candidate'?candKey(r):currentView==='dma'?(r.dma_name||'Unknown'):(r.callsign||'Unknown');
+    if(!map[k])map[k]={label:k,contracts:0,spend:0,parties:new Set(),states:new Set(),dmas:new Set(),stations:new Set(),rows:[]};
     map[k].contracts++;map[k].spend+=parseFloat(r.gross_total)||0;
     if(r.party)map[k].parties.add(r.party);if(r.state)map[k].states.add(r.state);
     if(r.dma_name)map[k].dmas.add(r.dma_name);if(r.callsign)map[k].stations.add(r.callsign);
@@ -247,9 +194,12 @@ function buildGroups(rows){
   return Object.values(map).sort(function(a,b){return currentSort==='spend'?b.spend-a.spend:b.contracts-a.contracts;});
 }
 
+var DETAIL_TH='<tr><th>CANDIDATE</th><th>ADVERTISER</th><th>PARTY</th><th>OFFICE</th><th>STATE</th><th>DMA</th><th>STATION</th><th>DATES</th><th>DAYPART(S)</th><th>TOTAL</th><th>DOC</th></tr>';
+
 function detailRow(r){
   return'<tr>'+
-    '<td class="'+pc(r.party)+'" title="'+esc(r.advertiser||r.candidate_name||'')+'">'+esc(r.advertiser||r.candidate_name||'—')+'</td>'+
+    '<td class="'+pc(r.party)+'" title="'+esc(r.candidate||'')+'">'+esc(r.candidate||'—')+'</td>'+
+    '<td class="c-muted" title="'+esc(r.advertiser||'')+'">'+esc(r.advertiser||'—')+'</td>'+
     '<td class="'+pc(r.party)+'">'+esc(r.party||'—')+'</td>'+
     '<td class="c-muted">'+esc(r.office_type||'—')+'</td>'+
     '<td class="c-blue">'+esc(r.state||'—')+'</td>'+
@@ -262,14 +212,12 @@ function detailRow(r){
   '</tr>';
 }
 
-var DETAIL_TH='<tr><th>ADVERTISER</th><th>PARTY</th><th>OFFICE</th><th>STATE</th><th>DMA</th><th>STATION</th><th>DATES</th><th>DAYPART(S)</th><th>TOTAL</th><th>DOC</th></tr>';
-
 function renderGrouped(groups){
   document.getElementById('grouped-count').textContent=groups.length+' GROUPS · '+getFiltered().length+' CONTRACTS';
   document.getElementById('grouped-body').innerHTML=groups.map(function(g,i){
     var barColor=i<3?'#f59e0b':'#1e3050';
     var pills=[...g.parties].map(partyPill).join('');
-    if(currentView==='advertiser'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#38bdf8','rgba(56,189,248,0.1)');});pills+=pill(g.dmas.size+' DMA'+(g.dmas.size!==1?'s':''));pills+=pill(g.stations.size+' STN');}
+    if(currentView==='candidate'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#38bdf8','rgba(56,189,248,0.1)');});pills+=pill(g.dmas.size+' DMA'+(g.dmas.size!==1?'s':''));pills+=pill(g.stations.size+' STN');}
     if(currentView==='dma'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#38bdf8','rgba(56,189,248,0.1)');});pills+=pill(g.stations.size+' stations');}
     if(currentView==='station'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#38bdf8','rgba(56,189,248,0.1)');});}
     return'<div class="group-row">'+
@@ -291,8 +239,7 @@ function renderGrouped(groups){
 }
 
 function renderRaw(rows){
-  var col=rawSort.col,dir=rawSort.dir;
-  var NUMS={gross_total:1};
+  var col=rawSort.col,dir=rawSort.dir,NUMS={gross_total:1};
   var sorted=rows.slice().sort(function(a,b){
     var av=a[col]||'',bv=b[col]||'';
     if(NUMS[col]){av=parseFloat(av)||0;bv=parseFloat(bv)||0;}
@@ -302,16 +249,15 @@ function renderRaw(rows){
   });
   document.getElementById('raw-header').textContent=rows.length.toLocaleString()+' CONTRACTS';
   document.getElementById('raw-body').innerHTML=sorted.map(detailRow).join('');
-  document.querySelectorAll('#raw-wrap th.sortable').forEach(function(th){
+  document.querySelectorAll('#raw-thead th.sortable').forEach(function(th){
     th.classList.remove('sort-asc','sort-desc');
     if(th.dataset.col===rawSort.col)th.classList.add('sort-'+rawSort.dir);
   });
 }
 
 function render(){
-  var rows=getFiltered();
+  var rows=getFiltered(),isRaw=currentView==='raw';
   updateStats(rows);
-  var isRaw=currentView==='raw';
   document.getElementById('grouped').style.display=isRaw?'none':'block';
   document.getElementById('raw-wrap').style.display=isRaw?'block':'none';
   if(isRaw){renderRaw(rows);}else{renderGrouped(buildGroups(rows));}
@@ -324,24 +270,24 @@ window.toggleDetail=function(i){
   if(!open){d.classList.add('open');a.textContent='▲';}
 };
 
-Promise.all([
-  fetch(API+'/api/rates?limit=500').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}),
-  loadCandidates()
-]).then(function(res){
-  ALL_DATA=res[0].data||[];
-  document.getElementById('loading').style.display='none';
-  document.getElementById('header-sub').textContent=ALL_DATA.length+' contracts indexed · TX + CA + IL · 2026 cycle';
-  var states=Array.from(new Set(ALL_DATA.map(function(r){return r.state;}).filter(Boolean))).sort();
-  var stateEl=document.getElementById('f-state');
-  states.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;stateEl.appendChild(o);});
-  var dmas=Array.from(new Set(ALL_DATA.map(function(r){return r.dma_name;}).filter(Boolean))).sort();
-  var dmaEl=document.getElementById('f-dma');
-  dmas.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;dmaEl.appendChild(o);});
-  render();
-}).catch(function(e){
-  document.getElementById('loading').style.display='none';
-  var em=document.getElementById('error-msg');em.style.display='block';em.textContent='API ERROR: '+e.message;
-});
+fetch(API+'/api/rates?limit=500')
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(j){
+    ALL_DATA=j.data||[];
+    document.getElementById('loading').style.display='none';
+    document.getElementById('header-sub').textContent=ALL_DATA.length+' contracts indexed · TX + CA + IL · 2026 cycle';
+    var states=Array.from(new Set(ALL_DATA.map(function(r){return r.state;}).filter(Boolean))).sort();
+    var stateEl=document.getElementById('f-state');
+    states.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;stateEl.appendChild(o);});
+    var dmas=Array.from(new Set(ALL_DATA.map(function(r){return r.dma_name;}).filter(Boolean))).sort();
+    var dmaEl=document.getElementById('f-dma');
+    dmas.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;dmaEl.appendChild(o);});
+    render();
+  })
+  .catch(function(e){
+    document.getElementById('loading').style.display='none';
+    var em=document.getElementById('error-msg');em.style.display='block';em.textContent='API ERROR: '+e.message;
+  });
 
 document.querySelectorAll('.tab').forEach(function(btn){
   btn.addEventListener('click',function(){
@@ -355,7 +301,7 @@ document.querySelectorAll('.sort-btn').forEach(function(btn){
     btn.classList.add('active');currentSort=btn.dataset.sort;render();
   });
 });
-document.querySelectorAll('#raw-wrap th.sortable').forEach(function(th){
+document.querySelectorAll('#raw-thead th.sortable').forEach(function(th){
   th.addEventListener('click',function(){
     var col=th.dataset.col;
     if(rawSort.col===col){rawSort.dir=rawSort.dir==='asc'?'desc':'asc';}
