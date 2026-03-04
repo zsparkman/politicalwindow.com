@@ -296,24 +296,6 @@
   ══════════════════════════════════════════ */
 
 
-  /* ── Rate Intel section ─────────────────────────────── */
-  .rate-table { width:100%; border-collapse:collapse; margin-top:0.5rem; }
-  .rate-table th { font-family:var(--mono); font-size:0.55rem; letter-spacing:0.08em; color:var(--text-faint); text-transform:uppercase; padding:0.25rem 0.4rem; border-bottom:1px solid var(--border); text-align:left; }
-  .rate-table td { font-family:var(--mono); font-size:0.65rem; color:var(--text-muted); padding:0.3rem 0.4rem; border-bottom:1px solid rgba(255,255,255,0.04); }
-  .rate-table td.val { color:var(--text-bright); font-weight:600; }
-  .rate-table td.green { color:var(--green); }
-  .rate-table td.red { color:var(--red); }
-  .rate-tag-r { color:#ef4444; } .rate-tag-d { color:#3b82f6; }
-  .rates-loading { font-family:var(--mono); font-size:0.65rem; color:var(--text-faint); padding:0.5rem 0; }
-  .rates-empty { font-family:var(--mono); font-size:0.65rem; color:var(--text-faint); padding:0.5rem 0; }
-  .rate-spend-bar { height:3px; background:var(--border); border-radius:2px; margin-top:0.75rem; }
-  .rate-spend-fill { height:3px; background:var(--amber); border-radius:2px; }
-  .rate-summary { display:flex; gap:1rem; margin-bottom:0.5rem; flex-wrap:wrap; }
-  .rate-stat { font-family:var(--mono); }
-  .rate-stat-val { font-size:1rem; color:var(--text-bright); font-weight:700; }
-  .rate-stat-lbl { font-size:0.55rem; color:var(--text-faint); letter-spacing:0.08em; text-transform:uppercase; margin-top:1px; }
-
-
   /* ── NAV BAR ── */
   .site-nav { background:var(--navy); border-bottom:1px solid var(--navy-border); display:flex; justify-content:center; gap:0; }
   .nav-link { font-family:var(--mono); font-size:0.62rem; font-weight:600; letter-spacing:0.09em; text-transform:uppercase;
@@ -811,12 +793,6 @@ function buildDetailHTML(abbr) {
       <div style="font-family:var(--sans);font-size:0.74rem;color:var(--text-muted);line-height:1.55">${s.notes||'—'}</div>
     </div>
 
-    <div class="dsec" id="rateIntelSection-${s.abbr}">
-      <div class="dlabel">📡 Rate Intel · FCC Filings</div>
-      <div class="rates-loading" id="ratesLoading-${s.abbr}">Loading ad contracts...</div>
-      <div id="ratesContent-${s.abbr}"></div>
-    </div>
-
     ${stateHasBallot(s.abbr) ? `
     <div class="dsec ballot-section" style="border-bottom:none; margin-top:0.5rem;">
       <div class="dlabel">Ballot Measures / Props</div>
@@ -837,77 +813,6 @@ function buildDetailHTML(abbr) {
   </div>`;
 }
 
-
-// ── RATE INTEL — fetch and render ad spend data ───────────────────────────────
-// States with rate intel coverage (backed by FCC data in ratewindow-api)
-const RATES_STATES = new Set(['TX','CA','IL','NY','FL','PA','OH','GA','AZ','NC','WI','MI','NV','MN','CO','WA']);
-
-async function loadRatesForState(abbr) {
-  const loadEl = document.getElementById(`ratesLoading-${abbr}`);
-  const contentEl = document.getElementById(`ratesContent-${abbr}`);
-  if (!loadEl || !contentEl) return;
-
-  try {
-    const res = await fetch(`${RATES_API}/api/rates?state=${encodeURIComponent(abbr)}&limit=20`);
-    const json = await res.json();
-    const rows = json.data || [];
-
-    loadEl.style.display = 'none';
-
-    if (rows.length === 0) {
-      contentEl.innerHTML = `<div class="rates-empty">No FCC ad contracts on file yet for ${abbr}</div>`;
-      return;
-    }
-
-    // Summary stats
-    const totalSpend = rows.reduce((s, r) => s + (parseFloat(r.gross_total) || 0), 0);
-    const avgRate = rows.filter(r => r.unit_rate).reduce((s, r, _, a) => s + r.unit_rate / a.length, 0);
-    const advertisers = [...new Set(rows.map(r => r.advertiser).filter(Boolean))];
-
-    contentEl.innerHTML = `
-      <div class="rate-summary">
-        <div class="rate-stat">
-          <div class="rate-stat-val">$${totalSpend >= 1000000 ? (totalSpend/1000000).toFixed(1)+'M' : totalSpend >= 1000 ? (totalSpend/1000).toFixed(0)+'K' : totalSpend.toFixed(0)}</div>
-          <div class="rate-stat-lbl">Gross Spend</div>
-        </div>
-        <div class="rate-stat">
-          <div class="rate-stat-val">${rows.length}</div>
-          <div class="rate-stat-lbl">Contracts</div>
-        </div>
-        <div class="rate-stat">
-          <div class="rate-stat-val">${advertisers.length}</div>
-          <div class="rate-stat-lbl">Advertisers</div>
-        </div>
-        ${avgRate > 0 ? `<div class="rate-stat">
-          <div class="rate-stat-val">$${Math.round(avgRate)}</div>
-          <div class="rate-stat-lbl">Avg Unit Rate</div>
-        </div>` : ''}
-      </div>
-      <table class="rate-table">
-        <thead><tr>
-          <th>Advertiser</th>
-          <th>Station</th>
-          <th>Dates</th>
-          <th>Rate</th>
-          <th>Total</th>
-        </tr></thead>
-        <tbody>
-          ${rows.slice(0, 10).map(r => `<tr>
-            <td class="${r.party === 'R' ? 'rate-tag-r' : r.party === 'D' ? 'rate-tag-d' : ''}">${r.advertiser || r.candidate_name || '—'}</td>
-            <td>${r.callsign || '—'}</td>
-            <td style="font-size:0.58rem">${r.start_date ? r.start_date.slice(5,10) : '—'}${r.end_date ? '→'+r.end_date.slice(5,10) : ''}</td>
-            <td class="val">${r.unit_rate ? '$'+Number(r.unit_rate).toLocaleString() : '—'}</td>
-            <td class="green">${r.gross_total ? '$'+Number(r.gross_total).toLocaleString(undefined,{maximumFractionDigits:0}) : '—'}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-      ${rows.length > 10 ? `<div class="rates-loading" style="padding-top:0.4rem">${rows.length - 10} more contracts not shown</div>` : ''}
-    `;
-  } catch(e) {
-    if (loadEl) loadEl.textContent = 'Rate intel unavailable';
-  }
-  checkDetailScroll();
-}
 
 // ── PICK (select state) ────────────────────────────────────────────────────────
 let sel = null;
@@ -939,9 +844,6 @@ function pick(abbr) {
     p.scrollTop = 0;
     checkDetailScroll();
   }
-  // Load rate intel async after panel renders
-  loadRatesForState(abbr);
-
   // Filter table to selected state — no page scroll
   drawTable();
 }

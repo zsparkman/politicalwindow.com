@@ -14,6 +14,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Candidate Rate Intelligence — PoliticalWindow.com</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://cdn.webdatarocks.com/latest/webdatarocks.min.css" rel="stylesheet"/>
+<script src="https://cdn.webdatarocks.com/latest/webdatarocks.toolbar.min.js"></script>
+<script src="https://cdn.webdatarocks.com/latest/webdatarocks.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 html{font-size:18px}
@@ -89,6 +92,20 @@ tr:nth-child(even) td{background:#08111e}
 #loading{display:flex;align-items:center;justify-content:center;height:200px;font-size:0.8rem;color:#f59e0b;letter-spacing:0.15em}
 #error-msg{color:#ef4444;text-align:center;padding:40px;font-size:0.8rem;display:none}
 footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;padding:20px}
+#wdr-pivot-section{min-height:500px;background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
+#pivot-container{min-height:500px}
+/* WebDataRocks dark theme overrides */
+#pivot-container .wdr-ui,#pivot-container .wdr-component{background:#080e1a!important;color:#cbd5e1!important;font-family:'IBM Plex Mono',monospace!important;font-size:0.65rem!important}
+#pivot-container .wdr-toolbar-wrapper,#pivot-container .wdr-toolbar{background:#0d1829!important;border-bottom:1px solid #1e3050!important}
+#pivot-container .wdr-toolbar-ui-btn,#pivot-container .wdr-toolbar-menu-button{color:#94a3b8!important;background:transparent!important;border-color:#1e3050!important}
+#pivot-container .wdr-toolbar-ui-btn:hover,#pivot-container .wdr-toolbar-menu-button:hover{color:#f59e0b!important;background:rgba(245,158,11,0.08)!important}
+#pivot-container .wdr-grid-layout{background:#080e1a!important}
+#pivot-container .wdr-cell,#pivot-container .wdr-cell-value,#pivot-container .wdr-cell-header{background:#0d1829!important;color:#cbd5e1!important;border-color:#1e3050!important}
+#pivot-container .wdr-header-r div,#pivot-container .wdr-header-c div{background:#0a1525!important;color:#94a3b8!important;border-color:#1e3050!important;letter-spacing:0.06em!important}
+#pivot-container .wdr-grand-total td,#pivot-container .wdr-total{background:#0a1525!important;color:#f59e0b!important;font-weight:700!important}
+#pivot-container .wdr-selected{background:rgba(245,158,11,0.12)!important}
+#pivot-container ::-webkit-scrollbar{width:5px;height:5px}
+#pivot-container ::-webkit-scrollbar-thumb{background:#1e3050!important;border-radius:3px}
 :root{--navy:#08111f;--navy-border:#1a3156;--mono:'IBM Plex Mono',monospace;--text-faint:#3a506e;--text-bright:#e2e8f0;--amber:#f5a623}
 .site-nav{background:var(--navy);border-bottom:1px solid var(--navy-border);display:flex;justify-content:center;gap:0}
 .nav-link{font-family:var(--mono);font-size:0.62rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-faint);text-decoration:none;padding:0.55rem 1.5rem;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;white-space:nowrap}
@@ -232,6 +249,10 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
       <span></span>
     </div>
     <div id="pivot-body"></div>
+  </div>
+
+  <div id="wdr-pivot-section" style="display:none">
+    <div id="pivot-container"></div>
   </div>
 
   <div id="trend-table-wrap" style="display:none">
@@ -593,6 +614,7 @@ function render(){
   document.getElementById('chart-wrap').style.display=isLines?'none':'block';
   document.getElementById('pivot-controls').style.display=isPivot?'flex':'none';
   document.getElementById('pivot-wrap').style.display=isPivot?'block':'none';
+  document.getElementById('wdr-pivot-section').style.display=isPivot?'block':'none';
   document.getElementById('trend-table-wrap').style.display=isTrend?'block':'none';
   document.getElementById('lines-wrap').style.display=isLines?'block':'none';
   if(isPivot){
@@ -646,6 +668,47 @@ document.getElementById('c-sortby').addEventListener('change',function(){pivotSo
   document.getElementById(id).addEventListener('change',render);
 });
 document.getElementById('f-search').addEventListener('input',render);
+</script>
+
+<script>
+var wdrPivot = new WebDataRocks({
+  container: "#pivot-container",
+  toolbar: true,
+  beforetoolbarcreated: function(toolbar) {
+    toolbar.showShareReportButton = false;
+  },
+  report: {
+    dataSource: {
+      type: "json",
+      data: []
+    },
+    slice: {
+      rows: [{ uniqueName: "advertiser" }],
+      columns: [{ uniqueName: "dma_name" }],
+      measures: [{ uniqueName: "gross_total", aggregation: "sum" }]
+    },
+    formats: [{
+      name: "gross_total",
+      currencySymbol: "$",
+      decimalPlaces: 0,
+      thousandsSeparator: ","
+    }],
+    options: {
+      grid: {
+        type: "compact",
+        showTotals: "on",
+        showGrandTotals: "on"
+      }
+    }
+  }
+});
+
+fetch("https://rates.politicalwindow.com/api/rates?limit=500")
+  .then(function(r) { return r.json(); })
+  .then(function(j) {
+    var data = j.data || [];
+    wdrPivot.updateData({ data: data });
+  });
 </script>
 </body>
 </html>
