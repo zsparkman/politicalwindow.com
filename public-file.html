@@ -182,10 +182,10 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
         <th class="sortable" data-col="state">STATE</th>
         <th class="sortable" data-col="dma_name">DMA</th>
         <th class="sortable" data-col="callsign">STATION</th>
-        <th class="sortable sort-desc" data-col="start_date">DATES</th>
-        <th class="sortable" data-col="window_status">WINDOW</th>
         <th class="sortable" data-col="order_number">ORDER #</th>
-        <th>DAYPART</th>
+        <th class="sortable sort-desc" data-col="start_date">DATES</th>
+        <th>DPTCD</th>
+        <th class="sortable" data-col="window_status">WINDOW</th>
         <th class="sortable" data-col="gross_total">TOTAL</th>
         <th>DOC</th>
       </tr></thead>
@@ -249,7 +249,7 @@ function buildGroups(rows){
   return Object.values(map).sort(function(a,b){return currentSort==='spend'?b.spend-a.spend:b.contracts-a.contracts;});
 }
 
-var DETAIL_TH='<tr><th>CANDIDATE</th><th>ADVERTISER</th><th>PARTY</th><th>OFFICE</th><th>STATE</th><th>DMA</th><th>STATION</th><th>DATES</th><th>WINDOW</th><th>ORDER #</th><th>DAYPART</th><th>TOTAL</th><th>DOC</th></tr>';
+var DETAIL_TH='<tr><th>CANDIDATE</th><th>ADVERTISER</th><th>PARTY</th><th>OFFICE</th><th>STATE</th><th>DMA</th><th>STATION</th><th>ORDER #</th><th>DATES</th><th>DPTCD</th><th>WINDOW</th><th>TOTAL</th><th>DOC</th></tr>';
 
 function detailRow(r){
   return'<tr>'+
@@ -260,10 +260,10 @@ function detailRow(r){
     '<td class="c-blue">'+esc(r.state||'—')+'</td>'+
     '<td class="c-muted" title="'+esc(r.dma_name||'')+'">'+esc(r.dma_name||'—')+'</td>'+
     '<td class="c-amber">'+esc(r.callsign||'—')+'</td>'+
-    '<td class="c-muted">'+esc(fmtDates(r))+'</td>'+
-    '<td class="'+(r.window_status==='OOW'?'c-bright':r.window_status==='General'?'c-green':'c-amber')+'">'+esc(r.window_status||'—')+'</td>'+
     '<td class="c-muted">'+esc(r.order_number||'—')+'</td>'+
+    '<td class="c-muted">'+esc(fmtDates(r))+'</td>'+
     '<td class="c-muted">'+fmtDaypartCodes(r)+'</td>'+
+    '<td class="'+(r.window_status==='OOW'?'c-bright':r.window_status==='General'?'c-green':'c-amber')+'">'+esc(r.window_status||'—')+'</td>'+
     '<td class="c-green">'+fmt$(r.gross_total)+'</td>'+
     '<td>'+fccLink(r)+'</td>'+
   '</tr>';
