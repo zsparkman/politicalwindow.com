@@ -88,7 +88,7 @@
   .filter-btn.active { background:var(--blue-glow); border-color:var(--blue); color:var(--blue-light); }
 
   /* ── TOP SECTION: MAP + DETAIL ── */
-  .top-section { display:grid; grid-template-columns:minmax(0,1fr) 370px; gap:1rem; align-items:stretch; }
+  .top-section { display:grid; grid-template-columns:minmax(0,1fr) 370px; gap:1rem; align-items:start; }
 
   /* ── MAP CARD ── */
   .map-card { background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px; padding:1.25rem 1rem 1.25rem 1.25rem; align-self:start; overflow:visible; min-width:0; }
@@ -126,7 +126,6 @@
   .detail-panel {
     background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px;
     padding:1.25rem; overflow-y:auto;
-    min-height:0;
     transition:box-shadow 0.2s;
   }
   .detail-panel.has-more { box-shadow:inset 0 -52px 20px -20px var(--navy); }
@@ -325,7 +324,7 @@
   /* Tablet: 900px and below — stack map + detail */
   @media (max-width: 900px) {
     .top-section { grid-template-columns: 1fr; }
-    .detail-panel { min-height:200px; }
+    .detail-panel { height:auto !important; }
     .header-fcc { display:none; }
   }
 
@@ -1223,8 +1222,17 @@ const BALLOT = {};
 
 function stateHasBallot(abbr) { return !!(BALLOT[abbr] && BALLOT[abbr].length > 0); }
 
+function syncDetailHeight() {
+  if (window.innerWidth <= 900) return;
+  const mapCard = document.querySelector('.map-card');
+  const panel   = document.getElementById('detailPanel');
+  if (mapCard && panel) panel.style.height = mapCard.offsetHeight + 'px';
+}
+window.addEventListener('resize', syncDetailHeight);
+
 // ── INIT ───────────────────────────────────────────────────────────────────────
 buildMap(); buildHead(); drawTable();
+syncDetailHeight();
 document.getElementById('live-date').textContent =
   new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
 
