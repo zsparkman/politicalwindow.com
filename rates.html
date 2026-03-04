@@ -466,15 +466,16 @@ fetch(API+'/api/lines?limit=5000')
   if(DATA_BADGE){DATA_BADGE.style.color='var(--amber)';DATA_BADGE.textContent='⬤ API OFFLINE';}
 });
 
-document.getElementById('c-groupby').addEventListener('change',function(){pivotGroupBy=this.value;render();});
-document.getElementById('c-sortby').addEventListener('change',function(){pivotSortBy=this.value;render();});
+function safeRender(){try{render();}catch(e){console.error('render error:',e);}}
+document.getElementById('c-groupby').addEventListener('change',function(){pivotGroupBy=this.value;safeRender();});
+document.getElementById('c-sortby').addEventListener('change',function(){pivotSortBy=this.value;safeRender();});
 ['f-party','f-state','f-dma','f-station','f-daypart'].forEach(function(id){
-  document.getElementById(id).addEventListener('change',render);
+  document.getElementById(id).addEventListener('change',safeRender);
 });
 ['f-week-from','f-week-to'].forEach(function(id){
-  document.getElementById(id).addEventListener('change',render);
+  document.getElementById(id).addEventListener('change',safeRender);
 });
-document.getElementById('f-search').addEventListener('input',render);
+document.getElementById('f-search').addEventListener('input',safeRender);
 </script>
 </body>
 </html>
