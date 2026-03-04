@@ -615,6 +615,7 @@ function render(){
   document.getElementById('pivot-controls').style.display=isPivot?'flex':'none';
   document.getElementById('pivot-wrap').style.display=isPivot?'block':'none';
   document.getElementById('wdr-pivot-section').style.display=isPivot?'block':'none';
+  if(isPivot&&typeof wdrPivot!=='undefined'){wdrPivot.refresh();}
   document.getElementById('trend-table-wrap').style.display=isTrend?'block':'none';
   document.getElementById('lines-wrap').style.display=isLines?'block':'none';
   if(isPivot){
