@@ -210,9 +210,9 @@ function partyPill(p){var c={R:'#ef4444',D:'#3b82f6',I:'#a78bfa'},b={R:'rgba(239
 function fmtDate(d){if(!d)return'';return d.slice(5,10).replace('-','/');}
 function fmtDates(r){var s=fmtDate(r.start_date),e=fmtDate(r.end_date);if(!s&&!e)return'—';if(!e)return s;if(!s)return e;return s+'–'+e;}
 var DAYPART_CODES={'Early Morning':'EM','Daytime':'DT','Early Fringe':'EF','Early News':'EN','Prime Access':'PA','Primetime':'PT','Late News':'LN','Late Fringe':'LF','Overnight':'ON'};
-function fmtDayparts(str){if(!str)return'—';return str.split(/[,;\/+|&]+/).map(function(s){var t=s.trim();return DAYPART_CODES[t]||t;}).filter(Boolean).join(' · ');}
+function fmtDayparts(str){if(!str)return'—';return str.split(/[,;\/+|&]+/).map(function(s){var t=s.trim();return DAYPART_CODES[t]||t;}).filter(Boolean).join('·');}
 // Use line-level daypart_codes array from rate_lines when available; fall back to contract-level text parsing.
-function fmtDaypartCodes(r){var c=r.daypart_codes;if(c&&c.length)return c.join(' · ');return fmtDayparts(r.daypart);}
+function fmtDaypartCodes(r){var c=r.daypart_codes;if(c&&c.length)return c.join('·');return fmtDayparts(r.daypart);}
 function fccLink(r){return r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:#f59e0b;font-size:0.6rem">PDF ↗</a>':'—';}
 // Resolved candidate name, falling back to raw advertiser
 function candKey(r){return r.candidate||r.advertiser||'Unknown';}
