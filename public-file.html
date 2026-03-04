@@ -159,6 +159,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
     <div class="filter-lbl">SEARCH</div>
     <input id="f-search" placeholder="candidate, advertiser, station…">
   </div>
+  <button id="clear-filters" class="sort-btn" style="color:#f59e0b">CLEAR</button>
   <div id="sort-wrap">SORT:
     <button class="sort-btn active" data-sort="spend">SPEND</button>
     <button class="sort-btn" data-sort="contracts">CONTRACTS</button>
@@ -319,6 +320,38 @@ function render(){
   document.getElementById('grouped').style.display=isRaw?'none':'block';
   document.getElementById('raw-wrap').style.display=isRaw?'block':'none';
   if(isRaw){renderRaw(rows);}else{renderGrouped(buildGroups(rows));}
+  updateOptionStates();
+}
+
+function updateOptionStates(){
+  var filterIds=['f-party','f-state','f-dma'];
+  var fields={
+    'f-party':function(r){return r.party;},
+    'f-state':function(r){return r.state;},
+    'f-dma':function(r){return r.dma_name;}
+  };
+  filterIds.forEach(function(fid){
+    var sel=document.getElementById(fid);
+    var otherFilters={};
+    filterIds.forEach(function(oid){
+      if(oid!==fid)otherFilters[oid]=document.getElementById(oid).value;
+    });
+    var search=document.getElementById('f-search').value.toLowerCase();
+    var opts=sel.options;
+    for(var i=1;i<opts.length;i++){
+      var val=opts[i].value;
+      var count=ALL_DATA.filter(function(r){
+        for(var oid in otherFilters){
+          if(otherFilters[oid]!=='ALL'&&fields[oid](r)!==otherFilters[oid])return false;
+        }
+        if(search){
+          if(!(r.candidate||'').toLowerCase().includes(search)&&!(r.advertiser||'').toLowerCase().includes(search)&&!(r.callsign||'').toLowerCase().includes(search)&&!(r.dma_name||'').toLowerCase().includes(search))return false;
+        }
+        return fields[fid](r)===val;
+      }).length;
+      opts[i].style.color=count===0?'#3a506e':'';
+    }
+  });
 }
 
 window.toggleDetail=function(i){
@@ -372,6 +405,13 @@ document.querySelectorAll('#raw-thead th.sortable').forEach(function(th){
 });
 ['f-party','f-state','f-dma'].forEach(function(id){document.getElementById(id).addEventListener('change',render);});
 document.getElementById('f-search').addEventListener('input',render);
+document.getElementById('clear-filters').addEventListener('click',function(){
+  document.getElementById('f-party').value='ALL';
+  document.getElementById('f-state').value='ALL';
+  document.getElementById('f-dma').value='ALL';
+  document.getElementById('f-search').value='';
+  render();
+});
 </script>
 </body>
 </html>
