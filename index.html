@@ -87,9 +87,8 @@
   .filter-btn:hover  { border-color:var(--blue); color:var(--blue-light); }
   .filter-btn.active { background:var(--blue-glow); border-color:var(--blue); color:var(--blue-light); }
 
-  /* ── TOP SECTION: LEFT COL (map + table) + RIGHT COL (detail panel) ── */
+  /* ── TOP SECTION: MAP + DETAIL ── */
   .top-section { display:grid; grid-template-columns:minmax(0,1fr) 370px; gap:1rem; align-items:start; }
-  .map-table-col { display:flex; flex-direction:column; gap:1rem; min-width:0; }
 
   /* ── MAP CARD ── */
   .map-card { background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px; padding:1.25rem 1rem 1.25rem 1.25rem; align-self:start; overflow:visible; min-width:0; }
@@ -127,8 +126,7 @@
   .detail-panel {
     background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px;
     padding:1.25rem; overflow-y:auto;
-    position:sticky; top:1rem;
-    max-height:calc(100vh - 2rem);
+    height:280px;
     transition:box-shadow 0.2s;
   }
   .detail-panel.has-more { box-shadow:inset 0 -52px 20px -20px var(--navy); }
@@ -327,7 +325,7 @@
   /* Tablet: 900px and below — stack map + detail */
   @media (max-width: 900px) {
     .top-section { grid-template-columns: 1fr; }
-    .detail-panel { position:static; }
+    .detail-panel { height:auto; }
     .header-fcc { display:none; }
   }
 
@@ -445,9 +443,8 @@
     </div>
   </div>
 
-  <!-- MAP + TABLE (left) + DETAIL PANEL (right sidebar) -->
+  <!-- MAP + DETAIL -->
   <div class="top-section">
-    <div class="map-table-col">
     <div class="map-card">
       <div class="card-header">
         <div>
@@ -464,34 +461,6 @@
       </div>
     </div>
 
-    <!-- TABLE (desktop) / CARD LIST (mobile) -->
-    <div class="table-card">
-      <div class="table-toolbar">
-        <div class="card-title" style="font-size:0.95rem">State FCC Window Calendar</div>
-        <div class="search-wrap">
-          <span style="color:var(--text-faint);font-size:0.8rem">🔍</span>
-          <input type="text" id="searchInput" placeholder="Search state...">
-        </div>
-        <span class="tbl-info" id="tableInfo"></span>
-      </div>
-
-      <!-- Desktop table -->
-      <div class="table-scroll">
-        <table>
-          <thead><tr id="tableHead"></tr></thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
-
-      <!-- Mobile card list -->
-      <div class="mobile-state-list" id="mobileList"></div>
-
-      <div class="disclaimer">
-        ⚠ FCC Primary Window = 45 days prior to primary (federal candidates, broadcast). FCC General Window = 60 days prior to Nov 3, 2026 = <strong style="color:var(--text-muted)">Sep 4, 2026</strong>. LUR applies during both windows for legally qualified federal candidates. Issue/PAC advertisers not subject to LUR. Candidate data: public filings &amp; news reports as of Feb 27, 2026 — subject to change. Not legal advice.
-      </div>
-    </div>
-    </div><!-- /map-table-col -->
-
     <!-- Desktop detail panel (hidden on mobile, replaced by drawer) -->
     <div class="detail-panel" id="detailPanel">
       <div class="no-sel">
@@ -499,7 +468,34 @@
         <div class="no-sel-txt">SELECT A STATE<br>TO VIEW FCC WINDOW<br>&amp; DECLARED CANDIDATES</div>
       </div>
     </div>
-  </div><!-- /top-section -->
+  </div>
+
+  <!-- TABLE (desktop) / CARD LIST (mobile) -->
+  <div class="table-card">
+    <div class="table-toolbar">
+      <div class="card-title" style="font-size:0.95rem">State FCC Window Calendar</div>
+      <div class="search-wrap">
+        <span style="color:var(--text-faint);font-size:0.8rem">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search state...">
+      </div>
+      <span class="tbl-info" id="tableInfo"></span>
+    </div>
+
+    <!-- Desktop table -->
+    <div class="table-scroll">
+      <table>
+        <thead><tr id="tableHead"></tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Mobile card list -->
+    <div class="mobile-state-list" id="mobileList"></div>
+
+    <div class="disclaimer">
+      ⚠ FCC Primary Window = 45 days prior to primary (federal candidates, broadcast). FCC General Window = 60 days prior to Nov 3, 2026 = <strong style="color:var(--text-muted)">Sep 4, 2026</strong>. LUR applies during both windows for legally qualified federal candidates. Issue/PAC advertisers not subject to LUR. Candidate data: public filings &amp; news reports as of Feb 27, 2026 — subject to change. Not legal advice.
+    </div>
+  </div>
 </main>
 
 <!-- Mobile detail drawer -->
