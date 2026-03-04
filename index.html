@@ -126,8 +126,9 @@
   .detail-panel {
     background:var(--navy-card); border:1px solid var(--navy-border); border-radius:8px;
     padding:1.25rem; overflow-y:auto;
-    max-height:600px;
+    min-height:0; transition:box-shadow 0.2s;
   }
+  .detail-panel.has-more { box-shadow:inset 0 -52px 20px -20px var(--navy); }
   .detail-state-name { font-family:var(--display); font-size:1.85rem; letter-spacing:0.05em; color:#fff; line-height:1; }
   .detail-state-abbr { font-family:var(--mono); font-size:0.65rem; color:var(--text-muted); margin-top:2px; margin-bottom:0.875rem; }
   .dsec { margin-bottom:0.875rem; padding-bottom:0.875rem; border-bottom:1px solid var(--navy-border); }
@@ -323,7 +324,7 @@
   /* Tablet: 900px and below — stack map + detail */
   @media (max-width: 900px) {
     .top-section { grid-template-columns: 1fr; }
-    .detail-panel { min-height:unset; max-height:unset; }
+    .detail-panel { min-height:auto; }
     .header-fcc { display:none; }
   }
 
@@ -900,6 +901,7 @@ async function loadRatesForState(abbr) {
   } catch(e) {
     if (loadEl) loadEl.textContent = 'Rate intel unavailable';
   }
+  checkDetailScroll();
 }
 
 // ── PICK (select state) ────────────────────────────────────────────────────────
@@ -927,7 +929,10 @@ function pick(abbr) {
   if (isMobile()) {
     openDrawer(abbr);
   } else {
-    document.getElementById('detailPanel').innerHTML = buildDetailHTML(abbr);
+    const p = document.getElementById('detailPanel');
+    p.innerHTML = buildDetailHTML(abbr);
+    p.scrollTop = 0;
+    checkDetailScroll();
   }
   // Load rate intel async after panel renders
   loadRatesForState(abbr);
@@ -937,8 +942,18 @@ function pick(abbr) {
 }
 
 function emptyDetail() {
-  document.getElementById('detailPanel').innerHTML = `<div class="no-sel"><div class="no-sel-icon">🗳</div><div class="no-sel-txt">SELECT A STATE<br>TO VIEW FCC WINDOW<br>&amp; DECLARED CANDIDATES</div></div>`;
+  const p = document.getElementById('detailPanel');
+  p.innerHTML = `<div class="no-sel"><div class="no-sel-icon">🗳</div><div class="no-sel-txt">SELECT A STATE<br>TO VIEW FCC WINDOW<br>&amp; DECLARED CANDIDATES</div></div>`;
+  checkDetailScroll();
 }
+
+function checkDetailScroll() {
+  const p = document.getElementById('detailPanel');
+  if (!p) return;
+  const atBottom = p.scrollTop + p.clientHeight >= p.scrollHeight - 8;
+  p.classList.toggle('has-more', p.scrollHeight > p.clientHeight + 8 && !atBottom);
+}
+document.getElementById('detailPanel').addEventListener('scroll', checkDetailScroll);
 
 // ── MOBILE DRAWER ──────────────────────────────────────────────────────────────
 function openDrawer(abbr) {
