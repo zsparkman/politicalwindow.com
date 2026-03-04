@@ -281,7 +281,7 @@ function fmtN(n){
   var v=parseInt(n);
   return isNaN(v)?'—':v.toLocaleString();
 }
-function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(s){return(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function pc(p){return p==='R'?'c-r':p==='D'?'c-d':'c-muted';}
 function fmtWeek(w){if(!w)return'—';return w.slice(5,7)+'/'+w.slice(8,10)+'/'+w.slice(2,4);}
 function pill(label,color,bg){return'<span class="pill" style="color:'+(color||'#94a3b8')+';background:'+(bg||'rgba(148,163,184,0.1)')+';border-color:'+(color||'#94a3b8')+'44">'+esc(label)+'</span>';}
