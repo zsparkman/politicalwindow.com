@@ -200,6 +200,7 @@ document.getElementById('live-date').textContent =
   new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
 
 var API='https://rates.politicalwindow.com';
+var RATES_API_KEY='pw_live_7dc94b9e84da7e71d875d5dec837442b';
 var ALL_DATA=[],currentView='candidate',currentSort='spend';
 var rawSort={col:'start_date',dir:'desc'};
 
@@ -362,7 +363,7 @@ window.toggleDetail=function(i){
 };
 
 var DATA_BADGE=document.getElementById('data-badge');
-fetch(API+'/api/rates?limit=500')
+fetch(API+'/api/rates?limit=500',{headers:{'Authorization':'Bearer '+RATES_API_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(j){
     ALL_DATA=j.data||[];
