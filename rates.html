@@ -107,6 +107,10 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 #pivot-container .wdr-selected{background:rgba(245,158,11,0.12)!important}
 #pivot-container ::-webkit-scrollbar{width:5px;height:5px}
 #pivot-container ::-webkit-scrollbar-thumb{background:#1e3050!important;border-radius:3px}
+#office-bar{padding:8px 24px;border-bottom:1px solid #1e3050;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.office-btn{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;padding:4px 12px;border:1px solid #1e3050;border-radius:2px;cursor:pointer;background:transparent;color:#94a3b8;white-space:nowrap}
+.office-btn:hover{color:#e2e8f0;border-color:#2a4060}
+.office-btn.active{border-color:#f59e0b;background:rgba(245,158,11,0.12);color:#f59e0b}
 :root{--navy:#08111f;--navy-border:#1a3156;--mono:'IBM Plex Mono',monospace;--text-faint:#3a506e;--text-bright:#e2e8f0;--amber:#f5a623}
 .site-nav{background:var(--navy);border-bottom:1px solid var(--navy-border);display:flex;justify-content:center;gap:0}
 .nav-link{font-family:var(--mono);font-size:0.62rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-faint);text-decoration:none;padding:0.55rem 1.5rem;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;white-space:nowrap}
@@ -195,6 +199,8 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   </div>
   <button id="clear-filters" class="sort-btn" style="color:#f59e0b">CLEAR</button>
 </div>
+
+<div id="office-bar"></div>
 
 <div id="tabs-bar">
   <button class="tab active" data-view="pivot">PIVOT TABLE</button>
@@ -288,6 +294,7 @@ var ALL_DATA=[];
 var currentView='pivot';
 var pivotGroupBy='candidate';
 var pivotSortBy='spend';
+var officeFilter='ALL';
 var linesSort={col:'line_total',dir:'desc'};
 var chartInstance=null;
 
@@ -328,6 +335,26 @@ function buildDropdowns(){
   pop('f-state',Array.from(new Set(ALL_DATA.map(function(r){return r.state;}).filter(Boolean))).sort());
   pop('f-dma',Array.from(new Set(ALL_DATA.map(function(r){return r.dma;}).filter(Boolean))).sort());
   pop('f-station',Array.from(new Set(ALL_DATA.map(function(r){return r.station;}).filter(Boolean))).sort());
+  buildOfficeBar();
+}
+
+function buildOfficeBar(){
+  var offices=Array.from(new Set(ALL_DATA.map(function(r){return r.office;}).filter(Boolean))).sort();
+  var bar=document.getElementById('office-bar');
+  bar.innerHTML='';
+  ['ALL'].concat(offices).forEach(function(o){
+    var btn=document.createElement('button');
+    btn.className='office-btn'+(officeFilter===o?' active':'');
+    btn.dataset.office=o;
+    btn.textContent=o==='ALL'?'ALL':o.toUpperCase();
+    btn.addEventListener('click',function(){
+      officeFilter=o;
+      bar.querySelectorAll('.office-btn').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      render();
+    });
+    bar.appendChild(btn);
+  });
 }
 
 function getFiltered(){
@@ -342,6 +369,7 @@ function getFiltered(){
   return ALL_DATA.filter(function(r){
     if(party!=='ALL'&&r.party!==party)return false;
     if(state!=='ALL'&&r.state!==state)return false;
+    if(officeFilter!=='ALL'&&r.office!==officeFilter)return false;
     if(dma!=='ALL'&&r.dma!==dma)return false;
     if(station!=='ALL'&&r.station!==station)return false;
     if(daypart!=='ALL'&&r.daypart_code!==daypart)return false;
@@ -715,6 +743,8 @@ document.getElementById('clear-filters').addEventListener('click',function(){
   document.getElementById('f-week-from').value='';
   document.getElementById('f-week-to').value='';
   document.getElementById('f-search').value='';
+  officeFilter='ALL';
+  buildOfficeBar();
   render();
 });
 </script>
