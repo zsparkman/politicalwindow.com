@@ -122,10 +122,16 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 .col-dragging{opacity:0.35}
 .col-drop-target{border-color:#f59e0b!important;color:#f59e0b!important}
 .col-picker-wrap{padding:8px 14px;border-bottom:1px solid #1e3050;display:flex;gap:4px;flex-wrap:wrap;align-items:center}
-.col-filter-row th{background:#04090f!important;padding:3px 4px!important;border-bottom:1px solid #1e3050!important;font-weight:normal!important}
-.col-filter-input{width:100%;box-sizing:border-box;font-family:'IBM Plex Mono',monospace;font-size:0.57rem;color:#94a3b8;background:#080e1a;border:1px solid #1a2a40;border-radius:2px;padding:2px 5px;outline:none}
-.col-filter-input:focus{border-color:#2a4060;color:#cbd5e1}
-.col-filter-input::placeholder{color:#1a2a40}
+.col-flt-arr{cursor:pointer;font-size:0.52rem;color:#2a4060;margin-left:4px;flex-shrink:0;user-select:none;line-height:1;vertical-align:middle}
+.col-flt-arr:hover{color:#94a3b8}
+.col-flt-arr.active{color:#f59e0b}
+#col-filter-drop{position:fixed;background:#0a1525;border:1px solid #1e3050;border-radius:3px;z-index:9999;min-width:130px;max-width:220px;max-height:240px;overflow-y:auto;font-family:'IBM Plex Mono',monospace;font-size:0.62rem;box-shadow:0 4px 16px rgba(0,0,0,0.6)}
+.cfd-clear{padding:5px 10px;color:#64748b;cursor:pointer;border-bottom:1px solid #0f1f33;font-size:0.58rem;letter-spacing:0.06em}
+.cfd-clear:hover{color:#ef4444}
+.cfd-item{padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;color:#94a3b8;overflow:hidden}
+.cfd-item:hover{background:rgba(30,48,80,0.6);color:#e2e8f0}
+.cfd-item.checked{color:#f59e0b}
+.cfd-chk{width:10px;flex-shrink:0;color:#f59e0b;font-size:0.6rem}
 .g-name-pin{cursor:pointer;min-width:0}.g-name-pin:hover .g-name{color:#f59e0b}.g-name-pin.is-pinned .g-name{color:#f59e0b}
 #wdr-pivot-section{min-height:500px;background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
 #pivot-container{min-height:500px}
@@ -636,6 +642,9 @@ var colOrder=LINE_COLS.map(function(c){return c.key;});
 var groupFields=[];
 var expandedGroups={};
 var colFilters={};
+var linesLastRows=[];
+var colFilterDrop=null;
+var colFilterKey=null;
 var _dk=null,_ds=null;
 
 function getActiveCols(){
@@ -723,6 +732,58 @@ function buildColPicker(){
   });
 }
 
+function closeColFilter(){
+  if(colFilterDrop){colFilterDrop.remove();colFilterDrop=null;colFilterKey=null;}
+}
+function openColFilter(key,thEl){
+  closeColFilter();
+  var rows=linesLastRows;
+  var vals=Array.from(new Set(rows.map(function(r){
+    var v=r[key];
+    if(key==='week_of'||key==='start_date'||key==='end_date')return fmtWeek(v);
+    return(v==null||v==='')?'—':String(v);
+  }))).sort();
+  var active=colFilters[key] instanceof Set?colFilters[key]:new Set();
+  var drop=document.createElement('div');
+  drop.id='col-filter-drop';
+  var clr=document.createElement('div');
+  clr.className='cfd-clear';
+  clr.textContent=active.size>0?'✕  Clear filter':'No filter active';
+  clr.addEventListener('click',function(e){
+    e.stopPropagation();
+    delete colFilters[key];
+    closeColFilter();
+    renderLines(getFiltered());
+  });
+  drop.appendChild(clr);
+  vals.forEach(function(v){
+    var isChk=active.has(v);
+    var item=document.createElement('div');
+    item.className='cfd-item'+(isChk?' checked':'');
+    var chk=document.createElement('span');
+    chk.className='cfd-chk';chk.textContent=isChk?'✓':'';
+    item.appendChild(chk);
+    item.appendChild(document.createTextNode(v));
+    item.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(!colFilters[key])colFilters[key]=new Set();
+      if(colFilters[key].has(v))colFilters[key].delete(v);else colFilters[key].add(v);
+      if(colFilters[key].size===0)delete colFilters[key];
+      var nowChk=!!(colFilters[key]&&colFilters[key].has(v));
+      item.classList.toggle('checked',nowChk);
+      chk.textContent=nowChk?'✓':'';
+      renderLines(getFiltered());
+    });
+    drop.appendChild(item);
+  });
+  var rect=thEl.getBoundingClientRect();
+  drop.style.top=(rect.bottom+2)+'px';
+  drop.style.left=rect.left+'px';
+  document.body.appendChild(drop);
+  colFilterDrop=drop;colFilterKey=key;
+  setTimeout(function(){document.addEventListener('click',closeColFilter,{once:true});},0);
+}
+
 function summarizeRows(rows){
   var total=0,units=0,rateSum=0,rateCount=0;
   rows.forEach(function(r){
@@ -796,12 +857,15 @@ function renderGroupedLines(rows,cols){
 }
 
 function renderLines(rows){
+  linesLastRows=rows;
   var activeCols=getActiveCols();
-  // apply per-column text filters on top of global filters
+  // apply per-column dropdown filters
   var filtered=Object.keys(colFilters).length?rows.filter(function(r){
     return Object.keys(colFilters).every(function(k){
-      var f=colFilters[k];if(!f)return true;
-      return String(r[k]||'').toLowerCase().includes(f);
+      var s=colFilters[k];if(!s||s.size===0)return true;
+      var v=r[k];
+      var disp=(k==='week_of'||k==='start_date'||k==='end_date')?fmtWeek(v):(v==null||v===''?'—':String(v));
+      return s.has(disp);
     });
   }):rows;
   var sorted=filtered.slice().sort(function(a,b){
@@ -813,13 +877,10 @@ function renderLines(rows){
   });
   var sortRow='<tr>'+activeCols.map(function(c){
     var cls='sortable'+(linesSort.col===c.key?' sort-'+linesSort.dir:'');
-    return'<th class="'+cls+'" data-col="'+c.key+'">'+c.label+'</th>';
+    var hasF=colFilters[c.key]&&colFilters[c.key].size>0;
+    return'<th class="'+cls+'" data-col="'+c.key+'">'+c.label+'<span class="col-flt-arr'+(hasF?' active':'')+'" data-col="'+c.key+'">▾</span></th>';
   }).join('')+'</tr>';
-  var filterRow='<tr class="col-filter-row">'+activeCols.map(function(c){
-    var val=esc(colFilters[c.key]||'');
-    return'<th><input class="col-filter-input" data-col="'+c.key+'" value="'+val+'" placeholder="filter…" spellcheck="false"></th>';
-  }).join('')+'</tr>';
-  document.getElementById('lines-thead').innerHTML=sortRow+filterRow;
+  document.getElementById('lines-thead').innerHTML=sortRow;
   var MUTED={dma:1,agency:1,buyer:1,sales_office:1,salesperson:1,daypart_code:1,rate_class:1,description:1,time_start:1,time_end:1,order_number:1,line_number:1};
   if(groupFields.length>0){
     document.getElementById('lines-body').innerHTML=renderGroupedLines(sorted,activeCols);
@@ -854,15 +915,13 @@ function renderLines(rows){
       renderLines(rows);
     });
   });
-  document.querySelectorAll('.col-filter-input').forEach(function(inp){
-    inp.addEventListener('click',function(e){e.stopPropagation();});
-    inp.addEventListener('input',function(){
-      var key=inp.dataset.col,val=inp.value.trim().toLowerCase();
-      if(val)colFilters[key]=val;else delete colFilters[key];
-      var focusKey=key,cursor=inp.selectionStart;
-      renderLines(rows);
-      var restored=document.querySelector('.col-filter-input[data-col="'+focusKey+'"]');
-      if(restored){restored.focus();try{restored.setSelectionRange(cursor,cursor);}catch(e){}}
+  document.querySelectorAll('#lines-thead .col-flt-arr').forEach(function(arr){
+    arr.addEventListener('click',function(e){
+      e.stopPropagation();
+      var key=arr.dataset.col;
+      var th=arr.closest('th');
+      if(colFilterKey===key){closeColFilter();return;}
+      openColFilter(key,th);
     });
   });
 }
@@ -1017,7 +1076,7 @@ document.getElementById('clear-filters').addEventListener('click',function(){
   document.getElementById('f-week-from').value='';
   document.getElementById('f-week-to').value='';
   document.getElementById('f-search').value='';
-  colFilters={};
+  colFilters={};closeColFilter();
   clearPins();
 });
 </script>
