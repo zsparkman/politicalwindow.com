@@ -122,6 +122,10 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 .col-dragging{opacity:0.35}
 .col-drop-target{border-color:#f59e0b!important;color:#f59e0b!important}
 .col-picker-wrap{padding:8px 14px;border-bottom:1px solid #1e3050;display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.col-filter-row th{background:#04090f!important;padding:3px 4px!important;border-bottom:1px solid #1e3050!important;font-weight:normal!important}
+.col-filter-input{width:100%;box-sizing:border-box;font-family:'IBM Plex Mono',monospace;font-size:0.57rem;color:#94a3b8;background:#080e1a;border:1px solid #1a2a40;border-radius:2px;padding:2px 5px;outline:none}
+.col-filter-input:focus{border-color:#2a4060;color:#cbd5e1}
+.col-filter-input::placeholder{color:#1a2a40}
 .g-name-pin{cursor:pointer;min-width:0}.g-name-pin:hover .g-name{color:#f59e0b}.g-name-pin.is-pinned .g-name{color:#f59e0b}
 #wdr-pivot-section{min-height:500px;background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
 #pivot-container{min-height:500px}
@@ -631,6 +635,7 @@ var visibleCols=new Set(['candidate','party','office','state','dma','station','o
 var colOrder=LINE_COLS.map(function(c){return c.key;});
 var groupFields=[];
 var expandedGroups={};
+var colFilters={};
 var _dk=null,_ds=null;
 
 function getActiveCols(){
@@ -774,7 +779,7 @@ function renderGroupedLines(rows,cols){
             var disp='';
             if(c.key==='candidate')disp=esc(v||r.advertiser||'—');
             else if(c.key==='rate'||c.key==='line_total')disp=v?'$'+parseFloat(v).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2}):'—';
-            else if(c.key==='week_of')disp=fmtWeek(v);
+            else if(c.key==='week_of'||c.key==='start_date'||c.key==='end_date')disp=fmtWeek(v);
             else disp=esc(v||'—');
             return'<td class="'+cls+'"'+(ci===0?' style="padding-left:'+(14+(depth+1)*16)+'px"':'')+'>'+disp+'</td>';
           }).join('')+'</tr>';
@@ -792,22 +797,34 @@ function renderGroupedLines(rows,cols){
 
 function renderLines(rows){
   var activeCols=getActiveCols();
-  var sorted=rows.slice().sort(function(a,b){
+  // apply per-column text filters on top of global filters
+  var filtered=Object.keys(colFilters).length?rows.filter(function(r){
+    return Object.keys(colFilters).every(function(k){
+      var f=colFilters[k];if(!f)return true;
+      return String(r[k]||'').toLowerCase().includes(f);
+    });
+  }):rows;
+  var sorted=filtered.slice().sort(function(a,b){
     var av=a[linesSort.col],bv=b[linesSort.col];
     if(NUMERIC_COLS[linesSort.col]){av=parseFloat(av)||0;bv=parseFloat(bv)||0;}
     if(av<bv)return linesSort.dir==='asc'?-1:1;
     if(av>bv)return linesSort.dir==='asc'?1:-1;
     return 0;
   });
-  document.getElementById('lines-thead').innerHTML='<tr>'+activeCols.map(function(c){
+  var sortRow='<tr>'+activeCols.map(function(c){
     var cls='sortable'+(linesSort.col===c.key?' sort-'+linesSort.dir:'');
     return'<th class="'+cls+'" data-col="'+c.key+'">'+c.label+'</th>';
   }).join('')+'</tr>';
+  var filterRow='<tr class="col-filter-row">'+activeCols.map(function(c){
+    var val=esc(colFilters[c.key]||'');
+    return'<th><input class="col-filter-input" data-col="'+c.key+'" value="'+val+'" placeholder="filter…" spellcheck="false"></th>';
+  }).join('')+'</tr>';
+  document.getElementById('lines-thead').innerHTML=sortRow+filterRow;
   var MUTED={dma:1,agency:1,buyer:1,sales_office:1,salesperson:1,daypart_code:1,rate_class:1,description:1,time_start:1,time_end:1,order_number:1,line_number:1};
   if(groupFields.length>0){
     document.getElementById('lines-body').innerHTML=renderGroupedLines(sorted,activeCols);
     var glbls=groupFields.map(function(k){var c=LINE_COLS.find(function(c){return c.key===k;});return c?c.label:k;});
-    document.getElementById('lines-count').textContent=rows.length.toLocaleString()+' LINES · GROUPED BY '+glbls.join(' › ');
+    document.getElementById('lines-count').textContent=filtered.length.toLocaleString()+' LINES · GROUPED BY '+glbls.join(' › ');
   } else {
     var cap=Math.min(sorted.length,2000);
     document.getElementById('lines-body').innerHTML=sorted.slice(0,cap).map(function(r){
@@ -822,12 +839,12 @@ function renderLines(rows){
         var disp='';
         if(c.key==='candidate')disp=esc(v||r.advertiser||'—');
         else if(c.key==='rate'||c.key==='line_total')disp=v?'$'+parseFloat(v).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2}):'—';
-        else if(c.key==='week_of')disp=fmtWeek(v);
+        else if(c.key==='week_of'||c.key==='start_date'||c.key==='end_date')disp=fmtWeek(v);
         else disp=esc(v||'—');
         return'<td class="'+cls+'">'+disp+'</td>';
       }).join('')+'</tr>';
     }).join('');
-    document.getElementById('lines-count').textContent=rows.length.toLocaleString()+' LINES'+(rows.length>cap?' (showing '+cap.toLocaleString()+')':'');
+    document.getElementById('lines-count').textContent=filtered.length.toLocaleString()+' LINES'+(filtered.length<rows.length?' of '+rows.length.toLocaleString():'')+(filtered.length>cap?' (showing '+cap.toLocaleString()+')':'');
   }
   document.querySelectorAll('#lines-thead th.sortable').forEach(function(th){
     th.addEventListener('click',function(){
@@ -835,6 +852,17 @@ function renderLines(rows){
       if(linesSort.col===col)linesSort.dir=(linesSort.dir==='asc'?'desc':'asc');
       else{linesSort.col=col;linesSort.dir=NUMERIC_COLS[col]?'desc':'asc';}
       renderLines(rows);
+    });
+  });
+  document.querySelectorAll('.col-filter-input').forEach(function(inp){
+    inp.addEventListener('click',function(e){e.stopPropagation();});
+    inp.addEventListener('input',function(){
+      var key=inp.dataset.col,val=inp.value.trim().toLowerCase();
+      if(val)colFilters[key]=val;else delete colFilters[key];
+      var focusKey=key,cursor=inp.selectionStart;
+      renderLines(rows);
+      var restored=document.querySelector('.col-filter-input[data-col="'+focusKey+'"]');
+      if(restored){restored.focus();try{restored.setSelectionRange(cursor,cursor);}catch(e){}}
     });
   });
 }
@@ -989,6 +1017,7 @@ document.getElementById('clear-filters').addEventListener('click',function(){
   document.getElementById('f-week-from').value='';
   document.getElementById('f-week-to').value='';
   document.getElementById('f-search').value='';
+  colFilters={};
   clearPins();
 });
 </script>
