@@ -101,6 +101,11 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 .pin-apply{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;padding:4px 12px;border:1px solid #f59e0b;border-radius:2px;cursor:pointer;background:rgba(245,158,11,0.12);color:#f59e0b}
 .pin-clear-btn{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;padding:4px 10px;border:1px solid #1e3050;border-radius:2px;cursor:pointer;background:transparent;color:#64748b}
 .pin-clear-btn:hover{color:#94a3b8}
+.col-tog{font-family:'IBM Plex Mono',monospace;font-size:0.55rem;font-weight:700;letter-spacing:0.06em;padding:3px 8px;border:1px solid #1a2a40;border-radius:2px;cursor:pointer;background:transparent;color:#2a4060;white-space:nowrap}
+.col-tog:hover{color:#3a506e;border-color:#1e3050}
+.col-tog.on{border-color:#2a4060;color:#94a3b8;background:rgba(30,48,80,0.3)}
+.col-tog.on:hover{color:#e2e8f0;border-color:#4a6080}
+.col-picker-wrap{padding:8px 14px;border-bottom:1px solid #1e3050;display:flex;gap:4px;flex-wrap:wrap;align-items:center}
 .g-name-pin{cursor:pointer;min-width:0}.g-name-pin:hover .g-name{color:#f59e0b}.g-name-pin.is-pinned .g-name{color:#f59e0b}
 #wdr-pivot-section{min-height:500px;background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
 #pivot-container{min-height:500px}
@@ -285,6 +290,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
       <span>LINE ITEMS</span>
       <span id="lines-count"></span>
     </div>
+    <div class="col-picker-wrap" id="col-picker"></div>
     <table>
       <thead id="lines-thead"></thead>
       <tbody id="lines-body"></tbody>
@@ -348,6 +354,7 @@ function buildDropdowns(){
   pop('f-office',Array.from(new Set(ALL_DATA.map(function(r){return r.office;}).filter(Boolean))).sort());
   pop('f-dma',Array.from(new Set(ALL_DATA.map(function(r){return r.dma;}).filter(Boolean))).sort());
   pop('f-station',Array.from(new Set(ALL_DATA.map(function(r){return r.station;}).filter(Boolean))).sort());
+  buildColPicker();
 }
 
 function getFiltered(){
@@ -602,8 +609,28 @@ var LINE_COLS=[
   {key:'rate',label:'RATE'},{key:'units',label:'UNITS'},{key:'line_total',label:'LINE TOTAL'}
 ];
 var NUMERIC_COLS={rate:1,units:1,line_total:1};
+var visibleCols=new Set(['candidate','party','office','state','dma','station','order_number','line_number','description','week_of','time_start','time_end','rate_class','rate','units','line_total']);
+
+function buildColPicker(){
+  var picker=document.getElementById('col-picker');
+  picker.innerHTML='';
+  LINE_COLS.forEach(function(c){
+    var btn=document.createElement('button');
+    btn.className='col-tog'+(visibleCols.has(c.key)?' on':'');
+    btn.textContent=c.label;
+    btn.title=(visibleCols.has(c.key)?'Hide ':'Show ')+c.label;
+    btn.addEventListener('click',function(){
+      if(visibleCols.has(c.key)){visibleCols.delete(c.key);}else{visibleCols.add(c.key);}
+      btn.classList.toggle('on');
+      btn.title=(visibleCols.has(c.key)?'Hide ':'Show ')+c.label;
+      renderLines(getFiltered());
+    });
+    picker.appendChild(btn);
+  });
+}
 
 function renderLines(rows){
+  var activeCols=LINE_COLS.filter(function(c){return visibleCols.has(c.key);});
   var sorted=rows.slice().sort(function(a,b){
     var av=a[linesSort.col],bv=b[linesSort.col];
     if(NUMERIC_COLS[linesSort.col]){av=parseFloat(av)||0;bv=parseFloat(bv)||0;}
@@ -611,14 +638,14 @@ function renderLines(rows){
     if(av>bv)return linesSort.dir==='asc'?1:-1;
     return 0;
   });
-  document.getElementById('lines-thead').innerHTML='<tr>'+LINE_COLS.map(function(c){
+  document.getElementById('lines-thead').innerHTML='<tr>'+activeCols.map(function(c){
     var cls='sortable'+(linesSort.col===c.key?' sort-'+linesSort.dir:'');
     return'<th class="'+cls+'" data-col="'+c.key+'">'+c.label+'</th>';
   }).join('')+'</tr>';
   var MUTED={dma:1,agency:1,buyer:1,sales_office:1,salesperson:1,daypart_code:1,rate_class:1,description:1,time_start:1,time_end:1,order_number:1,line_number:1};
   var cap=Math.min(sorted.length,2000);
   document.getElementById('lines-body').innerHTML=sorted.slice(0,cap).map(function(r){
-    return'<tr>'+LINE_COLS.map(function(c){
+    return'<tr>'+activeCols.map(function(c){
       var v=r[c.key];
       var cls='';
       if(c.key==='party')cls=pc(v);
@@ -656,7 +683,7 @@ function render(){
   document.getElementById('pivot-controls').style.display=isPivot?'flex':'none';
   document.getElementById('pivot-wrap').style.display=isPivot?'block':'none';
   document.getElementById('wdr-pivot-section').style.display=isPivot?'block':'none';
-  if(isPivot){initWdr();}
+  if(isPivot){setTimeout(initWdr,0);}
   document.getElementById('trend-table-wrap').style.display=isTrend?'block':'none';
   document.getElementById('lines-wrap').style.display=isLines?'block':'none';
   if(isPivot){
@@ -800,6 +827,7 @@ function initWdr() {
   wdrPivot = new WebDataRocks({
     container: "#pivot-container",
     toolbar: true,
+    height: 500,
     beforetoolbarcreated: function(toolbar) {
       toolbar.showShareReportButton = false;
     },
