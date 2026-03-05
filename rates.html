@@ -687,6 +687,7 @@ fetch(API+'/api/lines?limit=5000')
   document.getElementById('header-sub').textContent=ALL_DATA.length.toLocaleString()+' rate lines indexed · 2026 cycle';
   if(DATA_BADGE){var t=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});DATA_BADGE.style.color='#4ade80';DATA_BADGE.textContent='⬤ LIVE · UPDATED '+t.toUpperCase();}
   buildDropdowns();
+  wdrPivot.updateData({ data: ALL_DATA });
   render();
 }).catch(function(e){
   document.getElementById('loading').style.display='none';
@@ -731,12 +732,12 @@ var wdrPivot = new WebDataRocks({
       data: []
     },
     slice: {
-      rows: [{ uniqueName: "advertiser" }],
-      columns: [{ uniqueName: "dma_name" }],
-      measures: [{ uniqueName: "gross_total", aggregation: "sum" }]
+      rows: [{ uniqueName: "candidate" }],
+      columns: [{ uniqueName: "dma" }],
+      measures: [{ uniqueName: "line_total", aggregation: "sum" }]
     },
     formats: [{
-      name: "gross_total",
+      name: "line_total",
       currencySymbol: "$",
       decimalPlaces: 0,
       thousandsSeparator: ","
@@ -751,12 +752,7 @@ var wdrPivot = new WebDataRocks({
   }
 });
 
-fetch("https://rates.politicalwindow.com/api/rates?limit=500")
-  .then(function(r) { return r.json(); })
-  .then(function(j) {
-    var data = j.data || [];
-    wdrPivot.updateData({ data: data });
-  });
+// wdrPivot data is populated below after ALL_DATA loads
 </script>
 </body>
 </html>
