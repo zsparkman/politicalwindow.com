@@ -93,6 +93,15 @@ tr:nth-child(even) td{background:#08111e}
 #loading{display:flex;align-items:center;justify-content:center;height:200px;font-size:0.8rem;color:#f59e0b;letter-spacing:0.15em}
 #error-msg{color:#ef4444;text-align:center;padding:40px;font-size:0.8rem;display:none}
 footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;padding:20px}
+#pin-bar{padding:8px 24px;border-bottom:1px solid #1e3050;display:none;align-items:center;gap:8px;flex-wrap:wrap}
+.pin-lbl{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:#3a506e;letter-spacing:0.1em;flex-shrink:0}
+.pin-chip{display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.06em;padding:3px 8px 3px 10px;border-radius:2px;border:1px solid #2a4060;color:#94a3b8;background:rgba(30,48,80,0.3)}
+.pin-chip.applied{border-color:#f59e0b;color:#f59e0b;background:rgba(245,158,11,0.1)}
+.pin-rm{cursor:pointer;color:#475569;font-size:0.65rem;line-height:1}.pin-rm:hover{color:#ef4444}
+.pin-apply{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;padding:4px 12px;border:1px solid #f59e0b;border-radius:2px;cursor:pointer;background:rgba(245,158,11,0.12);color:#f59e0b}
+.pin-clear-btn{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;padding:4px 10px;border:1px solid #1e3050;border-radius:2px;cursor:pointer;background:transparent;color:#64748b}
+.pin-clear-btn:hover{color:#94a3b8}
+.g-name-pin{cursor:pointer;min-width:0}.g-name-pin:hover .g-name{color:#f59e0b}.g-name-pin.is-pinned .g-name{color:#f59e0b}
 #wdr-pivot-section{min-height:500px;background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
 #pivot-container{min-height:500px}
 /* WebDataRocks dark theme overrides */
@@ -206,6 +215,8 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   <button class="tab" data-view="lines">LINE ITEMS</button>
 </div>
 
+<div id="pin-bar"></div>
+
 <div id="main">
   <div id="loading">LOADING RATE LINE DATA…</div>
   <div id="error-msg"></div>
@@ -292,6 +303,10 @@ var ALL_DATA=[];
 var currentView='pivot';
 var pivotGroupBy='candidate';
 var pivotSortBy='spend';
+var pinSet=new Set();
+var activePin=new Set();
+var chartTopGroups=[];
+var pivotGroupsCache=[];
 var linesSort={col:'line_total',dir:'desc'};
 var chartInstance=null;
 
@@ -349,6 +364,7 @@ function getFiltered(){
     if(party!=='ALL'&&r.party!==party)return false;
     if(state!=='ALL'&&r.state!==state)return false;
     if(office!=='ALL'&&r.office!==office)return false;
+    if(activePin.size>0&&!activePin.has(r.candidate))return false;
     if(dma!=='ALL'&&r.dma!==dma)return false;
     if(station!=='ALL'&&r.station!==station)return false;
     if(daypart!=='ALL'&&r.daypart_code!==daypart)return false;
@@ -407,11 +423,14 @@ function buildPivot(rows){
 }
 
 function renderPivotTable(groups){
+  pivotGroupsCache=groups;
+  var canPin=(pivotGroupBy==='candidate');
   var html=groups.map(function(g,i){
     var avgRate=g.rates.length?g.rates.reduce(function(s,v){return s+v;},0)/g.rates.length:null;
     var minRate=g.rates.length?Math.min.apply(null,g.rates):null;
     var pills=[...g.parties].map(partyPill).join('');
     var cap=50;
+    var isPinned=pinSet.has(g.label);
     var subRows=g.rows.slice(0,cap).map(function(r){
       return'<tr>'+
         '<td class="c-amber">'+esc(r.station||'—')+'</td>'+
@@ -424,11 +443,16 @@ function renderPivotTable(groups){
         '<td class="c-green" style="text-align:right">'+fmt$(r.line_total)+'</td>'+
       '</tr>';
     }).join('');
+    var nameEl=canPin
+      ?'<div class="g-name-pin'+(isPinned?' is-pinned':'')+'" onclick="window.pinCandidate('+i+')" title="Click to pin candidate">'+
+          '<div class="g-name">'+esc(g.label)+'</div><div class="g-pills">'+pills+'</div>'+
+        '</div>'
+      :'<div style="min-width:0"><div class="g-name">'+esc(g.label)+'</div><div class="g-pills">'+pills+'</div></div>';
     return'<div class="group-row">'+
-      '<div class="group-main" onclick="togglePivot('+i+')">'+
+      '<div class="group-main">'+
         '<div style="display:flex;align-items:center;gap:8px;min-width:0">'+
           '<div style="width:3px;height:28px;border-radius:2px;flex-shrink:0;background:'+(i<3?'#f59e0b':'#1e3050')+'"></div>'+
-          '<div style="min-width:0"><div class="g-name">'+esc(g.label)+'</div><div class="g-pills">'+pills+'</div></div>'+
+          nameEl+
         '</div>'+
         '<div class="g-num"><div class="g-num-val" style="color:#10b981">'+fmt$(g.spend)+'</div><div class="g-num-lbl">SPEND</div></div>'+
         '<div class="g-num"><div class="g-num-val">'+fmtN(g.units)+'</div><div class="g-num-lbl">UNITS</div></div>'+
@@ -436,7 +460,7 @@ function renderPivotTable(groups){
         '<div class="g-num"><div class="g-num-val" style="color:#f59e0b">'+(avgRate?'$'+avgRate.toFixed(0):'—')+'</div><div class="g-num-lbl">AVG RATE</div></div>'+
         '<div class="g-num"><div class="g-num-val" style="color:#64748b">'+(minRate?'$'+minRate.toFixed(0):'—')+'</div><div class="g-num-lbl">MIN RATE</div></div>'+
         '<div class="g-num"><div class="g-num-val">'+g.orders.size+'</div><div class="g-num-lbl">ORDERS</div></div>'+
-        '<div class="g-arrow" id="parrow-'+i+'">▼</div>'+
+        '<div class="g-arrow" id="parrow-'+i+'" onclick="togglePivot('+i+')" style="cursor:pointer">▼</div>'+
       '</div>'+
       '<div class="detail-wrap" id="pdetail-'+i+'">'+
         '<div class="detail-title">LINE DETAIL — '+g.rows.length+' RECORDS'+(g.rows.length>cap?' (showing '+cap+')':'')+'</div>'+
@@ -453,6 +477,7 @@ function renderPivotTable(groups){
 
 function renderPivotChart(groups){
   var top=groups.slice(0,20);
+  chartTopGroups=top;
   var labels=top.map(function(g){return g.label.length>32?g.label.slice(0,30)+'…':g.label;});
   var isMoney=(pivotSortBy==='spend'||pivotSortBy==='avgrate');
   var values=top.map(function(g){
@@ -471,6 +496,13 @@ function renderPivotChart(groups){
     },
     options:{
       indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      onClick:function(evt,elements){
+        if(!elements.length||pivotGroupBy!=='candidate')return;
+        var g=chartTopGroups[elements[0].index];
+        if(!g)return;
+        if(pinSet.has(g.label))pinSet.delete(g.label);else pinSet.add(g.label);
+        renderPinBar();
+      },
       plugins:{
         legend:{display:false},
         tooltip:{callbacks:{label:function(c){var v=c.raw;return isMoney?' $'+v.toLocaleString(undefined,{maximumFractionDigits:0}):'  '+v.toLocaleString();}}}
@@ -678,6 +710,41 @@ function updateOptionStates(){
   });
 }
 
+var pinList=[];
+function renderPinBar(){
+  var bar=document.getElementById('pin-bar');
+  pinList=Array.from(pinSet);
+  if(pinList.length===0&&activePin.size===0){bar.style.display='none';return;}
+  bar.style.display='flex';
+  var html='<span class="pin-lbl">PINNED</span>';
+  html+=pinList.map(function(p,idx){
+    return'<span class="pin-chip'+(activePin.has(p)?' applied':'')+'">'+esc(p)+'<span class="pin-rm" data-idx="'+idx+'"> ✕</span></span>';
+  }).join('');
+  if(pinList.length>0)html+='<button class="pin-apply" id="pin-apply-btn">APPLY FILTER</button>';
+  html+='<button class="pin-clear-btn" id="pin-clear-btn">CLEAR</button>';
+  bar.innerHTML=html;
+  bar.querySelectorAll('.pin-rm').forEach(function(el){
+    el.addEventListener('click',function(e){
+      e.stopPropagation();
+      var p=pinList[parseInt(el.dataset.idx)];
+      pinSet.delete(p);
+      renderPinBar();
+    });
+  });
+  var applyBtn=document.getElementById('pin-apply-btn');
+  if(applyBtn)applyBtn.addEventListener('click',function(){activePin=new Set(pinSet);render();renderPinBar();});
+  document.getElementById('pin-clear-btn').addEventListener('click',clearPins);
+}
+function clearPins(){pinSet.clear();activePin.clear();renderPinBar();render();}
+window.pinCandidate=function(i){
+  var g=pivotGroupsCache[i];if(!g)return;
+  if(pinSet.has(g.label))pinSet.delete(g.label);else pinSet.add(g.label);
+  // update visual on just this row without full re-render
+  var el=document.querySelector('#pivot-body .group-row:nth-child('+(i+1)+') .g-name-pin');
+  if(el){if(pinSet.has(g.label))el.classList.add('is-pinned');else el.classList.remove('is-pinned');}
+  renderPinBar();
+};
+
 window.togglePivot=function(i){
   var d=document.getElementById('pdetail-'+i),a=document.getElementById('parrow-'+i);
   var open=d.classList.contains('open');
@@ -723,7 +790,7 @@ document.getElementById('clear-filters').addEventListener('click',function(){
   document.getElementById('f-week-from').value='';
   document.getElementById('f-week-to').value='';
   document.getElementById('f-search').value='';
-  render();
+  clearPins();
 });
 </script>
 
