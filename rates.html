@@ -1161,38 +1161,7 @@ if(RATES_TOKEN){fetch(API+'/auth/me',{headers:{'Authorization':'Bearer '+RATES_T
   <div id="auth-card">
     <div class="auth-header">
       <div class="auth-title">PoliticalWindow<span style="color:#1e6fff">.</span>com</div>
-      <div class="auth-sub">RATE INTELLIGENCE · RESTRICTED ACCESS</div>
-    </div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" data-pane="login">LOGIN</button>
-      <button class="auth-tab" data-pane="register">REGISTER</button>
-    </div>
-    <div class="auth-body">
-      <div id="pane-login" class="auth-pane">
-        <form id="login-form">
-          <div class="auth-field"><div class="auth-lbl">EMAIL</div><input class="auth-inp" id="login-email" type="email" required autocomplete="email"></div>
-          <div class="auth-field"><div class="auth-lbl">PASSWORD</div><input class="auth-inp" id="login-password" type="password" required autocomplete="current-password"></div>
-          <button class="auth-btn" id="login-btn" type="submit">LOGIN</button>
-        </form>
-      </div>
-      <div id="pane-register" class="auth-pane" style="display:none">
-        <form id="register-form">
-          <div class="auth-field"><div class="auth-lbl">INVITE CODE</div><input class="auth-inp" id="reg-invite" type="text" required placeholder="paste your invite code"></div>
-          <div class="auth-field"><div class="auth-lbl">EMAIL</div><input class="auth-inp" id="reg-email" type="email" required autocomplete="email"></div>
-          <div class="auth-field"><div class="auth-lbl">PASSWORD</div><input class="auth-inp" id="reg-password" type="password" required autocomplete="new-password" placeholder="min 8 characters"></div>
-          <div class="auth-field"><div class="auth-lbl">CONFIRM PASSWORD</div><input class="auth-inp" id="reg-password2" type="password" required autocomplete="new-password"></div>
-          <button class="auth-btn" id="register-btn" type="submit">CREATE ACCOUNT</button>
-        </form>
-      </div>
-      <div class="auth-err" id="auth-err"></div>
-    </div>
-  </div>
-</div>
-<div id="auth-overlay">
-  <div id="auth-card">
-    <div class="auth-header">
-      <div class="auth-title">PoliticalWindow<span style="color:#1e6fff">.</span>com</div>
-      <div class="auth-sub">RATE INTELLIGENCE · RESTRICTED ACCESS</div>
+      <div class="auth-sub">RATE INTELLIGENCE ï¿½ RESTRICTED ACCESS</div>
     </div>
     <div class="auth-tabs">
       <button class="auth-tab active" data-pane="login">LOGIN</button>
@@ -1220,77 +1189,5 @@ if(RATES_TOKEN){fetch(API+'/auth/me',{headers:{'Authorization':'Bearer '+RATES_T
   </div>
 </div>
 
-<script>
-var wdrPivot = null;
-function initWdr() {
-  if (wdrPivot || typeof WebDataRocks === 'undefined') return;
-  wdrPivot = new WebDataRocks({
-    container: "#pivot-container",
-    toolbar: true,
-    height: 500,
-    beforetoolbarcreated: function(toolbar) {
-      toolbar.showShareReportButton = false;
-    },
-    report: {
-      dataSource: {
-        type: "json",
-        data: ALL_DATA
-      },
-      slice: {
-        rows: [{ uniqueName: "candidate" }],
-        columns: [{ uniqueName: "dma" }],
-        measures: [{ uniqueName: "line_total", aggregation: "sum" }]
-      },
-      formats: [{
-        name: "line_total",
-        currencySymbol: "$",
-        decimalPlaces: 0,
-        thousandsSeparator: ","
-      }],
-      options: {
-        grid: {
-          type: "compact",
-          showTotals: "on",
-          showGrandTotals: "on"
-        }
-      }
-    }
-  });
-}
-</script>
-<div id="auth-overlay">
-  <div id="auth-card">
-    <div class="auth-header">
-      <div class="auth-title">PoliticalWindow<span style="color:#1e6fff">.</span>com</div>
-      <div class="auth-sub">RATE INTELLIGENCE Â· RESTRICTED ACCESS</div>
-    </div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" data-pane="login">LOGIN</button>
-      <button class="auth-tab" data-pane="register">REGISTER</button>
-    </div>
-    <div class="auth-body">
-      <div id="pane-login" class="auth-pane">
-        <form id="login-form">
-          <div class="auth-field"><div class="auth-lbl">EMAIL</div><input class="auth-inp" id="login-email" type="email" required autocomplete="email"></div>
-          <div class="auth-field"><div class="auth-lbl">PASSWORD</div><input class="auth-inp" id="login-password" type="password" required autocomplete="current-password"></div>
-          <button class="auth-btn" id="login-btn" type="submit">LOGIN</button>
-        </form>
-      </div>
-      <div id="pane-register" class="auth-pane" style="display:none">
-        <form id="register-form">
-          <div class="auth-field"><div class="auth-lbl">INVITE CODE</div><input class="auth-inp" id="reg-invite" type="text" required placeholder="paste your invite code"></div>
-          <div class="auth-field"><div class="auth-lbl">EMAIL</div><input class="auth-inp" id="reg-email" type="email" required autocomplete="email"></div>
-          <div class="auth-field"><div class="auth-lbl">PASSWORD</div><input class="auth-inp" id="reg-password" type="password" required autocomplete="new-password" placeholder="min 8 characters"></div>
-          <div class="auth-field"><div class="auth-lbl">CONFIRM PASSWORD</div><input class="auth-inp" id="reg-password2" type="password" required autocomplete="new-password"></div>
-          <button class="auth-btn" id="register-btn" type="submit">CREATE ACCOUNT</button>
-        </form>
-      </div>
-      <div class="auth-err" id="auth-err"></div>
-    </div>
-  </div>
-</div>
 </body>
 </html>
-
-
-
