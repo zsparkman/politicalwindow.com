@@ -14,9 +14,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Candidate Rate Intelligence — PoliticalWindow.com</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<link href="https://cdn.webdatarocks.com/latest/webdatarocks.min.css" rel="stylesheet"/>
-<script src="https://cdn.webdatarocks.com/latest/webdatarocks.toolbar.min.js"></script>
-<script src="https://cdn.webdatarocks.com/latest/webdatarocks.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 html{font-size:18px}
@@ -146,20 +143,6 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 .cfd-item.checked{color:#f59e0b}
 .cfd-chk{width:10px;flex-shrink:0;color:#f59e0b;font-size:0.6rem}
 .g-name-pin{cursor:pointer;min-width:0}.g-name-pin:hover .g-name{color:#f59e0b}.g-name-pin.is-pinned .g-name{color:#f59e0b}
-#wdr-pivot-section{min-height:500px;background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
-#pivot-container{min-height:500px}
-/* WebDataRocks dark theme overrides */
-#pivot-container .wdr-ui,#pivot-container .wdr-component{background:#080e1a!important;color:#cbd5e1!important;font-family:'IBM Plex Mono',monospace!important;font-size:0.65rem!important}
-#pivot-container .wdr-toolbar-wrapper,#pivot-container .wdr-toolbar{background:#0d1829!important;border-bottom:1px solid #1e3050!important}
-#pivot-container .wdr-toolbar-ui-btn,#pivot-container .wdr-toolbar-menu-button{color:#94a3b8!important;background:transparent!important;border-color:#1e3050!important}
-#pivot-container .wdr-toolbar-ui-btn:hover,#pivot-container .wdr-toolbar-menu-button:hover{color:#f59e0b!important;background:rgba(245,158,11,0.08)!important}
-#pivot-container .wdr-grid-layout{background:#080e1a!important}
-#pivot-container .wdr-cell,#pivot-container .wdr-cell-value,#pivot-container .wdr-cell-header{background:#0d1829!important;color:#cbd5e1!important;border-color:#1e3050!important}
-#pivot-container .wdr-header-r div,#pivot-container .wdr-header-c div{background:#0a1525!important;color:#94a3b8!important;border-color:#1e3050!important;letter-spacing:0.06em!important}
-#pivot-container .wdr-grand-total td,#pivot-container .wdr-total{background:#0a1525!important;color:#f59e0b!important;font-weight:700!important}
-#pivot-container .wdr-selected{background:rgba(245,158,11,0.12)!important}
-#pivot-container ::-webkit-scrollbar{width:5px;height:5px}
-#pivot-container ::-webkit-scrollbar-thumb{background:#1e3050!important;border-radius:3px}
 :root{--navy:#08111f;--navy-border:#1a3156;--mono:'IBM Plex Mono',monospace;--text-faint:#3a506e;--text-bright:#e2e8f0;--amber:#f5a623}
 #auth-overlay{position:fixed;inset:0;background:rgba(4,8,18,0.97);z-index:9999;display:flex;align-items:center;justify-content:center}#auth-card{background:#0d1829;border:1px solid #1e3050;border-radius:4px;width:100%;max-width:380px}.auth-header{padding:20px 24px 16px;border-bottom:1px solid #1e3050}.auth-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#fff;letter-spacing:0.04em}.auth-sub{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:#4a6080;margin-top:4px;letter-spacing:0.06em}.auth-tabs{display:flex;border-bottom:1px solid #1e3050}.auth-tab{flex:1;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.08em;border:none;background:transparent;cursor:pointer;color:#4a6080;border-bottom:2px solid transparent}.auth-tab.active{color:#f59e0b;border-bottom-color:#f59e0b;background:rgba(245,158,11,0.04)}.auth-body{padding:20px 24px}.auth-field{margin-bottom:14px}.auth-lbl{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:#64748b;letter-spacing:0.08em;margin-bottom:4px}.auth-inp{width:100%;background:#060d18;border:1px solid #1e3050;border-radius:2px;padding:8px 10px;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:#e2e8f0;outline:none;box-sizing:border-box}.auth-inp:focus{border-color:#2a4060}.auth-btn{width:100%;padding:10px;background:#f59e0b;border:none;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;font-weight:700;letter-spacing:0.1em;color:#060d18;cursor:pointer;margin-top:4px}.auth-btn:disabled{opacity:0.5;cursor:not-allowed}.auth-err{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:#ef4444;margin-top:10px;min-height:16px;letter-spacing:0.04em}.logout-btn{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:#3a506e;background:none;border:none;cursor:pointer;padding:2px 6px;letter-spacing:0.06em}.logout-btn:hover{color:#94a3b8}
 .site-nav{background:var(--navy);border-bottom:1px solid var(--navy-border);display:flex;justify-content:center;gap:0}
@@ -314,9 +297,6 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
     <div id="pivot-body"></div>
   </div>
 
-  <div id="wdr-pivot-section" style="display:none">
-    <div id="pivot-container"></div>
-  </div>
 
   <div id="trend-table-wrap" style="display:none">
     <div class="tbl-hdr">
@@ -995,34 +975,6 @@ function renderLines(rows){
   });
 }
 
-var wdrInstance=null;
-function initWdr(){
-  var data=getFiltered();
-  if(wdrInstance){
-    wdrInstance.updateData({data:data});
-    return;
-  }
-  wdrInstance=new WebDataRocks({
-    container:'#pivot-container',
-    toolbar:true,
-    report:{
-      dataSource:{data:data},
-      slice:{
-        rows:[{uniqueName:'state'},{uniqueName:'office'}],
-        columns:[{uniqueName:'party'},{uniqueName:'Measures'}],
-        measures:[
-          {uniqueName:'line_total',aggregation:'sum',caption:'Gross Spend'},
-          {uniqueName:'units',aggregation:'sum',caption:'Spots'},
-          {uniqueName:'rate',aggregation:'average',caption:'Avg Rate'}
-        ]
-      },
-      options:{grid:{type:'compact',showTotals:'on',showGrandTotals:'on'}}
-    },
-    customizeCell:function(cell,data){
-      if(cell.isTotal||cell.isGrandTotal){cell.style['background-color']='#0a1525';cell.style['color']='#f59e0b';}
-    }
-  });
-}
 
 function render(){
   var rows=getFiltered();
@@ -1033,8 +985,6 @@ function render(){
   document.getElementById('chart-wrap').style.display=isLines?'none':'block';
   document.getElementById('pivot-controls').style.display=isPivot?'flex':'none';
   document.getElementById('pivot-wrap').style.display=isPivot?'block':'none';
-  document.getElementById('wdr-pivot-section').style.display=isPivot?'block':'none';
-  if(isPivot){setTimeout(initWdr,0);}
   document.getElementById('trend-table-wrap').style.display=isTrend?'block':'none';
   document.getElementById('lines-wrap').style.display=isLines?'block':'none';
   if(isPivot){
