@@ -122,10 +122,19 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 .col-dragging{opacity:0.35}
 .col-drop-target{border-color:#f59e0b!important;color:#f59e0b!important}
 .col-picker-wrap{padding:8px 14px;border-bottom:1px solid #1e3050;display:flex;gap:4px;flex-wrap:wrap;align-items:center}
-#lines-thead th{position:relative;padding-right:20px}
+#lines-thead th{position:relative;padding-right:20px;cursor:grab}
+#lines-thead th:active{cursor:grabbing}
+#lines-thead th.col-drop-target{outline:2px solid #f59e0b;outline-offset:-2px;color:#f59e0b}
+#lines-thead th.col-dragging{opacity:0.35}
 .col-flt-arr{position:absolute;right:0;top:0;bottom:0;width:18px;display:flex;align-items:center;justify-content:center;border-left:1px solid #1e3050;background:#0a1525;cursor:pointer;font-size:0.55rem;color:#4a6080;user-select:none}
 .col-flt-arr:hover{background:#111f35;color:#cbd5e1}
 .col-flt-arr.active{background:rgba(245,158,11,0.12);border-left-color:rgba(245,158,11,0.4);color:#f59e0b}
+.cfd-month-group{border-bottom:1px solid #0f1f33}
+.cfd-month-hdr{padding:5px 10px;display:flex;align-items:center;justify-content:space-between;background:#0d1829;font-weight:700;font-size:0.58rem;letter-spacing:0.08em;color:#cbd5e1}
+.cfd-month-hdr:hover{background:#111f35}
+.cfd-month-cnt{color:#4a6080;font-weight:400;font-size:0.55rem}
+.cfd-month-weeks{display:none}
+.cfd-month-group:hover .cfd-month-weeks{display:block}
 #col-filter-drop{position:fixed;background:#0a1525;border:1px solid #1e3050;border-radius:3px;z-index:9999;min-width:130px;max-width:220px;max-height:240px;overflow-y:auto;font-family:'IBM Plex Mono',monospace;font-size:0.62rem;box-shadow:0 4px 16px rgba(0,0,0,0.6)}
 .cfd-clear{padding:5px 10px;color:#64748b;cursor:pointer;border-bottom:1px solid #0f1f33;font-size:0.58rem;letter-spacing:0.06em}
 .cfd-clear:hover{color:#ef4444}
@@ -401,7 +410,7 @@ function getFiltered(){
     if(party!=='ALL'&&r.party!==party)return false;
     if(state!=='ALL'&&r.state!==state)return false;
     if(office!=='ALL'&&r.office!==office)return false;
-    if(activePin.size>0&&!activePin.has(r.candidate))return false;
+    if(activePin.size>0&&!activePin.has(r[pivotGroupBy]))return false;
     if(dma!=='ALL'&&r.dma!==dma)return false;
     if(station!=='ALL'&&r.station!==station)return false;
     if(daypart!=='ALL'&&r.daypart_code!==daypart)return false;
@@ -461,7 +470,6 @@ function buildPivot(rows){
 
 function renderPivotTable(groups){
   pivotGroupsCache=groups;
-  var canPin=(pivotGroupBy==='candidate');
   var html=groups.map(function(g,i){
     var avgRate=g.rates.length?g.rates.reduce(function(s,v){return s+v;},0)/g.rates.length:null;
     var minRate=g.rates.length?Math.min.apply(null,g.rates):null;
@@ -480,11 +488,9 @@ function renderPivotTable(groups){
         '<td class="c-green" style="text-align:right">'+fmt$(r.line_total)+'</td>'+
       '</tr>';
     }).join('');
-    var nameEl=canPin
-      ?'<div class="g-name-pin'+(isPinned?' is-pinned':'')+'" onclick="window.pinCandidate('+i+')" title="Click to pin candidate">'+
-          '<div class="g-name">'+esc(g.label)+'</div><div class="g-pills">'+pills+'</div>'+
-        '</div>'
-      :'<div style="min-width:0"><div class="g-name">'+esc(g.label)+'</div><div class="g-pills">'+pills+'</div></div>';
+    var nameEl='<div class="g-name-pin'+(isPinned?' is-pinned':'')+'" onclick="window.pinCandidate('+i+')" title="Click to pin">'+
+        '<div class="g-name">'+esc(g.label)+'</div><div class="g-pills">'+pills+'</div>'+
+      '</div>';
     return'<div class="group-row">'+
       '<div class="group-main">'+
         '<div style="display:flex;align-items:center;gap:8px;min-width:0">'+
@@ -534,7 +540,7 @@ function renderPivotChart(groups){
     options:{
       indexAxis:'y',responsive:true,maintainAspectRatio:false,
       onClick:function(evt,elements){
-        if(!elements.length||pivotGroupBy!=='candidate')return;
+        if(!elements.length)return;
         var g=chartTopGroups[elements[0].index];
         if(!g)return;
         if(pinSet.has(g.label))pinSet.delete(g.label);else pinSet.add(g.label);
@@ -758,7 +764,8 @@ function openColFilter(key,thEl){
     renderLines(getFiltered());
   });
   drop.appendChild(clr);
-  vals.forEach(function(v){
+  var isDateCol=(key==='week_of'||key==='start_date'||key==='end_date');
+  function makeItem(v){
     var isChk=active.has(v);
     var item=document.createElement('div');
     item.className='cfd-item'+(isChk?' checked':'');
@@ -776,8 +783,37 @@ function openColFilter(key,thEl){
       chk.textContent=nowChk?'✓':'';
       renderLines(getFiltered());
     });
-    drop.appendChild(item);
-  });
+    return item;
+  }
+  if(isDateCol){
+    var MONTHS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    var byMonth={},monthOrder=[];
+    vals.forEach(function(v){
+      // v is mm/dd/yy
+      var p=v.split('/');var mk=(p[0]||'??')+'/'+( p[2]||'??');
+      if(!byMonth[mk]){byMonth[mk]=[];monthOrder.push(mk);}
+      byMonth[mk].push(v);
+    });
+    monthOrder.forEach(function(mk){
+      var weeks=byMonth[mk];
+      var p=mk.split('/');
+      var mn=MONTHS[parseInt(p[0],10)-1]||p[0];
+      var yr='20'+(p[1]||'??');
+      var checkedCnt=weeks.filter(function(v){return active.has(v);}).length;
+      var grp=document.createElement('div');grp.className='cfd-month-group';
+      var hdr=document.createElement('div');hdr.className='cfd-month-hdr';
+      var hdrLbl=document.createTextNode(mn+' '+yr);
+      var hdrCnt=document.createElement('span');hdrCnt.className='cfd-month-cnt';
+      hdrCnt.textContent=(checkedCnt?checkedCnt+'/':'')+weeks.length+' wks';
+      hdr.appendChild(hdrLbl);hdr.appendChild(hdrCnt);
+      var weekWrap=document.createElement('div');weekWrap.className='cfd-month-weeks';
+      weeks.forEach(function(v){weekWrap.appendChild(makeItem(v));});
+      grp.appendChild(hdr);grp.appendChild(weekWrap);
+      drop.appendChild(grp);
+    });
+  } else {
+    vals.forEach(function(v){drop.appendChild(makeItem(v));});
+  }
   var rect=thEl.getBoundingClientRect();
   drop.style.top=(rect.bottom+2)+'px';
   drop.style.left=rect.left+'px';
@@ -926,6 +962,31 @@ function renderLines(rows){
       openColFilter(key,th);
     });
   });
+  // column header drag-to-reorder
+  document.querySelectorAll('#lines-thead th[data-col]').forEach(function(th){
+    th.addEventListener('dragstart',function(e){
+      _dk=th.dataset.col;_ds='col';
+      e.dataTransfer.effectAllowed='move';
+      setTimeout(function(){th.classList.add('col-dragging');},0);
+    });
+    th.addEventListener('dragend',function(){
+      th.classList.remove('col-dragging');
+      document.querySelectorAll('#lines-thead th').forEach(function(t){t.classList.remove('col-drop-target');});
+      _dk=null;_ds=null;
+    });
+    th.addEventListener('dragover',function(e){
+      if(_ds==='col'&&_dk!==th.dataset.col){e.preventDefault();th.classList.add('col-drop-target');}
+    });
+    th.addEventListener('dragleave',function(){th.classList.remove('col-drop-target');});
+    th.addEventListener('drop',function(e){
+      e.preventDefault();th.classList.remove('col-drop-target');
+      if(_ds!=='col'||!_dk||_dk===th.dataset.col)return;
+      var fi=colOrder.indexOf(_dk),ti=colOrder.indexOf(th.dataset.col);
+      if(fi>=0&&ti>=0){colOrder.splice(fi,1);colOrder.splice(ti,0,_dk);}
+      _dk=null;_ds=null;
+      buildColPicker();renderLines(getFiltered());
+    });
+  });
 }
 
 function render(){
@@ -998,7 +1059,7 @@ function renderPinBar(){
   pinList=Array.from(pinSet);
   if(pinList.length===0&&activePin.size===0){bar.style.display='none';return;}
   bar.style.display='flex';
-  var html='<span class="pin-lbl">PINNED</span>';
+  var html='<span class="pin-lbl">PIN '+pivotGroupBy.toUpperCase()+'</span>';
   html+=pinList.map(function(p,idx){
     return'<span class="pin-chip'+(activePin.has(p)?' applied':'')+'">'+esc(p)+'<span class="pin-rm" data-idx="'+idx+'"> ✕</span></span>';
   }).join('');
@@ -1057,7 +1118,7 @@ document.querySelectorAll('.tab').forEach(function(btn){
     btn.classList.add('active');currentView=btn.dataset.view;render();
   });
 });
-document.getElementById('c-groupby').addEventListener('change',function(){pivotGroupBy=this.value;render();});
+document.getElementById('c-groupby').addEventListener('change',function(){pivotGroupBy=this.value;pinSet.clear();activePin.clear();renderPinBar();render();});
 document.getElementById('c-sortby').addEventListener('change',function(){pivotSortBy=this.value;render();});
 ['f-party','f-state','f-office','f-dma','f-station','f-daypart'].forEach(function(id){
   document.getElementById(id).addEventListener('change',render);
