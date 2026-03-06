@@ -158,6 +158,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 #pivot-container ::-webkit-scrollbar{width:5px;height:5px}
 #pivot-container ::-webkit-scrollbar-thumb{background:#1e3050!important;border-radius:3px}
 :root{--navy:#08111f;--navy-border:#1a3156;--mono:'IBM Plex Mono',monospace;--text-faint:#3a506e;--text-bright:#e2e8f0;--amber:#f5a623}
+#auth-overlay{position:fixed;inset:0;background:rgba(4,8,18,0.97);z-index:9999;display:flex;align-items:center;justify-content:center}#auth-card{background:#0d1829;border:1px solid #1e3050;border-radius:4px;width:100%;max-width:380px}.auth-header{padding:20px 24px 16px;border-bottom:1px solid #1e3050}.auth-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#fff;letter-spacing:0.04em}.auth-sub{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:#4a6080;margin-top:4px;letter-spacing:0.06em}.auth-tabs{display:flex;border-bottom:1px solid #1e3050}.auth-tab{flex:1;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.08em;border:none;background:transparent;cursor:pointer;color:#4a6080;border-bottom:2px solid transparent}.auth-tab.active{color:#f59e0b;border-bottom-color:#f59e0b;background:rgba(245,158,11,0.04)}.auth-body{padding:20px 24px}.auth-field{margin-bottom:14px}.auth-lbl{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:#64748b;letter-spacing:0.08em;margin-bottom:4px}.auth-inp{width:100%;background:#060d18;border:1px solid #1e3050;border-radius:2px;padding:8px 10px;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:#e2e8f0;outline:none;box-sizing:border-box}.auth-inp:focus{border-color:#2a4060}.auth-btn{width:100%;padding:10px;background:#f59e0b;border:none;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;font-weight:700;letter-spacing:0.1em;color:#060d18;cursor:pointer;margin-top:4px}.auth-btn:disabled{opacity:0.5;cursor:not-allowed}.auth-err{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:#ef4444;margin-top:10px;min-height:16px;letter-spacing:0.04em}.logout-btn{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:#3a506e;background:none;border:none;cursor:pointer;padding:2px 6px;letter-spacing:0.06em}.logout-btn:hover{color:#94a3b8}
 .site-nav{background:var(--navy);border-bottom:1px solid var(--navy-border);display:flex;justify-content:center;gap:0}
 .nav-link{font-family:var(--mono);font-size:0.62rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-faint);text-decoration:none;padding:0.55rem 1.5rem;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;white-space:nowrap}
 .nav-link:hover{color:var(--text-bright)}
@@ -179,6 +180,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
     <span class="header-fcc header-meta">Candidate Rate Analytics</span>
     <span class="header-meta" id="live-date"></span>
     <span class="header-meta" id="data-badge" style="color:var(--text-faint);font-size:0.55rem;letter-spacing:0.05em">⬤ LOADING…</span>
+    <button class="logout-btn" id="logout-btn" onclick="logout()" style="display:none">LOGOUT</button>
   </div>
 </header>
 <nav class="site-nav">
@@ -342,7 +344,8 @@ document.getElementById('live-date').textContent =
   new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
 
 var API='https://rates.politicalwindow.com';
-var RATES_API_KEY='pw_live_7dc94b9e84da7e71d875d5dec837442b';
+var RATES_TOKEN=localStorage.getItem('pw_token');
+function authFetch(url,opts){var o=opts||{};o.headers=Object.assign({},o.headers,{'Authorization':'Bearer '+(RATES_TOKEN||'')});return fetch(url,o);}
 var ALL_DATA=[];
 var currentView='pivot';
 var pivotGroupBy='candidate';
@@ -1096,8 +1099,9 @@ window.togglePivot=function(i){
   if(!open){d.classList.add('open');a.textContent='▲';}
 };
 
+function loadData(){
 var DATA_BADGE=document.getElementById('data-badge');
-fetch(API+'/api/lines?limit=5000',{headers:{'Authorization':'Bearer '+RATES_API_KEY}})
+authFetch(API+'/api/lines?limit=5000')
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(j){
   ALL_DATA=j.data||j||[];
@@ -1111,6 +1115,7 @@ fetch(API+'/api/lines?limit=5000',{headers:{'Authorization':'Bearer '+RATES_API_
   var em=document.getElementById('error-msg');em.style.display='block';em.textContent='API ERROR: '+e.message;
   if(DATA_BADGE){DATA_BADGE.style.color='var(--amber)';DATA_BADGE.textContent='⬤ API OFFLINE';}
 });
+}
 
 document.querySelectorAll('.tab').forEach(function(btn){
   btn.addEventListener('click',function(){
@@ -1142,6 +1147,15 @@ document.getElementById('clear-filters').addEventListener('click',function(){
   colFilters={};closeColFilter();
   clearPins();
 });
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+function showOverlay(){document.getElementById('auth-overlay').style.display='flex';}
+function hideOverlay(){document.getElementById('auth-overlay').style.display='none';var lb=document.getElementById('logout-btn');if(lb)lb.style.display='';}
+window.logout=function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');RATES_TOKEN=null;ALL_DATA=[];showOverlay();var lb=document.getElementById('logout-btn');if(lb)lb.style.display='none';};
+document.querySelectorAll('.auth-tab').forEach(function(tab){tab.addEventListener('click',function(){document.querySelectorAll('.auth-tab').forEach(function(t){t.classList.remove('active');});tab.classList.add('active');document.querySelectorAll('.auth-pane').forEach(function(p){p.style.display='none';});document.getElementById('pane-'+tab.dataset.pane).style.display='block';document.getElementById('auth-err').textContent='';});});
+(function(){var p=new URLSearchParams(window.location.search).get('invite');if(p){document.getElementById('reg-invite').value=p;document.querySelector('.auth-tab[data-pane="register"]').click();}})();
+document.getElementById('login-form').addEventListener('submit',function(e){e.preventDefault();var btn=document.getElementById('login-btn'),err=document.getElementById('auth-err');btn.disabled=true;btn.textContent='AUTHENTICATING…';err.textContent='';fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('login-email').value.trim(),password:document.getElementById('login-password').value})}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});}).then(function(res){if(!res.ok){err.textContent=res.d.error||'Login failed';btn.disabled=false;btn.textContent='LOGIN';return;}RATES_TOKEN=res.d.token;localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);hideOverlay();loadData();}).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='LOGIN';});});
+document.getElementById('register-form').addEventListener('submit',function(e){e.preventDefault();var btn=document.getElementById('register-btn'),err=document.getElementById('auth-err');var pw=document.getElementById('reg-password').value,pw2=document.getElementById('reg-password2').value;if(pw!==pw2){err.textContent='Passwords do not match';return;}btn.disabled=true;btn.textContent='CREATING ACCOUNT…';err.textContent='';fetch(API+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('reg-email').value.trim(),password:pw,invite_token:document.getElementById('reg-invite').value.trim()})}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});}).then(function(res){if(!res.ok){err.textContent=res.d.error||'Registration failed';btn.disabled=false;btn.textContent='CREATE ACCOUNT';return;}RATES_TOKEN=res.d.token;localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);hideOverlay();loadData();}).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='CREATE ACCOUNT';});});
+if(RATES_TOKEN){fetch(API+'/auth/me',{headers:{'Authorization':'Bearer '+RATES_TOKEN}}).then(function(r){if(r.ok){hideOverlay();loadData();}else{localStorage.removeItem('pw_token');RATES_TOKEN=null;showOverlay();}}).catch(function(){showOverlay();});}else{showOverlay();}
 </script>
 
 <script>
@@ -1182,5 +1196,36 @@ function initWdr() {
   });
 }
 </script>
+<div id="auth-overlay">
+  <div id="auth-card">
+    <div class="auth-header">
+      <div class="auth-title">PoliticalWindow<span style="color:#1e6fff">.</span>com</div>
+      <div class="auth-sub">RATE INTELLIGENCE · RESTRICTED ACCESS</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-pane="login">LOGIN</button>
+      <button class="auth-tab" data-pane="register">REGISTER</button>
+    </div>
+    <div class="auth-body">
+      <div id="pane-login" class="auth-pane">
+        <form id="login-form">
+          <div class="auth-field"><div class="auth-lbl">EMAIL</div><input class="auth-inp" id="login-email" type="email" required autocomplete="email"></div>
+          <div class="auth-field"><div class="auth-lbl">PASSWORD</div><input class="auth-inp" id="login-password" type="password" required autocomplete="current-password"></div>
+          <button class="auth-btn" id="login-btn" type="submit">LOGIN</button>
+        </form>
+      </div>
+      <div id="pane-register" class="auth-pane" style="display:none">
+        <form id="register-form">
+          <div class="auth-field"><div class="auth-lbl">INVITE CODE</div><input class="auth-inp" id="reg-invite" type="text" required placeholder="paste your invite code"></div>
+          <div class="auth-field"><div class="auth-lbl">EMAIL</div><input class="auth-inp" id="reg-email" type="email" required autocomplete="email"></div>
+          <div class="auth-field"><div class="auth-lbl">PASSWORD</div><input class="auth-inp" id="reg-password" type="password" required autocomplete="new-password" placeholder="min 8 characters"></div>
+          <div class="auth-field"><div class="auth-lbl">CONFIRM PASSWORD</div><input class="auth-inp" id="reg-password2" type="password" required autocomplete="new-password"></div>
+          <button class="auth-btn" id="register-btn" type="submit">CREATE ACCOUNT</button>
+        </form>
+      </div>
+      <div class="auth-err" id="auth-err"></div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
