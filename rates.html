@@ -359,8 +359,8 @@ function fmt$(n){
   var v=parseFloat(n);
   if(isNaN(v))return'—';
   if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';
-  if(v>=1000)return'$'+(v/1000).toFixed(0)+'K';
-  return'$'+v.toFixed(0);
+  if(v>=1000)return'$'+(v/1000).toFixed(2)+'K';
+  return'$'+v.toFixed(2);
 }
 function fmtN(n){
   if(!n&&n!==0)return'—';
@@ -483,7 +483,7 @@ function renderPivotTable(groups){
         '<td>'+esc(r.description||'—')+'</td>'+
         '<td class="c-muted">'+esc(r.daypart||'—')+'</td>'+
         '<td class="c-muted">'+fmtWeek(r.week_of)+'</td>'+
-        '<td class="c-bright" style="text-align:right">'+(r.rate?'$'+parseFloat(r.rate).toLocaleString():'—')+'</td>'+
+        '<td class="c-bright" style="text-align:right">'+(r.rate?'$'+parseFloat(r.rate).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—')+'</td>'+
         '<td style="text-align:right">'+(r.units||'—')+'</td>'+
         '<td class="c-green" style="text-align:right">'+fmt$(r.line_total)+'</td>'+
       '</tr>';
@@ -500,8 +500,8 @@ function renderPivotTable(groups){
         '<div class="g-num"><div class="g-num-val" style="color:#10b981">'+fmt$(g.spend)+'</div><div class="g-num-lbl">SPEND</div></div>'+
         '<div class="g-num"><div class="g-num-val">'+fmtN(g.units)+'</div><div class="g-num-lbl">UNITS</div></div>'+
         '<div class="g-num"><div class="g-num-val">'+g.lines+'</div><div class="g-num-lbl">LINES</div></div>'+
-        '<div class="g-num"><div class="g-num-val" style="color:#f59e0b">'+(avgRate?'$'+avgRate.toFixed(0):'—')+'</div><div class="g-num-lbl">AVG RATE</div></div>'+
-        '<div class="g-num"><div class="g-num-val" style="color:#64748b">'+(minRate?'$'+minRate.toFixed(0):'—')+'</div><div class="g-num-lbl">MIN RATE</div></div>'+
+        '<div class="g-num"><div class="g-num-val" style="color:#f59e0b">'+(avgRate?'$'+avgRate.toFixed(2):'—')+'</div><div class="g-num-lbl">AVG RATE</div></div>'+
+        '<div class="g-num"><div class="g-num-val" style="color:#64748b">'+(minRate?'$'+minRate.toFixed(2):'—')+'</div><div class="g-num-lbl">MIN RATE</div></div>'+
         '<div class="g-num"><div class="g-num-val">'+g.orders.size+'</div><div class="g-num-lbl">ORDERS</div></div>'+
         '<div class="g-arrow" id="parrow-'+i+'" onclick="togglePivot('+i+')" style="cursor:pointer">▼</div>'+
       '</div>'+
@@ -859,7 +859,7 @@ function renderGroupedLines(rows,cols){
         +'<span style="color:#475569;font-size:0.6rem;margin-left:16px">'+s.count.toLocaleString()+' lines</span>'
         +'<span class="c-green" style="font-size:0.65rem;font-weight:700;margin-left:12px">'+fmt$(s.line_total)+'</span>'
         +(s.units?'<span style="color:#64748b;font-size:0.6rem;margin-left:10px">'+fmtN(s.units)+' units</span>':'')
-        +(s.avg_rate?'<span style="color:#f59e0b;font-size:0.6rem;margin-left:10px">avg $'+s.avg_rate.toFixed(0)+'</span>':'')
+        +(s.avg_rate?'<span style="color:#f59e0b;font-size:0.6rem;margin-left:10px">avg $'+s.avg_rate.toFixed(2)+'</span>':'')
       +'</td></tr>';
     if(isOpen){
       if(node.children){
@@ -877,7 +877,7 @@ function renderGroupedLines(rows,cols){
             else if(MUTED[c.key])cls='c-muted';
             var disp='';
             if(c.key==='candidate')disp=esc(v||r.advertiser||'—');
-            else if(c.key==='rate'||c.key==='line_total')disp=v?'$'+parseFloat(v).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2}):'—';
+            else if(c.key==='rate'||c.key==='line_total')disp=v?'$'+parseFloat(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
             else if(c.key==='week_of'||c.key==='start_date'||c.key==='end_date')disp=fmtWeek(v);
             else disp=esc(v||'—');
             return'<td class="'+cls+'"'+(ci===0?' style="padding-left:'+(14+(depth+1)*16)+'px"':'')+'>'+disp+'</td>';
@@ -937,7 +937,7 @@ function renderLines(rows){
         else if(MUTED[c.key])cls='c-muted';
         var disp='';
         if(c.key==='candidate')disp=esc(v||r.advertiser||'—');
-        else if(c.key==='rate'||c.key==='line_total')disp=v?'$'+parseFloat(v).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2}):'—';
+        else if(c.key==='rate'||c.key==='line_total')disp=v?'$'+parseFloat(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
         else if(c.key==='week_of'||c.key==='start_date'||c.key==='end_date')disp=fmtWeek(v);
         else disp=esc(v||'—');
         return'<td class="'+cls+'">'+disp+'</td>';
