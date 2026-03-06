@@ -992,6 +992,35 @@ function renderLines(rows){
   });
 }
 
+var wdrInstance=null;
+function initWdr(){
+  var data=getFiltered();
+  if(wdrInstance){
+    wdrInstance.updateData({data:data});
+    return;
+  }
+  wdrInstance=new WebDataRocks({
+    container:'#pivot-container',
+    toolbar:true,
+    report:{
+      dataSource:{data:data},
+      slice:{
+        rows:[{uniqueName:'state'},{uniqueName:'office'}],
+        columns:[{uniqueName:'party'},{uniqueName:'Measures'}],
+        measures:[
+          {uniqueName:'line_total',aggregation:'sum',caption:'Gross Spend'},
+          {uniqueName:'units',aggregation:'sum',caption:'Spots'},
+          {uniqueName:'rate',aggregation:'average',caption:'Avg Rate'}
+        ]
+      },
+      options:{grid:{type:'compact',showTotals:'on',showGrandTotals:'on'}}
+    },
+    customizeCell:function(cell,data){
+      if(cell.isTotal||cell.isGrandTotal){cell.style['background-color']='#0a1525';cell.style['color']='#f59e0b';}
+    }
+  });
+}
+
 function render(){
   var rows=getFiltered();
   updateStats(rows);
