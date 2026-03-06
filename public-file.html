@@ -228,7 +228,7 @@ function getFiltered(){
     if(party!=='ALL'&&r.party!==party)return false;
     if(state!=='ALL'&&r.state!==state)return false;
     if(dma!=='ALL'&&r.dma_name!==dma)return false;
-    if(search)return(r.candidate||'').toLowerCase().includes(search)||(r.advertiser||'').toLowerCase().includes(search)||(r.callsign||'').toLowerCase().includes(search)||(r.dma_name||'').toLowerCase().includes(search);
+    if(search){var s=search;if(!(  (r.candidate||'').toLowerCase().includes(s)||(r.advertiser||'').toLowerCase().includes(s)||(r.callsign||'').toLowerCase().includes(s)||(r.dma_name||'').toLowerCase().includes(s)||(r.state||'').toLowerCase().includes(s)||(r.party||'').toLowerCase().includes(s)||(r.office_type||'').toLowerCase().includes(s)||(r.order_number||'').toLowerCase().includes(s)||(r.window_status||'').toLowerCase().includes(s)))return false;}
     return true;
   });
 }
@@ -349,7 +349,7 @@ function updateOptionStates(){
           if(otherFilters[oid]!=='ALL'&&fields[oid](r)!==otherFilters[oid])return false;
         }
         if(search){
-          if(!(r.candidate||'').toLowerCase().includes(search)&&!(r.advertiser||'').toLowerCase().includes(search)&&!(r.callsign||'').toLowerCase().includes(search)&&!(r.dma_name||'').toLowerCase().includes(search))return false;
+          if(!((r.candidate||'').toLowerCase().includes(search)||(r.advertiser||'').toLowerCase().includes(search)||(r.callsign||'').toLowerCase().includes(search)||(r.dma_name||'').toLowerCase().includes(search)||(r.state||'').toLowerCase().includes(search)||(r.party||'').toLowerCase().includes(search)||(r.office_type||'').toLowerCase().includes(search)||(r.order_number||'').toLowerCase().includes(search)||(r.window_status||'').toLowerCase().includes(search)))return false;
         }
         return fields[fid](r)===val;
       }).length;
