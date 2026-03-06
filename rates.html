@@ -1157,6 +1157,37 @@ document.getElementById('login-form').addEventListener('submit',function(e){e.pr
 document.getElementById('register-form').addEventListener('submit',function(e){e.preventDefault();var btn=document.getElementById('register-btn'),err=document.getElementById('auth-err');var pw=document.getElementById('reg-password').value,pw2=document.getElementById('reg-password2').value;if(pw!==pw2){err.textContent='Passwords do not match';return;}btn.disabled=true;btn.textContent='CREATING ACCOUNTâ€¦';err.textContent='';fetch(API+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('reg-email').value.trim(),password:pw,invite_token:document.getElementById('reg-invite').value.trim()})}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});}).then(function(res){if(!res.ok){err.textContent=res.d.error||'Registration failed';btn.disabled=false;btn.textContent='CREATE ACCOUNT';return;}RATES_TOKEN=res.d.token;localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);hideOverlay();loadData();}).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='CREATE ACCOUNT';});});
 if(RATES_TOKEN){fetch(API+'/auth/me',{headers:{'Authorization':'Bearer '+RATES_TOKEN}}).then(function(r){if(r.ok){hideOverlay();loadData();}else{localStorage.removeItem('pw_token');RATES_TOKEN=null;showOverlay();}}).catch(function(){showOverlay();});}else{showOverlay();}
 </script>
+<div id="auth-overlay">
+  <div id="auth-card">
+    <div class="auth-header">
+      <div class="auth-title">PoliticalWindow<span style="color:#1e6fff">.</span>com</div>
+      <div class="auth-sub">RATE INTELLIGENCE · RESTRICTED ACCESS</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-pane="login">LOGIN</button>
+      <button class="auth-tab" data-pane="register">REGISTER</button>
+    </div>
+    <div class="auth-body">
+      <div id="pane-login" class="auth-pane">
+        <form id="login-form">
+          <div class="auth-field"><div class="auth-lbl">EMAIL</div><input class="auth-inp" id="login-email" type="email" required autocomplete="email"></div>
+          <div class="auth-field"><div class="auth-lbl">PASSWORD</div><input class="auth-inp" id="login-password" type="password" required autocomplete="current-password"></div>
+          <button class="auth-btn" id="login-btn" type="submit">LOGIN</button>
+        </form>
+      </div>
+      <div id="pane-register" class="auth-pane" style="display:none">
+        <form id="register-form">
+          <div class="auth-field"><div class="auth-lbl">INVITE CODE</div><input class="auth-inp" id="reg-invite" type="text" required placeholder="paste your invite code"></div>
+          <div class="auth-field"><div class="auth-lbl">EMAIL</div><input class="auth-inp" id="reg-email" type="email" required autocomplete="email"></div>
+          <div class="auth-field"><div class="auth-lbl">PASSWORD</div><input class="auth-inp" id="reg-password" type="password" required autocomplete="new-password" placeholder="min 8 characters"></div>
+          <div class="auth-field"><div class="auth-lbl">CONFIRM PASSWORD</div><input class="auth-inp" id="reg-password2" type="password" required autocomplete="new-password"></div>
+          <button class="auth-btn" id="register-btn" type="submit">CREATE ACCOUNT</button>
+        </form>
+      </div>
+      <div class="auth-err" id="auth-err"></div>
+    </div>
+  </div>
+</div>
 
 <script>
 var wdrPivot = null;
@@ -1229,4 +1260,5 @@ function initWdr() {
 </div>
 </body>
 </html>
+
 
