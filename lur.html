@@ -497,7 +497,7 @@ document.getElementById('register-form').addEventListener('submit', async e=>{
   try{
     const r = await fetch(API+'/auth/register',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({invite_code:document.getElementById('reg-invite').value,
+      body:JSON.stringify({invite_token:document.getElementById('reg-invite').value,
                            email:document.getElementById('reg-email').value,
                            password:p1})
     });
