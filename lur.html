@@ -113,6 +113,16 @@ td:last-child{border-right:none}
 .overpaid-badge{display:inline-block;padding:1px 5px;border-radius:2px;font-size:0.56rem;font-weight:700;background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.25)}
 .compliant-badge{display:inline-block;padding:1px 5px;border-radius:2px;font-size:0.56rem;font-weight:700;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.2)}
 
+/* ── VIOLATION EXPLANATION ── */
+.violation-explain{padding:14px 24px 12px;border-bottom:1px solid #0d1c2e;background:#070e1c}
+.violation-explain-head{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;font-weight:700;letter-spacing:0.14em;color:#f5a623;margin-bottom:7px}
+.violation-explain-body{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:#64748b;line-height:1.75;max-width:860px}
+.violation-explain-body strong{color:#94a3b8;font-weight:600}
+.violation-explain-meta{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:10px;padding-top:10px;border-top:1px solid #0d1c2e}
+.vmeta{display:flex;flex-direction:column;gap:2px}
+.vmeta-lbl{font-family:'IBM Plex Mono',monospace;font-size:0.5rem;color:#2a4060;letter-spacing:0.12em}
+.vmeta-val{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:#64748b}
+
 /* ── METHODOLOGY ── */
 #methodology{margin:20px 0 0;padding:14px 18px;background:rgba(30,48,80,0.15);border:1px solid #0f1f33;border-radius:4px}
 .meth-title{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;letter-spacing:0.12em;color:#2a4060;margin-bottom:6px}
@@ -299,6 +309,63 @@ function renderInvoices(invoices){
   }).join('<br>');
 }
 
+function generateExplanation(v){
+  const buyers = v.buyers || [];
+  const lurRate = parseFloat(v.lur_rate);
+  const lurBuyer = buyers.find(b => parseFloat(b.rate) <= lurRate);
+  const overBuyers = buyers.filter(b => parseFloat(b.rate) > lurRate);
+  const lurName = lurBuyer ? (lurBuyer.candidate_name || lurBuyer.advertiser || 'an advertiser') : 'an advertiser';
+  const dpFull = DP[v.daypart_code] || v.daypart_code || 'this daypart';
+  const weekStr = fmtWeek(v.week_of);
+  const spread = parseFloat(v.spread_pct);
+  const overcharge = parseFloat(v.est_overcharge || 0);
+
+  // Severity language
+  const severity = spread >= 500 ? 'significant' : spread >= 100 ? 'material' : 'potential';
+
+  // Overpaying buyers sentence
+  let overSentence = '';
+  if(overBuyers.length === 1){
+    const b = overBuyers[0];
+    const bName = b.candidate_name || b.advertiser || 'another advertiser';
+    overSentence = `<strong>${bName}</strong> paid <strong>${fmtR(parseFloat(b.rate))}/spot</strong> — <strong>${fmtPct(b.overpaid_pct)}</strong> above the lowest rate charged.`;
+  } else if(overBuyers.length > 1){
+    const names = overBuyers.map(b=>b.candidate_name||b.advertiser||'an advertiser');
+    overSentence = `${names.slice(0,-1).map(n=>`<strong>${n}</strong>`).join(', ')} and <strong>${names[names.length-1]}</strong> each paid above the lowest rate on record for this slot.`;
+  }
+
+  const overchargeNote = overcharge > 0
+    ? ` Total estimated overcharge across all overpaying buyers: <strong>${fmt$(overcharge)}</strong>.`
+    : '';
+
+  const body = `During the week of <strong>${weekStr}</strong>, <strong>${v.station}</strong> (${v.dma||v.state||''}) `
+    + `aired political spots in the <strong>${dpFull}</strong> daypart at rates ranging from `
+    + `<strong>${fmtR(lurRate)}</strong> to <strong>${fmtR(parseFloat(v.max_rate))}</strong> — a <strong>${fmtPct(spread)}</strong> spread. `
+    + `The lowest rate paid was by <strong>${lurName}</strong>. ${overSentence}`
+    + ` Under FCC §315, all legally qualified candidates must receive the Lowest Unit Rate (LUR) offered to any buyer for the same class and amount of time during a political window.`
+    + ` This ${severity} rate discrepancy warrants review of the station's political rate card.`
+    + overchargeNote;
+
+  const meta = [
+    {lbl:'STATION',    val: v.station || '—'},
+    {lbl:'MARKET',     val: v.dma || '—'},
+    {lbl:'STATE',      val: v.state || '—'},
+    {lbl:'DAYPART',    val: dpFull},
+    {lbl:'WEEK OF',    val: weekStr},
+    {lbl:'BUYERS',     val: v.candidate_count + ' candidates'},
+    {lbl:'LUR RATE',   val: fmtR(lurRate)},
+    {lbl:'MAX RATE',   val: fmtR(parseFloat(v.max_rate))},
+    {lbl:'SPREAD',     val: fmtPct(spread)},
+    {lbl:'EST. OVERCHARGE', val: overcharge > 0 ? fmt$(overcharge) : '—'},
+  ].map(m=>`<div class="vmeta"><div class="vmeta-lbl">${m.lbl}</div><div class="vmeta-val">${m.val}</div></div>`).join('');
+
+  return `<div class="violation-explain">
+    <div class="violation-explain-head">⚠ LUR VIOLATION ANALYSIS</div>
+    <div class="violation-explain-body">${body}</div>
+    <div class="violation-explain-meta">${meta}</div>
+  </div>`;
+}
+
 function spreadClass(pct){
   if(pct>=500) return'spread-critical';
   if(pct>=100) return'spread-high';
@@ -433,6 +500,7 @@ function render(){
     }).join('');
 
     det.innerHTML = `<td colspan="9" style="padding:0">
+      ${generateExplanation(v)}
       <div class="buyer-table-wrap">
         <table class="buyer-table">
           <thead><tr>
