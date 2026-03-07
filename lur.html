@@ -558,11 +558,17 @@ function render(){
   });
 }
 
+// Live filter — apply on any change without clicking Apply
+let filterDebounce;
+function scheduleFilter(){ clearTimeout(filterDebounce); filterDebounce=setTimeout(applyFilters,250); }
 ['f-state','f-dma','f-station','f-candidate'].forEach(id=>{
-  const el = document.getElementById(id);
-  if(el) el.addEventListener('keydown', e=>{ if(e.key==='Enter') applyFilters(); });
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('change', ()=>{ if(ALL_DATA.length) applyFilters(); });
+  el.addEventListener('input',  scheduleFilter);
+  el.addEventListener('keydown', e=>{ if(e.key==='Enter'){ clearTimeout(filterDebounce); applyFilters(); }});
 });
-document.getElementById('apply-btn').addEventListener('click', applyFilters);
+document.getElementById('apply-btn').addEventListener('click', ()=>{ clearTimeout(filterDebounce); applyFilters(); });
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 function showPane(name){
@@ -630,9 +636,11 @@ document.getElementById('logout-btn').addEventListener('click',()=>{
 // ── INIT ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{
   if(TOKEN){
-    fetch(API+'/auth/me',{headers:authHeader()})
-      .then(r=>{ if(r.ok){hideOverlay();load();}else{localStorage.removeItem(STORAGE_KEY);TOKEN=null;showOverlay();}})
-      .catch(()=>showOverlay());
+    // Start loading immediately — don't block on /auth/me round trip.
+    // The violations endpoint will return 401 if the token is invalid,
+    // which triggers showOverlay() inside load().
+    hideOverlay();
+    load();
   }else{
     showOverlay();
   }
