@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Admin — PoliticalWindow.com</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{background:#080e1a;color:#cbd5e1;font-family:'IBM Plex Mono',monospace;min-height:100vh;max-width:600px;margin:0 auto;padding:0 0 40px}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:#1e3050;border-radius:2px}
+
+/* header */
+header{background:#0d1a2e;border-bottom:1px solid #1a3156;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:50px;position:sticky;top:0;z-index:100}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.04em;color:#fff}
+.logo span{color:#1e6fff}
+.badge{font-size:0.55rem;font-weight:700;color:#f5a623;background:rgba(245,166,35,0.15);border:1px solid #f5a623;border-radius:2px;padding:2px 6px;letter-spacing:0.1em;margin-left:8px}
+
+/* setup screen */
+#setup{display:none;padding:40px 20px}
+.setup-title{font-size:0.7rem;color:#3a506e;letter-spacing:0.12em;margin-bottom:20px}
+.setup-label{font-size:0.6rem;color:#3a506e;letter-spacing:0.1em;display:block;margin-bottom:6px}
+.setup-inp{width:100%;background:#060d18;border:1px solid #1e3050;border-radius:3px;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#e2e8f0;outline:none}
+.setup-inp:focus{border-color:#1e6fff}
+.setup-btn{width:100%;margin-top:12px;padding:14px;background:#f5a623;border:none;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:0.75rem;font-weight:700;letter-spacing:0.1em;color:#060d18;cursor:pointer}
+.setup-err{font-size:0.6rem;color:#ef4444;margin-top:10px;min-height:16px}
+
+/* main */
+#main{display:none;padding:0}
+
+/* section */
+.section{padding:18px 16px 0}
+.section-title{font-size:0.6rem;font-weight:700;letter-spacing:0.14em;color:#3a506e;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #0f1f33}
+
+/* generate invite */
+.field{margin-bottom:12px}
+.lbl{font-size:0.58rem;color:#2a4060;letter-spacing:0.1em;display:block;margin-bottom:5px}
+.inp{width:100%;background:#060d18;border:1px solid #1e3050;border-radius:3px;padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#e2e8f0;outline:none;-webkit-appearance:none}
+.inp:focus{border-color:#1e6fff}
+.row{display:flex;gap:10px}
+.row .field{flex:1}
+.gen-btn{width:100%;padding:14px;background:#1e6fff;border:none;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:0.75rem;font-weight:700;letter-spacing:0.1em;color:#fff;cursor:pointer;margin-top:4px;-webkit-appearance:none}
+.gen-btn:active{background:#1559cc}
+.gen-btn:disabled{opacity:0.5}
+
+/* result card */
+#invite-result{display:none;margin-top:14px;background:#060d18;border:1px solid #1e3050;border-radius:4px;padding:14px}
+.result-lbl{font-size:0.52rem;color:#2a4060;letter-spacing:0.12em;margin-bottom:6px}
+.result-url{font-size:0.65rem;color:#f5a623;word-break:break-all;line-height:1.5;margin-bottom:12px}
+.copy-btn{width:100%;padding:12px;background:rgba(245,166,35,0.15);border:1px solid #f5a623;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:0.7rem;font-weight:700;letter-spacing:0.1em;color:#f5a623;cursor:pointer}
+.copy-btn.copied{background:rgba(16,185,129,0.15);border-color:#10b981;color:#10b981}
+.result-meta{font-size:0.56rem;color:#2a4060;margin-top:10px}
+
+/* list */
+.list{margin-top:12px;display:flex;flex-direction:column;gap:1px}
+.list-item{background:#0a1525;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.list-item:first-child{border-radius:4px 4px 0 0}
+.list-item:last-child{border-radius:0 0 4px 4px}
+.list-item:only-child{border-radius:4px}
+.item-main{flex:1;min-width:0}
+.item-title{font-size:0.68rem;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-sub{font-size:0.55rem;color:#2a4060;margin-top:3px}
+.item-used{color:#10b981}
+.item-pending{color:#f5a623}
+.item-expired{color:#3a506e}
+.revoke-btn{flex-shrink:0;padding:6px 10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:#f87171;cursor:pointer;white-space:nowrap}
+.revoke-btn:active{background:rgba(239,68,68,0.25)}
+.empty{font-size:0.62rem;color:#1e3050;text-align:center;padding:20px;letter-spacing:0.08em}
+.err{font-size:0.6rem;color:#ef4444;margin-top:8px;min-height:16px}
+
+/* logout */
+.logout-wrap{padding:28px 16px 0;text-align:center}
+.logout-btn{background:none;border:none;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:#1e3050;cursor:pointer;letter-spacing:0.08em}
+.logout-btn:active{color:#94a3b8}
+
+/* divider */
+.divider{height:1px;background:#0a1828;margin:20px 0 0}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <span class="logo">Political<span>Window</span></span>
+    <span class="badge">ADMIN</span>
+  </div>
+</header>
+
+<!-- Setup: enter admin key once -->
+<div id="setup">
+  <div class="setup-title">ADMIN API KEY</div>
+  <label class="setup-label">Paste your admin key to continue</label>
+  <input class="setup-inp" id="setup-key" type="password" placeholder="pw_admin_..." autocomplete="off" spellcheck="false">
+  <button class="setup-btn" id="setup-btn">AUTHENTICATE</button>
+  <div class="setup-err" id="setup-err"></div>
+</div>
+
+<!-- Main admin UI -->
+<div id="main">
+
+  <!-- Generate Invite -->
+  <div class="section">
+    <div class="section-title">GENERATE INVITE LINK</div>
+    <div class="field">
+      <label class="lbl">EMAIL (optional — locks invite to this address)</label>
+      <input class="inp" id="inv-email" type="email" placeholder="recipient@example.com" autocomplete="off">
+    </div>
+    <div class="row">
+      <div class="field">
+        <label class="lbl">EXPIRES IN</label>
+        <select class="inp" id="inv-days">
+          <option value="1">1 day</option>
+          <option value="3">3 days</option>
+          <option value="7" selected>7 days</option>
+          <option value="30">30 days</option>
+          <option value="90">90 days</option>
+        </select>
+      </div>
+    </div>
+    <button class="gen-btn" id="gen-btn">GENERATE INVITE LINK</button>
+    <div class="err" id="gen-err"></div>
+
+    <div id="invite-result">
+      <div class="result-lbl">INVITE LINK — SHARE WITH RECIPIENT</div>
+      <div class="result-url" id="result-url"></div>
+      <button class="copy-btn" id="copy-btn">COPY LINK</button>
+      <div class="result-meta" id="result-meta"></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Active Invites -->
+  <div class="section" style="margin-top:20px">
+    <div class="section-title">ACTIVE INVITES</div>
+    <div class="list" id="invites-list"><div class="empty">Loading…</div></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Users -->
+  <div class="section" style="margin-top:20px">
+    <div class="section-title">REGISTERED USERS</div>
+    <div class="list" id="users-list"><div class="empty">Loading…</div></div>
+  </div>
+
+  <div class="logout-wrap">
+    <button class="logout-btn" id="logout-btn">CLEAR KEY &amp; LOGOUT</button>
+  </div>
+
+</div>
+
+<script>
+const API = 'https://rates.politicalwindow.com';
+const STORAGE_KEY = 'pw_admin_key';
+const REGISTER_BASE = 'https://politicalwindow.com/rates.html?invite=';
+
+let KEY = localStorage.getItem(STORAGE_KEY);
+
+function authHeader() {
+  return { 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' };
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// ── SETUP ─────────────────────────────────────────────────────────────────────
+async function tryAuth(key) {
+  const r = await fetch(API + '/api/invites', { headers: { 'Authorization': 'Bearer ' + key } });
+  return r.ok || r.status === 200;
+}
+
+async function init() {
+  if (KEY) {
+    const ok = await tryAuth(KEY).catch(() => false);
+    if (ok) { showMain(); return; }
+    localStorage.removeItem(STORAGE_KEY);
+    KEY = null;
+  }
+  document.getElementById('setup').style.display = 'block';
+}
+
+document.getElementById('setup-btn').addEventListener('click', async () => {
+  const key = document.getElementById('setup-key').value.trim();
+  const err = document.getElementById('setup-err');
+  const btn = document.getElementById('setup-btn');
+  if (!key) { err.textContent = 'Paste your admin key'; return; }
+  btn.disabled = true; err.textContent = '';
+  const ok = await tryAuth(key).catch(() => false);
+  if (!ok) { err.textContent = 'Invalid key'; btn.disabled = false; return; }
+  KEY = key;
+  localStorage.setItem(STORAGE_KEY, KEY);
+  document.getElementById('setup').style.display = 'none';
+  showMain();
+});
+
+document.getElementById('setup-key').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('setup-btn').click();
+});
+
+// ── MAIN ──────────────────────────────────────────────────────────────────────
+function showMain() {
+  document.getElementById('main').style.display = 'block';
+  loadInvites();
+  loadUsers();
+}
+
+// ── GENERATE ──────────────────────────────────────────────────────────────────
+document.getElementById('gen-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('gen-btn');
+  const err = document.getElementById('gen-err');
+  const email = document.getElementById('inv-email').value.trim();
+  const days = parseInt(document.getElementById('inv-days').value);
+  btn.disabled = true; err.textContent = '';
+
+  try {
+    const r = await fetch(API + '/api/invites', {
+      method: 'POST',
+      headers: authHeader(),
+      body: JSON.stringify({ email: email || null, expires_in_days: days }),
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'Failed');
+
+    const url = REGISTER_BASE + j.token;
+    document.getElementById('result-url').textContent = url;
+    document.getElementById('result-meta').textContent =
+      'Expires ' + fmtDate(j.expires_at) + (j.email ? ' · Locked to ' + j.email : ' · Open registration');
+    document.getElementById('invite-result').style.display = 'block';
+
+    const copyBtn = document.getElementById('copy-btn');
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(url).then(() => {
+        copyBtn.textContent = '✓ COPIED';
+        copyBtn.classList.add('copied');
+        setTimeout(() => { copyBtn.textContent = 'COPY LINK'; copyBtn.classList.remove('copied'); }, 2000);
+      });
+    };
+
+    document.getElementById('inv-email').value = '';
+    loadInvites();
+  } catch (e) {
+    err.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ── INVITES LIST ──────────────────────────────────────────────────────────────
+async function loadInvites() {
+  const list = document.getElementById('invites-list');
+  try {
+    const r = await fetch(API + '/api/invites', { headers: authHeader() });
+    const j = await r.json();
+    const rows = j.data || [];
+    const now = new Date();
+
+    if (!rows.length) { list.innerHTML = '<div class="empty">NO INVITES YET</div>'; return; }
+
+    list.innerHTML = rows.map(inv => {
+      const used = !!inv.used_at;
+      const expired = !used && inv.expires_at && new Date(inv.expires_at) < now;
+      const statusClass = used ? 'item-used' : expired ? 'item-expired' : 'item-pending';
+      const statusText = used
+        ? '✓ Used by ' + (inv.used_by_email || 'unknown')
+        : expired ? 'Expired ' + fmtDate(inv.expires_at)
+        : 'Pending · expires ' + fmtDate(inv.expires_at);
+      const revokeBtn = (!used && !expired)
+        ? `<button class="revoke-btn" onclick="revokeInvite('${inv.invite_id}')">REVOKE</button>` : '';
+      return `<div class="list-item">
+        <div class="item-main">
+          <div class="item-title">${inv.email || 'Open invite'}</div>
+          <div class="item-sub ${statusClass}">${statusText}</div>
+        </div>
+        ${revokeBtn}
+      </div>`;
+    }).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="empty">Error loading invites</div>';
+  }
+}
+
+async function revokeInvite(id) {
+  if (!confirm('Revoke this invite?')) return;
+  await fetch(API + '/api/invites/' + id, { method: 'DELETE', headers: authHeader() });
+  loadInvites();
+}
+
+// ── USERS LIST ────────────────────────────────────────────────────────────────
+async function loadUsers() {
+  const list = document.getElementById('users-list');
+  try {
+    const r = await fetch(API + '/api/invites/users', { headers: authHeader() });
+    const j = await r.json();
+    const rows = j.data || [];
+    if (!rows.length) { list.innerHTML = '<div class="empty">NO USERS YET</div>'; return; }
+    list.innerHTML = rows.map(u => `<div class="list-item">
+      <div class="item-main">
+        <div class="item-title">${u.email}</div>
+        <div class="item-sub ${u.is_active ? 'item-pending' : 'item-expired'}">
+          ${u.is_active ? 'Active' : 'Disabled'} · joined ${fmtDate(u.created_at)}
+          ${u.last_login_at ? ' · last login ' + fmtDate(u.last_login_at) : ''}
+        </div>
+      </div>
+      ${u.is_active ? `<button class="revoke-btn" onclick="disableUser('${u.user_id}','${u.email}')">DISABLE</button>` : ''}
+    </div>`).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="empty">Error loading users</div>';
+  }
+}
+
+async function disableUser(id, email) {
+  if (!confirm('Disable ' + email + '?')) return;
+  await fetch(API + '/api/invites/users/' + id, { method: 'DELETE', headers: authHeader() });
+  loadUsers();
+}
+
+// ── LOGOUT ────────────────────────────────────────────────────────────────────
+document.getElementById('logout-btn').addEventListener('click', () => {
+  localStorage.removeItem(STORAGE_KEY);
+  KEY = null;
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('invite-result').style.display = 'none';
+  document.getElementById('setup-key').value = '';
+  document.getElementById('setup-err').textContent = '';
+  document.getElementById('setup').style.display = 'block';
+});
+
+init();
+</script>
+</body>
+</html>
