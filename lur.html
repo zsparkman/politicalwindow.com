@@ -227,13 +227,15 @@ header{background:#0d1a2e;border-bottom:1px solid #1a3156;padding:0 1.5rem;displ
   <div class="filters" id="camp-filters">
     <div class="fwrap">
       <div class="flbl">CAMPAIGN</div>
-      <select id="f-entity" style="width:260px">
+      <select id="f-entity" style="width:280px">
         <option value="">Loading campaigns…</option>
       </select>
     </div>
     <div class="fwrap">
-      <div class="flbl">STATION</div>
-      <input type="text" id="f-camp-station" placeholder="e.g. KHOU" maxlength="12">
+      <div class="flbl">STATION / PSID</div>
+      <select id="f-camp-station" style="width:200px">
+        <option value="">All Stations</option>
+      </select>
     </div>
     <div class="filter-note">Competitor rates sourced from same station · daypart · week</div>
   </div>
@@ -279,11 +281,15 @@ header{background:#0d1a2e;border-bottom:1px solid #1a3156;padding:0 1.5rem;displ
     </div>
     <div class="fwrap">
       <div class="flbl">DMA</div>
-      <input type="text" id="f-stn-dma" placeholder="e.g. HOUSTON">
+      <select id="f-stn-dma" style="width:200px">
+        <option value="">All DMAs</option>
+      </select>
     </div>
     <div class="fwrap">
-      <div class="flbl">STATION</div>
-      <input type="text" id="f-stn-station" placeholder="e.g. KHOU" maxlength="12">
+      <div class="flbl">STATION / PSID</div>
+      <select id="f-stn-station" style="width:220px">
+        <option value="">All Stations</option>
+      </select>
     </div>
     <div class="filter-note">LUR floor = lowest rate paid by any political buyer in that slot</div>
   </div>
@@ -377,6 +383,44 @@ document.getElementById('card-station').addEventListener('click',()=>{
 });
 document.getElementById('back-from-campaign').addEventListener('click',()=>showScreen('mode'));
 document.getElementById('back-from-station').addEventListener('click',()=>showScreen('mode'));
+
+// ── OPTIONS (stations + DMAs) ──────────────────────────────────────────────────
+async function loadOptions(){
+  try{
+    const r = await fetch(API+'/api/lur-options',{headers:authHeader()});
+    if(!r.ok) return;
+    const j = await r.json();
+    const stations = j.stations||[];
+    const dmas     = j.dmas||[];
+
+    // Build station option HTML — broadcast callsigns grouped before cable PSIDs
+    const broadcast = stations.filter(s=>s.source_type!=='cable');
+    const cable     = stations.filter(s=>s.source_type==='cable');
+
+    function stationOptHTML(s){
+      if(s.source_type==='cable'){
+        return `<option value="${s.station}">PSID ${s.station} · ${s.operator_name||'Cable'} (CABLE)</option>`;
+      }
+      return `<option value="${s.station}">${s.station}${s.dma?' · '+s.dma:''}</option>`;
+    }
+
+    const campSel = document.getElementById('f-camp-station');
+    const stnSel  = document.getElementById('f-stn-station');
+    const dmaFrag  = dmas.map(d=>`<option value="${d}">${d}</option>`).join('');
+
+    [campSel, stnSel].forEach(sel=>{
+      sel.innerHTML = '<option value="">All Stations</option>';
+      if(broadcast.length){
+        sel.innerHTML += '<optgroup label="BROADCAST">' + broadcast.map(stationOptHTML).join('') + '</optgroup>';
+      }
+      if(cable.length){
+        sel.innerHTML += '<optgroup label="CABLE / PSID">' + cable.map(stationOptHTML).join('') + '</optgroup>';
+      }
+    });
+
+    document.getElementById('f-stn-dma').innerHTML = '<option value="">All DMAs</option>' + dmaFrag;
+  }catch(e){/* silent — filters still usable */}
+}
 
 // ── ENTITIES DROPDOWN ─────────────────────────────────────────────────────────
 async function loadEntities(){
@@ -556,10 +600,7 @@ function renderCampaign(rows, entityId){
 }
 
 document.getElementById('f-entity').addEventListener('change', loadCampaign);
-document.getElementById('f-camp-station').addEventListener('input', ()=>{
-  clearTimeout(campDebounce);
-  campDebounce=setTimeout(loadCampaign,400);
-});
+document.getElementById('f-camp-station').addEventListener('change', loadCampaign);
 
 // ── STATION MODE ──────────────────────────────────────────────────────────────
 let stnData=[], stnDebounce;
@@ -703,14 +744,8 @@ function renderSlots(rows){
 }
 
 // Live filters for station mode
-['f-stn-state'].forEach(id=>{
+['f-stn-state','f-stn-dma','f-stn-station'].forEach(id=>{
   document.getElementById(id).addEventListener('change',loadSlots);
-});
-['f-stn-dma','f-stn-station'].forEach(id=>{
-  document.getElementById(id).addEventListener('input',()=>{
-    clearTimeout(stnDebounce);
-    stnDebounce=setTimeout(loadSlots,400);
-  });
 });
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
@@ -734,7 +769,7 @@ document.getElementById('login-form').addEventListener('submit',async e=>{
     const j=await r.json();
     if(!r.ok) throw new Error(j.error||'Login failed');
     TOKEN=j.token; localStorage.setItem(STORAGE_KEY,TOKEN);
-    hideOverlay(); loadEntities(); showScreen('mode');
+    hideOverlay(); loadEntities(); loadOptions(); showScreen('mode');
   }catch(ex){err.textContent=ex.message;}
   finally{btn.disabled=false;}
 });
@@ -752,7 +787,7 @@ document.getElementById('register-form').addEventListener('submit',async e=>{
     const j=await r.json();
     if(!r.ok) throw new Error(j.error||'Registration failed');
     TOKEN=j.token; localStorage.setItem(STORAGE_KEY,TOKEN);
-    hideOverlay(); loadEntities(); showScreen('mode');
+    hideOverlay(); loadEntities(); loadOptions(); showScreen('mode');
   }catch(ex){err.textContent=ex.message;}
   finally{btn.disabled=false;}
 });
@@ -767,6 +802,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     hideOverlay();
     showScreen('mode');
     loadEntities();
+    loadOptions();
   } else {
     showOverlay();
   }
