@@ -98,6 +98,15 @@ td:last-child{border-right:none}
 .arrow{font-size:0.7rem;color:#2a4060;transition:transform 0.15s}
 .vrow.open .arrow{transform:rotate(90deg);color:#f5a623}
 
+/* ── STATION GROUP HEADER ── */
+.station-hdr td{background:#0b1729;border-top:2px solid #1e3050;border-bottom:1px solid #0f1f33;padding:10px 14px;cursor:default}
+.station-hdr td:hover{background:#0b1729}
+.stn-hdr-name{font-family:'IBM Plex Mono',monospace;font-size:0.78rem;font-weight:700;color:#e2e8f0;letter-spacing:0.04em}
+.stn-hdr-market{font-weight:400;color:#3a506e;font-size:0.65rem;margin-left:8px}
+.stn-hdr-sub{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:#3a506e;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.stn-hdr-sep{color:#1e3050}
+.stn-hdr-total{font-weight:700;color:#f87171}
+
 /* ── EXPANDED BUYER ROWS ── */
 .buyer-section{display:none;background:#060d18;border-bottom:1px solid #1e3050}
 .buyer-section.open{display:block}
@@ -204,28 +213,16 @@ td:last-child{border-right:none}
     </select>
   </div>
   <div class="fwrap">
+    <div class="flbl">DMA</div>
+    <input type="text" id="f-dma" placeholder="e.g. HOUSTON" maxlength="60" style="width:140px">
+  </div>
+  <div class="fwrap">
     <div class="flbl">STATION</div>
     <input type="text" id="f-station" placeholder="e.g. KHOU" maxlength="12">
   </div>
   <div class="fwrap">
-    <div class="flbl">DAYPART</div>
-    <select id="f-daypart">
-      <option value="">All Dayparts</option>
-      <option value="EM">EM · Early Morning</option>
-      <option value="MN">MN · Morning News</option>
-      <option value="DT">DT · Daytime</option>
-      <option value="EF">EF · Early Fringe</option>
-      <option value="EN">EN · Early News</option>
-      <option value="PA">PA · Prime Access</option>
-      <option value="PR">PR · Primetime</option>
-      <option value="LN">LN · Late News</option>
-      <option value="LF">LF · Late Fringe</option>
-      <option value="ON">ON · Overnight</option>
-    </select>
-  </div>
-  <div class="fwrap">
-    <div class="flbl">MIN SPREAD %</div>
-    <input type="number" id="f-spread" value="10" min="0" max="5000" step="5">
+    <div class="flbl">CANDIDATE</div>
+    <input type="text" id="f-candidate" placeholder="name or committee" maxlength="60" style="width:160px">
   </div>
   <button id="apply-btn">APPLY</button>
   <div class="filter-note">Comparing political buyers only · commercial rate data not included</div>
@@ -279,8 +276,8 @@ td:last-child{border-right:none}
 const API = 'https://rates.politicalwindow.com';
 const STORAGE_KEY = 'pw_token';
 let TOKEN = localStorage.getItem(STORAGE_KEY);
+let ALL_DATA = [];
 let DATA = [];
-let sortCol = 'spread_pct', sortDir = -1;
 
 const DP = {EM:'Early Morning',MN:'Morning News',DT:'Daytime',EF:'Early Fringe',
             EN:'Early News',PA:'Prime Access',PR:'Primetime',LN:'Late News',
@@ -383,36 +380,14 @@ async function load(){
   document.getElementById('empty-msg').style.display='none';
   document.getElementById('error-msg').style.display='none';
 
-  const state   = document.getElementById('f-state').value;
-  const station = document.getElementById('f-station').value.trim().toUpperCase();
-  const daypart = document.getElementById('f-daypart').value;
-  const spread  = document.getElementById('f-spread').value || '10';
-
-  const qs = new URLSearchParams({min_spread:spread,limit:500});
-  if(state)   qs.set('state',state);
-  if(station) qs.set('station',station);
-  if(daypart) qs.set('daypart_code',daypart);
-
   try{
-    const r = await fetch(API+'/api/lur-violations?'+qs, {headers:authHeader()});
+    const r = await fetch(API+'/api/lur-violations?min_spread=0&limit=1000', {headers:authHeader()});
     if(r.status===401){showOverlay();return;}
     if(!r.ok) throw new Error('API error '+r.status);
     const json = await r.json();
-
-    document.getElementById('s-slots').textContent     = (json.summary.total_slots).toLocaleString();
-    document.getElementById('s-stations').textContent  = json.summary.total_stations;
-    document.getElementById('s-states').textContent    = json.summary.total_states;
-    document.getElementById('s-overcharge').textContent= fmt$(json.summary.total_overcharge);
-
-    DATA = json.data || [];
+    ALL_DATA = json.data || [];
     document.getElementById('loading').style.display='none';
-
-    if(DATA.length===0){
-      document.getElementById('empty-msg').style.display='block';
-      return;
-    }
-    document.getElementById('tbl-wrap').style.display='block';
-    render();
+    applyFilters();
   }catch(e){
     document.getElementById('loading').style.display='none';
     const em=document.getElementById('error-msg');
@@ -421,125 +396,173 @@ async function load(){
   }
 }
 
-function sorted(){
-  return [...DATA].sort((a,b)=>{
-    let av=a[sortCol],bv=b[sortCol];
-    if(av==null&&bv==null)return 0;
-    if(av==null)return 1; if(bv==null)return -1;
-    return sortDir*(av<bv?-1:av>bv?1:0);
+function applyFilters(){
+  const state = document.getElementById('f-state').value.toUpperCase();
+  const dma   = document.getElementById('f-dma').value.trim().toUpperCase();
+  const stn   = document.getElementById('f-station').value.trim().toUpperCase();
+  const cand  = document.getElementById('f-candidate').value.trim().toLowerCase();
+
+  DATA = ALL_DATA.filter(v=>{
+    if(state && (v.state||'').toUpperCase() !== state) return false;
+    if(dma   && !(v.dma||'').toUpperCase().includes(dma)) return false;
+    if(stn   && v.station !== stn) return false;
+    if(cand){
+      const match = (v.buyers||[]).some(b=>
+        (b.candidate_name||'').toLowerCase().includes(cand) ||
+        (b.advertiser||'').toLowerCase().includes(cand)
+      );
+      if(!match) return false;
+    }
+    return true;
   });
+
+  const totalOver = DATA.reduce((s,r)=>s+parseFloat(r.est_overcharge||0),0);
+  document.getElementById('s-slots').textContent     = DATA.length.toLocaleString();
+  document.getElementById('s-stations').textContent  = new Set(DATA.map(r=>r.station)).size;
+  document.getElementById('s-states').textContent    = new Set(DATA.map(r=>r.state).filter(Boolean)).size;
+  document.getElementById('s-overcharge').textContent= fmt$(totalOver);
+
+  if(DATA.length===0){
+    document.getElementById('tbl-wrap').style.display='none';
+    document.getElementById('empty-msg').style.display='block';
+    return;
+  }
+  document.getElementById('empty-msg').style.display='none';
+  document.getElementById('tbl-wrap').style.display='block';
+  render();
+}
+
+function buildBuyerRow(b, lurRate){
+  const bRate = parseFloat(b.rate);
+  const over  = parseFloat(b.overpaid_per_spot||0);
+  const totalOver = over * (b.units||0);
+  const isLur = bRate <= lurRate;
+  const party = b.party||'';
+  const dotColor = PC[party]||'#4a6080';
+  const name = b.candidate_name || b.advertiser || '—';
+  const badge = isLur
+    ? `<span class="compliant-badge">LUR</span>`
+    : `<span class="overpaid-badge">+${fmtPct(b.overpaid_pct)}</span>`;
+  return `<tr>
+    <td class="left"><span class="pdot" style="background:${dotColor};display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px"></span><span class="buyer-name">${name}</span></td>
+    <td class="left">${party?`<span style="color:${dotColor};font-weight:700">${party}</span>`:'—'}</td>
+    <td class="left">${b.office||'—'}</td>
+    <td class="${isLur?'buyer-lur':'buyer-over'}">${fmtR(bRate)}</td>
+    <td>${badge}</td>
+    <td>${b.units||'—'}</td>
+    <td>${fmt$(b.spend)}</td>
+    <td>${totalOver>0?`<span style="color:#f87171">${fmt$(totalOver)}</span>`:'—'}</td>
+    <td class="left" style="line-height:1.8">${renderInvoices(b.invoices||[])}</td>
+  </tr>`;
 }
 
 function render(){
-  const rows = sorted();
-  document.getElementById('tbl-count').textContent = rows.length+' slots';
-
-  // Update sort indicators
-  document.querySelectorAll('th[data-col]').forEach(th=>{
-    th.classList.remove('sort-asc','sort-desc');
-    if(th.dataset.col===sortCol) th.classList.add(sortDir===1?'sort-asc':'sort-desc');
-  });
-
   const tbody = document.getElementById('tbl-body');
   tbody.innerHTML = '';
 
-  rows.forEach((v,i)=>{
-    const pct = parseFloat(v.spread_pct);
-    const sc = spreadClass(pct);
-    const dpName = DP[v.daypart_code] || v.daypart_code || '—';
-    const overcharge = parseFloat(v.est_overcharge||0);
+  // Group by station, sort stations by total est_overcharge desc
+  const byStation = {};
+  DATA.forEach(v=>{
+    if(!byStation[v.station]) byStation[v.station]=[];
+    byStation[v.station].push(v);
+  });
+  const stationOrder = Object.keys(byStation).sort((a,b)=>{
+    const sa = byStation[a].reduce((s,v)=>s+parseFloat(v.est_overcharge||0),0);
+    const sb = byStation[b].reduce((s,v)=>s+parseFloat(v.est_overcharge||0),0);
+    return sb-sa;
+  });
 
-    // Main violation row
-    const tr = document.createElement('tr');
-    tr.className = 'vrow';
-    tr.dataset.idx = i;
-    tr.innerHTML = `
-      <td class="left">
-        <div class="stn-name">${v.station||'—'}</div>
-        <div class="stn-sub">${v.state||''} · ${v.dma||'—'}</div>
-      </td>
-      <td class="left"><span class="dp">${v.daypart_code||'—'}</span><span style="font-size:0.54rem;color:#2a4060;margin-left:6px">${dpName}</span></td>
-      <td>${fmtWeek(v.week_of)}</td>
-      <td><span class="lur-rate">${fmtR(v.lur_rate)}</span></td>
-      <td><span class="max-rate">${fmtR(v.max_rate)}</span></td>
-      <td><span class="spread ${sc}">${fmtPct(pct)}</span></td>
-      <td>${v.candidate_count}</td>
-      <td>${overcharge>0?fmt$(overcharge):'—'}</td>
-      <td><span class="arrow">›</span></td>
-    `;
-    tbody.appendChild(tr);
+  document.getElementById('tbl-count').textContent =
+    DATA.length+' slot'+(DATA.length!==1?'s':'')+' across '+stationOrder.length+' station'+(stationOrder.length!==1?'s':'');
 
-    // Buyer detail section
-    const det = document.createElement('tr');
-    det.className = 'buyer-section';
-    det.dataset.parent = i;
-    const buyers = (v.buyers||[]);
-    const lurRate = parseFloat(v.lur_rate);
-    const buyerRows = buyers.map(b=>{
-      const bRate = parseFloat(b.rate);
-      const over  = parseFloat(b.overpaid_per_spot||0);
-      const totalOver = over * (b.units||0);
-      const isLur = bRate <= lurRate;
-      const party = b.party||'';
-      const dotColor = PC[party]||'#4a6080';
-      const name = b.candidate_name || b.advertiser || '—';
-      const badge = isLur
-        ? `<span class="compliant-badge">LUR</span>`
-        : `<span class="overpaid-badge">+${fmtPct(b.overpaid_pct)}</span>`;
-      return `<tr>
-        <td class="left"><span class="pdot" style="background:${dotColor};display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px"></span><span class="buyer-name">${name}</span></td>
-        <td class="left">${party?`<span style="color:${dotColor};font-weight:700">${party}</span>`:'—'}</td>
-        <td class="left">${b.office||'—'}</td>
-        <td class="${isLur?'buyer-lur':'buyer-over'}">${fmtR(bRate)}</td>
-        <td>${badge}</td>
-        <td>${b.units||'—'}</td>
-        <td>${fmt$(b.spend)}</td>
-        <td>${totalOver>0?`<span style="color:#f87171">${fmt$(totalOver)}</span>`:'—'}</td>
-        <td class="left" style="line-height:1.8">${renderInvoices(b.invoices||[])}</td>
-      </tr>`;
-    }).join('');
+  stationOrder.forEach(stn=>{
+    const violations = byStation[stn].sort((a,b)=>parseFloat(b.spread_pct)-parseFloat(a.spread_pct));
+    const totalOver  = violations.reduce((s,v)=>s+parseFloat(v.est_overcharge||0),0);
+    const allCands   = new Set();
+    violations.forEach(v=>(v.buyers||[]).forEach(b=>allCands.add(b.candidate_name||b.advertiser)));
+    const v0 = violations[0];
 
-    det.innerHTML = `<td colspan="9" style="padding:0">
-      ${generateExplanation(v)}
-      <div class="buyer-table-wrap">
-        <table class="buyer-table">
-          <thead><tr>
-            <th class="left" style="padding-left:24px">ADVERTISER</th>
-            <th class="left">PARTY</th>
-            <th class="left">OFFICE</th>
-            <th>RATE/SPOT</th>
-            <th>VS LUR</th>
-            <th>UNITS</th>
-            <th>TOTAL SPEND</th>
-            <th>OVERCHARGE EST.</th>
-            <th class="left">INVOICES</th>
-          </tr></thead>
-          <tbody>${buyerRows}</tbody>
-        </table>
+    // Station subtotal header
+    const stnRow = document.createElement('tr');
+    stnRow.className = 'station-hdr';
+    stnRow.innerHTML = `<td colspan="9" class="left">
+      <div class="stn-hdr-name">${stn} <span class="stn-hdr-market">${v0.dma||''} · ${v0.state||''}</span></div>
+      <div class="stn-hdr-sub">
+        <span>${violations.length} flagged slot${violations.length!==1?'s':''}</span>
+        <span class="stn-hdr-sep">·</span>
+        <span>${allCands.size} candidate${allCands.size!==1?'s':''}</span>
+        <span class="stn-hdr-sep">·</span>
+        <span class="stn-hdr-total">Est. overcharge: ${fmt$(totalOver)}</span>
       </div>
     </td>`;
-    tbody.appendChild(det);
+    tbody.appendChild(stnRow);
 
-    // Toggle expand
-    tr.addEventListener('click',()=>{
-      const open = tr.classList.toggle('open');
-      det.classList.toggle('open', open);
+    // Violation rows — all expanded
+    violations.forEach(v=>{
+      const pct = parseFloat(v.spread_pct);
+      const sc  = spreadClass(pct);
+      const dpName = DP[v.daypart_code]||v.daypart_code||'—';
+      const overcharge = parseFloat(v.est_overcharge||0);
+      const lurRate = parseFloat(v.lur_rate);
+
+      const tr = document.createElement('tr');
+      tr.className = 'vrow open';
+      tr.innerHTML = `
+        <td class="left">
+          <div class="stn-name">${v.station||'—'}</div>
+          <div class="stn-sub">${v.state||''} · ${v.dma||'—'}</div>
+        </td>
+        <td class="left"><span class="dp">${v.daypart_code||'—'}</span><span style="font-size:0.54rem;color:#2a4060;margin-left:6px">${dpName}</span></td>
+        <td>${fmtWeek(v.week_of)}</td>
+        <td><span class="lur-rate">${fmtR(v.lur_rate)}</span></td>
+        <td><span class="max-rate">${fmtR(v.max_rate)}</span></td>
+        <td><span class="spread ${sc}">${fmtPct(pct)}</span></td>
+        <td>${v.candidate_count}</td>
+        <td>${overcharge>0?fmt$(overcharge):'—'}</td>
+        <td><span class="arrow" style="transform:rotate(90deg);color:#f5a623">›</span></td>
+      `;
+      tbody.appendChild(tr);
+
+      const det = document.createElement('tr');
+      det.className = 'buyer-section open';
+      const buyerRows = (v.buyers||[]).map(b=>buildBuyerRow(b,lurRate)).join('');
+      det.innerHTML = `<td colspan="9" style="padding:0">
+        ${generateExplanation(v)}
+        <div class="buyer-table-wrap">
+          <table class="buyer-table">
+            <thead><tr>
+              <th class="left" style="padding-left:24px">ADVERTISER</th>
+              <th class="left">PARTY</th>
+              <th class="left">OFFICE</th>
+              <th>RATE/SPOT</th>
+              <th>VS LUR</th>
+              <th>UNITS</th>
+              <th>TOTAL SPEND</th>
+              <th>OVERCHARGE EST.</th>
+              <th class="left">INVOICES</th>
+            </tr></thead>
+            <tbody>${buyerRows}</tbody>
+          </table>
+        </div>
+      </td>`;
+      tbody.appendChild(det);
+
+      // Toggle on click
+      tr.addEventListener('click',()=>{
+        const open = tr.classList.toggle('open');
+        det.classList.toggle('open',open);
+        tr.querySelector('.arrow').style.transform = open?'rotate(90deg)':'';
+        tr.querySelector('.arrow').style.color = open?'#f5a623':'#2a4060';
+      });
     });
   });
 }
 
-// Sort on header click
-document.querySelectorAll('th[data-col]').forEach(th=>{
-  th.addEventListener('click',()=>{
-    const col = th.dataset.col;
-    if(sortCol===col) sortDir*=-1;
-    else{ sortCol=col; sortDir=-1; }
-    render();
-  });
+['f-state','f-dma','f-station','f-candidate'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('keydown', e=>{ if(e.key==='Enter') applyFilters(); });
 });
-
-document.getElementById('apply-btn').addEventListener('click', load);
-document.getElementById('f-station').addEventListener('keydown', e=>{ if(e.key==='Enter') load(); });
+document.getElementById('apply-btn').addEventListener('click', applyFilters);
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 function showPane(name){
