@@ -282,6 +282,23 @@ function fmtR(n){return n==null?'—':'$'+Number(n).toFixed(2);}
 function fmtPct(n){return n==null?'—':'+'+Number(n).toLocaleString()+'%';}
 function fmtWeek(d){if(!d)return'—';const dt=new Date(d);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});}
 
+function fccUrl(inv){
+  if(inv.folder_id&&inv.file_manager_id)
+    return'https://publicfiles.fcc.gov/api/manager/download/'+inv.folder_id+'/'+inv.file_manager_id+'.pdf';
+  return null;
+}
+
+function renderInvoices(invoices){
+  if(!invoices||!invoices.length) return'—';
+  return invoices.map(inv=>{
+    const label='Ord '+( inv.order_number||'?')+' Ln '+(inv.line_number!=null?inv.line_number:'?');
+    const url=fccUrl(inv);
+    return url
+      ?`<a href="${url}" target="_blank" style="color:#f5a623;text-decoration:none;white-space:nowrap">${label} ↗</a>`
+      :`<span style="color:#3a506e;white-space:nowrap">${label}</span>`;
+  }).join('<br>');
+}
+
 function spreadClass(pct){
   if(pct>=500) return'spread-critical';
   if(pct>=100) return'spread-high';
@@ -411,6 +428,7 @@ function render(){
         <td>${b.units||'—'}</td>
         <td>${fmt$(b.spend)}</td>
         <td>${totalOver>0?`<span style="color:#f87171">${fmt$(totalOver)}</span>`:'—'}</td>
+        <td class="left" style="line-height:1.8">${renderInvoices(b.invoices||[])}</td>
       </tr>`;
     }).join('');
 
@@ -426,6 +444,7 @@ function render(){
             <th>UNITS</th>
             <th>TOTAL SPEND</th>
             <th>OVERCHARGE EST.</th>
+            <th class="left">INVOICES</th>
           </tr></thead>
           <tbody>${buyerRows}</tbody>
         </table>
