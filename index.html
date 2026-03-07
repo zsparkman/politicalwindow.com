@@ -685,7 +685,7 @@ function buildStates() {
     if (pWindow && TODAY >= pWindow && pDate && TODAY <= pDate) status = 'window-open';
     else if (pWindow && dWin !== null && dWin > 0 && dWin <= 30) status = 'window-soon';
     else if (pDate && dPrim !== null && dPrim > 0)               status = 'upcoming';
-    else if (pDate && dPrim !== null && dPrim <= 0 && TODAY < GENERAL_WINDOW) status = 'general-only';
+    else if (pDate && dPrim !== null && dPrim <= 0) status = 'general-only';
     else status = 'inactive';
     return { ...s, pDate, rDate, pWindow, dWin, dPrim, status, cands: CANDS[s.abbr] || [] };
   });
@@ -758,7 +758,7 @@ function buildDetailHTML(abbr) {
     });
   }
   return `<div class="fade-in">
-    <div style="font-family:var(--mono);font-size:0.57rem;letter-spacing:0.08em;margin-bottom:0.4rem">${SL[s.status]||''}</div>
+    <div style="font-family:var(--mono);font-size:0.57rem;letter-spacing:0.08em;margin-bottom:0.4rem">${s.status==='general-only'&&s.pDate?`<span style="color:var(--green)">✓ PRIMARY COMPLETE · GENERAL WINDOW</span>`:SL[s.status]||''}</div>
     <div class="detail-state-name">${s.name}</div>
     <div class="detail-state-abbr">${s.abbr} · 2026 ELECTION CYCLE</div>
     <div class="dsec"><div class="dlabel">Races on Ballot</div><div class="race-tags">${raceTags}</div></div>
@@ -776,9 +776,15 @@ function buildDetailHTML(abbr) {
     </div></div>
     <div class="dsec">
       <div class="dlabel">FCC Primary Window · LUR Applies</div>
+      ${s.dPrim!==null&&s.dPrim<=0?`
+      <div class="dval muted">${fmtS(s.pWindow)} → ${fmtS(s.pDate)}</div>
+      <div class="wbar"><div class="wbar-fill" style="width:100%;background:var(--slate);opacity:0.25"></div></div>
+      <div class="wbar-note" style="color:var(--text-faint)">Primary window closed · ${Math.abs(s.dPrim)}d ago</div>
+      `:`
       <div class="dval" style="color:${wc}">${fmtS(s.pWindow)} → ${fmtS(s.pDate)}</div>
       <div class="wbar"><div class="wbar-fill" style="width:${barPct}%;background:${wc}"></div></div>
       <div class="wbar-note">${s.status==='window-open'?`${Math.round(barPct)}% elapsed · LUR APPLIES NOW`:s.status==='window-soon'?`Opens in ${s.dWin}d · ${fmtL(s.pWindow)}`:s.pWindow?`Opens ${fmtL(s.pWindow)}`:'No primary window this cycle'}</div>
+      `}
     </div>
     <div class="dsec">
       <div class="dlabel">FCC General Window · All Federal Candidates</div>
@@ -961,7 +967,7 @@ function drawTable() {
     mini += '</div>';
     tr.innerHTML = `
       <td><div class="td-state"><div class="sbox">${s.abbr}</div><div class="sname">${s.name}</div></div></td>
-      <td>${SPILL[s.status]||''}</td>
+      <td>${s.status==='general-only'&&s.pDate?`<span class="spill spill-green">✓ COMPLETE</span>`:SPILL[s.status]||''}</td>
       <td style="color:var(--text)">${fmtS(s.pDate)}</td>
       <td style="color:var(--text)">${fmtS(s.pWindow)}${s.status==='window-open'?'<span class="dbadge pulse" style="color:var(--red)">● NOW</span>':s.status==='window-soon'?`<span class="dbadge" style="color:var(--amber)">in ${s.dWin}d</span>`:''}</td>
       <td style="color:var(--text)">${s.dWin===null?'—':s.dWin<=0?`<span style="color:var(--text-faint)">Past</span>`:s.dWin}</td>
@@ -999,7 +1005,7 @@ function drawMobileList(data) {
         ${candPreview ? `<div class="msc-cands">${candPreview}</div>` : ''}
       </div>
       <div class="msc-right">
-        ${SPILL[s.status]||''}
+        ${s.status==='general-only'&&s.pDate?`<span class="spill spill-green">✓ COMPLETE</span>`:SPILL[s.status]||''}
         ${s.dWin!==null&&s.dWin>0?`<span style="font-family:var(--mono);font-size:0.55rem;color:var(--text-faint)">${s.dWin}d to window</span>`:''}
       </div>
       <span class="msc-arrow">›</span>
