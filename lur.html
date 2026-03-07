@@ -115,8 +115,7 @@ header{background:#0d1a2e;border-bottom:1px solid #1a3156;padding:0 1.5rem;displ
 
 /* ── SLOT ROW (Station mode) ── */
 .slot-block{margin-bottom:2px;background:#0a1525;border-radius:3px;overflow:hidden}
-.slot-hdr{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:12px;align-items:center;padding:9px 14px;cursor:pointer;border-left:3px solid #1e3050}
-.slot-hdr:hover{background:rgba(30,48,80,0.3)}
+.slot-hdr{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;padding:9px 14px;border-left:3px solid #1e3050}
 .slot-hdr.has-spread{border-left-color:#f5a623}
 .slot-hdr.high-spread{border-left-color:#f87171}
 .slot-hdr-dp{display:flex;align-items:center;gap:8px}
@@ -127,8 +126,7 @@ header{background:#0d1a2e;border-bottom:1px solid #1a3156;padding:0 1.5rem;displ
 .spread-low{background:rgba(251,191,36,0.08);color:#fbbf24;border:1px solid rgba(251,191,36,0.2)}
 .spread-med{background:rgba(245,166,35,0.12);color:#f5a623;border:1px solid rgba(245,166,35,0.3)}
 .spread-high{background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
-.slot-buyers{padding:0 14px 10px 14px;display:none}
-.slot-buyers.open{display:block}
+.slot-buyers{padding:0 14px 10px 14px}
 .buyer-row{display:flex;align-items:center;gap:10px;padding:4px 0;border-bottom:1px solid #060d18;font-family:'IBM Plex Mono',monospace;font-size:0.62rem}
 .buyer-row:last-child{border-bottom:none}
 .buyer-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#64748b}
@@ -139,8 +137,6 @@ header{background:#0d1a2e;border-bottom:1px solid #1a3156;padding:0 1.5rem;displ
 .buyer-overpaid{font-size:0.54rem;color:#f87171;white-space:nowrap}
 .buyer-units{color:#2a4060;font-size:0.56rem;white-space:nowrap}
 .party-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.slot-arrow{font-size:0.7rem;color:#2a4060;transition:transform 0.15s;flex-shrink:0}
-.slot-arrow.open{transform:rotate(90deg);color:#f5a623}
 
 /* ── AUTH OVERLAY ── */
 @keyframes auth-fade-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -770,7 +766,6 @@ function renderSlots(rows){
           <span></span>
           <span class="slot-hdr-lur">LUR: ${fmtR(lurRate)}</span>
           <span class="slot-hdr-spread ${sc}">${pct>0?fmtPct(pct):'—'}</span>
-          <span class="slot-arrow">›</span>
         `;
 
         const bDiv = document.createElement('div');
@@ -789,11 +784,6 @@ function renderSlots(rows){
             ${!isLur&&over>0?`<span class="buyer-overpaid">${fmtPct(Math.round((over/lurRate)*100))}</span>`:''}
             <span class="buyer-units">${b.units||'?'} unit${(b.units||0)!==1?'s':''}</span>
           </div>`;
-        });
-
-        hdr.addEventListener('click',()=>{
-          const open = bDiv.classList.toggle('open');
-          hdr.querySelector('.slot-arrow').classList.toggle('open',open);
         });
 
         block.appendChild(hdr);
