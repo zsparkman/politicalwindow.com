@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUR Violation Detector — PoliticalWindow.com</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:18px}
+body{background:#080e1a;color:#cbd5e1;font-family:'DM Sans',sans-serif;min-height:100vh}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#1e3050;border-radius:3px}
+select,input,button{font-family:'IBM Plex Mono',monospace;outline:none}
+
+/* ── HEADER ── */
+header{background:#0d1a2e;border-bottom:1px solid #1a3156;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:baseline;gap:0.5rem}
+.logo-text{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.04em;color:#fff;line-height:1}
+.logo-dot{color:#1e6fff}
+.logo-badge{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:600;color:#f5a623;background:rgba(245,166,35,0.15);border:1px solid #f5a623;border-radius:2px;padding:2px 5px;letter-spacing:0.08em}
+.nav{display:flex;gap:1.25rem;align-items:center}
+.nav a{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:#4a6080;text-decoration:none;letter-spacing:0.08em}
+.nav a:hover{color:#94a3b8}
+.nav a.active{color:#f5a623}
+#logout-btn{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:#3a506e;background:none;border:none;cursor:pointer;padding:2px 6px;letter-spacing:0.06em}
+#logout-btn:hover{color:#94a3b8}
+
+/* ── PAGE HEADER ── */
+#page-header{padding:18px 24px 14px;border-bottom:1px solid #1e3050}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:0.06em;color:#fff;line-height:1}
+.page-sub{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:#4a6080;margin-top:5px;line-height:1.6;max-width:680px}
+
+/* ── STATS BAR ── */
+#stats{display:flex;gap:0;border-bottom:1px solid #1e3050}
+.stat{flex:1;padding:14px 20px;border-right:1px solid #1e3050}
+.stat:last-child{border-right:none}
+.stat-val{font-family:'IBM Plex Mono',monospace;font-size:1.15rem;font-weight:600;color:#f5a623;line-height:1}
+.stat-lbl{font-family:'IBM Plex Mono',monospace;font-size:0.52rem;color:#3a506e;letter-spacing:0.12em;margin-top:4px}
+
+/* ── FILTERS ── */
+#filters{padding:10px 24px;border-bottom:1px solid #1e3050;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;background:#060d18}
+.fwrap{display:flex;flex-direction:column;gap:3px}
+.flbl{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:#3a506e;letter-spacing:0.1em}
+select,input[type=text],input[type=number]{font-size:0.62rem;color:#cbd5e1;background:#0d1829;border:1px solid #1e3050;border-radius:2px;padding:5px 8px;height:28px}
+select{padding-right:24px;cursor:pointer}
+input[type=text]{width:120px}
+input[type=number]{width:72px}
+#apply-btn{height:28px;padding:0 14px;background:rgba(245,166,35,0.15);border:1px solid #f5a623;border-radius:2px;color:#f5a623;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;cursor:pointer}
+#apply-btn:hover{background:rgba(245,166,35,0.25)}
+.filter-note{font-family:'IBM Plex Mono',monospace;font-size:0.55rem;color:#2a4060;align-self:flex-end;padding-bottom:4px}
+
+/* ── MAIN ── */
+#main{padding:16px 24px;display:flex;flex-direction:column;gap:0}
+#loading{display:flex;align-items:center;justify-content:center;height:200px;font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:#f5a623;letter-spacing:0.15em}
+#error-msg{color:#ef4444;text-align:center;padding:40px;font-family:'IBM Plex Mono',monospace;font-size:0.8rem;display:none}
+#empty-msg{text-align:center;padding:60px;font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:#2a4060;letter-spacing:0.1em;display:none}
+
+/* ── TABLE ── */
+#tbl-wrap{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
+.tbl-hdr{padding:8px 16px;border-bottom:1px solid #1e3050;display:flex;justify-content:space-between;align-items:center}
+.tbl-hdr-txt{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:#3a506e;letter-spacing:0.1em}
+.tbl-count{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:#f5a623}
+table{width:100%;border-collapse:collapse;font-size:0.68rem}
+th{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;font-weight:700;letter-spacing:0.06em;color:#3a506e;padding:7px 12px;border-bottom:2px solid #1e3050;border-right:1px solid #0f1f33;background:#0a1525;text-align:right;white-space:nowrap;cursor:pointer;user-select:none}
+th:first-child,th.left{text-align:left}
+th:last-child{border-right:none}
+th:hover{color:#94a3b8}
+th.sort-asc::after{content:' ▲';color:#f5a623}
+th.sort-desc::after{content:' ▼';color:#f5a623}
+td{font-family:'IBM Plex Mono',monospace;padding:8px 12px;border-bottom:1px solid #0a1828;text-align:right;white-space:nowrap;color:#94a3b8;vertical-align:middle}
+td:first-child,td.left{text-align:left}
+td:last-child{border-right:none}
+.vrow:hover td{background:rgba(30,48,80,0.25);cursor:pointer}
+.vrow.open td{background:rgba(30,48,80,0.35)}
+
+/* station cell */
+.stn-name{color:#e2e8f0;font-weight:600;font-size:0.7rem}
+.stn-sub{color:#2a4060;font-size:0.55rem;margin-top:2px}
+
+/* rate cells */
+.lur-rate{color:#10b981;font-weight:600}
+.max-rate{color:#f87171;font-weight:600}
+
+/* spread badge */
+.spread{display:inline-block;padding:2px 6px;border-radius:2px;font-weight:700;font-size:0.65rem}
+.spread-critical{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
+.spread-high    {background:rgba(245,166,35,0.15);color:#f5a623;border:1px solid rgba(245,166,35,0.3)}
+.spread-medium  {background:rgba(251,191,36,0.1); color:#fbbf24;border:1px solid rgba(251,191,36,0.2)}
+
+/* daypart badge */
+.dp{display:inline-block;padding:2px 7px;border-radius:2px;font-size:0.58rem;font-weight:700;letter-spacing:0.06em;background:rgba(30,111,255,0.12);color:#60a5fa;border:1px solid rgba(30,111,255,0.2)}
+
+/* party dot */
+.pdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;flex-shrink:0}
+
+/* expand arrow */
+.arrow{font-size:0.7rem;color:#2a4060;transition:transform 0.15s}
+.vrow.open .arrow{transform:rotate(90deg);color:#f5a623}
+
+/* ── EXPANDED BUYER ROWS ── */
+.buyer-section{display:none;background:#060d18;border-bottom:1px solid #1e3050}
+.buyer-section.open{display:block}
+.buyer-table{width:100%;border-collapse:collapse;font-size:0.64rem}
+.buyer-table th{font-family:'IBM Plex Mono',monospace;font-size:0.54rem;color:#1e3050;padding:5px 12px 5px 24px;border-bottom:1px solid #0a1828;background:#060d18;text-align:right;white-space:nowrap;letter-spacing:0.06em;font-weight:700}
+.buyer-table th:first-child{text-align:left}
+.buyer-table td{font-family:'IBM Plex Mono',monospace;padding:6px 12px 6px 24px;border-bottom:1px solid #080f1c;color:#64748b;text-align:right;white-space:nowrap}
+.buyer-table td:first-child{text-align:left}
+.buyer-table tr:last-child td{border-bottom:none}
+.buyer-lur{color:#10b981!important;font-weight:600}
+.buyer-over{color:#f87171!important;font-weight:600}
+.buyer-name{color:#cbd5e1;font-weight:500}
+.overpaid-badge{display:inline-block;padding:1px 5px;border-radius:2px;font-size:0.56rem;font-weight:700;background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.25)}
+.compliant-badge{display:inline-block;padding:1px 5px;border-radius:2px;font-size:0.56rem;font-weight:700;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.2)}
+
+/* ── METHODOLOGY ── */
+#methodology{margin:20px 0 0;padding:14px 18px;background:rgba(30,48,80,0.15);border:1px solid #0f1f33;border-radius:4px}
+.meth-title{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;letter-spacing:0.12em;color:#2a4060;margin-bottom:6px}
+.meth-body{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:#1e3050;line-height:1.8}
+
+/* ── AUTH OVERLAY ── */
+@keyframes auth-fade-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+#auth-overlay{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(8,17,31,0.98) 0%,rgba(2,5,12,0.99) 100%);z-index:9999;display:none;align-items:center;justify-content:center}
+#auth-card{background:#0b1525;border:1px solid #1a2e4a;border-top:3px solid #1e6fff;border-radius:6px;width:100%;max-width:420px;box-shadow:0 32px 80px rgba(0,0,0,0.8);animation:auth-fade-in 0.2s ease}
+.auth-brand{padding:30px 28px 22px;border-bottom:1px solid #10203a;text-align:center}
+.auth-title{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:#fff;letter-spacing:0.05em;line-height:1}
+.auth-title .auth-dot{color:#1e6fff}
+.auth-sub{font-family:'IBM Plex Mono',monospace;font-size:0.54rem;color:#2e4a6a;margin-top:7px;letter-spacing:0.14em}
+.auth-tabs{display:flex;border-bottom:1px solid #10203a}
+.auth-tab{flex:1;padding:11px;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;border:none;background:transparent;cursor:pointer;color:#2e4a6a;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s}
+.auth-tab:hover{color:#64748b}
+.auth-tab.active{color:#f59e0b;border-bottom-color:#f59e0b;background:rgba(245,158,11,0.04)}
+.auth-body{padding:22px 28px 18px}
+.auth-field{margin-bottom:16px}
+.auth-lbl{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:#3a506e;letter-spacing:0.1em;margin-bottom:5px;display:block}
+.auth-inp{width:100%;background:#060d18;border:1px solid #162030;border-radius:3px;padding:9px 12px;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:#e2e8f0;outline:none;box-sizing:border-box;transition:border-color 0.15s}
+.auth-inp:focus{border-color:#1e6fff;box-shadow:0 0 0 3px rgba(30,111,255,0.1)}
+.auth-btn{width:100%;padding:11px;background:#f59e0b;border:none;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;color:#060d18;cursor:pointer;margin-top:8px;transition:background 0.15s}
+.auth-btn:hover:not(:disabled){background:#f5ab25}
+.auth-btn:disabled{opacity:0.45;cursor:not-allowed}
+.auth-err{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:#ef4444;margin-top:12px;min-height:18px;letter-spacing:0.04em}
+.auth-note{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:0.5rem;color:#162030;letter-spacing:0.1em;padding:13px 28px 16px;border-top:1px solid #0d1c30}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-text">Political<span class="logo-dot">Window</span></span>
+    <span class="logo-badge">LUR DETECTOR</span>
+  </div>
+  <nav class="nav">
+    <a href="/">MAP</a>
+    <a href="/rates.html">RATE INTEL</a>
+    <a href="/public-file.html">PUBLIC FILE</a>
+    <a href="/lur.html" class="active">LUR</a>
+    <button id="logout-btn">LOGOUT</button>
+  </nav>
+</header>
+
+<div id="page-header">
+  <div class="page-title">LUR Violation Detector</div>
+  <div class="page-sub">
+    Compares unit rates across political advertisers within the same station · daypart · broadcast week.
+    Any candidate charged above the slot minimum is flagged. Sorted by rate spread, highest first.
+  </div>
+</div>
+
+<div id="stats">
+  <div class="stat"><div class="stat-val" id="s-slots">—</div><div class="stat-lbl">FLAGGED SLOTS</div></div>
+  <div class="stat"><div class="stat-val" id="s-stations">—</div><div class="stat-lbl">STATIONS</div></div>
+  <div class="stat"><div class="stat-val" id="s-states">—</div><div class="stat-lbl">STATES</div></div>
+  <div class="stat"><div class="stat-val" id="s-overcharge">—</div><div class="stat-lbl">EST. OVERCHARGE</div></div>
+</div>
+
+<div id="filters">
+  <div class="fwrap">
+    <div class="flbl">STATE</div>
+    <select id="f-state">
+      <option value="">All States</option>
+      <option>AL</option><option>AK</option><option>AR</option><option>AZ</option>
+      <option>CA</option><option>CO</option><option>CT</option><option>DC</option>
+      <option>DE</option><option>FL</option><option>GA</option><option>HI</option>
+      <option>IA</option><option>ID</option><option>IL</option><option>IN</option>
+      <option>KS</option><option>KY</option><option>LA</option><option>MA</option>
+      <option>MD</option><option>ME</option><option>MI</option><option>MN</option>
+      <option>MO</option><option>MS</option><option>MT</option><option>NC</option>
+      <option>ND</option><option>NE</option><option>NH</option><option>NJ</option>
+      <option>NM</option><option>NV</option><option>NY</option><option>OH</option>
+      <option>OK</option><option>OR</option><option>PA</option><option>RI</option>
+      <option>SC</option><option>SD</option><option>TN</option><option>TX</option>
+      <option>UT</option><option>VA</option><option>VT</option><option>WA</option>
+      <option>WI</option><option>WV</option><option>WY</option>
+    </select>
+  </div>
+  <div class="fwrap">
+    <div class="flbl">STATION</div>
+    <input type="text" id="f-station" placeholder="e.g. KHOU" maxlength="12">
+  </div>
+  <div class="fwrap">
+    <div class="flbl">DAYPART</div>
+    <select id="f-daypart">
+      <option value="">All Dayparts</option>
+      <option value="EM">EM · Early Morning</option>
+      <option value="MN">MN · Morning News</option>
+      <option value="DT">DT · Daytime</option>
+      <option value="EF">EF · Early Fringe</option>
+      <option value="EN">EN · Early News</option>
+      <option value="PA">PA · Prime Access</option>
+      <option value="PR">PR · Primetime</option>
+      <option value="LN">LN · Late News</option>
+      <option value="LF">LF · Late Fringe</option>
+      <option value="ON">ON · Overnight</option>
+    </select>
+  </div>
+  <div class="fwrap">
+    <div class="flbl">MIN SPREAD %</div>
+    <input type="number" id="f-spread" value="10" min="0" max="5000" step="5">
+  </div>
+  <button id="apply-btn">APPLY</button>
+  <div class="filter-note">Comparing political buyers only · commercial rate data not included</div>
+</div>
+
+<div id="main">
+  <div id="loading">LOADING VIOLATIONS…</div>
+  <div id="error-msg"></div>
+  <div id="empty-msg">NO VIOLATIONS FOUND FOR CURRENT FILTERS</div>
+
+  <div id="tbl-wrap" style="display:none">
+    <div class="tbl-hdr">
+      <span class="tbl-hdr-txt">RATE DISCREPANCIES BY SLOT</span>
+      <span class="tbl-count" id="tbl-count"></span>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th class="left" data-col="station">STATION</th>
+            <th class="left" data-col="daypart_code">DAYPART</th>
+            <th data-col="week_of">WEEK OF</th>
+            <th data-col="lur_rate">LUR RATE</th>
+            <th data-col="max_rate">MAX PAID</th>
+            <th data-col="spread_pct">SPREAD</th>
+            <th data-col="candidate_count">BUYERS</th>
+            <th data-col="est_overcharge">EST. OVERCHARGE</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="methodology">
+    <div class="meth-title">METHODOLOGY · IMPORTANT LIMITATIONS</div>
+    <div class="meth-body">
+      This tool compares unit rates paid by different political advertisers within the same station, daypart, and broadcast week.
+      Under FCC §315, all legally qualified candidates must be charged the Lowest Unit Rate offered to any advertiser for the same
+      class and amount of time. A rate discrepancy between political buyers on the same slot may indicate an LUR violation.
+      However: (1) this analysis uses political file data only — we do not have access to commercial rate cards or makegood rates;
+      (2) different rate classes (preemptible vs. fixed) within the same daypart may legitimately carry different rates;
+      (3) volume discounts and package rates can explain some discrepancies. Flagged slots warrant investigation, not automatic
+      enforcement action. Est. overcharge = (candidate rate − slot minimum) × units purchased.
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://rates.politicalwindow.com';
+const STORAGE_KEY = 'pw_token';
+let TOKEN = localStorage.getItem(STORAGE_KEY);
+let DATA = [];
+let sortCol = 'spread_pct', sortDir = -1;
+
+const DP = {EM:'Early Morning',MN:'Morning News',DT:'Daytime',EF:'Early Fringe',
+            EN:'Early News',PA:'Prime Access',PR:'Primetime',LN:'Late News',
+            LF:'Late Fringe',ON:'Overnight'};
+const PC = {D:'#3b82f6',R:'#ef4444',I:'#a78bfa'};
+
+function fmt$(n){return n==null?'—':'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function fmtR(n){return n==null?'—':'$'+Number(n).toFixed(2);}
+function fmtPct(n){return n==null?'—':'+'+Number(n).toLocaleString()+'%';}
+function fmtWeek(d){if(!d)return'—';const dt=new Date(d);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});}
+
+function spreadClass(pct){
+  if(pct>=500) return'spread-critical';
+  if(pct>=100) return'spread-high';
+  return'spread-medium';
+}
+
+function authHeader(){return TOKEN?{'Authorization':'Bearer '+TOKEN}:{};}
+
+function showOverlay(){document.getElementById('auth-overlay').style.display='flex';}
+function hideOverlay(){document.getElementById('auth-overlay').style.display='none';}
+
+async function load(){
+  document.getElementById('loading').style.display='flex';
+  document.getElementById('tbl-wrap').style.display='none';
+  document.getElementById('empty-msg').style.display='none';
+  document.getElementById('error-msg').style.display='none';
+
+  const state   = document.getElementById('f-state').value;
+  const station = document.getElementById('f-station').value.trim().toUpperCase();
+  const daypart = document.getElementById('f-daypart').value;
+  const spread  = document.getElementById('f-spread').value || '10';
+
+  const qs = new URLSearchParams({min_spread:spread,limit:500});
+  if(state)   qs.set('state',state);
+  if(station) qs.set('station',station);
+  if(daypart) qs.set('daypart_code',daypart);
+
+  try{
+    const r = await fetch(API+'/api/lur-violations?'+qs, {headers:authHeader()});
+    if(r.status===401){showOverlay();return;}
+    if(!r.ok) throw new Error('API error '+r.status);
+    const json = await r.json();
+
+    document.getElementById('s-slots').textContent     = (json.summary.total_slots).toLocaleString();
+    document.getElementById('s-stations').textContent  = json.summary.total_stations;
+    document.getElementById('s-states').textContent    = json.summary.total_states;
+    document.getElementById('s-overcharge').textContent= fmt$(json.summary.total_overcharge);
+
+    DATA = json.data || [];
+    document.getElementById('loading').style.display='none';
+
+    if(DATA.length===0){
+      document.getElementById('empty-msg').style.display='block';
+      return;
+    }
+    document.getElementById('tbl-wrap').style.display='block';
+    render();
+  }catch(e){
+    document.getElementById('loading').style.display='none';
+    const em=document.getElementById('error-msg');
+    em.textContent='Error loading data: '+e.message;
+    em.style.display='block';
+  }
+}
+
+function sorted(){
+  return [...DATA].sort((a,b)=>{
+    let av=a[sortCol],bv=b[sortCol];
+    if(av==null&&bv==null)return 0;
+    if(av==null)return 1; if(bv==null)return -1;
+    return sortDir*(av<bv?-1:av>bv?1:0);
+  });
+}
+
+function render(){
+  const rows = sorted();
+  document.getElementById('tbl-count').textContent = rows.length+' slots';
+
+  // Update sort indicators
+  document.querySelectorAll('th[data-col]').forEach(th=>{
+    th.classList.remove('sort-asc','sort-desc');
+    if(th.dataset.col===sortCol) th.classList.add(sortDir===1?'sort-asc':'sort-desc');
+  });
+
+  const tbody = document.getElementById('tbl-body');
+  tbody.innerHTML = '';
+
+  rows.forEach((v,i)=>{
+    const pct = parseFloat(v.spread_pct);
+    const sc = spreadClass(pct);
+    const dpName = DP[v.daypart_code] || v.daypart_code || '—';
+    const overcharge = parseFloat(v.est_overcharge||0);
+
+    // Main violation row
+    const tr = document.createElement('tr');
+    tr.className = 'vrow';
+    tr.dataset.idx = i;
+    tr.innerHTML = `
+      <td class="left">
+        <div class="stn-name">${v.station||'—'}</div>
+        <div class="stn-sub">${v.state||''} · ${v.dma||'—'}</div>
+      </td>
+      <td class="left"><span class="dp">${v.daypart_code||'—'}</span><span style="font-size:0.54rem;color:#2a4060;margin-left:6px">${dpName}</span></td>
+      <td>${fmtWeek(v.week_of)}</td>
+      <td><span class="lur-rate">${fmtR(v.lur_rate)}</span></td>
+      <td><span class="max-rate">${fmtR(v.max_rate)}</span></td>
+      <td><span class="spread ${sc}">${fmtPct(pct)}</span></td>
+      <td>${v.candidate_count}</td>
+      <td>${overcharge>0?fmt$(overcharge):'—'}</td>
+      <td><span class="arrow">›</span></td>
+    `;
+    tbody.appendChild(tr);
+
+    // Buyer detail section
+    const det = document.createElement('tr');
+    det.className = 'buyer-section';
+    det.dataset.parent = i;
+    const buyers = (v.buyers||[]);
+    const lurRate = parseFloat(v.lur_rate);
+    const buyerRows = buyers.map(b=>{
+      const bRate = parseFloat(b.rate);
+      const over  = parseFloat(b.overpaid_per_spot||0);
+      const totalOver = over * (b.units||0);
+      const isLur = bRate <= lurRate;
+      const party = b.party||'';
+      const dotColor = PC[party]||'#4a6080';
+      const name = b.candidate_name || b.advertiser || '—';
+      const badge = isLur
+        ? `<span class="compliant-badge">LUR</span>`
+        : `<span class="overpaid-badge">+${fmtPct(b.overpaid_pct)}</span>`;
+      return `<tr>
+        <td class="left"><span class="pdot" style="background:${dotColor};display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px"></span><span class="buyer-name">${name}</span></td>
+        <td class="left">${party?`<span style="color:${dotColor};font-weight:700">${party}</span>`:'—'}</td>
+        <td class="left">${b.office||'—'}</td>
+        <td class="${isLur?'buyer-lur':'buyer-over'}">${fmtR(bRate)}</td>
+        <td>${badge}</td>
+        <td>${b.units||'—'}</td>
+        <td>${fmt$(b.spend)}</td>
+        <td>${totalOver>0?`<span style="color:#f87171">${fmt$(totalOver)}</span>`:'—'}</td>
+      </tr>`;
+    }).join('');
+
+    det.innerHTML = `<td colspan="9" style="padding:0">
+      <div class="buyer-table-wrap">
+        <table class="buyer-table">
+          <thead><tr>
+            <th class="left" style="padding-left:24px">ADVERTISER</th>
+            <th class="left">PARTY</th>
+            <th class="left">OFFICE</th>
+            <th>RATE/SPOT</th>
+            <th>VS LUR</th>
+            <th>UNITS</th>
+            <th>TOTAL SPEND</th>
+            <th>OVERCHARGE EST.</th>
+          </tr></thead>
+          <tbody>${buyerRows}</tbody>
+        </table>
+      </div>
+    </td>`;
+    tbody.appendChild(det);
+
+    // Toggle expand
+    tr.addEventListener('click',()=>{
+      const open = tr.classList.toggle('open');
+      det.classList.toggle('open', open);
+    });
+  });
+}
+
+// Sort on header click
+document.querySelectorAll('th[data-col]').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const col = th.dataset.col;
+    if(sortCol===col) sortDir*=-1;
+    else{ sortCol=col; sortDir=-1; }
+    render();
+  });
+});
+
+document.getElementById('apply-btn').addEventListener('click', load);
+document.getElementById('f-station').addEventListener('keydown', e=>{ if(e.key==='Enter') load(); });
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+function showPane(name){
+  document.querySelectorAll('.auth-pane').forEach(p=>p.style.display='none');
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('pane-'+name).style.display='block';
+  document.querySelector(`.auth-tab[data-pane="${name}"]`).classList.add('active');
+}
+document.querySelectorAll('.auth-tab').forEach(t=>{
+  t.addEventListener('click',()=>showPane(t.dataset.pane));
+});
+
+document.getElementById('login-form').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const btn=document.getElementById('login-btn');
+  const err=document.getElementById('auth-err');
+  btn.disabled=true; err.textContent='';
+  try{
+    const r = await fetch(API+'/auth/login',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:document.getElementById('login-email').value,
+                           password:document.getElementById('login-password').value})
+    });
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.error||'Login failed');
+    TOKEN = j.token;
+    localStorage.setItem(STORAGE_KEY, TOKEN);
+    hideOverlay();
+    load();
+  }catch(ex){ err.textContent=ex.message; }
+  finally{ btn.disabled=false; }
+});
+
+document.getElementById('register-form').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const btn=document.getElementById('register-btn');
+  const err=document.getElementById('auth-err');
+  const p1=document.getElementById('reg-password').value;
+  const p2=document.getElementById('reg-password2').value;
+  if(p1!==p2){err.textContent='Passwords do not match';return;}
+  btn.disabled=true; err.textContent='';
+  try{
+    const r = await fetch(API+'/auth/register',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({invite_code:document.getElementById('reg-invite').value,
+                           email:document.getElementById('reg-email').value,
+                           password:p1})
+    });
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.error||'Registration failed');
+    TOKEN = j.token;
+    localStorage.setItem(STORAGE_KEY, TOKEN);
+    hideOverlay();
+    load();
+  }catch(ex){ err.textContent=ex.message; }
+  finally{ btn.disabled=false; }
+});
+
+document.getElementById('logout-btn').addEventListener('click',()=>{
+  localStorage.removeItem(STORAGE_KEY);
+  TOKEN=null;
+  showOverlay();
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  if(TOKEN){
+    fetch(API+'/auth/me',{headers:authHeader()})
+      .then(r=>{ if(r.ok){hideOverlay();load();}else{localStorage.removeItem(STORAGE_KEY);TOKEN=null;showOverlay();}})
+      .catch(()=>showOverlay());
+  }else{
+    showOverlay();
+  }
+});
+</script>
+
+<div id="auth-overlay">
+  <div id="auth-card">
+    <div class="auth-brand">
+      <div class="auth-title">Political<span class="auth-dot">Window</span>.com</div>
+      <div class="auth-sub">POLITICAL ADVERTISING INTELLIGENCE</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-pane="login">LOGIN</button>
+      <button class="auth-tab" data-pane="register">REGISTER</button>
+    </div>
+    <div class="auth-body">
+      <div id="pane-login" class="auth-pane">
+        <form id="login-form">
+          <div class="auth-field"><label class="auth-lbl">EMAIL</label><input class="auth-inp" id="login-email" type="email" required autocomplete="email"></div>
+          <div class="auth-field"><label class="auth-lbl">PASSWORD</label><input class="auth-inp" id="login-password" type="password" required autocomplete="current-password"></div>
+          <button class="auth-btn" id="login-btn" type="submit">LOGIN</button>
+        </form>
+      </div>
+      <div id="pane-register" class="auth-pane" style="display:none">
+        <form id="register-form">
+          <div class="auth-field"><label class="auth-lbl">INVITE CODE</label><input class="auth-inp" id="reg-invite" type="text" required placeholder="paste your invite code"></div>
+          <div class="auth-field"><label class="auth-lbl">EMAIL</label><input class="auth-inp" id="reg-email" type="email" required autocomplete="email"></div>
+          <div class="auth-field"><label class="auth-lbl">PASSWORD</label><input class="auth-inp" id="reg-password" type="password" required autocomplete="new-password" placeholder="min 8 characters"></div>
+          <div class="auth-field"><label class="auth-lbl">CONFIRM PASSWORD</label><input class="auth-inp" id="reg-password2" type="password" required autocomplete="new-password"></div>
+          <button class="auth-btn" id="register-btn" type="submit">CREATE ACCOUNT</button>
+        </form>
+      </div>
+      <div class="auth-err" id="auth-err"></div>
+    </div>
+    <div class="auth-note">FOR AUTHORIZED SUBSCRIBERS ONLY</div>
+  </div>
+</div>
+
+</body>
+</html>
