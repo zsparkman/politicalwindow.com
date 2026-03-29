@@ -99,22 +99,25 @@
   .card-sub { font-family:var(--mono); font-size:0.6rem; color:var(--text-muted); line-height:1.6; }
 
   /* ── MAPLIBRE MAP ── */
-  #mapContainer { width:100%; height:500px; border-radius:4px; overflow:hidden; position:relative; }
+  #mapContainer { width:100%; height:500px; border-radius:4px; overflow:hidden; position:relative; box-shadow:inset 0 0 40px rgba(8,17,31,0.5); }
   #mapContainer .maplibregl-canvas { outline:none; }
   .maplibregl-ctrl-attrib { font-size:0.5rem !important; opacity:0.4; }
-  .maplibregl-ctrl-group { background:var(--navy-card) !important; border:1px solid var(--navy-border) !important; }
+  .maplibregl-ctrl-group { background:rgba(15,32,64,0.85) !important; border:1px solid var(--navy-border) !important; backdrop-filter:blur(6px); }
   .maplibregl-ctrl-group button { background-color:transparent !important; }
-  .maplibregl-ctrl-group button span { background-color:var(--text-muted) !important; }
-  .map-inset { position:absolute; z-index:10; border:1px solid var(--navy-border); border-radius:3px; overflow:hidden; background:var(--navy-mid); cursor:pointer; }
+  .maplibregl-ctrl-group button:hover span { background-color:var(--blue-light) !important; }
+  .maplibregl-ctrl-group button span { background-color:var(--text-muted) !important; transition:background-color 0.2s; }
+  .map-inset { position:absolute; z-index:10; border:1px solid var(--navy-border); border-radius:3px; overflow:hidden; background:var(--navy-mid); cursor:pointer; transition:border-color 0.2s, box-shadow 0.2s; }
+  .map-inset:hover { border-color:var(--blue); box-shadow:0 0 10px rgba(30,111,255,0.25); }
   .map-inset .maplibregl-ctrl-attrib { display:none !important; }
   .map-inset .maplibregl-ctrl { display:none !important; }
   .map-inset-label { position:absolute; bottom:2px; right:4px; font-family:var(--mono); font-size:0.5rem; color:#e8edf3; text-shadow:0 0 4px rgba(8,17,31,0.9); z-index:2; pointer-events:none; letter-spacing:0.05em; font-weight:600; }
   #insetAK { width:130px; height:90px; bottom:40px; left:8px; }
   #insetHI { width:100px; height:70px; bottom:40px; left:146px; }
   .map-tooltip {
-    position:absolute; pointer-events:none; background:var(--navy-mid); border:1px solid var(--navy-border);
+    position:absolute; pointer-events:none; background:rgba(13,26,46,0.92); backdrop-filter:blur(8px);
+    border:1px solid var(--navy-border); border-left:3px solid var(--blue);
     border-radius:4px; padding:8px 12px; font-family:var(--mono); font-size:0.62rem; color:var(--text);
-    z-index:50; box-shadow:0 4px 12px rgba(0,0,0,0.5); max-width:220px; line-height:1.6;
+    z-index:50; box-shadow:0 4px 16px rgba(0,0,0,0.6); max-width:260px; line-height:1.6;
   }
   .map-breadcrumb {
     font-family:var(--mono); font-size:0.6rem; color:var(--text-muted);
@@ -926,10 +929,39 @@ function addStatesLayer() {
       ],
       'fill-opacity': [
         'case',
-        ['boolean', ['feature-state', 'dimmed'], false], 0.1,
-        ['boolean', ['feature-state', 'selected'], false], 0.8,
-        ['boolean', ['feature-state', 'hover'], false], 0.7,
-        0.5
+        ['boolean', ['feature-state', 'dimmed'], false], 0.08,
+        ['boolean', ['feature-state', 'selected'], false], 0.75,
+        ['boolean', ['feature-state', 'hover'], false], 0.55,
+        0.38
+      ]
+    }
+  });
+
+  // Glow layer for selected/hover states (renders underneath the crisp border)
+  glMap.addLayer({
+    id: 'states-glow',
+    type: 'line',
+    source: 'states',
+    paint: {
+      'line-color': ['match', ['get', 'status'],
+        'window-open',  STATUS_COLORS['window-open'],
+        'window-soon',  STATUS_COLORS['window-soon'],
+        'upcoming',     STATUS_COLORS['upcoming'],
+        'general-only', STATUS_COLORS['general-only'],
+        STATUS_COLORS['inactive']
+      ],
+      'line-width': [
+        'case',
+        ['boolean', ['feature-state', 'selected'], false], 6,
+        ['boolean', ['feature-state', 'hover'], false], 4,
+        0
+      ],
+      'line-blur': 4,
+      'line-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'selected'], false], 0.6,
+        ['boolean', ['feature-state', 'hover'], false], 0.35,
+        0
       ]
     }
   });
@@ -943,18 +975,18 @@ function addStatesLayer() {
       'line-color': [
         'case',
         ['boolean', ['feature-state', 'selected'], false], '#ffffff',
-        ['boolean', ['feature-state', 'hover'], false], '#e2e8f0',
-        'rgba(148,163,184,0.6)'
+        ['boolean', ['feature-state', 'hover'], false], '#cbd5e1',
+        'rgba(100,120,150,0.45)'
       ],
       'line-width': [
         'case',
-        ['boolean', ['feature-state', 'selected'], false], 2.5,
-        ['boolean', ['feature-state', 'hover'], false], 1.8,
-        0.7
+        ['boolean', ['feature-state', 'selected'], false], 2,
+        ['boolean', ['feature-state', 'hover'], false], 1.5,
+        0.6
       ],
       'line-opacity': [
         'case',
-        ['boolean', ['feature-state', 'dimmed'], false], 0.12,
+        ['boolean', ['feature-state', 'dimmed'], false], 0.1,
         1
       ]
     }
@@ -990,7 +1022,7 @@ function addStateLabels() {
     source: 'state-labels',
     layout: {
       'text-field': ['get', 'abbr'],
-      'text-size': 11,
+      'text-size': ['interpolate', ['linear'], ['zoom'], 3, 9, 5, 12, 7, 14],
       'text-font': ['Open Sans Bold'],
       'text-allow-overlap': false,
       'text-ignore-placement': false,
@@ -999,7 +1031,8 @@ function addStateLabels() {
     paint: {
       'text-color': '#e8edf3',
       'text-halo-color': 'rgba(8,17,31,0.9)',
-      'text-halo-width': 2
+      'text-halo-width': 2,
+      'text-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, 8, 0]
     }
   });
 }
@@ -1038,6 +1071,7 @@ function wireMapInteractions() {
     const daysStr = s.dWin !== null && s.dWin > 0 ? `${s.dWin}d to window` : '';
 
     tooltip.innerHTML = `<strong>${s.name}</strong><br>${statusLabel}<br>Primary: ${primary}<br>FCC Opens: ${fccOpen}${daysStr ? '<br>' + daysStr : ''}<br>${races}`;
+    tooltip.style.borderLeftColor = STATUS_COLORS[s.status] || 'var(--blue)';
     tooltip.style.display = 'block';
 
     const rect = document.getElementById('mapContainer').getBoundingClientRect();
@@ -1104,8 +1138,12 @@ function mapSelectState(abbr) {
   // Hide insets when zoomed in
   setInsetVisibility(false);
 
-  // Load districts
-  loadDistricts(abbr).then(() => showDistricts(abbr));
+  // Load districts in parallel with zoom, reveal after both complete
+  const districtPromise = loadDistricts(abbr);
+  glMap.once('moveend', async () => {
+    await districtPromise;
+    showDistricts(abbr);
+  });
 }
 
 function mapDeselectState() {
@@ -1144,47 +1182,37 @@ function mapBackToUSA() {
 async function loadDistricts(abbr) {
   if (DISTRICT_CACHE[abbr]) return DISTRICT_CACHE[abbr];
 
-  const count = DISTRICT_COUNTS[abbr];
-  if (!count) return null;
-
-  const abbrLower = abbr.toLowerCase();
-  const features = [];
-
   try {
-    const fetches = [];
-    for (let i = 1; i <= count; i++) {
-      const url = `https://theunitedstates.io/districts/cds/2012/${abbrLower}-${i}/shape.geojson`;
-      fetches.push(
-        fetch(url).then(r => r.ok ? r.json() : null).catch(() => null)
-      );
+    const url = `https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_118th_Congressional_Districts/FeatureServer/0/query?where=STATE_ABBR='${abbr}'&outFields=DISTRICTID,CDFIPS,NAME,PARTY,LAST_NAME,STATE_ABBR&f=geojson&outSR=4326`;
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const geo = await resp.json();
+
+    if (geo.features) {
+      geo.features.forEach((f, i) => {
+        const p = f.properties;
+        const num = parseInt(p.CDFIPS ? p.CDFIPS.slice(-2) : i + 1, 10);
+        f.properties.district_code = `${abbr}-${num || 'AL'}`;
+        f.properties.district_number = num || 0;
+        f.properties.state_abbr = abbr;
+        f.properties.representative = p.LAST_NAME || '';
+        f.properties.party = p.PARTY || '';
+        f.id = i + 1;
+      });
     }
-    const results = await Promise.all(fetches);
-    results.forEach((geo, i) => {
-      if (geo) {
-        const f = geo.type === 'FeatureCollection' ? geo.features[0] : geo;
-        if (f) {
-          f.properties = f.properties || {};
-          f.properties.district_code = `${abbr}-${i + 1}`;
-          f.properties.district_number = i + 1;
-          f.properties.state_abbr = abbr;
-          f.id = i + 1;
-          features.push(f);
-        }
-      }
-    });
+
+    DISTRICT_CACHE[abbr] = geo;
+    return geo;
   } catch (e) {
     console.error('District load failed:', abbr, e);
+    return null;
   }
-
-  const fc = { type: 'FeatureCollection', features };
-  DISTRICT_CACHE[abbr] = fc;
-  return fc;
 }
 
 function showDistricts(abbr) {
   hideDistricts();
   const data = DISTRICT_CACHE[abbr];
-  if (!data || !data.features.length) return;
+  if (!data || !data.features || !data.features.length) return;
 
   glMap.addSource('districts', { type: 'geojson', data });
 
@@ -1193,10 +1221,10 @@ function showDistricts(abbr) {
     type: 'fill',
     source: 'districts',
     paint: {
-      'fill-color': 'transparent',
+      'fill-color': 'rgba(30,111,255,0.25)',
       'fill-opacity': [
         'case',
-        ['boolean', ['feature-state', 'hover'], false], 0.15,
+        ['boolean', ['feature-state', 'hover'], false], 1,
         0
       ]
     }
@@ -1209,7 +1237,8 @@ function showDistricts(abbr) {
     paint: {
       'line-color': 'rgba(200,214,229,0.5)',
       'line-width': 1,
-      'line-dasharray': [3, 2]
+      'line-dasharray': [3, 2],
+      'line-opacity': 0
     }
   });
 
@@ -1218,16 +1247,23 @@ function showDistricts(abbr) {
     type: 'symbol',
     source: 'districts',
     layout: {
-      'text-field': ['get', 'district_number'],
-      'text-size': 11,
+      'text-field': ['case', ['==', ['get', 'district_number'], 0], 'AL', ['to-string', ['get', 'district_number']]],
+      'text-size': 12,
       'text-font': ['Open Sans Bold'],
       'text-allow-overlap': false
     },
     paint: {
-      'text-color': 'rgba(200,214,229,0.6)',
-      'text-halo-color': 'rgba(10,15,30,0.7)',
-      'text-halo-width': 1
+      'text-color': 'rgba(200,214,229,0.7)',
+      'text-halo-color': 'rgba(10,15,30,0.8)',
+      'text-halo-width': 1.5,
+      'text-opacity': 0
     }
+  });
+
+  // Fade in district layers
+  requestAnimationFrame(() => {
+    glMap.setPaintProperty('districts-line', 'line-opacity', 1);
+    glMap.setPaintProperty('districts-label', 'text-opacity', 1);
   });
 
   // District hover
@@ -1247,18 +1283,28 @@ function showDistricts(abbr) {
 
     const dc = f.properties.district_code;
     const dn = f.properties.district_number;
+    const rep = f.properties.representative;
+    const party = f.properties.party;
+    const partyColor = party === 'R' ? 'var(--rep)' : party === 'D' ? 'var(--dem)' : 'var(--text-muted)';
+
+    let tipHTML = `<strong>${dc}</strong>${dn ? ' — District ' + dn : ' — At-Large'}`;
+    if (rep) tipHTML += `<br><span style="color:${partyColor}">●</span> Rep. ${rep} (${party})`;
+
+    // Add declared candidates if available
     const cands = CANDS[abbr] || [];
     const houseRace = cands.find(r => r.race === 'House');
-    const houseCands = houseRace ? houseRace.list : [];
-    // Simple candidate summary for tooltip
-    const candStr = houseCands.slice(0, 3).map(c => `${c.n} (${c.p})`).join(', ');
+    if (houseRace) {
+      const preview = houseRace.list.slice(0, 3).map(c => `${c.n} (${c.p})`).join(', ');
+      if (preview) tipHTML += `<br><span style="color:var(--text-faint)">Candidates:</span> ${preview}`;
+    }
 
-    tooltip.innerHTML = `<strong>${dc}</strong> — District ${dn}${candStr ? '<br>' + candStr : ''}`;
+    tooltip.innerHTML = tipHTML;
+    tooltip.style.borderLeftColor = partyColor;
     tooltip.style.display = 'block';
 
     const rect = document.getElementById('mapContainer').getBoundingClientRect();
-    const tRight = e.point.x + 16 + 220 > rect.width;
-    tooltip.style.left = tRight ? (e.point.x - 230) + 'px' : (e.point.x + 16) + 'px';
+    const tRight = e.point.x + 16 + 260 > rect.width;
+    tooltip.style.left = tRight ? (e.point.x - 270) + 'px' : (e.point.x + 16) + 'px';
     tooltip.style.top = (e.point.y - 10) + 'px';
   });
 
