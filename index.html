@@ -893,6 +893,39 @@ async function initMap() {
       // Match water + background to page container color
       if (glMap.getLayer('water')) glMap.setPaintProperty('water', 'fill-color', '#13203F');
       if (glMap.getLayer('background')) glMap.setPaintProperty('background', 'background-color', '#13203F');
+
+      // Subtle water texture: canvas-generated noise pattern
+      const texSize = 128;
+      const cvs = document.createElement('canvas');
+      cvs.width = texSize; cvs.height = texSize;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#13203F';
+      ctx.fillRect(0, 0, texSize, texSize);
+      for (let y = 0; y < texSize; y++) {
+        for (let x = 0; x < texSize; x++) {
+          if (Math.random() < 0.12) {
+            const v = Math.random() < 0.5 ? 'rgba(25,45,80,0.4)' : 'rgba(18,38,72,0.35)';
+            ctx.fillStyle = v;
+            ctx.fillRect(x, y, 1, 1);
+          }
+        }
+      }
+      // Faint horizontal wave lines
+      ctx.strokeStyle = 'rgba(30,55,95,0.18)';
+      ctx.lineWidth = 0.5;
+      for (let y = 8; y < texSize; y += 16) {
+        ctx.beginPath();
+        for (let x = 0; x < texSize; x += 2) {
+          const dy = Math.sin(x * 0.08 + y * 0.3) * 1.5;
+          x === 0 ? ctx.moveTo(x, y + dy) : ctx.lineTo(x, y + dy);
+        }
+        ctx.stroke();
+      }
+      glMap.addImage('water-texture', { width: texSize, height: texSize, data: new Uint8Array(ctx.getImageData(0, 0, texSize, texSize).data) });
+      if (glMap.getLayer('water')) {
+        glMap.setPaintProperty('water', 'fill-pattern', 'water-texture');
+      }
+
       addStatesLayer();
       addStateLabels();
       wireMapInteractions();
