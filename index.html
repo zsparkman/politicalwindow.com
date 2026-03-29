@@ -49,16 +49,15 @@
   /* ── HEADER ── */
   header {
     background:var(--navy-mid); border-bottom:1px solid var(--navy-border);
-    padding:0 1.25rem; display:flex; align-items:center; justify-content:space-between;
-    height:52px; position:sticky; top:0; z-index:100;
+    padding:0 1.25rem; display:grid; grid-template-columns:1fr auto 1fr;
+    align-items:center; height:52px; position:sticky; top:0; z-index:100;
   }
   .logo { display:flex; align-items:baseline; gap:0.5rem; }
   .logo-text { font-family:var(--display); font-size:1.5rem; letter-spacing:0.04em; color:#fff; line-height:1; }
   .logo-dot { color:var(--blue); }
   .logo-badge { font-family:var(--mono); font-size:0.6rem; font-weight:600; color:var(--amber); background:var(--amber-dim); border:1px solid var(--amber); border-radius:2px; padding:2px 5px; letter-spacing:0.08em; }
-  .header-right { display:flex; align-items:center; gap:1rem; }
+  .header-right { display:flex; align-items:center; gap:1rem; justify-content:flex-end; }
   .header-meta { font-family:var(--mono); font-size:0.62rem; color:var(--text-muted); }
-  .header-fcc { font-family:var(--mono); font-size:0.62rem; color:var(--text-muted); display:none; }
 
   /* ── LAYOUT ── */
   main { max-width:1440px; margin:0 auto; padding:1rem 1.25rem 3rem 1.75rem; display:grid; gap:1rem; }
@@ -428,7 +427,7 @@
 
 <header>
   <div class="logo">
-    <span class="logo-text">Political<span class="logo-dot">Window</span><span style="color:var(--text-muted)">.com</span></span>
+    <a href="/" style="text-decoration:none"><span class="logo-text">Political<span class="logo-dot">Window</span><span style="color:var(--text-muted)">.com</span></span></a>
     <span class="logo-badge">2026</span>
   </div>
   <nav class="header-nav">
@@ -438,7 +437,7 @@
   </nav>
   <div class="header-right">
     <span class="header-meta" id="live-date"></span>
-    <span class="header-meta" id="data-badge" style="color:var(--text-faint);font-size:0.55rem;letter-spacing:0.05em">⬤ CACHED SNAPSHOT · FEB 2026</span>
+    <span class="header-meta" id="data-badge" style="color:var(--text-faint);font-size:0.55rem;letter-spacing:0.05em;min-width:10em;text-align:right">⬤ LOADING…</span>
   </div>
 </header>
 
