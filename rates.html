@@ -1025,11 +1025,11 @@ function renderMatchups(rows){
     if(!slots[k]){slots[k]={station:r.station,description:r.description,time_period:r.time_period,week_of:r.week_of,rows:[]};slotOrder.push(k);}
     slots[k].rows.push(r);
   });
-  // Keep only slots with 2+ distinct candidates/advertisers
+  // Keep only slots with 2+ distinct candidates/advertisers paying different rates
   var matchups=slotOrder.map(function(k){return slots[k];}).filter(function(s){
-    var names=new Set();
-    s.rows.forEach(function(r){names.add(r.candidate||r.advertiser||'—');});
-    return names.size>=2;
+    var names=new Set(),rates=new Set();
+    s.rows.forEach(function(r){names.add(r.candidate||r.advertiser||'—');rates.add(parseFloat(r.rate)||0);});
+    return names.size>=2&&rates.size>=2;
   });
   if(!matchups.length){
     document.getElementById('matchups-count').textContent='';
