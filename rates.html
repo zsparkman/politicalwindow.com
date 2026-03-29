@@ -201,7 +201,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 <div id="header">
   <div>
     <div style="font-size:0.95rem;font-weight:700;color:#fff;letter-spacing:0.06em;font-family:'IBM Plex Mono',monospace">RATE ANALYTICS</div>
-    <div class="sub" id="header-sub">Loading rate lines…</div>
+    <div class="sub" id="header-sub">Set filters above then run report · 2026 cycle</div>
   </div>
   <div id="stats">
     <div><div class="stat-val" id="s-spend">—</div><div class="stat-lbl">GROSS SPEND</div></div>
@@ -222,7 +222,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   </div>
   <div class="filter-wrap">
     <div class="filter-lbl">STATE</div>
-    <select id="f-state"><option value="ALL">All States</option></select>
+    <select id="f-state"><option value="ALL">All States</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option><option>DC</option></select>
   </div>
   <div class="filter-wrap">
     <div class="filter-lbl">OFFICE</div>
@@ -259,7 +259,10 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
     <input type="text" id="f-search" placeholder="advertiser, station, buyer…">
   </div>
   <button id="clear-filters" class="sort-btn" style="color:#f59e0b">CLEAR</button>
+  <button id="run-report" style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;padding:6px 18px;border:1px solid #f59e0b;border-radius:2px;cursor:pointer;background:#f59e0b;color:#080e1a;margin-left:auto">RUN REPORT</button>
 </div>
+
+<div id="truncation-note" style="display:none;padding:8px 24px;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:#f59e0b;background:rgba(245,158,11,0.08);border-bottom:1px solid rgba(245,158,11,0.2);letter-spacing:0.06em"></div>
 
 <div id="tabs-bar">
   <button class="tab active" data-view="pivot">PIVOT TABLE</button>
@@ -270,7 +273,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
 <div id="pin-bar"></div>
 
 <div id="main">
-  <div id="loading">LOADING RATE LINE DATA…</div>
+  <div id="loading">SELECT FILTERS AND CLICK RUN REPORT</div>
   <div id="error-msg"></div>
 
   <div id="chart-wrap" style="display:none">
@@ -1104,23 +1107,49 @@ window.togglePivot=function(i){
   if(!open){d.classList.add('open');a.textContent='▲';}
 };
 
+function buildQueryParams(){
+  var p=[];
+  var party=document.getElementById('f-party').value;if(party!=='ALL')p.push('party='+encodeURIComponent(party));
+  var state=document.getElementById('f-state').value;if(state!=='ALL')p.push('state='+encodeURIComponent(state));
+  var office=document.getElementById('f-office').value;if(office!=='ALL')p.push('office='+encodeURIComponent(office));
+  var station=document.getElementById('f-station').value;if(station!=='ALL')p.push('station='+encodeURIComponent(station));
+  var dma=document.getElementById('f-dma').value;if(dma!=='ALL')p.push('dma='+encodeURIComponent(dma));
+  var daypart=document.getElementById('f-daypart').value;if(daypart!=='ALL')p.push('daypart_code='+encodeURIComponent(daypart));
+  var wf=document.getElementById('f-week-from').value;if(wf)p.push('week_from='+encodeURIComponent(wf));
+  var wt=document.getElementById('f-week-to').value;if(wt)p.push('week_to='+encodeURIComponent(wt));
+  return p.join('&');
+}
 function loadData(){
 var DATA_BADGE=document.getElementById('data-badge');
-authFetch(API+'/api/lines?limit=5000')
+var loading=document.getElementById('loading');
+loading.style.display='flex';loading.textContent='LOADING RATE LINE DATA…';
+document.getElementById('error-msg').style.display='none';
+document.getElementById('truncation-note').style.display='none';
+var qp=buildQueryParams();
+var url=API+'/api/lines?limit=30000'+(qp?'&'+qp:'');
+authFetch(url)
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(j){
   ALL_DATA=j.data||j||[];
-  document.getElementById('loading').style.display='none';
-  document.getElementById('header-sub').textContent=ALL_DATA.length.toLocaleString()+' rate lines indexed · 2026 cycle';
+  var totalRows=j.total_rows||ALL_DATA.length;
+  var totalSpend=j.total_spend||0;
+  loading.style.display='none';
+  document.getElementById('header-sub').textContent=totalRows.toLocaleString()+' rate lines · $'+fmtCompact(totalSpend)+' total spend · 2026 cycle';
+  if(ALL_DATA.length<totalRows){
+    var tn=document.getElementById('truncation-note');
+    tn.textContent='SHOWING '+ALL_DATA.length.toLocaleString()+' OF '+totalRows.toLocaleString()+' TOTAL ROWS — narrow your filters to see all data';
+    tn.style.display='block';
+  }
   if(DATA_BADGE){var t=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});DATA_BADGE.style.color='#4ade80';DATA_BADGE.textContent='⬤ LIVE · UPDATED '+t.toUpperCase();}
   buildDropdowns();
   render();
 }).catch(function(e){
-  document.getElementById('loading').style.display='none';
+  loading.style.display='none';
   var em=document.getElementById('error-msg');em.style.display='block';em.textContent='API ERROR: '+e.message;
   if(DATA_BADGE){DATA_BADGE.style.color='var(--amber)';DATA_BADGE.textContent='⬤ API OFFLINE';}
 });
 }
+function fmtCompact(v){if(v>=1e6)return(v/1e6).toFixed(2)+'M';if(v>=1e3)return(v/1e3).toFixed(0)+'K';return v.toFixed(0);}
 
 document.querySelectorAll('.tab').forEach(function(btn){
   btn.addEventListener('click',function(){
@@ -1152,6 +1181,11 @@ document.getElementById('clear-filters').addEventListener('click',function(){
   colFilters={};closeColFilter();
   clearPins();
 });
+document.getElementById('run-report').addEventListener('click',function(){loadData();});
+function showIdleState(){
+  var el=document.getElementById('loading');el.style.display='flex';el.textContent='SELECT FILTERS AND CLICK RUN REPORT';
+  document.getElementById('header-sub').textContent='Set filters above then run report · 2026 cycle';
+}
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 function showOverlay(){var el=document.getElementById('auth-overlay');if(el)el.style.display='flex';}
 function hideOverlay(){var el=document.getElementById('auth-overlay');if(el)el.style.display='none';var lb=document.getElementById('logout-btn');if(lb)lb.style.display='';}
@@ -1161,9 +1195,9 @@ document.addEventListener('DOMContentLoaded',function(){
   document.querySelectorAll('.auth-tab').forEach(function(tab){tab.addEventListener('click',function(){document.querySelectorAll('.auth-tab').forEach(function(t){t.classList.remove('active');});tab.classList.add('active');document.querySelectorAll('.auth-pane').forEach(function(p){p.style.display='none';});document.getElementById('pane-'+tab.dataset.pane).style.display='block';document.getElementById('auth-err').textContent='';});});
   var inviteParam=new URLSearchParams(window.location.search).get('invite');
   if(inviteParam){var ri=document.getElementById('reg-invite');if(ri)ri.value=inviteParam;var rt=document.querySelector('.auth-tab[data-pane="register"]');if(rt)rt.click();}
-  document.getElementById('login-form').addEventListener('submit',function(e){e.preventDefault();var btn=document.getElementById('login-btn'),err=document.getElementById('auth-err');btn.disabled=true;btn.textContent='AUTHENTICATING…';err.textContent='';fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('login-email').value.trim(),password:document.getElementById('login-password').value})}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});}).then(function(res){if(!res.ok){err.textContent=res.d.error||'Login failed';btn.disabled=false;btn.textContent='LOGIN';return;}RATES_TOKEN=res.d.token;localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);hideOverlay();loadData();}).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='LOGIN';});});
-  document.getElementById('register-form').addEventListener('submit',function(e){e.preventDefault();var btn=document.getElementById('register-btn'),err=document.getElementById('auth-err');var pw=document.getElementById('reg-password').value,pw2=document.getElementById('reg-password2').value;if(pw!==pw2){err.textContent='Passwords do not match';return;}btn.disabled=true;btn.textContent='CREATING ACCOUNT…';err.textContent='';fetch(API+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('reg-email').value.trim(),password:pw,invite_token:document.getElementById('reg-invite').value.trim()})}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});}).then(function(res){if(!res.ok){err.textContent=res.d.error||'Registration failed';btn.disabled=false;btn.textContent='CREATE ACCOUNT';return;}RATES_TOKEN=res.d.token;localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);hideOverlay();loadData();}).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='CREATE ACCOUNT';});});
-  if(RATES_TOKEN){fetch(API+'/auth/me',{headers:{'Authorization':'Bearer '+RATES_TOKEN}}).then(function(r){if(r.ok){hideOverlay();loadData();}else{localStorage.removeItem('pw_token');RATES_TOKEN=null;showOverlay();}}).catch(function(){showOverlay();});}else{showOverlay();}
+  document.getElementById('login-form').addEventListener('submit',function(e){e.preventDefault();var btn=document.getElementById('login-btn'),err=document.getElementById('auth-err');btn.disabled=true;btn.textContent='AUTHENTICATING…';err.textContent='';fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('login-email').value.trim(),password:document.getElementById('login-password').value})}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});}).then(function(res){if(!res.ok){err.textContent=res.d.error||'Login failed';btn.disabled=false;btn.textContent='LOGIN';return;}RATES_TOKEN=res.d.token;localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);hideOverlay();showIdleState();}).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='LOGIN';});});
+  document.getElementById('register-form').addEventListener('submit',function(e){e.preventDefault();var btn=document.getElementById('register-btn'),err=document.getElementById('auth-err');var pw=document.getElementById('reg-password').value,pw2=document.getElementById('reg-password2').value;if(pw!==pw2){err.textContent='Passwords do not match';return;}btn.disabled=true;btn.textContent='CREATING ACCOUNT…';err.textContent='';fetch(API+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('reg-email').value.trim(),password:pw,invite_token:document.getElementById('reg-invite').value.trim()})}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});}).then(function(res){if(!res.ok){err.textContent=res.d.error||'Registration failed';btn.disabled=false;btn.textContent='CREATE ACCOUNT';return;}RATES_TOKEN=res.d.token;localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);hideOverlay();showIdleState();}).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='CREATE ACCOUNT';});});
+  if(RATES_TOKEN){fetch(API+'/auth/me',{headers:{'Authorization':'Bearer '+RATES_TOKEN}}).then(function(r){if(r.ok){hideOverlay();showIdleState();}else{localStorage.removeItem('pw_token');RATES_TOKEN=null;showOverlay();}}).catch(function(){showOverlay();});}else{showOverlay();}
 });
 </script>
 <div id="auth-overlay">

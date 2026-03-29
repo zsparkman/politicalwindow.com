@@ -213,7 +213,7 @@ document.getElementById('live-date').textContent =
 var API='https://rates.politicalwindow.com';
 var RATES_TOKEN=localStorage.getItem('pw_token');
 function authFetch(url,opts){var o=opts||{};o.headers=Object.assign({},o.headers,{'Authorization':'Bearer '+(RATES_TOKEN||'')});return fetch(url,o);}
-var ALL_DATA=[],currentView='candidate',currentSort='spend';
+var ALL_DATA=[],SERVER_STATS={},currentView='candidate',currentSort='spend';
 var rawSort={col:'start_date',dir:'desc'};
 
 function fmt$(n){if(!n&&n!==0)return'—';var v=parseFloat(n);if(isNaN(v))return'—';if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';if(v>=1000)return'$'+(v/1000).toFixed(0)+'K';return'$'+v.toFixed(0);}
@@ -242,12 +242,22 @@ function getFiltered(){
   });
 }
 
+function isUnfiltered(){
+  return document.getElementById('f-party').value==='ALL'&&document.getElementById('f-state').value==='ALL'&&document.getElementById('f-dma').value==='ALL'&&!document.getElementById('f-search').value;
+}
 function updateStats(rows){
-  var spend=rows.reduce(function(s,r){return s+(parseFloat(r.gross_total)||0);},0);
-  document.getElementById('s-spend').textContent=fmt$(spend);
-  document.getElementById('s-contracts').textContent=rows.length.toLocaleString();
-  document.getElementById('s-candidates').textContent=new Set(rows.map(candKey).filter(Boolean)).size;
-  document.getElementById('s-stations').textContent=new Set(rows.map(function(r){return r.callsign;}).filter(Boolean)).size;
+  if(isUnfiltered()&&SERVER_STATS.total_spend){
+    document.getElementById('s-spend').textContent=fmt$(SERVER_STATS.total_spend);
+    document.getElementById('s-contracts').textContent=SERVER_STATS.total_rows.toLocaleString();
+    document.getElementById('s-candidates').textContent=SERVER_STATS.total_candidates.toLocaleString();
+    document.getElementById('s-stations').textContent=SERVER_STATS.total_stations.toLocaleString();
+  }else{
+    var spend=rows.reduce(function(s,r){return s+(parseFloat(r.gross_total)||0);},0);
+    document.getElementById('s-spend').textContent=fmt$(spend);
+    document.getElementById('s-contracts').textContent=rows.length.toLocaleString();
+    document.getElementById('s-candidates').textContent=new Set(rows.map(candKey).filter(Boolean)).size;
+    document.getElementById('s-stations').textContent=new Set(rows.map(function(r){return r.callsign;}).filter(Boolean)).size;
+  }
 }
 
 function buildGroups(rows){
@@ -376,13 +386,16 @@ window.toggleDetail=function(i){
 
 function loadData(){
 var DATA_BADGE=document.getElementById('data-badge');
-authFetch(API+'/api/rates?limit=500')
+authFetch(API+'/api/rates?limit=2000')
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(j){
     ALL_DATA=j.data||[];
+    SERVER_STATS={total_rows:j.total_rows||ALL_DATA.length,total_spend:j.total_spend||0,total_candidates:j.total_candidates||0,total_stations:j.total_stations||0};
     document.getElementById('loading').style.display='none';
-    document.getElementById('header-sub').textContent=ALL_DATA.length+' contracts indexed · TX + CA + IL · 2026 cycle';
-    if(DATA_BADGE){var t=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});DATA_BADGE.style.color='#4ade80';DATA_BADGE.textContent='⬤ LIVE · UPDATED '+t.toUpperCase();}
+    var sub=SERVER_STATS.total_rows.toLocaleString()+' contracts indexed · 2026 cycle';
+    if(ALL_DATA.length<SERVER_STATS.total_rows)sub+=' · showing '+ALL_DATA.length.toLocaleString();
+    document.getElementById('header-sub').textContent=sub;
+    if(DATA_BADGE){var t=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});DATA_BADGE.style.color='#4ade80';DATA_BADGE.textContent='\u2B24 LIVE \u00B7 UPDATED '+t.toUpperCase();}
     var states=Array.from(new Set(ALL_DATA.map(function(r){return r.state;}).filter(Boolean))).sort();
     var stateEl=document.getElementById('f-state');
     states.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;stateEl.appendChild(o);});
