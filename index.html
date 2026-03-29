@@ -852,8 +852,12 @@ async function initMap() {
     });
 
     // Show map, hide tile grid
-    document.getElementById('mapContainer').style.display = 'block';
+    const mapEl = document.getElementById('mapContainer');
+    mapEl.style.display = 'block';
     document.getElementById('tileGrid').style.display = 'none';
+
+    // Allow layout to settle before initializing MapLibre
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
     glMap = new maplibregl.Map({
       container: 'mapContainer',
@@ -876,6 +880,7 @@ async function initMap() {
     glMap.touchZoomRotate.disableRotation();
 
     glMap.on('load', () => {
+      glMap.resize();
       addStatesLayer();
       addStateLabels();
       wireMapInteractions();
