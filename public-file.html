@@ -93,10 +93,10 @@ tr:hover td{background:#0d1f35}
 footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;padding:20px}
 :root{--navy:#08111f;--navy-border:#1a3156;--mono:'IBM Plex Mono',monospace;--text-faint:#3a506e;--text-bright:#e2e8f0;--amber:#f5a623}
 #auth-overlay{position:fixed;inset:0;background:rgba(4,8,18,0.97);z-index:9999;display:none;align-items:center;justify-content:center}#auth-card{background:#0d1829;border:1px solid #1e3050;border-radius:4px;width:100%;max-width:380px}.auth-header{padding:20px 24px 16px;border-bottom:1px solid #1e3050}.auth-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#fff;letter-spacing:0.04em}.auth-sub{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:#4a6080;margin-top:4px;letter-spacing:0.06em}.auth-tabs{display:flex;border-bottom:1px solid #1e3050}.auth-tab{flex:1;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.08em;border:none;background:transparent;cursor:pointer;color:#4a6080;border-bottom:2px solid transparent}.auth-tab.active{color:#f59e0b;border-bottom-color:#f59e0b;background:rgba(245,158,11,0.04)}.auth-body{padding:20px 24px}.auth-field{margin-bottom:14px}.auth-lbl{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:#64748b;letter-spacing:0.08em;margin-bottom:4px}.auth-inp{width:100%;background:#060d18;border:1px solid #1e3050;border-radius:2px;padding:8px 10px;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:#e2e8f0;outline:none;box-sizing:border-box}.auth-inp:focus{border-color:#2a4060}.auth-btn{width:100%;padding:10px;background:#f59e0b;border:none;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;font-weight:700;letter-spacing:0.1em;color:#060d18;cursor:pointer;margin-top:4px}.auth-btn:disabled{opacity:0.5;cursor:not-allowed}.auth-err{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:#ef4444;margin-top:10px;min-height:16px;letter-spacing:0.04em}.logout-btn{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:#3a506e;background:none;border:none;cursor:pointer;padding:2px 6px;letter-spacing:0.06em}.logout-btn:hover{color:#94a3b8}
-.site-nav{background:var(--navy);border-bottom:1px solid var(--navy-border);display:flex;justify-content:center;gap:0}
-.nav-link{font-family:var(--mono);font-size:0.62rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-faint);text-decoration:none;padding:0.55rem 1.5rem;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;white-space:nowrap}
-.nav-link:hover{color:var(--text-bright)}
-.nav-link.active{color:var(--amber);border-bottom-color:var(--amber)}
+.header-nav{display:flex;align-items:center;gap:0}
+.nav-link{font-family:var(--mono);font-size:0.58rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-faint);text-decoration:none;padding:0.35rem 0.75rem;border-radius:3px;transition:color 0.15s,background 0.15s;white-space:nowrap}
+.nav-link:hover{color:#e2e8f0;background:rgba(255,255,255,0.04)}
+.nav-link.active{color:var(--amber);background:rgba(245,166,35,0.1)}
 @media(max-width:700px){
   #stats{gap:14px}
   .stat-val{font-size:0.8rem}
@@ -106,8 +106,8 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   #raw-wrap th:nth-child(2),#raw-wrap td:nth-child(2),
   #raw-wrap th:nth-child(4),#raw-wrap td:nth-child(4),
   #raw-wrap th:nth-child(6),#raw-wrap td:nth-child(6){display:none}
-  .site-nav{gap:0}
-  .nav-link{font-size:0.56rem;padding:0.5rem 0.875rem;letter-spacing:0.06em}
+  .header-nav{gap:0}
+  .nav-link{font-size:0.5rem;padding:0.3rem 0.5rem;letter-spacing:0.04em}
 }
 </style>
 </head>
@@ -117,18 +117,17 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
     <a href="/" style="text-decoration:none"><span class="logo-text">Political<span class="logo-dot">Window</span><span class="logo-dim">.com</span></span></a>
     <span class="logo-badge">2026</span>
   </div>
+  <nav class="header-nav">
+    <a href="/" class="nav-link">Election Intelligence</a>
+    <a href="/public-file" class="nav-link active">Public File Activity</a>
+    <a href="/rates" class="nav-link">Rate Analytics</a>
+  </nav>
   <div class="header-right">
-    <span class="header-fcc header-meta">FCC Public File Activity</span>
     <span class="header-meta" id="live-date"></span>
     <span class="header-meta" id="data-badge" style="color:var(--text-faint);font-size:0.55rem;letter-spacing:0.05em">⬤ LOADING…</span>
     <button class="logout-btn" id="logout-btn" onclick="logout()" style="display:none">LOGOUT</button>
   </div>
 </header>
-<nav class="site-nav">
-  <a href="/" class="nav-link">Election Intelligence</a>
-  <a href="/public-file" class="nav-link active">Public File Activity</a>
-  <a href="/rates" class="nav-link">Rate Analytics</a>
-</nav>
 <div id="header">
   <div>
     <div style="font-size:0.95rem;font-weight:700;color:#fff;letter-spacing:0.06em;font-family:'IBM Plex Mono',monospace">PUBLIC FILE ACTIVITY</div>
