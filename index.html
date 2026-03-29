@@ -871,7 +871,7 @@ async function initMap() {
       container: 'mapContainer',
       style: 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
       center: [-96, 38.5],
-      zoom: 3.3,
+      zoom: 3.1,
       minZoom: 2,
       maxZoom: 12,
       maxBounds: [[-180, 10], [-50, 75]],
@@ -1167,7 +1167,7 @@ function mapDeselectState() {
   document.getElementById('mapSubtitle').style.display = '';
 
   // Smooth ease back to national view (easeTo avoids flyTo's zoom arc)
-  glMap.easeTo({ center: [-96, 38.5], zoom: 3.3, duration: 1000 });
+  glMap.easeTo({ center: [-96, 38.5], zoom: 3.1, duration: 1000 });
 
   // After animation completes, clean up layers and re-apply filter
   glMap.once('moveend', () => {
