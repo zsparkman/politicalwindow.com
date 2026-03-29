@@ -99,7 +99,7 @@
   .card-sub { font-family:var(--mono); font-size:0.6rem; color:var(--text-muted); line-height:1.6; }
 
   /* ── MAPLIBRE MAP ── */
-  #mapContainer { width:100%; height:420px; border-radius:4px; overflow:hidden; position:relative; }
+  #mapContainer { width:100%; height:500px; border-radius:4px; overflow:hidden; position:relative; }
   #mapContainer .maplibregl-canvas { outline:none; }
   .maplibregl-ctrl-attrib { font-size:0.5rem !important; opacity:0.4; }
   .maplibregl-ctrl-group { background:var(--navy-card) !important; border:1px solid var(--navy-border) !important; }
@@ -405,7 +405,7 @@
     .card-header { flex-direction:column; gap:0.3rem; }
     .card-sub { font-size:0.58rem; }
     .map-scroll { overflow:visible; width:100%; }
-    #mapContainer { height:300px !important; }
+    #mapContainer { height:340px !important; }
     .tile-grid {
       grid-template-rows:repeat(8,34px);
       gap:2px;
@@ -805,11 +805,11 @@ const FIPS = {
 };
 
 const STATUS_COLORS = {
-  'window-open':  '#ef4444',
-  'window-soon':  '#f59e0b',
-  'upcoming':     '#3b82f6',
-  'general-only': '#22c55e',
-  'inactive':     '#64748b'
+  'window-open':  '#ff4d4d',
+  'window-soon':  '#ffb020',
+  'upcoming':     '#4a9eff',
+  'general-only': '#34d399',
+  'inactive':     '#475569'
 };
 
 const DISTRICT_COUNTS = {
@@ -863,8 +863,8 @@ async function initMap() {
     glMap = new maplibregl.Map({
       container: 'mapContainer',
       style: 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
-      center: [-98.5, 39.8],
-      zoom: 3.5,
+      center: [-96, 38.5],
+      zoom: 3.8,
       minZoom: 2,
       maxZoom: 12,
       maxBounds: [[-180, 10], [-50, 75]],
@@ -920,10 +920,10 @@ function addStatesLayer() {
       ],
       'fill-opacity': [
         'case',
-        ['boolean', ['feature-state', 'dimmed'], false], 0.08,
-        ['boolean', ['feature-state', 'selected'], false], 0.7,
-        ['boolean', ['feature-state', 'hover'], false], 0.55,
-        0.35
+        ['boolean', ['feature-state', 'dimmed'], false], 0.1,
+        ['boolean', ['feature-state', 'selected'], false], 0.8,
+        ['boolean', ['feature-state', 'hover'], false], 0.7,
+        0.5
       ]
     }
   });
@@ -934,23 +934,22 @@ function addStatesLayer() {
     type: 'line',
     source: 'states',
     paint: {
-      'line-color': ['match', ['get', 'status'],
-        'window-open',  STATUS_COLORS['window-open'],
-        'window-soon',  STATUS_COLORS['window-soon'],
-        'upcoming',     STATUS_COLORS['upcoming'],
-        'general-only', STATUS_COLORS['general-only'],
-        STATUS_COLORS['inactive']
+      'line-color': [
+        'case',
+        ['boolean', ['feature-state', 'selected'], false], '#ffffff',
+        ['boolean', ['feature-state', 'hover'], false], '#e2e8f0',
+        'rgba(148,163,184,0.6)'
       ],
       'line-width': [
         'case',
         ['boolean', ['feature-state', 'selected'], false], 2.5,
-        ['boolean', ['feature-state', 'hover'], false], 1.5,
-        0.5
+        ['boolean', ['feature-state', 'hover'], false], 1.8,
+        0.7
       ],
       'line-opacity': [
         'case',
-        ['boolean', ['feature-state', 'dimmed'], false], 0.15,
-        0.8
+        ['boolean', ['feature-state', 'dimmed'], false], 0.12,
+        1
       ]
     }
   });
@@ -985,15 +984,16 @@ function addStateLabels() {
     source: 'state-labels',
     layout: {
       'text-field': ['get', 'abbr'],
-      'text-size': 10,
+      'text-size': 11,
       'text-font': ['Open Sans Bold'],
       'text-allow-overlap': false,
-      'text-ignore-placement': false
+      'text-ignore-placement': false,
+      'text-letter-spacing': 0.05
     },
     paint: {
-      'text-color': '#c8d6e5',
-      'text-halo-color': 'rgba(10,15,30,0.8)',
-      'text-halo-width': 1.5
+      'text-color': '#e8edf3',
+      'text-halo-color': 'rgba(8,17,31,0.9)',
+      'text-halo-width': 2
     }
   });
 }
@@ -1108,7 +1108,7 @@ function mapDeselectState() {
   });
 
   // Fly back to national view
-  glMap.flyTo({ center: [-98.5, 39.8], zoom: 3.5, duration: 800 });
+  glMap.flyTo({ center: [-96, 38.5], zoom: 3.8, duration: 800 });
 
   // Hide breadcrumb
   document.getElementById('mapBreadcrumb').style.display = 'none';
