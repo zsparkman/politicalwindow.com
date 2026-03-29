@@ -518,9 +518,9 @@
           </div>
         </div>
         <div class="map-scroll">
-          <div id="mapContainer" style="display:none"></div>
+          <div id="mapContainer"></div>
           <div class="map-tooltip" id="mapTooltip" style="display:none"></div>
-          <div class="tile-grid" id="tileGrid"></div>
+          <div class="tile-grid" id="tileGrid" style="display:none"></div>
         </div>
       </div>
 
@@ -841,7 +841,11 @@ let hoveredStateId = null;
 const DISTRICT_CACHE = {};
 
 async function initMap() {
-  if (typeof maplibregl === 'undefined') return false;
+  if (typeof maplibregl === 'undefined') {
+    document.getElementById('mapContainer').style.display = 'none';
+    document.getElementById('tileGrid').style.display = '';
+    return false;
+  }
 
   try {
     const resp = await fetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json');
@@ -859,11 +863,6 @@ async function initMap() {
       f.id = fid++;
       return true;
     });
-
-    // Show map, hide tile grid
-    const mapEl = document.getElementById('mapContainer');
-    mapEl.style.display = 'block';
-    document.getElementById('tileGrid').style.display = 'none';
 
     // Allow layout to settle before initializing MapLibre
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
