@@ -251,6 +251,16 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
     </select>
   </div>
   <div class="filter-wrap">
+    <div class="filter-lbl">WINDOW</div>
+    <select id="f-window">
+      <option value="ALL">All</option>
+      <option value="IN">In Window</option>
+      <option value="Primary">Primary</option>
+      <option value="General">General</option>
+      <option value="OOW">Out of Window</option>
+    </select>
+  </div>
+  <div class="filter-wrap">
     <div class="filter-lbl">WEEK FROM</div>
     <input type="date" id="f-week-from">
   </div>
@@ -381,6 +391,31 @@ var pivotGroupsCache=[];
 var linesSort={col:'line_total',dir:'desc'};
 var chartInstance=null;
 
+// ── Political window date logic ──────────────────────────────────────────────
+var GENERAL_WINDOW={open:new Date('2026-09-04'),close:new Date('2026-11-03')};
+var STATE_WINDOWS={};
+(function loadWindowDates(){
+  fetch('https://api.politicalwindow.com/api/states')
+    .then(function(r){return r.json();})
+    .then(function(j){
+      (j.data||[]).forEach(function(s){
+        if(!s.abbr)return;
+        var wins=[];
+        if(s.primary){var c=new Date(s.primary);var o=new Date(c);o.setDate(o.getDate()-45);wins.push({open:o,close:c});}
+        if(s.runoff){var c2=new Date(s.runoff);var o2=new Date(c2);o2.setDate(o2.getDate()-45);wins.push({open:o2,close:c2});}
+        STATE_WINDOWS[s.abbr]=wins;
+      });
+    }).catch(function(){});
+})();
+function getWeekWindowStatus(state,weekOf){
+  if(!state||!weekOf)return null;
+  var d=new Date(weekOf);
+  if(d>=GENERAL_WINDOW.open&&d<=GENERAL_WINDOW.close)return'General';
+  var wins=STATE_WINDOWS[state]||[];
+  for(var i=0;i<wins.length;i++){if(d>=wins[i].open&&d<=wins[i].close)return'Primary';}
+  return'OOW';
+}
+
 function fmt$(n){
   if(!n&&n!==0)return'—';
   var v=parseFloat(n);
@@ -430,6 +465,7 @@ function getFiltered(){
   var dma=document.getElementById('f-dma').value;
   var station=document.getElementById('f-station').value;
   var daypart=document.getElementById('f-daypart').value;
+  var winFilter=document.getElementById('f-window').value;
   var wkFrom=document.getElementById('f-week-from').value;
   var wkTo=document.getElementById('f-week-to').value;
   var search=document.getElementById('f-search').value.toLowerCase();
@@ -441,6 +477,10 @@ function getFiltered(){
     if(dma!=='ALL'&&r.dma!==dma)return false;
     if(station!=='ALL'&&r.station!==station)return false;
     if(daypart!=='ALL'&&r.daypart_code!==daypart)return false;
+    if(winFilter!=='ALL'){
+      if(winFilter==='IN'){if(r.window_status!=='Primary'&&r.window_status!=='General')return false;}
+      else{if(r.window_status!==winFilter)return false;}
+    }
     if(wkFrom&&r.week_of<wkFrom)return false;
     if(wkTo&&r.week_of>wkTo)return false;
     if(search){
@@ -1109,14 +1149,15 @@ function render(){
 }
 
 function updateOptionStates(){
-  var filterIds=['f-party','f-state','f-office','f-dma','f-station','f-daypart'];
+  var filterIds=['f-party','f-state','f-office','f-dma','f-station','f-daypart','f-window'];
   var fields={
     'f-party':function(r){return r.party;},
     'f-state':function(r){return r.state;},
     'f-office':function(r){return r.office;},
     'f-dma':function(r){return r.dma;},
     'f-station':function(r){return r.station;},
-    'f-daypart':function(r){return r.daypart_code;}
+    'f-daypart':function(r){return r.daypart_code;},
+    'f-window':function(r){return r.window_status;}
   };
   filterIds.forEach(function(fid){
     var sel=document.getElementById(fid);
@@ -1132,12 +1173,22 @@ function updateOptionStates(){
       var val=opts[i].value;
       var count=ALL_DATA.filter(function(r){
         for(var oid in otherFilters){
-          if(otherFilters[oid]!=='ALL'&&fields[oid](r)!==otherFilters[oid])return false;
+          var ov=otherFilters[oid];
+          if(ov==='ALL')continue;
+          if(oid==='f-window'){
+            var ws=r.window_status;
+            if(ov==='IN'){if(ws!=='Primary'&&ws!=='General')return false;}
+            else{if(ws!==ov)return false;}
+          }else{if(fields[oid](r)!==ov)return false;}
         }
         if(wkFrom&&r.week_of<wkFrom)return false;
         if(wkTo&&r.week_of>wkTo)return false;
         if(search){
           if(!(r.candidate||'').toLowerCase().includes(search)&&!(r.advertiser||'').toLowerCase().includes(search)&&!(r.station||'').toLowerCase().includes(search)&&!(r.description||'').toLowerCase().includes(search)&&!(r.buyer||'').toLowerCase().includes(search)&&!(r.salesperson||'').toLowerCase().includes(search))return false;
+        }
+        if(fid==='f-window'){
+          var ws2=r.window_status;
+          return val==='IN'?(ws2==='Primary'||ws2==='General'):ws2===val;
         }
         return fields[fid](r)===val;
       }).length;
@@ -1213,7 +1264,10 @@ authFetch(url)
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(j){
   ALL_DATA=j.data||j||[];
-  ALL_DATA.forEach(function(r){r.time_period=(r.time_start&&r.time_end)?(r.time_start+' – '+r.time_end):(r.time_start||r.time_end||'');});
+  ALL_DATA.forEach(function(r){
+    r.time_period=(r.time_start&&r.time_end)?(r.time_start+' – '+r.time_end):(r.time_start||r.time_end||'');
+    r.window_status=getWeekWindowStatus(r.state,r.week_of);
+  });
   var totalRows=j.total_rows||ALL_DATA.length;
   var totalSpend=j.total_spend||0;
   loading.style.display='none';
@@ -1242,7 +1296,7 @@ document.querySelectorAll('.tab').forEach(function(btn){
 });
 document.getElementById('c-groupby').addEventListener('change',function(){pivotGroupBy=this.value;pinSet.clear();activePin.clear();renderPinBar();render();});
 document.getElementById('c-sortby').addEventListener('change',function(){pivotSortBy=this.value;render();});
-['f-party','f-state','f-office','f-dma','f-station','f-daypart'].forEach(function(id){
+['f-party','f-state','f-office','f-dma','f-station','f-daypart','f-window'].forEach(function(id){
   document.getElementById(id).addEventListener('change',render);
 });
 ['f-week-from','f-week-to'].forEach(function(id){
@@ -1257,7 +1311,7 @@ document.getElementById('lines-wrap').addEventListener('click',function(e){
   renderLines(getFiltered());
 });
 document.getElementById('clear-filters').addEventListener('click',function(){
-  ['f-party','f-state','f-office','f-dma','f-station','f-daypart'].forEach(function(id){document.getElementById(id).value='ALL';});
+  ['f-party','f-state','f-office','f-dma','f-station','f-daypart','f-window'].forEach(function(id){document.getElementById(id).value='ALL';});
   document.getElementById('f-week-from').value='';
   document.getElementById('f-week-to').value='';
   document.getElementById('f-search').value='';
