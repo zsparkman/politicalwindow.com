@@ -105,6 +105,12 @@
   .maplibregl-ctrl-group { background:var(--navy-card) !important; border:1px solid var(--navy-border) !important; }
   .maplibregl-ctrl-group button { background-color:transparent !important; }
   .maplibregl-ctrl-group button span { background-color:var(--text-muted) !important; }
+  .map-inset { position:absolute; z-index:10; border:1px solid var(--navy-border); border-radius:3px; overflow:hidden; background:var(--navy-mid); cursor:pointer; }
+  .map-inset .maplibregl-ctrl-attrib { display:none !important; }
+  .map-inset .maplibregl-ctrl { display:none !important; }
+  .map-inset-label { position:absolute; bottom:2px; right:4px; font-family:var(--mono); font-size:0.5rem; color:#e8edf3; text-shadow:0 0 4px rgba(8,17,31,0.9); z-index:2; pointer-events:none; letter-spacing:0.05em; font-weight:600; }
+  #insetAK { width:130px; height:90px; bottom:40px; left:8px; }
+  #insetHI { width:100px; height:70px; bottom:40px; left:146px; }
   .map-tooltip {
     position:absolute; pointer-events:none; background:var(--navy-mid); border:1px solid var(--navy-border);
     border-radius:4px; padding:8px 12px; font-family:var(--mono); font-size:0.62rem; color:var(--text);
@@ -885,6 +891,7 @@ async function initMap() {
       addStatesLayer();
       addStateLabels();
       wireMapInteractions();
+      createInsetMaps();
     });
 
     glMap.on('error', () => {
@@ -1095,6 +1102,9 @@ function mapSelectState(abbr) {
   bc.style.display = 'flex';
   sub.style.display = 'none';
 
+  // Hide insets when zoomed in
+  setInsetVisibility(false);
+
   // Load districts
   loadDistricts(abbr).then(() => showDistricts(abbr));
 }
@@ -1116,6 +1126,9 @@ function mapDeselectState() {
 
   // Remove districts
   hideDistricts();
+
+  // Show insets again
+  setInsetVisibility(true);
 
   // Re-apply filter
   updateMapFilter();
@@ -1266,6 +1279,96 @@ function hideDistricts() {
     if (glMap.getLayer(id)) glMap.removeLayer(id);
   });
   if (glMap.getSource('districts')) glMap.removeSource('districts');
+}
+
+// ── INSET MAPS (Alaska + Hawaii) ──────────────────────────────────────────────
+let insetAK = null, insetHI = null;
+
+function createInsetMaps() {
+  const container = document.getElementById('mapContainer');
+
+  // Create AK inset
+  const akDiv = document.createElement('div');
+  akDiv.id = 'insetAK';
+  akDiv.className = 'map-inset';
+  akDiv.innerHTML = '<span class="map-inset-label">AK</span>';
+  container.appendChild(akDiv);
+
+  // Create HI inset
+  const hiDiv = document.createElement('div');
+  hiDiv.id = 'insetHI';
+  hiDiv.className = 'map-inset';
+  hiDiv.innerHTML = '<span class="map-inset-label">HI</span>';
+  container.appendChild(hiDiv);
+
+  // Filter GeoJSON for each state
+  const akFeature = statesGeoJSON.features.find(f => f.properties.abbr === 'AK');
+  const hiFeature = statesGeoJSON.features.find(f => f.properties.abbr === 'HI');
+
+  if (akFeature) {
+    const akGeo = { type: 'FeatureCollection', features: [akFeature] };
+    insetAK = createInsetMap('insetAK', [-152, 64], 2.5, akGeo, 'AK');
+  }
+
+  if (hiFeature) {
+    const hiGeo = { type: 'FeatureCollection', features: [hiFeature] };
+    insetHI = createInsetMap('insetHI', [-157, 20.5], 5, hiGeo, 'HI');
+  }
+}
+
+function createInsetMap(containerId, center, zoom, geoData, abbr) {
+  const s = SM[abbr];
+  const status = s ? s.status : 'inactive';
+  const color = STATUS_COLORS[status];
+
+  const m = new maplibregl.Map({
+    container: containerId,
+    style: { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#0D1A2E' } }] },
+    center: center,
+    zoom: zoom,
+    interactive: false,
+    attributionControl: false
+  });
+
+  m.on('load', () => {
+    m.addSource('state', { type: 'geojson', data: geoData });
+    m.addLayer({
+      id: 'state-fill',
+      type: 'fill',
+      source: 'state',
+      paint: { 'fill-color': color, 'fill-opacity': 0.5 }
+    });
+    m.addLayer({
+      id: 'state-border',
+      type: 'line',
+      source: 'state',
+      paint: { 'line-color': 'rgba(148,163,184,0.6)', 'line-width': 0.7 }
+    });
+  });
+
+  // Click triggers state selection
+  document.getElementById(containerId).addEventListener('click', () => pick(abbr));
+
+  return m;
+}
+
+function updateInsetColors() {
+  [['AK', insetAK], ['HI', insetHI]].forEach(([abbr, m]) => {
+    if (!m) return;
+    const s = SM[abbr];
+    if (!s) return;
+    const color = STATUS_COLORS[s.status];
+    if (m.getLayer('state-fill')) {
+      m.setPaintProperty('state-fill', 'fill-color', color);
+    }
+  });
+}
+
+function setInsetVisibility(visible) {
+  const akEl = document.getElementById('insetAK');
+  const hiEl = document.getElementById('insetHI');
+  if (akEl) akEl.style.display = visible ? '' : 'none';
+  if (hiEl) hiEl.style.display = visible ? '' : 'none';
 }
 
 // ── SHARED DETAIL HTML BUILDER ─────────────────────────────────────────────────
@@ -1732,6 +1835,7 @@ async function loadLiveData() {
       });
       const src = glMap.getSource('states');
       if (src) src.setData(statesGeoJSON);
+      updateInsetColors();
     }
 
     // Update badge to show live status
