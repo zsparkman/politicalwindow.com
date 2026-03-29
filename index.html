@@ -222,7 +222,7 @@
   tbody tr:hover { background:rgba(30,111,255,0.05); }
   tbody tr.row-selected { background:rgba(30,111,255,0.1); }
   tbody tr:last-child { border-bottom:none; }
-  td { padding:0.6rem 0.875rem; font-family:var(--mono); font-size:0.67rem; vertical-align:middle; }
+  td { padding:0.35rem 0.875rem; font-family:var(--mono); font-size:0.67rem; vertical-align:middle; }
   .td-state { display:flex; align-items:center; gap:0.45rem; }
   .sbox { width:26px; height:19px; background:var(--navy-border); border-radius:2px; display:flex; align-items:center; justify-content:center; font-size:0.52rem; color:var(--text-muted); font-weight:600; flex-shrink:0; }
   .sname { font-weight:600; color:var(--text); font-size:0.72rem; }
@@ -232,7 +232,7 @@
   .spill-blue  { background:var(--blue-glow);  color:var(--blue-light);  border:1px solid rgba(30,111,255,0.3); }
   .spill-green { background:var(--blue-glow);  color:var(--blue-light);  border:1px solid rgba(30,111,255,0.3); }
   .spill-slate { background:var(--slate-dim);  color:var(--slate);       border:1px solid rgba(74,96,128,0.3); }
-  .itag { font-size:0.52rem; padding:1px 4px; border-radius:2px; border:1px solid; white-space:nowrap; }
+  .itag { font-size:0.52rem; padding:1px 5px; border-radius:2px; border:1px solid; white-space:nowrap; font-weight:600; }
   .dbadge { font-size:0.54rem; display:block; margin-top:2px; }
   .cand-mini { display:flex; flex-direction:column; gap:2px; }
   .cand-mini-row { display:flex; align-items:center; gap:4px; }
@@ -871,7 +871,7 @@ async function initMap() {
       container: 'mapContainer',
       style: 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
       center: [-96, 38.5],
-      zoom: 3.8,
+      zoom: 3.3,
       minZoom: 2,
       maxZoom: 12,
       maxBounds: [[-180, 10], [-50, 75]],
@@ -1164,7 +1164,7 @@ function mapDeselectState() {
   document.getElementById('mapSubtitle').style.display = '';
 
   // Smooth ease back to national view (easeTo avoids flyTo's zoom arc)
-  glMap.easeTo({ center: [-96, 38.5], zoom: 3.8, duration: 1000 });
+  glMap.easeTo({ center: [-96, 38.5], zoom: 3.3, duration: 1000 });
 
   // After animation completes, clean up layers and re-apply filter
   glMap.once('moveend', () => {
@@ -1629,17 +1629,17 @@ function drawTable() {
     tr.dataset.abbr = s.abbr;
     if (s.abbr === sel) tr.classList.add('row-selected');
     tr.addEventListener('click', () => pick(s.abbr));
-    const rtags = s.races.map(r => `<span class="itag ${({Senate:'tag-senate',Governor:'tag-governor',House:'tag-house'}[r]||'')}">${r==='Governor'?'Gov':r}</span>`).join('');
+    const rtags = s.races.map(r => `<span class="itag ${({Senate:'tag-senate',Governor:'tag-governor',House:'tag-house'}[r]||'')}">${({Senate:'S',Governor:'G',House:'H'}[r]||r[0])}</span>`).join('');
     const flat = []; s.cands.forEach(rc => rc.list.slice(0,2).forEach(c => flat.push(c)));
     let mini = '<div class="cand-mini">';
     if (!flat.length) { mini += `<span style="color:var(--text-faint);font-size:0.6rem">—</span>`; }
     else {
-      flat.slice(0,3).forEach(c => {
+      flat.slice(0,2).forEach(c => {
         const pc = PC[c.p]||'var(--slate)';
         mini += `<div class="cand-mini-row"><div class="cand-mini-dot" style="background:${pc}"></div><span style="font-size:0.62rem;color:var(--text)">${c.n}</span><span style="font-size:0.56rem;color:${pc}">(${c.p})</span></div>`;
       });
       const total = s.cands.reduce((a,rc)=>a+rc.list.length,0);
-      if (total>3) mini += `<span style="color:var(--text-faint);font-size:0.56rem">+${total-3} more</span>`;
+      if (total>2) mini += `<span style="color:var(--text-faint);font-size:0.56rem">+${total-2} more</span>`;
     }
     mini += '</div>';
     tr.innerHTML = `
