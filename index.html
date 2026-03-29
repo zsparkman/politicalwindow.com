@@ -240,6 +240,32 @@
   }
   /* legend item */
   .legend-ballot { color:#a78bfa; }
+  /* ── POLLING ── */
+  .poll-section { margin-top:0.5rem; }
+  .poll-race-block { margin-bottom:0.65rem; }
+  .poll-race-label { font-family:var(--mono); font-size:0.54rem; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; border:1px solid; display:inline-block; margin-bottom:0.3rem; }
+  .poll-card {
+    background:rgba(30,111,255,0.06);
+    border:1px solid rgba(30,111,255,0.18);
+    border-radius:4px;
+    padding:0.5rem 0.65rem;
+    margin-bottom:0.35rem;
+  }
+  .poll-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.35rem; gap:0.4rem; }
+  .poll-pollster { font-family:var(--sans); font-size:0.65rem; color:var(--text); font-weight:500; flex:1; min-width:0; }
+  .poll-meta { font-family:var(--mono); font-size:0.5rem; color:var(--text-faint); white-space:nowrap; }
+  .poll-bar-row { display:flex; align-items:center; gap:0.35rem; margin-bottom:3px; }
+  .poll-cand-name { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); width:90px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .poll-bar-track { flex:1; height:12px; background:rgba(255,255,255,0.04); border-radius:2px; overflow:hidden; position:relative; }
+  .poll-bar-fill { height:100%; border-radius:2px; transition:width 0.4s ease; }
+  .poll-bar-fill.fill-r { background:var(--rep); }
+  .poll-bar-fill.fill-d { background:var(--dem); }
+  .poll-bar-fill.fill-i { background:var(--ind); }
+  .poll-bar-fill.fill-u { background:var(--slate); }
+  .poll-pct { font-family:var(--mono); font-size:0.56rem; font-weight:600; color:var(--text); width:28px; text-align:right; flex-shrink:0; }
+  .poll-moe { font-family:var(--mono); font-size:0.48rem; color:var(--text-faint); margin-top:2px; }
+  .poll-none { font-family:var(--mono); font-size:0.62rem; color:var(--text-faint); }
+
   /* ── MOBILE STATE CARD (shown instead of table row on mobile) ── */
   .mobile-state-list { display:none; }
   .mobile-state-card {
@@ -793,6 +819,7 @@ function buildDetailHTML(abbr) {
       <div class="wbar-note">${TODAY>=GENERAL_WINDOW?`${Math.round(genPct)}% elapsed`:`Opens in ${daysTo(GENERAL_WINDOW)}d · Sep 4, 2026`}</div>
     </div>
     <div class="dsec"><div class="dlabel">Declared Candidates</div>${candHTML}</div>
+    ${buildPollHTML(abbr)}
     <div class="dsec" style="border-bottom:none">
       <div class="dlabel">Market Intel</div>
       <div style="font-family:var(--sans);font-size:0.74rem;color:var(--text-muted);line-height:1.55">${s.notes||'—'}</div>
@@ -1053,10 +1080,11 @@ const DATA_BADGE = document.getElementById('data-badge');
 
 async function loadLiveData() {
   try {
-    const [statesResp, candsResp, ballotResp] = await Promise.all([
+    const [statesResp, candsResp, ballotResp, pollsResp] = await Promise.all([
       fetch(`${API_BASE}/api/states`),
       fetch(`${API_BASE}/api/candidates`),
       fetch(`${API_BASE}/api/ballot-measures`),
+      fetch(`${API_BASE}/api/polls`),
     ]);
 
     if (!statesResp.ok || !candsResp.ok) throw new Error('API returned error status');
@@ -1064,6 +1092,7 @@ async function loadLiveData() {
     const statesJson = await statesResp.json();
     const candsJson  = await candsResp.json();
     const ballotJson = ballotResp.ok ? await ballotResp.json() : { ok: false };
+    const pollsJson  = pollsResp.ok ? await pollsResp.json() : { ok: false };
 
     if (!statesJson.ok || !candsJson.ok) throw new Error('API data invalid');
 
@@ -1071,6 +1100,12 @@ async function loadLiveData() {
     if (ballotJson.ok && ballotJson.data) {
       Object.keys(BALLOT).forEach(k => delete BALLOT[k]);
       Object.assign(BALLOT, ballotJson.data);
+    }
+
+    // Update POLLS from API
+    if (pollsJson.ok && pollsJson.data) {
+      Object.keys(POLLS).forEach(k => delete POLLS[k]);
+      Object.assign(POLLS, pollsJson.data);
     }
 
     // Update RAW from API states
@@ -1131,6 +1166,48 @@ async function loadLiveData() {
 
 // ── BALLOT MEASURES (populated from API via loadLiveData) ───────────────────────
 const BALLOT = {};
+
+// ── POLLS (populated from API via loadLiveData) ─────────────────────────────────
+const POLLS = {};
+
+function buildPollHTML(abbr) {
+  const statePolls = POLLS[abbr];
+  if (!statePolls || Object.keys(statePolls).length === 0) return '';
+
+  let html = '<div class="dsec poll-section"><div class="dlabel">Latest Polls</div>';
+
+  for (const [race, polls] of Object.entries(statePolls)) {
+    const rb = {Senate:'tag-senate',Governor:'tag-governor',House:'tag-house'}[race] || 'tag-house';
+    html += `<div class="poll-race-block"><span class="poll-race-label ${rb}">${race}</span>`;
+
+    // Show most recent poll per race (first in array since API sorts by date DESC)
+    for (const poll of polls.slice(0, 2)) {
+      const dateStr = new Date(poll.date + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric' });
+      html += `<div class="poll-card">`;
+      html += `<div class="poll-header"><span class="poll-pollster">${poll.pollster}</span><span class="poll-meta">${dateStr}${poll.sample ? ' · n=' + poll.sample : ''}</span></div>`;
+
+      for (const r of poll.results) {
+        if (!r.candidate || r.pct == null) continue;
+        const partyClass = r.party === 'R' ? 'fill-r' : r.party === 'D' ? 'fill-d' : r.party === 'I' ? 'fill-i' : 'fill-u';
+        const maxPct = Math.max(...poll.results.filter(x => x.pct).map(x => x.pct));
+        const barWidth = Math.round((r.pct / maxPct) * 100);
+        html += `<div class="poll-bar-row">
+          <span class="poll-cand-name">${r.candidate}</span>
+          <div class="poll-bar-track"><div class="poll-bar-fill ${partyClass}" style="width:${barWidth}%"></div></div>
+          <span class="poll-pct">${r.pct}%</span>
+        </div>`;
+      }
+
+      if (poll.moe) html += `<div class="poll-moe">MOE ±${poll.moe}%</div>`;
+      html += `</div>`;
+    }
+
+    html += `</div>`;
+  }
+
+  html += '</div>';
+  return html;
+}
 
 function stateHasBallot(abbr) { return !!(BALLOT[abbr] && BALLOT[abbr].length > 0); }
 

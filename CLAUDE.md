@@ -23,6 +23,7 @@ entire frontend — a single-file static SPA hosted on GitHub Pages.
 - `GET /api/states` → state metadata (window dates, status, races)
 - `GET /api/candidates` → declared candidates grouped by state
 - `GET /api/ballot-measures` → ballot measures grouped by state `{ [state_abbr]: [...] }`
+- `GET /api/polls` → polls grouped by state → race `{ [state_abbr]: { [race]: [{pollster, date, sample, moe, results}] } }`
 - `GET /api/rates?state=TX&limit=20` → rate intel records array
 
 ## Key Constants (do not change)
@@ -36,8 +37,9 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 ## Key Functions (do not rename or remove)
 | Function | Purpose |
 |---|---|
-| `loadLiveData()` | Fetches states, candidates, ballot measures on page load |
+| `loadLiveData()` | Fetches states, candidates, ballot measures, polls on page load |
 | `buildDetailHTML(abbr)` | Renders full state detail panel HTML |
+| `buildPollHTML(abbr)` | Renders polling section for state detail panel |
 | `loadRatesForState(abbr)` | Async fetch + render Rate Intel section |
 | `pick(abbr)` | State tile click handler |
 | `drawTable()` | Renders sortable candidate/state table |
@@ -54,6 +56,7 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 - `SM` — state metadata map keyed by state abbr `{ TX: {...}, CA: {...} }`
 - `CANDS` — candidates by state `{ TX: [{race, list:[{n,p,s,note}]}] }`
 - `BALLOT` — ballot measures by state (loaded from API via `loadLiveData()`)
+- `POLLS` — polls by state → race (loaded from API via `loadLiveData()`)
 
 ## Rules
 1. `index.html` stays a single self-contained file — no external JS or CSS files
