@@ -75,7 +75,7 @@
   .legend-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
   .dot-red   { background:var(--red);   box-shadow:0 0 5px var(--red); }
   .dot-amber { background:var(--amber); }
-  .dot-blue  { background:#1A3156; }
+  .dot-blue  { background:#1E6FFF; }
   .dot-green { background:var(--blue-light); }
   .dot-slate { background:var(--slate); }
   .filter-group { display:flex; align-items:center; gap:0.4rem; margin-left:auto; flex-wrap:wrap; }
@@ -150,7 +150,7 @@
   .tile.selected { border-color:#fff; box-shadow:0 0 0 2px rgba(255,255,255,0.25); transform:scale(1.08); z-index:10; }
   .tile-window-open  { background:var(--red-dim);   border-color:var(--red);   color:var(--red); }
   .tile-window-soon  { background:var(--amber-dim);  border-color:var(--amber);  color:var(--amber); }
-  .tile-upcoming     { background:rgba(26,49,86,0.3);  border-color:#1A3156;       color:#4A6080; }
+  .tile-upcoming     { background:rgba(30,111,255,0.15);  border-color:#1E6FFF;       color:#1E6FFF; }
   .tile-general-only { background:var(--blue-glow);  border-color:#1A4A99;       color:var(--blue-light); }
   .tile-inactive     { background:rgba(20,35,58,0.4); color:var(--text-faint); }
   .tile.tile-dimmed  { opacity:0.2; pointer-events:none; cursor:default; }
@@ -229,7 +229,7 @@
   .spill { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:2px; font-size:0.56rem; letter-spacing:0.04em; font-weight:600; white-space:nowrap; }
   .spill-red   { background:var(--red-dim);   color:var(--red);        border:1px solid rgba(255,61,90,0.3); }
   .spill-amber { background:var(--amber-dim);  color:var(--amber);       border:1px solid rgba(245,166,35,0.3); }
-  .spill-purple{ background:rgba(26,49,86,0.3);      color:#4A6080;          border:1px solid rgba(26,49,86,0.5); }
+  .spill-purple{ background:rgba(30,111,255,0.12);   color:#1E6FFF;          border:1px solid rgba(30,111,255,0.3); }
   .spill-blue  { background:var(--blue-glow);  color:var(--blue-light);  border:1px solid rgba(30,111,255,0.3); }
   .spill-green { background:var(--blue-glow);  color:var(--blue-light);  border:1px solid rgba(30,111,255,0.3); }
   .spill-slate { background:var(--slate-dim);  color:var(--slate);       border:1px solid rgba(74,96,128,0.3); }
@@ -816,7 +816,7 @@ const FIPS = {
 const STATUS_COLORS = {
   'window-open':  '#EF3957',
   'window-soon':  '#F0A50E',
-  'upcoming':     '#1A3156',
+  'upcoming':     '#1E6FFF',
   'general-only': '#4a9eff',
   'inactive':     '#475569'
 };
@@ -1363,11 +1363,11 @@ const PC = { D:'var(--dem)', R:'var(--rep)', I:'var(--ind)' };
 const SL = {
   'window-open':  `<span style="color:var(--red)">● PRIMARY WINDOW OPEN</span>`,
   'window-soon':  `<span style="color:var(--amber)">◐ WINDOW OPENS SOON</span>`,
-  'upcoming':     `<span style="color:#4A6080">○ PRIMARY UPCOMING</span>`,
+  'upcoming':     `<span style="color:#1E6FFF">○ PRIMARY UPCOMING</span>`,
   'general-only': `<span style="color:var(--blue-light)">◇ GENERAL WINDOW ONLY</span>`,
   'inactive':     `<span style="color:var(--slate)">— NO MAJOR FEDERAL RACE</span>`,
 };
-const WC = { 'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'#1A3156', 'general-only':'var(--blue-light)', 'inactive':'var(--slate)' };
+const WC = { 'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'#1E6FFF', 'general-only':'var(--blue-light)', 'inactive':'var(--slate)' };
 
 function buildDetailHTML(abbr) {
   const s = SM[abbr]; if (!s) return '';
