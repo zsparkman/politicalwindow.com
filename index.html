@@ -242,17 +242,17 @@
   .legend-ballot { color:#a78bfa; }
   /* ── DETAIL TABS ── */
   .detail-tabs {
-    display:flex; gap:0; margin-bottom:0.75rem; border-bottom:1px solid var(--navy-border);
+    display:flex; gap:2px; margin-bottom:0.75rem; background:var(--navy); border-radius:4px; padding:3px;
   }
   .detail-tab {
-    font-family:var(--mono); font-size:0.58rem; letter-spacing:0.06em; text-transform:uppercase;
-    padding:0.45rem 0.75rem; cursor:pointer; color:var(--text-muted);
-    border-bottom:2px solid transparent; transition:all 0.15s;
+    font-family:var(--mono); font-size:0.6rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
+    padding:0.45rem 0.65rem; cursor:pointer; color:var(--text-muted);
+    border:none; border-radius:3px; transition:all 0.15s; flex:1; text-align:center;
     -webkit-tap-highlight-color:transparent; user-select:none;
-    background:transparent; border-top:none; border-left:none; border-right:none;
+    background:transparent;
   }
-  .detail-tab:hover { color:var(--text); }
-  .detail-tab.tab-active { color:var(--blue-light); border-bottom-color:var(--blue); }
+  .detail-tab:hover { color:var(--text); background:rgba(255,255,255,0.04); }
+  .detail-tab.tab-active { color:#fff; background:var(--blue); box-shadow:0 1px 4px rgba(30,111,255,0.3); }
   .detail-tab-pane { display:none; }
   .detail-tab-pane.pane-active { display:block; }
 
