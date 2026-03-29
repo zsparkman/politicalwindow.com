@@ -111,8 +111,8 @@
   .map-inset .maplibregl-ctrl-attrib { display:none !important; }
   .map-inset .maplibregl-ctrl { display:none !important; }
   .map-inset-label { position:absolute; bottom:2px; right:4px; font-family:var(--mono); font-size:0.5rem; color:#e8edf3; text-shadow:0 0 4px rgba(8,17,31,0.9); z-index:2; pointer-events:none; letter-spacing:0.05em; font-weight:600; }
-  #insetAK { width:130px; height:90px; bottom:8px; left:8px; }
-  #insetHI { width:100px; height:70px; bottom:8px; left:180px; }
+  #insetAK { width:160px; height:110px; bottom:4px; left:8px; }
+  #insetHI { width:100px; height:70px; bottom:4px; left:176px; }
   .map-tooltip {
     position:absolute; pointer-events:none; background:rgba(13,26,46,0.92); backdrop-filter:blur(8px);
     border:1px solid var(--navy-border); border-left:3px solid var(--blue);
@@ -1293,7 +1293,7 @@ function createInsetMaps() {
 
   if (akFeature) {
     const akGeo = { type: 'FeatureCollection', features: [akFeature] };
-    insetAK = createInsetMap('insetAK', [-152, 64], 1.6, akGeo, 'AK');
+    insetAK = createInsetMap('insetAK', [-153, 64], 1.2, akGeo, 'AK');
   }
 
   if (hiFeature) {
