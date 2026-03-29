@@ -272,6 +272,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   <button class="tab active" data-view="pivot">PIVOT TABLE</button>
   <button class="tab" data-view="trend">WEEKLY TREND</button>
   <button class="tab" data-view="lines">LINE ITEMS</button>
+  <button class="tab" data-view="variance">VARIANCE REPORT</button>
 </div>
 
 <div id="pin-bar"></div>
@@ -1017,8 +1018,6 @@ function renderLines(rows){
 
 
 function renderMatchups(rows){
-  var wrap=document.getElementById('matchups-wrap');
-  if(!rows.length){wrap.style.display='none';return;}
   // Group by station + description + time_period + week_of
   var slots={},slotOrder=[];
   rows.forEach(function(r){
@@ -1032,14 +1031,18 @@ function renderMatchups(rows){
     s.rows.forEach(function(r){names.add(r.candidate||r.advertiser||'—');});
     return names.size>=2;
   });
-  if(!matchups.length){wrap.style.display='none';return;}
+  if(!matchups.length){
+    document.getElementById('matchups-count').textContent='';
+    document.getElementById('matchups-thead').innerHTML='';
+    document.getElementById('matchups-body').innerHTML='<tr><td style="padding:24px 14px;text-align:center;color:#64748b;font-size:0.72rem;letter-spacing:0.08em">NO MATCHES FOUND</td></tr>';
+    return;
+  }
   // Sort by week descending, then station
   matchups.sort(function(a,b){
     if(a.week_of>b.week_of)return -1;if(a.week_of<b.week_of)return 1;
     if(a.station<b.station)return -1;if(a.station>b.station)return 1;
     return 0;
   });
-  wrap.style.display='block';
   document.getElementById('matchups-count').textContent=matchups.length+' VARIANCES';
   document.getElementById('matchups-thead').innerHTML='<tr><th>CANDIDATE</th><th>PARTY</th><th>STATION</th><th>DESCRIPTION</th><th>TIME PERIOD</th><th>WEEK OF</th><th>RATE</th><th>UNITS</th><th>LINE TOTAL</th></tr>';
   var html='';
@@ -1075,22 +1078,25 @@ function render(){
   var isPivot=(currentView==='pivot');
   var isTrend=(currentView==='trend');
   var isLines=(currentView==='lines');
-  document.getElementById('chart-wrap').style.display=isLines?'none':'block';
+  var isVariance=(currentView==='variance');
+  document.getElementById('chart-wrap').style.display=(isLines||isVariance)?'none':'block';
   document.getElementById('pivot-controls').style.display=isPivot?'flex':'none';
   document.getElementById('pivot-wrap').style.display=isPivot?'block':'none';
   document.getElementById('trend-table-wrap').style.display=isTrend?'block':'none';
   document.getElementById('lines-wrap').style.display=isLines?'block':'none';
-  document.getElementById('matchups-wrap').style.display='none';
+  document.getElementById('matchups-wrap').style.display=isVariance?'block':'none';
   if(isPivot){
     var groups=buildPivot(rows);
     renderPivotChart(groups);
     renderPivotTable(groups);
   }else if(isTrend){
     renderTrend(rows);
+  }else if(isVariance){
+    destroyChart();
+    renderMatchups(rows);
   }else{
     destroyChart();
     renderLines(rows);
-    renderMatchups(rows);
   }
   updateOptionStates();
 }
