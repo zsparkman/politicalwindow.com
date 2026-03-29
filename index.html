@@ -493,7 +493,7 @@
 
 <script>
 // ── DATES ─────────────────────────────────────────────────────────────────────
-const TODAY          = new Date(2026,1,27);
+const TODAY          = new Date(); // live date — state map colors update automatically
 const GENERAL        = new Date(2026,10,3);
 const GENERAL_WINDOW = new Date(2026,8,4);
 const fccPrimWin = d => { if(!d) return null; const r=new Date(d); r.setDate(r.getDate()-45); return r; };

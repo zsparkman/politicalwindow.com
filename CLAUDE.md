@@ -29,7 +29,7 @@ entire frontend — a single-file static SPA hosted on GitHub Pages.
 ```javascript
 const API_BASE  = 'https://api.politicalwindow.com';
 const RATES_API = 'https://rates.politicalwindow.com';
-const TODAY     = new Date(2026,1,27);   // update as needed
+const TODAY     = new Date();             // live date — auto-updates state map colors
 const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 ```
 
