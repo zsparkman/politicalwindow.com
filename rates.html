@@ -350,7 +350,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   </div>
   <div id="matchups-wrap" style="display:none">
     <div class="tbl-hdr">
-      <span>COMPETITIVE MATCHUPS</span>
+      <span>VARIANCE REPORT</span>
       <span id="matchups-count"></span>
     </div>
     <table>
@@ -1040,7 +1040,7 @@ function renderMatchups(rows){
     return 0;
   });
   wrap.style.display='block';
-  document.getElementById('matchups-count').textContent=matchups.length+' MATCHUPS';
+  document.getElementById('matchups-count').textContent=matchups.length+' VARIANCES';
   document.getElementById('matchups-thead').innerHTML='<tr><th>CANDIDATE</th><th>PARTY</th><th>STATION</th><th>DESCRIPTION</th><th>TIME PERIOD</th><th>WEEK OF</th><th>RATE</th><th>UNITS</th><th>LINE TOTAL</th></tr>';
   var html='';
   var cap=Math.min(matchups.length,200);
@@ -1065,7 +1065,7 @@ function renderMatchups(rows){
         +'</tr>';
     });
   }
-  if(matchups.length>cap)html+='<tr><td colspan="9" class="c-muted" style="padding:6px 14px;font-size:0.58rem">'+( matchups.length-cap)+' more matchups — apply filters to narrow</td></tr>';
+  if(matchups.length>cap)html+='<tr><td colspan="9" class="c-muted" style="padding:6px 14px;font-size:0.58rem">'+( matchups.length-cap)+' more variances — apply filters to narrow</td></tr>';
   document.getElementById('matchups-body').innerHTML=html;
 }
 
