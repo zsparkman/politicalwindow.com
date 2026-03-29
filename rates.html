@@ -651,13 +651,13 @@ var LINE_COLS=[
   {key:'state',label:'STATE'},{key:'dma',label:'DMA'},{key:'station',label:'STATION'},
   {key:'agency',label:'AGENCY'},{key:'buyer',label:'BUYER'},{key:'sales_office',label:'SALES OFFICE'},
   {key:'salesperson',label:'SALESPERSON'},{key:'order_number',label:'ORDER #'},{key:'line_number',label:'LINE #'},
-  {key:'description',label:'DESCRIPTION'},{key:'time_start',label:'TIME START'},{key:'time_end',label:'TIME END'},
+  {key:'description',label:'DESCRIPTION'},{key:'time_period',label:'TIME PERIOD'},
   {key:'daypart',label:'DAYPART'},{key:'daypart_code',label:'DPTCD'},{key:'week_of',label:'WEEK OF'},
   {key:'start_date',label:'START DATE'},{key:'end_date',label:'END DATE'},{key:'rate_class',label:'RATE CLASS'},
   {key:'rate',label:'RATE'},{key:'units',label:'UNITS'},{key:'line_total',label:'LINE TOTAL'}
 ];
 var NUMERIC_COLS={rate:1,units:1,line_total:1};
-var visibleCols=new Set(['candidate','party','office','state','dma','station','order_number','line_number','description','week_of','time_start','time_end','rate_class','rate','units','line_total']);
+var visibleCols=new Set(['candidate','party','office','state','dma','station','order_number','line_number','description','week_of','time_period','rate_class','rate','units','line_total']);
 var colOrder=LINE_COLS.map(function(c){return c.key;});
 var groupFields=[];
 var expandedGroups={};
@@ -856,7 +856,7 @@ function buildGroupTree(rows,fields,path){
 }
 
 function renderGroupedLines(rows,cols){
-  var MUTED={dma:1,agency:1,buyer:1,sales_office:1,salesperson:1,daypart_code:1,rate_class:1,description:1,time_start:1,time_end:1,order_number:1,line_number:1};
+  var MUTED={dma:1,agency:1,buyer:1,sales_office:1,salesperson:1,daypart_code:1,rate_class:1,description:1,time_period:1,order_number:1,line_number:1};
   var html='';
   function renderNode(node,depth){
     var isOpen=!!expandedGroups[node.path];
@@ -931,7 +931,7 @@ function renderLines(rows){
     return'<th class="'+cls+'" data-col="'+c.key+'">'+c.label+'<span class="col-flt-arr'+(hasF?' active':'')+'" data-col="'+c.key+'">▾</span></th>';
   }).join('')+'</tr>';
   document.getElementById('lines-thead').innerHTML=sortRow;
-  var MUTED={dma:1,agency:1,buyer:1,sales_office:1,salesperson:1,daypart_code:1,rate_class:1,description:1,time_start:1,time_end:1,order_number:1,line_number:1};
+  var MUTED={dma:1,agency:1,buyer:1,sales_office:1,salesperson:1,daypart_code:1,rate_class:1,description:1,time_period:1,order_number:1,line_number:1};
   if(groupFields.length>0){
     document.getElementById('lines-body').innerHTML=renderGroupedLines(sorted,activeCols);
     var glbls=groupFields.map(function(k){var c=LINE_COLS.find(function(c){return c.key===k;});return c?c.label:k;});
@@ -1131,6 +1131,7 @@ authFetch(url)
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(j){
   ALL_DATA=j.data||j||[];
+  ALL_DATA.forEach(function(r){r.time_period=(r.time_start&&r.time_end)?(r.time_start+' – '+r.time_end):(r.time_start||r.time_end||'');});
   var totalRows=j.total_rows||ALL_DATA.length;
   var totalSpend=j.total_spend||0;
   loading.style.display='none';
@@ -1185,6 +1186,24 @@ document.getElementById('run-report').addEventListener('click',function(){loadDa
 function showIdleState(){
   var el=document.getElementById('loading');el.style.display='flex';el.textContent='SELECT FILTERS AND CLICK RUN REPORT';
   document.getElementById('header-sub').textContent='Set filters above then run report · 2026 cycle';
+  loadFilters();
+}
+function loadFilters(){
+  authFetch(API+'/api/lines/filters')
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(j){
+      function pop(id,vals,fmt){
+        var el=document.getElementById(id),first=el.options[0],cur=el.value;
+        el.innerHTML='';el.appendChild(first);
+        vals.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=fmt?fmt(v):v;el.appendChild(o);});
+        if(cur!=='ALL'){for(var i=0;i<el.options.length;i++){if(el.options[i].value===cur){el.value=cur;break;}}}
+      }
+      if(j.states&&j.states.length)pop('f-state',j.states);
+      if(j.offices&&j.offices.length)pop('f-office',j.offices);
+      if(j.dmas&&j.dmas.length)pop('f-dma',j.dmas);
+      if(j.stations&&j.stations.length)pop('f-station',j.stations);
+      if(j.dayparts&&j.dayparts.length)pop('f-daypart',j.dayparts);
+    }).catch(function(e){console.warn('Failed to load filter options:',e.message);});
 }
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 function showOverlay(){var el=document.getElementById('auth-overlay');if(el)el.style.display='flex';}
