@@ -510,9 +510,11 @@ function renderPivotTable(groups){
         '<td>'+esc(r.description||'—')+'</td>'+
         '<td class="c-muted">'+esc(r.daypart||'—')+'</td>'+
         '<td class="c-muted">'+fmtWeek(r.week_of)+'</td>'+
+        '<td class="c-muted">'+esc(r.order_number||'—')+'</td>'+
         '<td class="c-bright" style="text-align:right">'+(r.rate?'$'+parseFloat(r.rate).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—')+'</td>'+
         '<td style="text-align:right">'+(r.units||'—')+'</td>'+
         '<td class="c-green" style="text-align:right">'+fmt$(r.line_total)+'</td>'+
+        '<td>'+(r.fcc_pdf_url?'<a href="'+esc(r.fcc_pdf_url)+'" target="_blank" rel="noopener" style="color:#38bdf8">PDF</a>':'—')+'</td>'+
       '</tr>';
     }).join('');
     var nameEl='<div class="g-name-pin'+(isPinned?' is-pinned':'')+'" onclick="window.pinCandidate('+i+')" title="Click to pin">'+
@@ -535,7 +537,7 @@ function renderPivotTable(groups){
       '<div class="detail-wrap" id="pdetail-'+i+'">'+
         '<div class="detail-title">LINE DETAIL — '+g.rows.length+' RECORDS'+(g.rows.length>cap?' (showing '+cap+')':'')+'</div>'+
         '<table><thead><tr>'+
-          '<th>STATION</th><th>DMA</th><th>PROGRAM / DESC</th><th>DAYPART</th><th>WEEK OF</th><th>RATE</th><th>UNITS</th><th>TOTAL</th>'+
+          '<th>STATION</th><th>DMA</th><th>PROGRAM / DESC</th><th>DAYPART</th><th>WEEK OF</th><th>ORDER #</th><th>RATE</th><th>UNITS</th><th>TOTAL</th><th>INVOICE</th>'+
         '</tr></thead><tbody>'+subRows+'</tbody></table>'+
       '</div>'+
     '</div>';
@@ -669,7 +671,8 @@ var LINE_COLS=[
   {key:'description',label:'DESCRIPTION'},{key:'time_period',label:'TIME PERIOD'},
   {key:'daypart',label:'DAYPART'},{key:'daypart_code',label:'DPTCD'},{key:'week_of',label:'WEEK OF'},
   {key:'start_date',label:'START DATE'},{key:'end_date',label:'END DATE'},{key:'rate_class',label:'RATE CLASS'},
-  {key:'rate',label:'RATE'},{key:'units',label:'UNITS'},{key:'line_total',label:'LINE TOTAL'}
+  {key:'rate',label:'RATE'},{key:'units',label:'UNITS'},{key:'line_total',label:'LINE TOTAL'},
+  {key:'fcc_pdf_url',label:'INVOICE PDF'}
 ];
 var NUMERIC_COLS={rate:1,units:1,line_total:1};
 var visibleCols=new Set(['candidate','party','office','state','dma','station','order_number','line_number','description','week_of','time_period','rate_class','rate','units','line_total']);
@@ -904,6 +907,7 @@ function renderGroupedLines(rows,cols){
             else if(MUTED[c.key])cls='c-muted';
             var disp='';
             if(c.key==='candidate')disp=esc(v||r.advertiser||'—');
+            else if(c.key==='fcc_pdf_url')disp=v?'<a href="'+esc(v)+'" target="_blank" rel="noopener" style="color:#38bdf8">VIEW PDF</a>':'—';
             else if(c.key==='rate'||c.key==='line_total')disp=v?'$'+parseFloat(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
             else if(c.key==='week_of'||c.key==='start_date'||c.key==='end_date')disp=fmtWeek(v);
             else disp=esc(v||'—');
@@ -964,6 +968,7 @@ function renderLines(rows){
         else if(MUTED[c.key])cls='c-muted';
         var disp='';
         if(c.key==='candidate')disp=esc(v||r.advertiser||'—');
+        else if(c.key==='fcc_pdf_url')disp=v?'<a href="'+esc(v)+'" target="_blank" rel="noopener" style="color:#38bdf8">VIEW PDF</a>':'—';
         else if(c.key==='rate'||c.key==='line_total')disp=v?'$'+parseFloat(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
         else if(c.key==='week_of'||c.key==='start_date'||c.key==='end_date')disp=fmtWeek(v);
         else disp=esc(v||'—');
@@ -1034,7 +1039,7 @@ function renderMatchups(rows){
   if(!matchups.length){
     document.getElementById('matchups-count').textContent='';
     document.getElementById('matchups-thead').innerHTML='';
-    document.getElementById('matchups-body').innerHTML='<tr><td style="padding:24px 14px;text-align:center;color:#64748b;font-size:0.72rem;letter-spacing:0.08em">NO MATCHES FOUND</td></tr>';
+    document.getElementById('matchups-body').innerHTML='<tr><td colspan="11" style="padding:24px 14px;text-align:center;color:#64748b;font-size:0.72rem;letter-spacing:0.08em">NO MATCHES FOUND</td></tr>';
     return;
   }
   // Sort by week descending, then station
@@ -1044,12 +1049,12 @@ function renderMatchups(rows){
     return 0;
   });
   document.getElementById('matchups-count').textContent=matchups.length+' VARIANCES';
-  document.getElementById('matchups-thead').innerHTML='<tr><th>CANDIDATE</th><th>PARTY</th><th>STATION</th><th>DESCRIPTION</th><th>TIME PERIOD</th><th>WEEK OF</th><th>RATE</th><th>UNITS</th><th>LINE TOTAL</th></tr>';
+  document.getElementById('matchups-thead').innerHTML='<tr><th>CANDIDATE</th><th>PARTY</th><th>STATION</th><th>DESCRIPTION</th><th>TIME PERIOD</th><th>WEEK OF</th><th>ORDER #</th><th>RATE</th><th>UNITS</th><th>LINE TOTAL</th><th>INVOICE</th></tr>';
   var html='';
   var cap=Math.min(matchups.length,200);
   for(var i=0;i<cap;i++){
     var s=matchups[i];
-    html+='<tr><td colspan="9" class="matchup-slot-hdr">'
+    html+='<tr><td colspan="11" class="matchup-slot-hdr">'
       +esc(s.station||'—')+' · '+esc(s.description||'—')+' · '+esc(s.time_period||'—')+' · WK '+esc(fmtWeek(s.week_of))
       +' <span style="color:#64748b">('+s.rows.length+' buyers)</span></td></tr>';
     s.rows.sort(function(a,b){var ar=parseFloat(a.rate)||0,br=parseFloat(b.rate)||0;return br-ar;});
@@ -1062,13 +1067,15 @@ function renderMatchups(rows){
         +'<td class="c-muted">'+esc(r.description||'—')+'</td>'
         +'<td class="c-muted">'+esc(r.time_period||'—')+'</td>'
         +'<td>'+fmtWeek(r.week_of)+'</td>'
+        +'<td class="c-muted">'+esc(r.order_number||'—')+'</td>'
         +'<td class="c-bright">'+(r.rate?'$'+parseFloat(r.rate).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—')+'</td>'
         +'<td>'+esc(r.units||'—')+'</td>'
         +'<td class="c-green">'+(r.line_total?'$'+parseFloat(r.line_total).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—')+'</td>'
+        +'<td>'+(r.fcc_pdf_url?'<a href="'+esc(r.fcc_pdf_url)+'" target="_blank" rel="noopener" style="color:#38bdf8">PDF</a>':'—')+'</td>'
         +'</tr>';
     });
   }
-  if(matchups.length>cap)html+='<tr><td colspan="9" class="c-muted" style="padding:6px 14px;font-size:0.58rem">'+( matchups.length-cap)+' more variances — apply filters to narrow</td></tr>';
+  if(matchups.length>cap)html+='<tr><td colspan="11" class="c-muted" style="padding:6px 14px;font-size:0.58rem">'+( matchups.length-cap)+' more variances — apply filters to narrow</td></tr>';
   document.getElementById('matchups-body').innerHTML=html;
 }
 
