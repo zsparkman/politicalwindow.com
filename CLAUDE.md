@@ -39,7 +39,8 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 |---|---|
 | `loadLiveData()` | Fetches states, candidates, ballot measures, polls on page load |
 | `buildDetailHTML(abbr)` | Renders full state detail panel HTML |
-| `buildPollHTML(abbr)` | Renders polling section for state detail panel |
+| `buildPollContent(abbr)` | Renders polling content for state detail tab |
+| `wireDetailTabs(container)` | Wires click handlers for Candidates/Issues/Polling tabs |
 | `loadRatesForState(abbr)` | Async fetch + render Rate Intel section |
 | `pick(abbr)` | State tile click handler |
 | `drawTable()` | Renders sortable candidate/state table |

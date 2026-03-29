@@ -240,8 +240,24 @@
   }
   /* legend item */
   .legend-ballot { color:#a78bfa; }
+  /* ── DETAIL TABS ── */
+  .detail-tabs {
+    display:flex; gap:0; margin-bottom:0.75rem; border-bottom:1px solid var(--navy-border);
+  }
+  .detail-tab {
+    font-family:var(--mono); font-size:0.58rem; letter-spacing:0.06em; text-transform:uppercase;
+    padding:0.45rem 0.75rem; cursor:pointer; color:var(--text-muted);
+    border-bottom:2px solid transparent; transition:all 0.15s;
+    -webkit-tap-highlight-color:transparent; user-select:none;
+    background:transparent; border-top:none; border-left:none; border-right:none;
+  }
+  .detail-tab:hover { color:var(--text); }
+  .detail-tab.tab-active { color:var(--blue-light); border-bottom-color:var(--blue); }
+  .detail-tab-pane { display:none; }
+  .detail-tab-pane.pane-active { display:block; }
+
   /* ── POLLING ── */
-  .poll-section { margin-top:0.5rem; }
+  .poll-section { margin-top:0; }
   .poll-race-block { margin-bottom:0.65rem; }
   .poll-race-label { font-family:var(--mono); font-size:0.54rem; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; border:1px solid; display:inline-block; margin-bottom:0.3rem; }
   .poll-card {
@@ -765,6 +781,8 @@ function buildDetailHTML(abbr) {
   const genPct = Math.max(0, Math.min(100, ((TODAY - GENERAL_WINDOW) / (GENERAL - GENERAL_WINDOW)) * 100));
   const wc = WC[s.status] || 'var(--blue)';
   const raceTags = s.races.map(r => `<span class="race-tag tag-${r.toLowerCase().replace(/[^a-z]/g,'')}">${r}</span>`).join('');
+
+  // ── Candidates tab content ──
   let candHTML = '';
   if (s.cands.length === 0) {
     candHTML = `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No major candidates on file yet</div>`;
@@ -783,24 +801,47 @@ function buildDetailHTML(abbr) {
       candHTML += `</div>`;
     });
   }
+
+  // ── Issues tab content ──
+  let issuesHTML = '';
+  if (stateHasBallot(s.abbr)) {
+    issuesHTML = BALLOT[s.abbr].map(m => `
+      <div class="ballot-measure">
+        <div class="ballot-measure-title">${m.title}</div>
+        <div class="ballot-measure-desc">${m.desc}</div>
+        <div class="ballot-camps">
+          <span class="ballot-yes">✓ YES: ${m.yes}</span><br>
+          <span class="ballot-no">✗ NO: ${m.no}</span>
+        </div>
+        <div class="ballot-measure-meta" style="margin-top:0.4rem;">
+          <span class="ballot-spend-tag spend-${m.spend}">${m.spend.toUpperCase()} SPEND</span>
+          <span class="ballot-fcc-note">${m.fcc}</span>
+        </div>
+      </div>`).join('');
+  } else {
+    issuesHTML = `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No ballot measures on file for ${s.abbr}</div>`;
+  }
+
+  // ── Primary window note ──
+  const primNote = s.dPrim !== null && s.dPrim > 0 ? `${s.dPrim}d away` : s.dPrim !== null && s.dPrim <= 0 ? 'Completed' : '';
+
   return `<div class="fade-in">
-    <div style="font-family:var(--mono);font-size:0.57rem;letter-spacing:0.08em;margin-bottom:0.4rem">${s.status==='general-only'&&s.pDate?`<span style="color:var(--green)">✓ PRIMARY COMPLETE · GENERAL WINDOW</span>`:SL[s.status]||''}</div>
+    <div style="font-family:var(--mono);font-size:0.57rem;letter-spacing:0.08em;margin-bottom:0.3rem">${s.status==='general-only'&&s.pDate?`<span style="color:var(--green)">✓ PRIMARY COMPLETE · GENERAL WINDOW</span>`:SL[s.status]||''}</div>
     <div class="detail-state-name">${s.name}</div>
     <div class="detail-state-abbr">${s.abbr} · 2026 ELECTION CYCLE</div>
-    <div class="dsec"><div class="dlabel">Races on Ballot</div><div class="race-tags">${raceTags}</div></div>
-    <div class="dsec"><div class="drow">
+    <div class="dsec" style="margin-bottom:0.6rem;padding-bottom:0.6rem"><div class="race-tags">${raceTags}</div></div>
+    <div class="dsec" style="margin-bottom:0.6rem;padding-bottom:0.6rem"><div class="drow">
       <div>
         <div class="dlabel">Primary Date</div>
         <div class="dval ${s.dPrim!==null&&s.dPrim<0?'muted':''}">${fmtS(s.pDate)}</div>
-        ${s.dPrim!==null&&s.dPrim>0?`<div class="wbar-note">${s.dPrim}d away</div>`:''}
-        ${s.dPrim!==null&&s.dPrim<=0?`<div class="wbar-note" style="color:var(--text-faint)">Completed</div>`:''}
+        ${primNote?`<div class="wbar-note" ${s.dPrim<=0?'style="color:var(--text-faint)"':''}>${primNote}</div>`:''}
       </div>
       <div>
         <div class="dlabel">Runoff Date</div>
         <div class="dval ${s.rDate?'':'muted'}">${fmtS(s.rDate)}</div>
       </div>
     </div></div>
-    <div class="dsec">
+    <div class="dsec" style="margin-bottom:0.5rem;padding-bottom:0.5rem">
       <div class="dlabel">FCC Primary Window · LUR Applies</div>
       ${s.dPrim!==null&&s.dPrim<=0?`
       <div class="dval muted">${fmtS(s.pWindow)} → ${fmtS(s.pDate)}</div>
@@ -812,39 +853,50 @@ function buildDetailHTML(abbr) {
       <div class="wbar-note">${s.status==='window-open'?`${Math.round(barPct)}% elapsed · LUR APPLIES NOW`:s.status==='window-soon'?`Opens in ${s.dWin}d · ${fmtL(s.pWindow)}`:s.pWindow?`Opens ${fmtL(s.pWindow)}`:'No primary window this cycle'}</div>
       `}
     </div>
-    <div class="dsec">
+    <div class="dsec" style="margin-bottom:0.6rem;padding-bottom:0;">
       <div class="dlabel">FCC General Window · All Federal Candidates</div>
       <div class="dval green">Sep 4, 2026 → Nov 3, 2026</div>
       <div class="wbar"><div class="wbar-fill" style="width:${genPct}%;background:var(--green)"></div></div>
       <div class="wbar-note">${TODAY>=GENERAL_WINDOW?`${Math.round(genPct)}% elapsed`:`Opens in ${daysTo(GENERAL_WINDOW)}d · Sep 4, 2026`}</div>
     </div>
-    <div class="dsec"><div class="dlabel">Declared Candidates</div>${candHTML}</div>
-    ${buildPollHTML(abbr)}
-    <div class="dsec" style="border-bottom:none">
-      <div class="dlabel">Market Intel</div>
-      <div style="font-family:var(--sans);font-size:0.74rem;color:var(--text-muted);line-height:1.55">${s.notes||'—'}</div>
+
+    <div class="detail-tabs">
+      <button class="detail-tab tab-active" data-tab="candidates">Candidates</button>
+      <button class="detail-tab" data-tab="issues">Issues</button>
+      <button class="detail-tab" data-tab="polling">Polling</button>
     </div>
 
-    ${stateHasBallot(s.abbr) ? `
-    <div class="dsec ballot-section" style="border-bottom:none; margin-top:0.5rem;">
+    <div class="detail-tab-pane pane-active" data-pane="candidates">
+      <div class="dlabel">Declared Candidates</div>
+      ${candHTML}
+    </div>
+
+    <div class="detail-tab-pane" data-pane="issues">
       <div class="dlabel">Ballot Measures / Props</div>
-      ${BALLOT[s.abbr].map(m => `
-        <div class="ballot-measure">
-          <div class="ballot-measure-title">${m.title}</div>
-          <div class="ballot-measure-desc">${m.desc}</div>
-          <div class="ballot-camps">
-            <span class="ballot-yes">✓ YES: ${m.yes}</span><br>
-            <span class="ballot-no">✗ NO: ${m.no}</span>
-          </div>
-          <div class="ballot-measure-meta" style="margin-top:0.4rem;">
-            <span class="ballot-spend-tag spend-${m.spend}">${m.spend.toUpperCase()} SPEND</span>
-            <span class="ballot-fcc-note">${m.fcc}</span>
-          </div>
-        </div>`).join('')}
-    </div>` : ''}
+      ${issuesHTML}
+    </div>
+
+    <div class="detail-tab-pane" data-pane="polling">
+      <div class="dlabel">Latest Polls</div>
+      ${buildPollContent(abbr)}
+    </div>
   </div>`;
 }
 
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────────
+function wireDetailTabs(container) {
+  container.querySelectorAll('.detail-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabId = btn.dataset.tab;
+      container.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('tab-active'));
+      container.querySelectorAll('.detail-tab-pane').forEach(p => p.classList.remove('pane-active'));
+      btn.classList.add('tab-active');
+      const pane = container.querySelector(`[data-pane="${tabId}"]`);
+      if (pane) pane.classList.add('pane-active');
+    });
+  });
+}
 
 // ── PICK (select state) ────────────────────────────────────────────────────────
 let sel = null;
@@ -873,6 +925,7 @@ function pick(abbr) {
   } else {
     const p = document.getElementById('detailPanel');
     p.innerHTML = buildDetailHTML(abbr);
+    wireDetailTabs(p);
     p.scrollTop = 0;
     checkDetailScroll();
   }
@@ -896,7 +949,9 @@ document.getElementById('detailPanel').addEventListener('scroll', checkDetailScr
 
 // ── MOBILE DRAWER ──────────────────────────────────────────────────────────────
 function openDrawer(abbr) {
-  document.getElementById('drawerContent').innerHTML = buildDetailHTML(abbr);
+  const dc = document.getElementById('drawerContent');
+  dc.innerHTML = buildDetailHTML(abbr);
+  wireDetailTabs(dc);
   document.getElementById('mobileDrawer').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1170,17 +1225,17 @@ const BALLOT = {};
 // ── POLLS (populated from API via loadLiveData) ─────────────────────────────────
 const POLLS = {};
 
-function buildPollHTML(abbr) {
+function buildPollContent(abbr) {
   const statePolls = POLLS[abbr];
-  if (!statePolls || Object.keys(statePolls).length === 0) return '';
+  if (!statePolls || Object.keys(statePolls).length === 0) {
+    return `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No polling data available for ${abbr}</div>`;
+  }
 
-  let html = '<div class="dsec poll-section"><div class="dlabel">Latest Polls</div>';
-
+  let html = '';
   for (const [race, polls] of Object.entries(statePolls)) {
     const rb = {Senate:'tag-senate',Governor:'tag-governor',House:'tag-house'}[race] || 'tag-house';
     html += `<div class="poll-race-block"><span class="poll-race-label ${rb}">${race}</span>`;
 
-    // Show most recent poll per race (first in array since API sorts by date DESC)
     for (const poll of polls.slice(0, 2)) {
       const dateStr = new Date(poll.date + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric' });
       html += `<div class="poll-card">`;
@@ -1205,7 +1260,6 @@ function buildPollHTML(abbr) {
     html += `</div>`;
   }
 
-  html += '</div>';
   return html;
 }
 
