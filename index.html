@@ -836,18 +836,19 @@ async function initMap() {
   if (typeof maplibregl === 'undefined') return false;
 
   try {
-    const resp = await fetch('https://eric.clst.org/assets/wiki/uploads/Stuff/gz_2010_us_040_00_20m.json');
+    const resp = await fetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json');
     if (!resp.ok) return false;
     statesGeoJSON = await resp.json();
 
     // Inject abbr + status onto each feature
+    let fid = 1;
     statesGeoJSON.features = statesGeoJSON.features.filter(f => {
-      const fips = String(f.properties.STATE).padStart(2, '0');
+      const fips = String(f.id).padStart(2, '0');
       const abbr = FIPS[fips];
       if (!abbr || !SM[abbr]) return false;
       f.properties.abbr = abbr;
       f.properties.status = SM[abbr].status;
-      f.id = parseInt(f.properties.STATE, 10);
+      f.id = fid++;
       return true;
     });
 
