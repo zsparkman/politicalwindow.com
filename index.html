@@ -889,6 +889,9 @@ async function initMap() {
 
     glMap.on('load', () => {
       glMap.resize();
+      // Match water + background to page container color
+      if (glMap.getLayer('water')) glMap.setPaintProperty('water', 'fill-color', '#13203F');
+      if (glMap.getLayer('background')) glMap.setPaintProperty('background', 'background-color', '#13203F');
       addStatesLayer();
       addStateLabels();
       wireMapInteractions();
@@ -1306,7 +1309,7 @@ function createInsetMap(containerId, center, zoom, geoData, abbr) {
 
   const m = new maplibregl.Map({
     container: containerId,
-    style: { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#0D1A2E' } }] },
+    style: { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#13203F' } }] },
     center: center,
     zoom: zoom,
     interactive: false,
