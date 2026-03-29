@@ -132,12 +132,13 @@
   .back-to-usa {
     display:inline-flex; align-items:center; gap:0.3rem;
     font-family:var(--mono); font-size:0.65rem; font-weight:500;
-    color:var(--blue-light); background:transparent;
-    border:1px solid var(--navy-border); border-radius:4px;
+    color:var(--blue-light); background:rgba(15,32,64,0.65);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    border:1px solid rgba(26,49,86,0.5); border-radius:4px;
     padding:5px 12px 5px 8px; cursor:pointer; margin-bottom:0.5rem;
     transition:all 0.15s; letter-spacing:0.03em;
   }
-  .back-to-usa:hover { border-color:var(--blue); background:var(--blue-glow); }
+  .back-to-usa:hover { border-color:rgba(30,111,255,0.5); background:rgba(15,32,64,0.85); }
 
   /* Map scroll wrapper — enables horizontal scroll on mobile */
   .map-scroll { overflow:visible; padding:6px; width:100%; position:relative; }
