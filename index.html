@@ -129,6 +129,16 @@
   }
   .map-breadcrumb button:hover { text-decoration:underline; }
 
+  .back-to-usa {
+    display:inline-flex; align-items:center; gap:0.3rem;
+    font-family:var(--mono); font-size:0.65rem; font-weight:500;
+    color:var(--blue-light); background:transparent;
+    border:1px solid var(--navy-border); border-radius:4px;
+    padding:5px 12px 5px 8px; cursor:pointer; margin-bottom:0.5rem;
+    transition:all 0.15s; letter-spacing:0.03em;
+  }
+  .back-to-usa:hover { border-color:var(--blue); background:var(--blue-glow); }
+
   /* Map scroll wrapper — enables horizontal scroll on mobile */
   .map-scroll { overflow:visible; padding:6px; width:100%; position:relative; }
   .tile-grid {
@@ -518,6 +528,10 @@
             FCC Gen Window: <span style="color:var(--green)">Sep 4, 2026</span>
           </div>
         </div>
+        <button class="back-to-usa" id="backToUSA" style="display:none" onclick="mapBackToUSA()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          Back to USA
+        </button>
         <div class="map-scroll">
           <div id="mapContainer"></div>
           <div class="map-tooltip" id="mapTooltip" style="display:none"></div>
@@ -1166,12 +1180,13 @@ function mapSelectState(abbr) {
   const bounds = [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]];
   glMap.fitBounds(bounds, { padding: 60, duration: 1000 });
 
-  // Show breadcrumb
+  // Show breadcrumb + back button
   const bc = document.getElementById('mapBreadcrumb');
   const sub = document.getElementById('mapSubtitle');
   document.getElementById('breadcrumbState').textContent = SM[abbr].name;
   bc.style.display = 'flex';
   sub.style.display = 'none';
+  document.getElementById('backToUSA').style.display = 'inline-flex';
 
   // Hide insets when zoomed in
   setInsetVisibility(false);
@@ -1196,9 +1211,10 @@ function mapDeselectState() {
     glMap.setFeatureState({ source: 'states', id: f.id }, { selected: false, dimmed: false });
   });
 
-  // Hide breadcrumb
+  // Hide breadcrumb + back button
   document.getElementById('mapBreadcrumb').style.display = 'none';
   document.getElementById('mapSubtitle').style.display = '';
+  document.getElementById('backToUSA').style.display = 'none';
 
   // Smooth ease back to national view (easeTo avoids flyTo's zoom arc)
   glMap.easeTo({ center: [-96, 38.5], zoom: 3.1, duration: 1000 });
