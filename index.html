@@ -76,7 +76,7 @@
   .dot-red   { background:var(--red);   box-shadow:0 0 5px var(--red); }
   .dot-amber { background:var(--amber); }
   .dot-blue  { background:var(--blue); }
-  .dot-green { background:var(--green); }
+  .dot-green { background:var(--blue-light); }
   .dot-slate { background:var(--slate); }
   .filter-group { display:flex; align-items:center; gap:0.4rem; margin-left:auto; flex-wrap:wrap; }
   .filter-btn {
@@ -99,7 +99,7 @@
   .card-sub { font-family:var(--mono); font-size:0.6rem; color:var(--text-muted); line-height:1.6; }
 
   /* ── MAPLIBRE MAP ── */
-  #mapContainer { width:100%; height:500px; border-radius:4px; overflow:hidden; position:relative; box-shadow:inset 0 0 40px rgba(8,17,31,0.5); }
+  #mapContainer { width:100%; height:420px; border-radius:4px; overflow:hidden; position:relative; box-shadow:inset 0 0 40px rgba(8,17,31,0.5); }
   #mapContainer .maplibregl-canvas { outline:none; }
   .maplibregl-ctrl-attrib { font-size:0.5rem !important; opacity:0.4; }
   .maplibregl-ctrl-group { background:rgba(15,32,64,0.85) !important; border:1px solid var(--navy-border) !important; backdrop-filter:blur(6px); }
@@ -151,7 +151,7 @@
   .tile-window-open  { background:var(--red-dim);   border-color:var(--red);   color:var(--red); }
   .tile-window-soon  { background:var(--amber-dim);  border-color:var(--amber);  color:var(--amber); }
   .tile-upcoming     { background:var(--blue-glow);  border-color:#1A4A99;       color:var(--blue-light); }
-  .tile-general-only { background:var(--green-dim);  border-color:#0A4035;       color:var(--green); }
+  .tile-general-only { background:var(--blue-glow);  border-color:#1A4A99;       color:var(--blue-light); }
   .tile-inactive     { background:rgba(20,35,58,0.4); color:var(--text-faint); }
   .tile.tile-dimmed  { opacity:0.2; pointer-events:none; cursor:default; }
 
@@ -230,7 +230,7 @@
   .spill-red   { background:var(--red-dim);   color:var(--red);        border:1px solid rgba(255,61,90,0.3); }
   .spill-amber { background:var(--amber-dim);  color:var(--amber);       border:1px solid rgba(245,166,35,0.3); }
   .spill-blue  { background:var(--blue-glow);  color:var(--blue-light);  border:1px solid rgba(30,111,255,0.3); }
-  .spill-green { background:var(--green-dim);  color:var(--green);       border:1px solid rgba(0,196,140,0.3); }
+  .spill-green { background:var(--blue-glow);  color:var(--blue-light);  border:1px solid rgba(30,111,255,0.3); }
   .spill-slate { background:var(--slate-dim);  color:var(--slate);       border:1px solid rgba(74,96,128,0.3); }
   .itag { font-size:0.52rem; padding:1px 4px; border-radius:2px; border:1px solid; white-space:nowrap; }
   .dbadge { font-size:0.54rem; display:block; margin-top:2px; }
@@ -414,7 +414,7 @@
     .card-header { flex-direction:column; gap:0.3rem; }
     .card-sub { font-size:0.58rem; }
     .map-scroll { overflow:visible; width:100%; }
-    #mapContainer { height:340px !important; }
+    #mapContainer { height:300px !important; }
     .tile-grid {
       grid-template-rows:repeat(8,34px);
       gap:2px;
@@ -816,7 +816,7 @@ const STATUS_COLORS = {
   'window-open':  '#ff4d4d',
   'window-soon':  '#ffb020',
   'upcoming':     '#4a9eff',
-  'general-only': '#34d399',
+  'general-only': '#4a9eff',
   'inactive':     '#475569'
 };
 
@@ -1062,7 +1062,7 @@ function wireMapInteractions() {
       'window-open': '🔴 Window Open',
       'window-soon': '🟡 Opens Soon',
       'upcoming': '🔵 Upcoming',
-      'general-only': '🟢 General Only',
+      'general-only': '🔵 General Only',
       'inactive': '⚫ None'
     }[s.status] || '';
 
@@ -1127,7 +1127,7 @@ function mapSelectState(abbr) {
   const lngs = coords.map(c => c[0]);
   const lats = coords.map(c => c[1]);
   const bounds = [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]];
-  glMap.fitBounds(bounds, { padding: 60, duration: 800 });
+  glMap.fitBounds(bounds, { padding: 60, duration: 1000 });
 
   // Show breadcrumb
   const bc = document.getElementById('mapBreadcrumb');
@@ -1150,26 +1150,28 @@ function mapSelectState(abbr) {
 function mapDeselectState() {
   if (!glMap || !statesGeoJSON) return;
 
-  // Clear all feature states
+  // Fade out district layers before removing them
+  if (glMap.getLayer('districts-line')) glMap.setPaintProperty('districts-line', 'line-opacity', 0);
+  if (glMap.getLayer('districts-label')) glMap.setPaintProperty('districts-label', 'text-opacity', 0);
+
+  // Clear all feature states before animating
   statesGeoJSON.features.forEach(f => {
     glMap.setFeatureState({ source: 'states', id: f.id }, { selected: false, dimmed: false });
   });
-
-  // Fly back to national view
-  glMap.flyTo({ center: [-96, 38.5], zoom: 3.8, duration: 800 });
 
   // Hide breadcrumb
   document.getElementById('mapBreadcrumb').style.display = 'none';
   document.getElementById('mapSubtitle').style.display = '';
 
-  // Remove districts
-  hideDistricts();
+  // Smooth ease back to national view (easeTo avoids flyTo's zoom arc)
+  glMap.easeTo({ center: [-96, 38.5], zoom: 3.8, duration: 1000 });
 
-  // Show insets again
-  setInsetVisibility(true);
-
-  // Re-apply filter
-  updateMapFilter();
+  // After animation completes, clean up layers and re-apply filter
+  glMap.once('moveend', () => {
+    hideDistricts();
+    setInsetVisibility(true);
+    updateMapFilter();
+  });
 }
 
 function mapBackToUSA() {
@@ -1288,12 +1290,12 @@ function createInsetMaps() {
 
   if (akFeature) {
     const akGeo = { type: 'FeatureCollection', features: [akFeature] };
-    insetAK = createInsetMap('insetAK', [-153, 64.5], 1.8, akGeo, 'AK');
+    insetAK = createInsetMap('insetAK', [-153, 64.5], 1.2, akGeo, 'AK');
   }
 
   if (hiFeature) {
     const hiGeo = { type: 'FeatureCollection', features: [hiFeature] };
-    insetHI = createInsetMap('insetHI', [-157, 20.5], 5, hiGeo, 'HI');
+    insetHI = createInsetMap('insetHI', [-157, 20.5], 3.8, hiGeo, 'HI');
   }
 }
 
@@ -1358,10 +1360,10 @@ const SL = {
   'window-open':  `<span style="color:var(--red)">● PRIMARY WINDOW OPEN</span>`,
   'window-soon':  `<span style="color:var(--amber)">◐ WINDOW OPENS SOON</span>`,
   'upcoming':     `<span style="color:var(--blue-light)">○ PRIMARY UPCOMING</span>`,
-  'general-only': `<span style="color:var(--green)">◇ GENERAL WINDOW ONLY</span>`,
+  'general-only': `<span style="color:var(--blue-light)">◇ GENERAL WINDOW ONLY</span>`,
   'inactive':     `<span style="color:var(--slate)">— NO MAJOR FEDERAL RACE</span>`,
 };
-const WC = { 'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'var(--blue)', 'general-only':'var(--green)', 'inactive':'var(--slate)' };
+const WC = { 'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'var(--blue)', 'general-only':'var(--blue-light)', 'inactive':'var(--slate)' };
 
 function buildDetailHTML(abbr) {
   const s = SM[abbr]; if (!s) return '';
@@ -1415,7 +1417,7 @@ function buildDetailHTML(abbr) {
   const primNote = s.dPrim !== null && s.dPrim > 0 ? `${s.dPrim}d away` : s.dPrim !== null && s.dPrim <= 0 ? 'Completed' : '';
 
   return `<div class="fade-in">
-    <div style="font-family:var(--mono);font-size:0.57rem;letter-spacing:0.08em;margin-bottom:0.3rem">${s.status==='general-only'&&s.pDate?`<span style="color:var(--green)">✓ PRIMARY COMPLETE · GENERAL WINDOW</span>`:SL[s.status]||''}</div>
+    <div style="font-family:var(--mono);font-size:0.57rem;letter-spacing:0.08em;margin-bottom:0.3rem">${s.status==='general-only'&&s.pDate?`<span style="color:var(--blue-light)">✓ PRIMARY COMPLETE · GENERAL WINDOW</span>`:SL[s.status]||''}</div>
     <div class="detail-state-name">${s.name}</div>
     <div class="detail-state-abbr">${s.abbr} · 2026 ELECTION CYCLE</div>
     <div class="dsec" style="margin-bottom:0.6rem;padding-bottom:0.6rem"><div class="race-tags">${raceTags}</div></div>
