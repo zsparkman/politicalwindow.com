@@ -934,9 +934,9 @@ function addStatesLayer() {
       'fill-opacity': [
         'case',
         ['boolean', ['feature-state', 'dimmed'], false], 0.08,
-        ['boolean', ['feature-state', 'selected'], false], 0.75,
-        ['boolean', ['feature-state', 'hover'], false], 0.55,
-        0.38
+        ['boolean', ['feature-state', 'selected'], false], 0.85,
+        ['boolean', ['feature-state', 'hover'], false], 0.7,
+        0.55
       ]
     }
   });
@@ -1322,7 +1322,7 @@ function createInsetMap(containerId, center, zoom, geoData, abbr) {
       id: 'state-fill',
       type: 'fill',
       source: 'state',
-      paint: { 'fill-color': color, 'fill-opacity': 0.5 }
+      paint: { 'fill-color': color, 'fill-opacity': 0.7 }
     });
     m.addLayer({
       id: 'state-border',
