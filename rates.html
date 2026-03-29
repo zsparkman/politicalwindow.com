@@ -49,7 +49,7 @@ input[type=date]{width:116px;color-scheme:dark}
 .tab.active{border-color:#f59e0b;background:rgba(245,158,11,0.12);color:#f59e0b}
 #main{padding:16px 24px;display:flex;flex-direction:column;gap:14px}
 #chart-wrap{background:#0d1829;border:1px solid #1e3050;border-radius:4px;padding:14px;height:320px;position:relative}
-#pivot-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+#pivot-controls,#trend-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .ctrl-wrap{display:flex;flex-direction:column;gap:3px}
 .ctrl-lbl{font-size:0.62rem;color:#94a3b8;letter-spacing:0.1em}
 #pivot-wrap,#trend-table-wrap,#lines-wrap,#matchups-wrap{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
@@ -338,6 +338,45 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   </div>
 
 
+  <div id="trend-controls" style="display:none">
+    <div class="ctrl-wrap">
+      <div class="ctrl-lbl">GROUP BY</div>
+      <select id="t-groupby">
+        <option value="candidate">Candidate</option>
+        <option value="station">Station</option>
+        <option value="dma">DMA</option>
+        <option value="party">Party</option>
+        <option value="office">Office</option>
+        <option value="agency">Agency</option>
+        <option value="buyer">Buyer</option>
+      </select>
+    </div>
+    <div class="ctrl-wrap">
+      <div class="ctrl-lbl">METRIC</div>
+      <select id="t-metric">
+        <option value="spend">Spend</option>
+        <option value="units">Units</option>
+      </select>
+    </div>
+    <div class="ctrl-wrap">
+      <div class="ctrl-lbl">TOP N</div>
+      <select id="t-topn">
+        <option value="5">5</option>
+        <option value="8" selected>8</option>
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+      </select>
+    </div>
+    <div class="ctrl-wrap">
+      <div class="ctrl-lbl">CHART TYPE</div>
+      <select id="t-charttype">
+        <option value="line">Line</option>
+        <option value="bar">Stacked Bar</option>
+      </select>
+    </div>
+  </div>
+
   <div id="trend-table-wrap" style="display:none">
     <div class="tbl-hdr">
       <span>WEEKLY SPEND MATRIX</span>
@@ -622,75 +661,98 @@ function renderPivotChart(groups){
 }
 
 function renderTrend(rows){
+  var groupBy=document.getElementById('t-groupby').value||'candidate';
+  var metric=document.getElementById('t-metric').value||'spend';
+  var topN=parseInt(document.getElementById('t-topn').value)||8;
+  var chartType=document.getElementById('t-charttype').value||'line';
+  var isSpend=(metric==='spend');
+  var valFn=isSpend?function(r){return parseFloat(r.line_total)||0;}:function(r){return parseInt(r.units)||0;};
+  var fmtVal=isSpend?fmt$:fmtN;
+  var fmtTick=isSpend?function(v){return'$'+(v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v);}:function(v){return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v;};
   var weeks=Array.from(new Set(rows.map(function(r){return r.week_of;}).filter(Boolean))).sort();
-  var advMap={};
+  var totMap={};
   rows.forEach(function(r){
-    if(!r.candidate)return;
-    advMap[r.candidate]=(advMap[r.candidate]||0)+(parseFloat(r.line_total)||0);
+    var k=r[groupBy]||'Unknown';
+    totMap[k]=(totMap[k]||0)+valFn(r);
   });
-  var top8=Object.keys(advMap).sort(function(a,b){return advMap[b]-advMap[a];}).slice(0,8);
+  var topKeys=Object.keys(totMap).sort(function(a,b){return totMap[b]-totMap[a];}).slice(0,topN);
   var advParty={};
-  rows.forEach(function(r){if(r.candidate&&r.party)advParty[r.candidate]=r.party;});
+  rows.forEach(function(r){if(r[groupBy]&&r.party)advParty[r[groupBy]]=r.party;});
   var matrix={};
   rows.forEach(function(r){
-    if(!r.week_of||!r.candidate)return;
-    var nk=r.candidate;
-    if(top8.indexOf(nk)<0)return;
+    if(!r.week_of)return;
+    var nk=r[groupBy]||'Unknown';
+    if(topKeys.indexOf(nk)<0)return;
     if(!matrix[r.week_of])matrix[r.week_of]={};
-    matrix[r.week_of][nk]=(matrix[r.week_of][nk]||0)+(parseFloat(r.line_total)||0);
+    matrix[r.week_of][nk]=(matrix[r.week_of][nk]||0)+valFn(r);
   });
-  var OTHER_CLR=['#f59e0b','#94a3b8','#10b981','#8b5cf6','#ec4899','#06b6d4'];
+  var PARTY_CLR={R:'#ef4444',D:'#3b82f6'};
+  var OTHER_CLR=['#f59e0b','#94a3b8','#10b981','#8b5cf6','#ec4899','#06b6d4','#f97316','#14b8a6','#a855f7','#fb7185','#22d3ee','#84cc16','#fbbf24','#6366f1','#d946ef','#0ea5e9','#e11d48','#65a30d','#c084fc','#facc15'];
   var oi=0;
-  var advColors={};
-  top8.forEach(function(adv){
-    var p=advParty[adv];
-    if(p==='R')advColors[adv]='#ef4444';
-    else if(p==='D')advColors[adv]='#3b82f6';
-    else advColors[adv]=OTHER_CLR[oi++%OTHER_CLR.length];
+  var keyColors={};
+  topKeys.forEach(function(k){
+    var p=advParty[k];
+    if(groupBy==='party'){
+      keyColors[k]=PARTY_CLR[k]||OTHER_CLR[oi++%OTHER_CLR.length];
+    }else if(p&&PARTY_CLR[p]){
+      keyColors[k]=PARTY_CLR[p];
+    }else{
+      keyColors[k]=OTHER_CLR[oi++%OTHER_CLR.length];
+    }
   });
-  var datasets=top8.map(function(adv){
-    var color=advColors[adv];
-    return{
-      label:adv.length>22?adv.slice(0,20)+'…':adv,
-      data:weeks.map(function(w){return(matrix[w]&&matrix[w][adv])||0;}),
-      borderColor:color,backgroundColor:hexToRgba(color,0.08),
-      fill:true,tension:0.3,pointRadius:3,borderWidth:2
+  var isBar=(chartType==='bar');
+  var datasets=topKeys.map(function(k){
+    var color=keyColors[k];
+    var base={
+      label:k.length>22?k.slice(0,20)+'…':k,
+      data:weeks.map(function(w){return(matrix[w]&&matrix[w][k])||0;}),
+      borderColor:color
     };
+    if(isBar){
+      base.backgroundColor=hexToRgba(color,0.7);
+      base.borderWidth=1;
+    }else{
+      base.backgroundColor=hexToRgba(color,0.08);
+      base.fill=true;base.tension=0.3;base.pointRadius=3;base.borderWidth=2;
+    }
+    return base;
   });
   destroyChart();
   var ctx=document.getElementById('chart-canvas').getContext('2d');
   chartInstance=new Chart(ctx,{
-    type:'line',
+    type:isBar?'bar':'line',
     data:{labels:weeks.map(fmtWeek),datasets:datasets},
     options:{
       responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
+      scales:{
+        x:{stacked:isBar,ticks:{color:'#94a3b8',font:{family:'IBM Plex Mono',size:9},maxRotation:45},grid:{color:'#1e3050'}},
+        y:{stacked:isBar,ticks:{color:'#94a3b8',font:{family:'IBM Plex Mono',size:9},callback:fmtTick},grid:{color:'#1e3050'}}
+      },
       plugins:{
         legend:{labels:{color:'#94a3b8',font:{family:'IBM Plex Mono',size:9},boxWidth:12}},
-        tooltip:{callbacks:{label:function(c){return' '+c.dataset.label+': $'+c.raw.toLocaleString(undefined,{maximumFractionDigits:0});}}}
-      },
-      scales:{
-        x:{ticks:{color:'#94a3b8',font:{family:'IBM Plex Mono',size:9},maxRotation:45},grid:{color:'#1e3050'}},
-        y:{ticks:{color:'#94a3b8',font:{family:'IBM Plex Mono',size:9},callback:function(v){return'$'+(v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v);}},grid:{color:'#1e3050'}}
+        tooltip:{callbacks:{label:function(c){return' '+c.dataset.label+': '+(isSpend?'$'+c.raw.toLocaleString(undefined,{maximumFractionDigits:0}):c.raw.toLocaleString());}}}
       }
     }
   });
-  var headerCols=top8.map(function(adv){return'<th style="color:'+advColors[adv]+'">'+esc(adv.length>14?adv.slice(0,12)+'…':adv)+'</th>';}).join('');
-  var colTotals=top8.map(function(adv){return weeks.reduce(function(s,w){return s+((matrix[w]&&matrix[w][adv])||0);},0);});
+  var groupLabel=groupBy.charAt(0).toUpperCase()+groupBy.slice(1);
+  var metricLabel=isSpend?'SPEND':'UNITS';
+  var headerCols=topKeys.map(function(k){return'<th style="color:'+keyColors[k]+'">'+esc(k.length>14?k.slice(0,12)+'…':k)+'</th>';}).join('');
+  var colTotals=topKeys.map(function(k){return weeks.reduce(function(s,w){return s+((matrix[w]&&matrix[w][k])||0);},0);});
   var totalRow='<tr style="border-top:1px solid #1e3050"><td style="color:#f59e0b;font-weight:700">TOTAL</td>'+
-    colTotals.map(function(t){return'<td class="c-green" style="text-align:right">'+fmt$(t)+'</td>';}).join('')+
-    '<td class="c-green" style="text-align:right">'+fmt$(colTotals.reduce(function(s,t){return s+t;},0))+'</td>'+
+    colTotals.map(function(t){return'<td class="c-green" style="text-align:right">'+fmtVal(t)+'</td>';}).join('')+
+    '<td class="c-green" style="text-align:right">'+fmtVal(colTotals.reduce(function(s,t){return s+t;},0))+'</td>'+
   '</tr>';
   var bodyRows=weeks.map(function(w){
-    var wkTotal=top8.reduce(function(s,adv){return s+((matrix[w]&&matrix[w][adv])||0);},0);
+    var wkTotal=topKeys.reduce(function(s,k){return s+((matrix[w]&&matrix[w][k])||0);},0);
     return'<tr><td class="c-amber">'+fmtWeek(w)+'</td>'+
-      top8.map(function(adv){var v=(matrix[w]&&matrix[w][adv])||0;return'<td style="text-align:right">'+(v?fmt$(v):'—')+'</td>';}).join('')+
-      '<td class="c-bright" style="text-align:right">'+fmt$(wkTotal)+'</td>'+
+      topKeys.map(function(k){var v=(matrix[w]&&matrix[w][k])||0;return'<td style="text-align:right">'+(v?fmtVal(v):'—')+'</td>';}).join('')+
+      '<td class="c-bright" style="text-align:right">'+fmtVal(wkTotal)+'</td>'+
     '</tr>';
   }).join('');
   document.getElementById('trend-body').innerHTML=
     '<table><thead><tr><th>WEEK OF</th>'+headerCols+'<th>WEEK TOTAL</th></tr></thead><tbody>'+bodyRows+totalRow+'</tbody></table>';
-  document.getElementById('trend-count').textContent=weeks.length+' WEEKS · TOP 8 CANDIDATES';
+  document.getElementById('trend-count').textContent=weeks.length+' WEEKS · TOP '+topN+' BY '+groupLabel.toUpperCase()+' ('+metricLabel+')';
 }
 
 var LINE_COLS=[
@@ -1118,6 +1180,7 @@ function render(){
   var isVariance=(currentView==='variance');
   document.getElementById('chart-wrap').style.display=(isLines||isVariance)?'none':'block';
   document.getElementById('pivot-controls').style.display=isPivot?'flex':'none';
+  document.getElementById('trend-controls').style.display=isTrend?'flex':'none';
   document.getElementById('pivot-wrap').style.display=isPivot?'block':'none';
   document.getElementById('trend-table-wrap').style.display=isTrend?'block':'none';
   document.getElementById('lines-wrap').style.display=isLines?'block':'none';
@@ -1286,6 +1349,9 @@ document.querySelectorAll('.tab').forEach(function(btn){
 });
 document.getElementById('c-groupby').addEventListener('change',function(){pivotGroupBy=this.value;pinSet.clear();activePin.clear();renderPinBar();render();});
 document.getElementById('c-sortby').addEventListener('change',function(){pivotSortBy=this.value;render();});
+['t-groupby','t-metric','t-topn','t-charttype'].forEach(function(id){
+  document.getElementById(id).addEventListener('change',function(){render();});
+});
 ['f-party','f-state','f-office','f-dma','f-station','f-daypart','f-window'].forEach(function(id){
   document.getElementById(id).addEventListener('change',render);
 });
