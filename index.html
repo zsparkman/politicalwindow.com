@@ -14,6 +14,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PoliticalWindow.com — 2026 FCC Ad Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <style>
   html { font-size: 18px; }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -96,8 +98,30 @@
   .card-title { font-family:var(--display); font-size:1.1rem; letter-spacing:0.05em; color:#fff; }
   .card-sub { font-family:var(--mono); font-size:0.6rem; color:var(--text-muted); line-height:1.6; }
 
+  /* ── MAPLIBRE MAP ── */
+  #mapContainer { width:100%; height:420px; border-radius:4px; overflow:hidden; position:relative; }
+  #mapContainer .maplibregl-canvas { outline:none; }
+  .maplibregl-ctrl-attrib { font-size:0.5rem !important; opacity:0.4; }
+  .maplibregl-ctrl-group { background:var(--navy-card) !important; border:1px solid var(--navy-border) !important; }
+  .maplibregl-ctrl-group button { background-color:transparent !important; }
+  .maplibregl-ctrl-group button span { background-color:var(--text-muted) !important; }
+  .map-tooltip {
+    position:absolute; pointer-events:none; background:var(--navy-mid); border:1px solid var(--navy-border);
+    border-radius:4px; padding:8px 12px; font-family:var(--mono); font-size:0.62rem; color:var(--text);
+    z-index:50; box-shadow:0 4px 12px rgba(0,0,0,0.5); max-width:220px; line-height:1.6;
+  }
+  .map-breadcrumb {
+    font-family:var(--mono); font-size:0.6rem; color:var(--text-muted);
+    display:flex; align-items:center; gap:0.3rem; margin-bottom:0.5rem;
+  }
+  .map-breadcrumb button {
+    background:none; border:none; color:var(--blue-light); cursor:pointer;
+    font-family:var(--mono); font-size:0.6rem; padding:0;
+  }
+  .map-breadcrumb button:hover { text-decoration:underline; }
+
   /* Map scroll wrapper — enables horizontal scroll on mobile */
-  .map-scroll { overflow:visible; padding:6px; width:100%; }
+  .map-scroll { overflow:visible; padding:6px; width:100%; position:relative; }
   .tile-grid {
     display:grid;
     grid-template-columns:repeat(12,1fr);
@@ -381,6 +405,7 @@
     .card-header { flex-direction:column; gap:0.3rem; }
     .card-sub { font-size:0.58rem; }
     .map-scroll { overflow:visible; width:100%; }
+    #mapContainer { height:300px !important; }
     .tile-grid {
       grid-template-rows:repeat(8,34px);
       gap:2px;
@@ -471,7 +496,12 @@
         <div class="card-header">
           <div>
             <div class="card-title">2026 Election Activity Map</div>
-            <div class="card-sub">Tap any state · FCC window + declared candidates</div>
+            <div class="map-breadcrumb" id="mapBreadcrumb" style="display:none">
+              <button onclick="mapBackToUSA()">USA</button>
+              <span>›</span>
+              <span id="breadcrumbState"></span>
+            </div>
+            <div class="card-sub" id="mapSubtitle">Tap any state · FCC window + declared candidates</div>
           </div>
           <div class="card-sub" style="text-align:right;flex-shrink:0">
             General: <span style="color:var(--green)">Nov 3, 2026</span><br>
@@ -479,6 +509,8 @@
           </div>
         </div>
         <div class="map-scroll">
+          <div id="mapContainer" style="display:none"></div>
+          <div class="map-tooltip" id="mapTooltip" style="display:none"></div>
           <div class="tile-grid" id="tileGrid"></div>
         </div>
       </div>
@@ -761,6 +793,475 @@ function buildMap() {
   });
 }
 
+// ── MAPLIBRE GL JS ────────────────────────────────────────────────────────────
+const FIPS = {
+  '01':'AL','02':'AK','04':'AZ','05':'AR','06':'CA','08':'CO','09':'CT','10':'DE',
+  '11':'DC','12':'FL','13':'GA','15':'HI','16':'ID','17':'IL','18':'IN','19':'IA',
+  '20':'KS','21':'KY','22':'LA','23':'ME','24':'MD','25':'MA','26':'MI','27':'MN',
+  '28':'MS','29':'MO','30':'MT','31':'NE','32':'NV','33':'NH','34':'NJ','35':'NM',
+  '36':'NY','37':'NC','38':'ND','39':'OH','40':'OK','41':'OR','42':'PA','44':'RI',
+  '45':'SC','46':'SD','47':'TN','48':'TX','49':'UT','50':'VT','51':'VA','53':'WA',
+  '54':'WV','55':'WI','56':'WY'
+};
+
+const STATUS_COLORS = {
+  'window-open':  '#ef4444',
+  'window-soon':  '#f59e0b',
+  'upcoming':     '#3b82f6',
+  'general-only': '#22c55e',
+  'inactive':     '#64748b'
+};
+
+const DISTRICT_COUNTS = {
+  AL:7,AK:1,AZ:9,AR:4,CA:52,CO:8,CT:5,DE:1,FL:28,GA:14,HI:2,ID:2,IL:17,IN:9,
+  IA:4,KS:4,KY:6,LA:6,ME:2,MD:8,MA:9,MI:13,MN:8,MS:4,MO:8,MT:2,NE:3,NV:4,
+  NH:2,NJ:12,NM:3,NY:26,NC:14,ND:1,OH:15,OK:5,OR:6,PA:17,RI:2,SC:7,SD:1,
+  TN:9,TX:38,UT:4,VT:1,VA:11,WA:10,WV:2,WI:8,WY:1
+};
+
+// Manual centroid overrides for labels that would otherwise be misplaced
+const LABEL_OVERRIDES = {
+  AK:[-153,64],HI:[-155.5,20],MI:[-84.5,44.3],FL:[-81.5,28.1],
+  LA:[-91.8,31],CA:[-119.4,37.2],ID:[-114.7,45],MD:[-76.6,39.0],
+  MA:[-71.3,42.2],RI:[-71.5,41.7],CT:[-72.7,41.6],NJ:[-74.4,40.1],
+  DE:[-75.5,39.0],DC:[-77.0,38.9],VT:[-72.6,44.0],NH:[-71.5,43.6]
+};
+
+let glMap = null;
+let statesGeoJSON = null;
+let hoveredStateId = null;
+const DISTRICT_CACHE = {};
+
+async function initMap() {
+  if (typeof maplibregl === 'undefined') return false;
+
+  try {
+    const resp = await fetch('https://eric.clst.org/assets/wiki/uploads/Stuff/gz_2010_us_040_00_20m.json');
+    if (!resp.ok) return false;
+    statesGeoJSON = await resp.json();
+
+    // Inject abbr + status onto each feature
+    statesGeoJSON.features = statesGeoJSON.features.filter(f => {
+      const fips = String(f.properties.STATE).padStart(2, '0');
+      const abbr = FIPS[fips];
+      if (!abbr || !SM[abbr]) return false;
+      f.properties.abbr = abbr;
+      f.properties.status = SM[abbr].status;
+      f.id = parseInt(f.properties.STATE, 10);
+      return true;
+    });
+
+    // Show map, hide tile grid
+    document.getElementById('mapContainer').style.display = 'block';
+    document.getElementById('tileGrid').style.display = 'none';
+
+    glMap = new maplibregl.Map({
+      container: 'mapContainer',
+      style: 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
+      center: [-98.5, 39.8],
+      zoom: 3.5,
+      minZoom: 2,
+      maxZoom: 12,
+      maxBounds: [[-180, 10], [-50, 75]],
+      dragRotate: false,
+      touchZoomRotate: true,
+      pitchWithRotate: false,
+      attributionControl: false
+    });
+
+    glMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    glMap.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+
+    // Disable rotation via touch
+    glMap.touchZoomRotate.disableRotation();
+
+    glMap.on('load', () => {
+      addStatesLayer();
+      addStateLabels();
+      wireMapInteractions();
+    });
+
+    glMap.on('error', () => {
+      // Fallback to tile grid
+      document.getElementById('mapContainer').style.display = 'none';
+      document.getElementById('tileGrid').style.display = '';
+    });
+
+    return true;
+  } catch (e) {
+    console.error('Map init failed:', e);
+    document.getElementById('mapContainer').style.display = 'none';
+    document.getElementById('tileGrid').style.display = '';
+    return false;
+  }
+}
+
+function addStatesLayer() {
+  glMap.addSource('states', { type: 'geojson', data: statesGeoJSON });
+
+  // Fill layer
+  glMap.addLayer({
+    id: 'states-fill',
+    type: 'fill',
+    source: 'states',
+    paint: {
+      'fill-color': ['match', ['get', 'status'],
+        'window-open',  STATUS_COLORS['window-open'],
+        'window-soon',  STATUS_COLORS['window-soon'],
+        'upcoming',     STATUS_COLORS['upcoming'],
+        'general-only', STATUS_COLORS['general-only'],
+        STATUS_COLORS['inactive']
+      ],
+      'fill-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'dimmed'], false], 0.08,
+        ['boolean', ['feature-state', 'selected'], false], 0.7,
+        ['boolean', ['feature-state', 'hover'], false], 0.55,
+        0.35
+      ]
+    }
+  });
+
+  // Border layer
+  glMap.addLayer({
+    id: 'states-border',
+    type: 'line',
+    source: 'states',
+    paint: {
+      'line-color': ['match', ['get', 'status'],
+        'window-open',  STATUS_COLORS['window-open'],
+        'window-soon',  STATUS_COLORS['window-soon'],
+        'upcoming',     STATUS_COLORS['upcoming'],
+        'general-only', STATUS_COLORS['general-only'],
+        STATUS_COLORS['inactive']
+      ],
+      'line-width': [
+        'case',
+        ['boolean', ['feature-state', 'selected'], false], 2.5,
+        ['boolean', ['feature-state', 'hover'], false], 1.5,
+        0.5
+      ],
+      'line-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'dimmed'], false], 0.15,
+        0.8
+      ]
+    }
+  });
+}
+
+function addStateLabels() {
+  const labelFeatures = statesGeoJSON.features.map(f => {
+    const abbr = f.properties.abbr;
+    let coords;
+    if (LABEL_OVERRIDES[abbr]) {
+      coords = LABEL_OVERRIDES[abbr];
+    } else {
+      // Use bbox midpoint
+      const bbox = f.geometry.type === 'MultiPolygon'
+        ? f.geometry.coordinates.flat(2)
+        : f.geometry.coordinates.flat(1);
+      const lngs = bbox.map(c => c[0]);
+      const lats = bbox.map(c => c[1]);
+      coords = [(Math.min(...lngs) + Math.max(...lngs)) / 2, (Math.min(...lats) + Math.max(...lats)) / 2];
+    }
+    return { type: 'Feature', geometry: { type: 'Point', coordinates: coords }, properties: { abbr } };
+  });
+
+  glMap.addSource('state-labels', {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: labelFeatures }
+  });
+
+  glMap.addLayer({
+    id: 'state-labels',
+    type: 'symbol',
+    source: 'state-labels',
+    layout: {
+      'text-field': ['get', 'abbr'],
+      'text-size': 10,
+      'text-font': ['Open Sans Bold'],
+      'text-allow-overlap': false,
+      'text-ignore-placement': false
+    },
+    paint: {
+      'text-color': '#c8d6e5',
+      'text-halo-color': 'rgba(10,15,30,0.8)',
+      'text-halo-width': 1.5
+    }
+  });
+}
+
+function wireMapInteractions() {
+  const tooltip = document.getElementById('mapTooltip');
+  const canvas = glMap.getCanvas();
+
+  glMap.on('mousemove', 'states-fill', (e) => {
+    if (!e.features.length) return;
+    canvas.style.cursor = 'pointer';
+
+    const f = e.features[0];
+    const abbr = f.properties.abbr;
+    const s = SM[abbr];
+
+    // Update hover state
+    if (hoveredStateId !== null && hoveredStateId !== f.id) {
+      glMap.setFeatureState({ source: 'states', id: hoveredStateId }, { hover: false });
+    }
+    hoveredStateId = f.id;
+    glMap.setFeatureState({ source: 'states', id: hoveredStateId }, { hover: true });
+
+    // Position tooltip
+    const statusLabel = {
+      'window-open': '🔴 Window Open',
+      'window-soon': '🟡 Opens Soon',
+      'upcoming': '🔵 Upcoming',
+      'general-only': '🟢 General Only',
+      'inactive': '⚫ None'
+    }[s.status] || '';
+
+    const races = s.races ? s.races.join(' · ') : '';
+    const primary = s.pDate ? fmtS(s.pDate) : '—';
+    const fccOpen = s.pWindow ? fmtS(s.pWindow) : '—';
+    const daysStr = s.dWin !== null && s.dWin > 0 ? `${s.dWin}d to window` : '';
+
+    tooltip.innerHTML = `<strong>${s.name}</strong><br>${statusLabel}<br>Primary: ${primary}<br>FCC Opens: ${fccOpen}${daysStr ? '<br>' + daysStr : ''}<br>${races}`;
+    tooltip.style.display = 'block';
+
+    const rect = document.getElementById('mapContainer').getBoundingClientRect();
+    const x = e.point.x;
+    const y = e.point.y;
+    // Keep tooltip within map bounds
+    const tRight = x + 16 + 220 > rect.width;
+    tooltip.style.left = tRight ? (x - 230) + 'px' : (x + 16) + 'px';
+    tooltip.style.top = (y - 10) + 'px';
+  });
+
+  glMap.on('mouseleave', 'states-fill', () => {
+    canvas.style.cursor = '';
+    if (hoveredStateId !== null) {
+      glMap.setFeatureState({ source: 'states', id: hoveredStateId }, { hover: false });
+      hoveredStateId = null;
+    }
+    tooltip.style.display = 'none';
+  });
+
+  glMap.on('click', 'states-fill', (e) => {
+    if (!e.features.length) return;
+    pick(e.features[0].properties.abbr);
+  });
+}
+
+// ── MAP: State zoom + district loading ────────────────────────────────────────
+function mapSelectState(abbr) {
+  if (!glMap || !statesGeoJSON) return;
+
+  // Clear previous selection
+  statesGeoJSON.features.forEach(f => {
+    glMap.setFeatureState({ source: 'states', id: f.id }, { selected: false, dimmed: false });
+  });
+
+  // Find the feature for this state
+  const feature = statesGeoJSON.features.find(f => f.properties.abbr === abbr);
+  if (!feature) return;
+
+  // Set selected + dim others
+  glMap.setFeatureState({ source: 'states', id: feature.id }, { selected: true });
+  statesGeoJSON.features.forEach(f => {
+    if (f.properties.abbr !== abbr) {
+      glMap.setFeatureState({ source: 'states', id: f.id }, { dimmed: true });
+    }
+  });
+
+  // Fly to state bounds
+  const coords = feature.geometry.type === 'MultiPolygon'
+    ? feature.geometry.coordinates.flat(2)
+    : feature.geometry.coordinates.flat(1);
+  const lngs = coords.map(c => c[0]);
+  const lats = coords.map(c => c[1]);
+  const bounds = [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]];
+  glMap.fitBounds(bounds, { padding: 60, duration: 800 });
+
+  // Show breadcrumb
+  const bc = document.getElementById('mapBreadcrumb');
+  const sub = document.getElementById('mapSubtitle');
+  document.getElementById('breadcrumbState').textContent = SM[abbr].name;
+  bc.style.display = 'flex';
+  sub.style.display = 'none';
+
+  // Load districts
+  loadDistricts(abbr).then(() => showDistricts(abbr));
+}
+
+function mapDeselectState() {
+  if (!glMap || !statesGeoJSON) return;
+
+  // Clear all feature states
+  statesGeoJSON.features.forEach(f => {
+    glMap.setFeatureState({ source: 'states', id: f.id }, { selected: false, dimmed: false });
+  });
+
+  // Fly back to national view
+  glMap.flyTo({ center: [-98.5, 39.8], zoom: 3.5, duration: 800 });
+
+  // Hide breadcrumb
+  document.getElementById('mapBreadcrumb').style.display = 'none';
+  document.getElementById('mapSubtitle').style.display = '';
+
+  // Remove districts
+  hideDistricts();
+
+  // Re-apply filter
+  updateMapFilter();
+}
+
+function mapBackToUSA() {
+  if (sel) {
+    pick(sel); // Toggle off
+  } else {
+    mapDeselectState();
+  }
+}
+
+async function loadDistricts(abbr) {
+  if (DISTRICT_CACHE[abbr]) return DISTRICT_CACHE[abbr];
+
+  const count = DISTRICT_COUNTS[abbr];
+  if (!count) return null;
+
+  const abbrLower = abbr.toLowerCase();
+  const features = [];
+
+  try {
+    const fetches = [];
+    for (let i = 1; i <= count; i++) {
+      const url = `https://theunitedstates.io/districts/cds/2012/${abbrLower}-${i}/shape.geojson`;
+      fetches.push(
+        fetch(url).then(r => r.ok ? r.json() : null).catch(() => null)
+      );
+    }
+    const results = await Promise.all(fetches);
+    results.forEach((geo, i) => {
+      if (geo) {
+        const f = geo.type === 'FeatureCollection' ? geo.features[0] : geo;
+        if (f) {
+          f.properties = f.properties || {};
+          f.properties.district_code = `${abbr}-${i + 1}`;
+          f.properties.district_number = i + 1;
+          f.properties.state_abbr = abbr;
+          f.id = i + 1;
+          features.push(f);
+        }
+      }
+    });
+  } catch (e) {
+    console.error('District load failed:', abbr, e);
+  }
+
+  const fc = { type: 'FeatureCollection', features };
+  DISTRICT_CACHE[abbr] = fc;
+  return fc;
+}
+
+function showDistricts(abbr) {
+  hideDistricts();
+  const data = DISTRICT_CACHE[abbr];
+  if (!data || !data.features.length) return;
+
+  glMap.addSource('districts', { type: 'geojson', data });
+
+  glMap.addLayer({
+    id: 'districts-fill',
+    type: 'fill',
+    source: 'districts',
+    paint: {
+      'fill-color': 'transparent',
+      'fill-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false], 0.15,
+        0
+      ]
+    }
+  });
+
+  glMap.addLayer({
+    id: 'districts-line',
+    type: 'line',
+    source: 'districts',
+    paint: {
+      'line-color': 'rgba(200,214,229,0.5)',
+      'line-width': 1,
+      'line-dasharray': [3, 2]
+    }
+  });
+
+  glMap.addLayer({
+    id: 'districts-label',
+    type: 'symbol',
+    source: 'districts',
+    layout: {
+      'text-field': ['get', 'district_number'],
+      'text-size': 11,
+      'text-font': ['Open Sans Bold'],
+      'text-allow-overlap': false
+    },
+    paint: {
+      'text-color': 'rgba(200,214,229,0.6)',
+      'text-halo-color': 'rgba(10,15,30,0.7)',
+      'text-halo-width': 1
+    }
+  });
+
+  // District hover
+  let hoveredDistrictId = null;
+  const tooltip = document.getElementById('mapTooltip');
+
+  glMap.on('mousemove', 'districts-fill', (e) => {
+    if (!e.features.length) return;
+    glMap.getCanvas().style.cursor = 'pointer';
+    const f = e.features[0];
+
+    if (hoveredDistrictId !== null && hoveredDistrictId !== f.id) {
+      glMap.setFeatureState({ source: 'districts', id: hoveredDistrictId }, { hover: false });
+    }
+    hoveredDistrictId = f.id;
+    glMap.setFeatureState({ source: 'districts', id: hoveredDistrictId }, { hover: true });
+
+    const dc = f.properties.district_code;
+    const dn = f.properties.district_number;
+    const cands = CANDS[abbr] || [];
+    const houseRace = cands.find(r => r.race === 'House');
+    const houseCands = houseRace ? houseRace.list : [];
+    // Simple candidate summary for tooltip
+    const candStr = houseCands.slice(0, 3).map(c => `${c.n} (${c.p})`).join(', ');
+
+    tooltip.innerHTML = `<strong>${dc}</strong> — District ${dn}${candStr ? '<br>' + candStr : ''}`;
+    tooltip.style.display = 'block';
+
+    const rect = document.getElementById('mapContainer').getBoundingClientRect();
+    const tRight = e.point.x + 16 + 220 > rect.width;
+    tooltip.style.left = tRight ? (e.point.x - 230) + 'px' : (e.point.x + 16) + 'px';
+    tooltip.style.top = (e.point.y - 10) + 'px';
+  });
+
+  glMap.on('mouseleave', 'districts-fill', () => {
+    glMap.getCanvas().style.cursor = '';
+    if (hoveredDistrictId !== null) {
+      glMap.setFeatureState({ source: 'districts', id: hoveredDistrictId }, { hover: false });
+      hoveredDistrictId = null;
+    }
+    tooltip.style.display = 'none';
+  });
+}
+
+function hideDistricts() {
+  if (!glMap) return;
+  ['districts-label', 'districts-line', 'districts-fill'].forEach(id => {
+    if (glMap.getLayer(id)) glMap.removeLayer(id);
+  });
+  if (glMap.getSource('districts')) glMap.removeSource('districts');
+}
+
 // ── SHARED DETAIL HTML BUILDER ─────────────────────────────────────────────────
 const PC = { D:'var(--dem)', R:'var(--rep)', I:'var(--ind)' };
 const SL = {
@@ -909,6 +1410,7 @@ function pick(abbr) {
     stateFilter = null;
     emptyDetail();
     drawTable();
+    mapDeselectState();
     return;
   }
 
@@ -917,6 +1419,9 @@ function pick(abbr) {
 
   const tile = document.querySelector(`[data-abbr="${abbr}"]`);
   if (tile) tile.classList.add('selected');
+
+  // Map integration — zoom to state + show districts
+  mapSelectState(abbr);
 
   if (isMobile()) {
     openDrawer(abbr);
@@ -1102,6 +1607,7 @@ document.querySelectorAll('[data-race]').forEach(btn => btn.addEventListener('cl
 }));
 
 function updateMapFilter() {
+  // Tile grid filter (fallback)
   document.querySelectorAll('.tile[data-abbr]').forEach(tile => {
     const abbr = tile.dataset.abbr;
     const s = SM[abbr];
@@ -1118,6 +1624,18 @@ function updateMapFilter() {
       tile.classList.remove('tile-dimmed');
     }
   });
+
+  // MapLibre filter
+  if (glMap && statesGeoJSON) {
+    statesGeoJSON.features.forEach(f => {
+      const abbr = f.properties.abbr;
+      const s = SM[abbr];
+      let matches = true;
+      if (rf === 'Ballot') matches = stateHasBallot(abbr);
+      else if (rf !== 'all') matches = !!(s && s.races.includes(rf));
+      glMap.setFeatureState({ source: 'states', id: f.id }, { dimmed: !matches });
+    });
+  }
 }
 
 function clearStateFilter() {
@@ -1199,6 +1717,17 @@ async function loadLiveData() {
     drawTable();
     if (isMobile()) drawMobileList();
 
+    // Refresh MapLibre states if active
+    if (glMap && statesGeoJSON) {
+      statesGeoJSON.features.forEach(f => {
+        const abbr = f.properties.abbr;
+        const s = SM[abbr];
+        if (s) f.properties.status = s.status;
+      });
+      const src = glMap.getSource('states');
+      if (src) src.setData(statesGeoJSON);
+    }
+
     // Update badge to show live status
     const updatedAt = new Date(statesJson.generatedAt);
     const timeStr = updatedAt.toLocaleDateString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
@@ -1265,6 +1794,7 @@ function stateHasBallot(abbr) { return !!(BALLOT[abbr] && BALLOT[abbr].length > 
 
 // ── INIT ───────────────────────────────────────────────────────────────────────
 buildMap(); buildHead(); drawTable();
+initMap().catch(() => {});
 document.getElementById('live-date').textContent =
   new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
 

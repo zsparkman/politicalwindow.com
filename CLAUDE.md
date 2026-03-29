@@ -13,6 +13,11 @@ entire frontend — a single-file static SPA hosted on GitHub Pages.
 - **No build step, no bundler, no npm** — do not introduce any
 - **Host:** GitHub Pages (auto-deploys on push to main)
 
+## External CDN Dependencies
+- **MapLibre GL JS 4.7.1** — geographic map rendering (loaded from unpkg CDN)
+- **CARTO Dark Matter basemap** — free dark basemap tiles (no API key needed)
+- Falls back to tile-grid cartogram if MapLibre CDN fails to load
+
 ## API Endpoints Consumed
 | API | Base URL | Purpose |
 |---|---|---|
@@ -44,7 +49,16 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 | `loadRatesForState(abbr)` | Async fetch + render Rate Intel section |
 | `pick(abbr)` | State tile click handler |
 | `drawTable()` | Renders sortable candidate/state table |
-| `buildMap()` | Renders the 12-column tile grid US map |
+| `buildMap()` | Renders the 12-column tile grid US map (fallback) |
+| `initMap()` | Async — loads MapLibre geographic map, replaces tile grid |
+| `addStatesLayer()` | Adds GeoJSON state fill + border layers to MapLibre map |
+| `addStateLabels()` | Adds state abbreviation labels as symbol layer |
+| `wireMapInteractions()` | Sets up hover tooltips and click handlers on map |
+| `mapSelectState(abbr)` | Zooms map to state, dims others, loads districts |
+| `mapDeselectState()` | Returns map to national view, removes districts |
+| `loadDistricts(abbr)` | Async — fetches congressional district GeoJSON per state |
+| `showDistricts(abbr)` | Renders district boundaries on map |
+| `hideDistricts()` | Removes district layers from map |
 
 ## Design System
 - **Aesthetic:** Bloomberg Terminal — dark navy, monospace data, amber accents
@@ -58,6 +72,9 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 - `CANDS` — candidates by state `{ TX: [{race, list:[{n,p,s,note}]}] }`
 - `BALLOT` — ballot measures by state (loaded from API via `loadLiveData()`)
 - `POLLS` — polls by state → race (loaded from API via `loadLiveData()`)
+- `glMap` — MapLibre GL JS map instance (null if CDN failed)
+- `statesGeoJSON` — US states GeoJSON with injected `abbr`/`status` properties
+- `DISTRICT_CACHE` — cached congressional district GeoJSON per state abbr
 
 ## Rules
 1. `index.html` stays a single self-contained file — no external JS or CSS files
@@ -66,8 +83,11 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 4. Both mobile drawer and desktop panel must render any new UI sections added
 5. Do not change API_BASE or RATES_API values
 
-## Current State (Feb 2026)
+## Current State (Mar 2026)
 - Rate Intel section live for TX and CA tiles
 - Ballot measures populated from API (empty until seeded)
 - FCC General Window: Sep 4–Nov 3, 2026
 - Data badge shows LIVE or CACHED SNAPSHOT depending on API availability
+- MapLibre geographic map replaces tile-grid cartogram (with tile-grid fallback)
+- State zoom + congressional district boundaries on state selection
+- Polling data displayed in detail panel tabs
