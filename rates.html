@@ -52,7 +52,11 @@ input[type=date]{width:116px;color-scheme:dark}
 #pivot-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .ctrl-wrap{display:flex;flex-direction:column;gap:3px}
 .ctrl-lbl{font-size:0.62rem;color:#94a3b8;letter-spacing:0.1em}
-#pivot-wrap,#trend-table-wrap,#lines-wrap{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
+#pivot-wrap,#trend-table-wrap,#lines-wrap,#matchups-wrap{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
+#matchups-wrap{margin-top:14px}
+.matchup-slot{background:#0a1525;border-bottom:2px solid #1e3050;padding:0}
+.matchup-slot td{border-bottom:1px solid #0f1f33}
+.matchup-slot-hdr{padding:8px 14px;font-size:0.62rem;color:#94a3b8;letter-spacing:0.06em;border-bottom:1px solid #1e3050;background:#060d18}
 .tbl-hdr{padding:8px 14px;border-bottom:1px solid #1e3050;font-size:0.62rem;color:#94a3b8;letter-spacing:0.08em;display:flex;justify-content:space-between;align-items:center}
 .pivot-col-hdr{display:grid;grid-template-columns:1.8fr 100px 80px 60px 80px 70px 60px 28px;gap:4px;padding:6px 14px;border-bottom:1px solid #1e3050;background:#0a1525}
 .pivot-col-hdr span{font-size:0.62rem;color:#94a3b8;letter-spacing:0.06em;text-align:right}
@@ -342,6 +346,16 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
     <table>
       <thead id="lines-thead"></thead>
       <tbody id="lines-body"></tbody>
+    </table>
+  </div>
+  <div id="matchups-wrap" style="display:none">
+    <div class="tbl-hdr">
+      <span>COMPETITIVE MATCHUPS</span>
+      <span id="matchups-count"></span>
+    </div>
+    <table>
+      <thead id="matchups-thead"></thead>
+      <tbody id="matchups-body"></tbody>
     </table>
   </div>
 </div>
@@ -1002,6 +1016,59 @@ function renderLines(rows){
 }
 
 
+function renderMatchups(rows){
+  var wrap=document.getElementById('matchups-wrap');
+  if(!rows.length){wrap.style.display='none';return;}
+  // Group by station + description + time_period + week_of
+  var slots={},slotOrder=[];
+  rows.forEach(function(r){
+    var k=(r.station||'')+'|||'+(r.description||'')+'|||'+(r.time_period||'')+'|||'+(r.week_of||'');
+    if(!slots[k]){slots[k]={station:r.station,description:r.description,time_period:r.time_period,week_of:r.week_of,rows:[]};slotOrder.push(k);}
+    slots[k].rows.push(r);
+  });
+  // Keep only slots with 2+ distinct candidates/advertisers
+  var matchups=slotOrder.map(function(k){return slots[k];}).filter(function(s){
+    var names=new Set();
+    s.rows.forEach(function(r){names.add(r.candidate||r.advertiser||'—');});
+    return names.size>=2;
+  });
+  if(!matchups.length){wrap.style.display='none';return;}
+  // Sort by week descending, then station
+  matchups.sort(function(a,b){
+    if(a.week_of>b.week_of)return -1;if(a.week_of<b.week_of)return 1;
+    if(a.station<b.station)return -1;if(a.station>b.station)return 1;
+    return 0;
+  });
+  wrap.style.display='block';
+  document.getElementById('matchups-count').textContent=matchups.length+' MATCHUPS';
+  document.getElementById('matchups-thead').innerHTML='<tr><th>CANDIDATE</th><th>PARTY</th><th>STATION</th><th>DESCRIPTION</th><th>TIME PERIOD</th><th>WEEK OF</th><th>RATE</th><th>UNITS</th><th>LINE TOTAL</th></tr>';
+  var html='';
+  var cap=Math.min(matchups.length,200);
+  for(var i=0;i<cap;i++){
+    var s=matchups[i];
+    html+='<tr><td colspan="9" class="matchup-slot-hdr">'
+      +esc(s.station||'—')+' · '+esc(s.description||'—')+' · '+esc(s.time_period||'—')+' · WK '+esc(fmtWeek(s.week_of))
+      +' <span style="color:#64748b">('+s.rows.length+' buyers)</span></td></tr>';
+    s.rows.sort(function(a,b){var ar=parseFloat(a.rate)||0,br=parseFloat(b.rate)||0;return br-ar;});
+    s.rows.forEach(function(r){
+      var cand=r.candidate||r.advertiser||'—';
+      html+='<tr>'
+        +'<td class="'+pc(r.party)+'">'+esc(cand)+'</td>'
+        +'<td class="'+pc(r.party)+'">'+esc(r.party||'—')+'</td>'
+        +'<td class="c-amber">'+esc(r.station||'—')+'</td>'
+        +'<td class="c-muted">'+esc(r.description||'—')+'</td>'
+        +'<td class="c-muted">'+esc(r.time_period||'—')+'</td>'
+        +'<td>'+fmtWeek(r.week_of)+'</td>'
+        +'<td class="c-bright">'+(r.rate?'$'+parseFloat(r.rate).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—')+'</td>'
+        +'<td>'+esc(r.units||'—')+'</td>'
+        +'<td class="c-green">'+(r.line_total?'$'+parseFloat(r.line_total).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—')+'</td>'
+        +'</tr>';
+    });
+  }
+  if(matchups.length>cap)html+='<tr><td colspan="9" class="c-muted" style="padding:6px 14px;font-size:0.58rem">'+( matchups.length-cap)+' more matchups — apply filters to narrow</td></tr>';
+  document.getElementById('matchups-body').innerHTML=html;
+}
+
 function render(){
   var rows=getFiltered();
   updateStats(rows);
@@ -1013,6 +1080,7 @@ function render(){
   document.getElementById('pivot-wrap').style.display=isPivot?'block':'none';
   document.getElementById('trend-table-wrap').style.display=isTrend?'block':'none';
   document.getElementById('lines-wrap').style.display=isLines?'block':'none';
+  document.getElementById('matchups-wrap').style.display='none';
   if(isPivot){
     var groups=buildPivot(rows);
     renderPivotChart(groups);
@@ -1022,6 +1090,7 @@ function render(){
   }else{
     destroyChart();
     renderLines(rows);
+    renderMatchups(rows);
   }
   updateOptionStates();
 }
