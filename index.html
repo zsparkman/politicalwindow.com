@@ -895,10 +895,12 @@ async function initMap() {
       createInsetMaps();
     });
 
-    glMap.on('error', () => {
-      // Fallback to tile grid
-      document.getElementById('mapContainer').style.display = 'none';
-      document.getElementById('tileGrid').style.display = '';
+    glMap.once('error', (e) => {
+      // Only fallback on load/style errors, not runtime layer errors
+      if (!glMap.loaded()) {
+        document.getElementById('mapContainer').style.display = 'none';
+        document.getElementById('tileGrid').style.display = '';
+      }
     });
 
     return true;
@@ -1216,20 +1218,6 @@ function showDistricts(abbr) {
   glMap.addSource('districts', { type: 'geojson', data });
 
   glMap.addLayer({
-    id: 'districts-fill',
-    type: 'fill',
-    source: 'districts',
-    paint: {
-      'fill-color': 'rgba(30,111,255,0.25)',
-      'fill-opacity': [
-        'case',
-        ['boolean', ['feature-state', 'hover'], false], 1,
-        0
-      ]
-    }
-  });
-
-  glMap.addLayer({
     id: 'districts-line',
     type: 'line',
     source: 'districts',
@@ -1256,70 +1244,12 @@ function showDistricts(abbr) {
       'text-halo-color': 'rgba(10,15,30,0.8)',
       'text-halo-width': 1.5,
       'text-opacity': 0
-    }
-  });
-
-  // Fade in district layers
-  requestAnimationFrame(() => {
-    glMap.setPaintProperty('districts-line', 'line-opacity', 1);
-    glMap.setPaintProperty('districts-label', 'text-opacity', 1);
-  });
-
-  // District hover
-  let hoveredDistrictId = null;
-  const tooltip = document.getElementById('mapTooltip');
-
-  glMap.on('mousemove', 'districts-fill', (e) => {
-    if (!e.features.length) return;
-    glMap.getCanvas().style.cursor = 'pointer';
-    const f = e.features[0];
-
-    if (hoveredDistrictId !== null && hoveredDistrictId !== f.id) {
-      glMap.setFeatureState({ source: 'districts', id: hoveredDistrictId }, { hover: false });
-    }
-    hoveredDistrictId = f.id;
-    glMap.setFeatureState({ source: 'districts', id: hoveredDistrictId }, { hover: true });
-
-    const dc = f.properties.district_code;
-    const dn = f.properties.district_number;
-    const rep = f.properties.representative;
-    const party = f.properties.party;
-    const partyColor = party === 'R' ? 'var(--rep)' : party === 'D' ? 'var(--dem)' : 'var(--text-muted)';
-
-    let tipHTML = `<strong>${dc}</strong>${dn ? ' — District ' + dn : ' — At-Large'}`;
-    if (rep) tipHTML += `<br><span style="color:${partyColor}">●</span> Rep. ${rep} (${party})`;
-
-    // Add declared candidates if available
-    const cands = CANDS[abbr] || [];
-    const houseRace = cands.find(r => r.race === 'House');
-    if (houseRace) {
-      const preview = houseRace.list.slice(0, 3).map(c => `${c.n} (${c.p})`).join(', ');
-      if (preview) tipHTML += `<br><span style="color:var(--text-faint)">Candidates:</span> ${preview}`;
-    }
-
-    tooltip.innerHTML = tipHTML;
-    tooltip.style.borderLeftColor = partyColor;
-    tooltip.style.display = 'block';
-
-    const rect = document.getElementById('mapContainer').getBoundingClientRect();
-    const tRight = e.point.x + 16 + 260 > rect.width;
-    tooltip.style.left = tRight ? (e.point.x - 270) + 'px' : (e.point.x + 16) + 'px';
-    tooltip.style.top = (e.point.y - 10) + 'px';
-  });
-
-  glMap.on('mouseleave', 'districts-fill', () => {
-    glMap.getCanvas().style.cursor = '';
-    if (hoveredDistrictId !== null) {
-      glMap.setFeatureState({ source: 'districts', id: hoveredDistrictId }, { hover: false });
-      hoveredDistrictId = null;
-    }
-    tooltip.style.display = 'none';
   });
 }
 
 function hideDistricts() {
   if (!glMap) return;
-  ['districts-label', 'districts-line', 'districts-fill'].forEach(id => {
+  ['districts-label', 'districts-line'].forEach(id => {
     if (glMap.getLayer(id)) glMap.removeLayer(id);
   });
   if (glMap.getSource('districts')) glMap.removeSource('districts');
