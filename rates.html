@@ -444,15 +444,6 @@ function hexToRgba(hex,alpha){
 function destroyChart(){if(chartInstance){chartInstance.destroy();chartInstance=null;}}
 
 function buildDropdowns(){
-  function pop(id,vals){
-    var el=document.getElementById(id),first=el.options[0];
-    el.innerHTML='';el.appendChild(first);
-    vals.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o);});
-  }
-  pop('f-state',Array.from(new Set(ALL_DATA.map(function(r){return r.state;}).filter(Boolean))).sort());
-  pop('f-office',Array.from(new Set(ALL_DATA.map(function(r){return r.office;}).filter(Boolean))).sort());
-  pop('f-dma',Array.from(new Set(ALL_DATA.map(function(r){return r.dma;}).filter(Boolean))).sort());
-  pop('f-station',Array.from(new Set(ALL_DATA.map(function(r){return r.station;}).filter(Boolean))).sort());
   renderGroupPanel();
   buildColPicker();
 }
