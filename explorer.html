@@ -13,87 +13,196 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FCC Rate Explorer — PoliticalWindow.com</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 html{font-size:18px}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#080e1a;color:#cbd5e1;font-family:'Courier New',monospace;min-height:100vh}
-a{color:#f59e0b;text-decoration:none}
-select,input,button{font-family:'Courier New',monospace;outline:none}
+:root {
+  --navy: #EBEEF3;
+  --navy-mid: #FFFFFF;
+  --navy-card: #FFFFFF;
+  --navy-border: #E3E8EF;
+  --blue: #2B6CB0;
+  --blue-light: #3B82F6;
+  --blue-glow: rgba(59,130,246,0.08);
+  --amber: #D97706;
+  --red: #DC2626;
+  --green: #059669;
+  --text: #1E293B;
+  --text-muted: #64748B;
+  --text-faint: #94A3B8;
+  --sans: 'DM Sans', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --display: 'DM Sans', sans-serif;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+}
+body{background:var(--navy);color:var(--text);font-family:var(--sans);min-height:100vh;
+  background-image:radial-gradient(circle, #D5DAE0 0.6px, transparent 0.6px);
+  background-size:16px 16px;
+}
+a{color:var(--blue);text-decoration:none}
+select,input,button{font-family:var(--sans);outline:none}
 ::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-thumb{background:#1e3050;border-radius:3px}
-#nav{background:#060d18;border-bottom:1px solid #1e3050;padding:10px 24px;display:flex;align-items:center;gap:10px;font-size:0.7rem}
-#nav .sep{color:#1e3050}
-#nav .cur{color:#f59e0b;letter-spacing:0.08em}
-#header{border-bottom:1px solid #1e3050;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-#header h1{font-size:0.95rem;font-weight:700;color:#fff;letter-spacing:0.06em}
-.sub{font-size:0.65rem;color:#94a3b8;margin-top:2px}
+::-webkit-scrollbar-thumb{background:var(--navy-border);border-radius:3px}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;top:0;left:0;bottom:0;z-index:110;display:flex;flex-direction:row}
+.sidebar-rail{width:62px;background:#fff;border-right:1px solid var(--navy-border);display:flex;flex-direction:column;align-items:center;padding:10px 0 6px;overflow-y:auto;overflow-x:visible;flex-shrink:0;position:relative}
+.sidebar-rail-logo{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#FF642D,#FF8F6B);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--sans);font-size:0.7rem;color:#fff;font-weight:800;letter-spacing:-0.02em;margin-bottom:12px;cursor:pointer}
+.rail-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px 6px;margin:1px 0;cursor:pointer;border-radius:6px;transition:all 0.12s;text-decoration:none;width:54px}
+.rail-item svg{width:20px;height:20px;color:var(--text-faint);transition:color 0.12s}
+.rail-item-label{font-family:var(--sans);font-size:0.48rem;font-weight:600;color:var(--text-faint);letter-spacing:0.02em;transition:color 0.12s}
+.rail-item:hover svg,.rail-item:hover .rail-item-label{color:var(--text)}
+.rail-item.active{background:var(--blue-glow)}
+.rail-item.active svg{color:var(--blue)}
+.rail-item.active .rail-item-label{color:var(--blue)}
+.rail-divider{width:36px;height:1px;background:var(--navy-border);margin:6px 0}
+.sidebar-panel{width:180px;background:#fff;border-right:1px solid var(--navy-border);padding:14px 0;overflow-y:auto;transition:width 0.2s ease,opacity 0.15s ease;opacity:1;position:relative}
+.sidebar-panel-header{font-family:var(--sans);font-size:0.7rem;font-weight:700;color:var(--text);padding:0 16px 10px;letter-spacing:-0.01em}
+.sidebar-panel-link{display:block;font-family:var(--sans);font-size:0.68rem;color:var(--text-muted);padding:6px 16px;text-decoration:none;border-left:2px solid transparent;transition:all 0.12s}
+.sidebar-panel-link:hover{color:var(--text);background:rgba(43,108,176,0.03)}
+.sidebar-panel-link.active{color:var(--blue);background:rgba(43,108,176,0.04);border-left-color:var(--blue);font-weight:600}
+.sidebar-panel-section{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-faint);padding:12px 16px 4px;font-weight:600}
+.sidebar-collapse-btn{width:46px;height:36px;margin:auto 8px 14px;background:var(--blue);border:none;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:115;box-shadow:0 2px 8px rgba(43,108,176,0.3);transition:all 0.18s}
+.sidebar-collapse-btn:hover{background:var(--blue-light);box-shadow:0 4px 14px rgba(59,130,246,0.35);transform:scale(1.05)}
+.sidebar-collapse-btn svg{width:18px;height:18px;color:#fff}
+.sidebar.collapsed .sidebar-panel{width:0;opacity:0;border-right:none;overflow:hidden}
+
+/* ── PAGE WRAP ── */
+.page-wrap{margin-left:242px;transition:margin-left 0.2s ease;padding:0 0 40px;min-height:100vh}
+.sidebar.collapsed ~ .page-wrap{margin-left:62px}
+
+/* ── HEADER ── */
+header{background:#fff;border-bottom:1px solid var(--navy-border);padding:0 20px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;height:48px;position:sticky;top:0;z-index:100}
+.header-left{display:flex;align-items:center;gap:10px}
+.header-meta{font-family:var(--mono);font-size:0.6rem;color:var(--text-faint);letter-spacing:0.04em}
+.header-right{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+
+#header{border-bottom:1px solid var(--navy-border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff}
+#header h1{font-size:0.95rem;font-weight:700;color:var(--text);letter-spacing:0.02em}
+.sub{font-size:0.65rem;color:var(--text-muted);margin-top:2px}
 #stats{display:flex;gap:24px}
-.stat-val{font-size:1rem;font-weight:700;color:#f59e0b;text-align:right}
-.stat-lbl{font-size:0.58rem;color:#94a3b8;letter-spacing:0.1em;text-align:right}
-#controls{padding:12px 24px;border-bottom:1px solid #1e3050;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.stat-val{font-size:1rem;font-weight:700;color:var(--blue);text-align:right}
+.stat-lbl{font-size:0.58rem;color:var(--text-muted);letter-spacing:0.1em;text-align:right;font-family:var(--mono)}
+#controls{padding:12px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;background:#fff}
 .tab-group{display:flex;gap:6px}
-.tab{font-size:0.62rem;font-weight:700;letter-spacing:0.1em;padding:5px 14px;border:1px solid #1e3050;border-radius:2px;cursor:pointer;background:transparent;color:#94a3b8}
-.tab.active{border-color:#f59e0b;background:rgba(245,158,11,0.12);color:#f59e0b}
+.tab{font-family:var(--sans);font-size:0.62rem;font-weight:600;letter-spacing:0.06em;padding:5px 14px;border:1px solid var(--navy-border);border-radius:4px;cursor:pointer;background:transparent;color:var(--text-muted);transition:all 0.12s}
+.tab:hover{border-color:var(--blue);color:var(--text)}
+.tab.active{border-color:var(--blue);background:var(--blue-glow);color:var(--blue)}
 .filter-wrap{display:flex;flex-direction:column;gap:3px}
-.filter-lbl{font-size:0.62rem;color:#94a3b8;letter-spacing:0.1em}
-select,input{font-size:0.65rem;color:#cbd5e1;background:#0d1829;border:1px solid #1e3050;border-radius:2px;padding:4px 8px}
+.filter-lbl{font-size:0.58rem;color:var(--text-muted);letter-spacing:0.08em;font-family:var(--mono);font-weight:500}
+select,input{font-size:0.65rem;color:var(--text);background:#fff;border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px;font-family:var(--sans)}
+select:focus,input:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-glow)}
 input{width:170px}
-#sort-wrap{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:0.65rem;color:#94a3b8}
-.sort-btn{background:transparent;border:none;cursor:pointer;font-family:'Courier New',monospace;font-size:0.65rem;letter-spacing:0.08em;color:#94a3b8;padding:2px 6px}
-.sort-btn.active{color:#f59e0b;font-weight:700}
+#sort-wrap{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:0.65rem;color:var(--text-muted);font-family:var(--sans)}
+.sort-btn{background:transparent;border:none;cursor:pointer;font-family:var(--sans);font-size:0.65rem;letter-spacing:0.06em;color:var(--text-muted);padding:2px 6px;border-radius:3px;transition:all 0.12s}
+.sort-btn:hover{color:var(--text)}
+.sort-btn.active{color:var(--blue);font-weight:700;background:var(--blue-glow)}
 #main{padding:16px 24px;display:flex;flex-direction:column;gap:14px}
-#chart-wrap{background:#0d1829;border:1px solid #1e3050;border-radius:4px;padding:14px}
-#grouped{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow:hidden}
-#grouped-header{display:flex;padding:8px 14px;border-bottom:1px solid #1e3050;align-items:center}
-#grouped-count{margin-left:auto;font-size:0.62rem;color:#64748b}
-.group-row{border-bottom:1px solid #0f1f33}
-.group-main{display:grid;grid-template-columns:1fr 80px 100px 80px 40px;gap:8px;padding:10px 14px;align-items:center;cursor:pointer}
+#chart-wrap{background:#fff;border:1px solid var(--navy-border);border-radius:6px;padding:14px;box-shadow:var(--shadow-sm)}
+#grouped{background:#fff;border:1px solid var(--navy-border);border-radius:6px;overflow:hidden;box-shadow:var(--shadow-sm)}
+#grouped-header{display:flex;padding:8px 14px;border-bottom:1px solid var(--navy-border);align-items:center;background:#F8FAFC}
+#grouped-count{margin-left:auto;font-size:0.62rem;color:var(--text-muted);font-family:var(--mono)}
+.group-row{border-bottom:1px solid var(--navy-border)}
+.group-main{display:grid;grid-template-columns:1fr 80px 100px 80px 40px;gap:8px;padding:10px 14px;align-items:center;cursor:pointer;transition:background 0.1s}
+.group-main:hover{background:#F8FAFC}
 .g-bar{width:3px;height:28px;border-radius:2px;flex-shrink:0}
-.g-name{font-size:0.7rem;color:#e2e8f0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-name{font-size:0.7rem;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .g-pills{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap}
-.pill{font-size:0.56rem;font-weight:700;padding:2px 6px;border-radius:2px;letter-spacing:0.08em;border:1px solid}
+.pill{font-size:0.56rem;font-weight:600;padding:2px 6px;border-radius:3px;letter-spacing:0.04em;border:1px solid}
 .g-num{text-align:right}
-.g-num-val{font-size:0.82rem;font-weight:600;color:#cbd5e1}
-.g-num-lbl{font-size:0.62rem;color:#94a3b8}
-.g-spend{color:#10b981!important;font-size:0.85rem!important}
-.g-rate{color:#94a3b8!important;font-size:0.75rem!important}
-.g-arrow{text-align:right;font-size:0.65rem;color:#64748b}
-.detail-wrap{background:#060d18;border-bottom:1px solid #1e3050;padding:10px 14px 14px;overflow-x:auto;display:none}
+.g-num-val{font-size:0.82rem;font-weight:600;color:var(--text);font-family:var(--mono)}
+.g-num-lbl{font-size:0.56rem;color:var(--text-muted);font-family:var(--mono);letter-spacing:0.04em}
+.g-spend{color:var(--green)!important;font-size:0.85rem!important}
+.g-rate{color:var(--text-muted)!important;font-size:0.75rem!important}
+.g-arrow{text-align:right;font-size:0.65rem;color:var(--text-faint)}
+.detail-wrap{background:#F8FAFC;border-bottom:1px solid var(--navy-border);padding:10px 14px 14px;overflow-x:auto;display:none}
 .detail-wrap.open{display:block}
-.detail-title{font-size:0.62rem;color:#94a3b8;letter-spacing:0.1em;margin-bottom:8px}
-table{width:100%;border-collapse:collapse;font-size:0.7rem}
-th{text-align:left;padding:6px 8px;border-bottom:1px solid #1e3050;font-weight:700;letter-spacing:0.06em;color:#94a3b8;white-space:nowrap;background:#0a1525;font-size:0.64rem}
-td{padding:5px 8px;border-bottom:1px solid #0f1f33;white-space:nowrap}
-tr:nth-child(even) td{background:#08111e}
-.c-green{color:#10b981;font-weight:700}
-.c-amber{color:#f59e0b;font-weight:600}
-.c-muted{color:#64748b}
-.c-bright{color:#e2e8f0}
-.c-r{color:#ef4444;font-weight:700}
+.detail-title{font-size:0.62rem;color:var(--text-muted);letter-spacing:0.08em;margin-bottom:8px;font-family:var(--mono)}
+table{width:100%;border-collapse:collapse;font-size:0.7rem;font-family:var(--sans)}
+th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--navy-border);font-weight:600;letter-spacing:0.04em;color:var(--text-muted);white-space:nowrap;background:#F8FAFC;font-size:0.6rem;font-family:var(--mono)}
+td{padding:5px 8px;border-bottom:1px solid var(--navy-border);white-space:nowrap;color:var(--text)}
+tr:nth-child(even) td{background:#F8FAFC}
+.c-green{color:var(--green);font-weight:700}
+.c-amber{color:var(--amber);font-weight:600}
+.c-muted{color:var(--text-muted)}
+.c-bright{color:var(--text);font-family:var(--mono)}
+.c-r{color:var(--red);font-weight:700}
 .c-d{color:#3b82f6;font-weight:700}
-#raw-wrap{background:#0d1829;border:1px solid #1e3050;border-radius:4px;overflow-x:auto}
-#raw-header{padding:8px 14px;border-bottom:1px solid #1e3050;font-size:0.62rem;color:#94a3b8;letter-spacing:0.08em}
-#loading{display:flex;align-items:center;justify-content:center;height:200px;font-size:0.8rem;color:#f59e0b;letter-spacing:0.15em}
-#error-msg{color:#ef4444;text-align:center;padding:40px;font-size:0.8rem;display:none}
-footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;padding:20px}
+#raw-wrap{background:#fff;border:1px solid var(--navy-border);border-radius:6px;overflow-x:auto;box-shadow:var(--shadow-sm)}
+#raw-header{padding:8px 14px;border-bottom:1px solid var(--navy-border);font-size:0.62rem;color:var(--text-muted);letter-spacing:0.06em;font-family:var(--mono);background:#F8FAFC}
+#loading{display:flex;align-items:center;justify-content:center;height:200px;font-size:0.8rem;color:var(--blue);letter-spacing:0.1em;font-weight:600}
+#error-msg{color:var(--red);text-align:center;padding:40px;font-size:0.8rem;display:none}
+footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing:0.06em;padding:20px;font-family:var(--mono)}
 </style>
 </head>
 <body>
-<div id="nav">
-  <a href="/">POLITICALWINDOW.COM</a>
-  <span class="sep">›</span>
-  <span class="cur">FCC RATE EXPLORER</span>
-</div>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-rail">
+    <div class="sidebar-rail-logo" title="PoliticalWindow.com">PW</div>
+    <a href="/" class="rail-item" title="Election Intel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span class="rail-item-label">Election Intel</span>
+    </a>
+    <a href="/public-file" class="rail-item" title="Public File">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span class="rail-item-label">Public File</span>
+    </a>
+    <a href="/rates" class="rail-item" title="Rate Analytics">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span class="rail-item-label">Rates</span>
+    </a>
+    <div class="rail-divider"></div>
+    <a href="/explorer" class="rail-item active" title="Explorer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span class="rail-item-label">Explorer</span>
+    </a>
+    <a href="/lur" class="rail-item" title="LUR">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span class="rail-item-label">LUR</span>
+    </a>
+    <a href="/admin" class="rail-item" title="Admin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="rail-item-label">Admin</span>
+    </a>
+    <div class="sidebar-collapse-btn" onclick="toggleSidebar()" id="sidebarToggleBtn" title="Collapse panel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/></svg>
+    </div>
+  </div>
+  <div class="sidebar-panel">
+    <div class="sidebar-panel-header">Explorer</div>
+    <a href="/explorer" class="sidebar-panel-link active">Rate Explorer</a>
+    <a href="/rates" class="sidebar-panel-link">Rate Analytics</a>
+    <a href="/public-file" class="sidebar-panel-link">Public File</a>
+    <div class="sidebar-panel-section">Intelligence</div>
+    <a href="/" class="sidebar-panel-link">Election Intel</a>
+    <a href="/lur" class="sidebar-panel-link">LUR Report</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+<header>
+  <div class="header-left">
+    <span style="font-family:var(--sans);font-size:0.78rem;font-weight:700;color:var(--text)">Rate Explorer</span>
+  </div>
+  <div></div>
+  <div class="header-right">
+    <span class="header-meta">FCC OPIF DATA</span>
+  </div>
+</header>
+
 <div id="header">
   <div>
-    <div style="font-size:0.95rem;font-weight:700;color:#fff;letter-spacing:0.06em">📡 RATE INTELLIGENCE</div>
+    <div style="font-size:0.95rem;font-weight:700;color:var(--text);letter-spacing:0.02em;font-family:var(--sans)">Rate Intelligence</div>
     <div class="sub" id="header-sub">Loading...</div>
   </div>
   <div id="stats">
-    <div><div class="stat-val" id="s-spend">—</div><div class="stat-lbl">GROSS SPEND</div></div>
-    <div><div class="stat-val" id="s-contracts">—</div><div class="stat-lbl">CONTRACTS</div></div>
-    <div><div class="stat-val" id="s-advertisers">—</div><div class="stat-lbl">ADVERTISERS</div></div>
-    <div><div class="stat-val" id="s-stations">—</div><div class="stat-lbl">STATIONS</div></div>
+    <div><div class="stat-val" id="s-spend">--</div><div class="stat-lbl">GROSS SPEND</div></div>
+    <div><div class="stat-val" id="s-contracts">--</div><div class="stat-lbl">CONTRACTS</div></div>
+    <div><div class="stat-val" id="s-advertisers">--</div><div class="stat-lbl">ADVERTISERS</div></div>
+    <div><div class="stat-val" id="s-stations">--</div><div class="stat-lbl">STATIONS</div></div>
   </div>
 </div>
 <div id="controls">
@@ -121,7 +230,7 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
   </div>
   <div class="filter-wrap">
     <div class="filter-lbl">SEARCH</div>
-    <input id="f-search" placeholder="name, station, DMA…">
+    <input id="f-search" placeholder="name, station, DMA...">
   </div>
   <div id="sort-wrap">SORT:
     <button class="sort-btn active" data-sort="spend">SPEND</button>
@@ -144,15 +253,30 @@ footer{font-size:0.5rem;color:#1e3050;text-align:center;letter-spacing:0.08em;pa
     </tr></thead><tbody id="raw-body"></tbody></table>
   </div>
 </div>
-<footer>DATA SOURCE: FCC OPIF PUBLIC FILES · PARSED VIA CLAUDE SONNET · POLITICALWINDOW.COM © 2026</footer>
+<footer>DATA SOURCE: FCC OPIF PUBLIC FILES &middot; PARSED VIA CLAUDE SONNET &middot; POLITICALWINDOW.COM &copy; 2026</footer>
+</div>
+
 <script>
+function toggleSidebar() {
+  var sb = document.getElementById('sidebar');
+  sb.classList.toggle('collapsed');
+  var btn = document.getElementById('sidebarToggleBtn');
+  if (sb.classList.contains('collapsed')) {
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/></svg>';
+    btn.title = 'Expand panel';
+  } else {
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/></svg>';
+    btn.title = 'Collapse panel';
+  }
+}
+
 var API='https://rates.politicalwindow.com',ALL_DATA=[],currentView='advertiser',currentSort='spend',groupIndexMap={};
-function fmt$(n){if(!n&&n!==0)return'—';var v=parseFloat(n);if(isNaN(v))return'—';if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';if(v>=1000)return'$'+(v/1000).toFixed(0)+'K';return'$'+v.toFixed(0);}
-function fmtR(n){return n?'$'+parseFloat(n).toLocaleString():'—';}
+function fmt$(n){if(!n&&n!==0)return'--';var v=parseFloat(n);if(isNaN(v))return'--';if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';if(v>=1000)return'$'+(v/1000).toFixed(0)+'K';return'$'+v.toFixed(0);}
+function fmtR(n){return n?'$'+parseFloat(n).toLocaleString():'--';}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function pc(p){return p==='R'?'c-r':p==='D'?'c-d':'c-muted';}
-function pill(label,color,bg){return'<span class="pill" style="color:'+(color||'#94a3b8')+';background:'+(bg||'rgba(148,163,184,0.1)')+';border-color:'+(color||'#94a3b8')+'44">'+esc(label)+'</span>';}
-function partyPill(p){var c={R:'#ef4444',D:'#3b82f6',I:'#a78bfa'},b={R:'rgba(239,68,68,0.12)',D:'rgba(59,130,246,0.12)',I:'rgba(167,139,250,0.12)'};return pill(p,c[p],b[p]);}
+function pill(label,color,bg){return'<span class="pill" style="color:'+(color||'#64748B')+';background:'+(bg||'rgba(100,116,139,0.06)')+';border-color:'+(color||'#64748B')+'33">'+esc(label)+'</span>';}
+function partyPill(p){var c={R:'#DC2626',D:'#3b82f6',I:'#a78bfa'},b={R:'rgba(220,38,38,0.08)',D:'rgba(59,130,246,0.08)',I:'rgba(167,139,250,0.08)'};return pill(p,c[p],b[p]);}
 function getFiltered(){
   var party=document.getElementById('f-party').value,state=document.getElementById('f-state').value,dma=document.getElementById('f-dma').value,adv=document.getElementById('f-adv').value,search=document.getElementById('f-search').value.toLowerCase();
   return ALL_DATA.filter(function(r){
@@ -185,27 +309,27 @@ function buildGroups(rows){
 }
 function renderGrouped(groups){
   groupIndexMap={};
-  document.getElementById('grouped-count').textContent=groups.length+' GROUPS · '+getFiltered().length+' CONTRACTS';
+  document.getElementById('grouped-count').textContent=groups.length+' GROUPS \u00b7 '+getFiltered().length+' CONTRACTS';
   document.getElementById('grouped-body').innerHTML=groups.map(function(g,i){
     groupIndexMap[g.label]=i;
     var avgRate=g.rates.length?g.rates.reduce(function(a,b){return a+b;},0)/g.rates.length:null;
-    var barColor=i<3?'#f59e0b':'#1e3050';
+    var barColor=i<3?'var(--blue)':'var(--navy-border)';
     var pills=[...g.parties].map(partyPill).join('');
-    if(currentView==='advertiser'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#38bdf8','rgba(56,189,248,0.1)');});pills+=pill(g.dmas.size+' DMA'+(g.dmas.size!==1?'s':''));pills+=pill(g.stations.size+' STN');}
-    if(currentView==='dma'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#38bdf8','rgba(56,189,248,0.1)');});pills+=pill(g.stations.size+' stations');}
-    if(currentView==='station'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#38bdf8','rgba(56,189,248,0.1)');});}
+    if(currentView==='advertiser'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#2B6CB0','rgba(43,108,176,0.06)');});pills+=pill(g.dmas.size+' DMA'+(g.dmas.size!==1?'s':''));pills+=pill(g.stations.size+' STN');}
+    if(currentView==='dma'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#2B6CB0','rgba(43,108,176,0.06)');});pills+=pill(g.stations.size+' stations');}
+    if(currentView==='station'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#2B6CB0','rgba(43,108,176,0.06)');});}
     var detailRows=g.rows.map(function(r){
-      var fccLink=r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:#f59e0b;font-size:0.56rem">PDF ↗</a>':'—';
-      return'<tr><td class="'+pc(r.party)+'" style="max-width:160px;overflow:hidden;text-overflow:ellipsis">'+esc(r.advertiser||r.candidate_name||'—')+'</td><td class="'+pc(r.party)+'">'+esc(r.party||'—')+'</td><td style="color:#38bdf8">'+esc(r.state||'—')+'</td><td class="c-amber">'+esc(r.callsign||'—')+'</td><td class="c-muted">'+esc(r.dma_name||'—')+'</td><td class="c-muted">'+(r.start_date?r.start_date.slice(5,10):'—')+(r.end_date?'→'+r.end_date.slice(5,10):'')+'</td><td class="c-bright">'+fmtR(r.unit_rate)+'</td><td class="c-muted" style="text-align:right">'+(r.spots_count||'—')+'</td><td class="c-green">'+fmt$(r.gross_total)+'</td><td class="c-muted">'+esc(r.office_type||'—')+'</td><td>'+fccLink+'</td></tr>';
+      var fccLink=r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:var(--blue);font-size:0.56rem">PDF &#8599;</a>':'--';
+      return'<tr><td class="'+pc(r.party)+'" style="max-width:160px;overflow:hidden;text-overflow:ellipsis">'+esc(r.advertiser||r.candidate_name||'--')+'</td><td class="'+pc(r.party)+'">'+esc(r.party||'--')+'</td><td style="color:#2B6CB0">'+esc(r.state||'--')+'</td><td style="color:var(--amber)">'+esc(r.callsign||'--')+'</td><td class="c-muted">'+esc(r.dma_name||'--')+'</td><td class="c-muted">'+(r.start_date?r.start_date.slice(5,10):'--')+(r.end_date?'\u2192'+r.end_date.slice(5,10):'')+'</td><td class="c-bright">'+fmtR(r.unit_rate)+'</td><td class="c-muted" style="text-align:right">'+(r.spots_count||'--')+'</td><td class="c-green">'+fmt$(r.gross_total)+'</td><td class="c-muted">'+esc(r.office_type||'--')+'</td><td>'+fccLink+'</td></tr>';
     }).join('');
-    return'<div class="group-row"><div class="group-main" onclick="toggleDetail('+i+')"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div class="g-bar" style="background:'+barColor+'"></div><div style="min-width:0"><div class="g-name">'+esc(g.label)+'</div><div class="g-pills">'+pills+'</div></div></div><div class="g-num"><div class="g-num-val">'+g.contracts+'</div><div class="g-num-lbl">CONTRACTS</div></div><div class="g-num"><div class="g-num-val g-spend">'+fmt$(g.spend)+'</div><div class="g-num-lbl">GROSS SPEND</div></div><div class="g-num"><div class="g-num-val g-rate">'+(avgRate?fmtR(avgRate):'—')+'</div><div class="g-num-lbl">AVG RATE</div></div><div class="g-arrow" id="arrow-'+i+'">▼</div></div><div class="detail-wrap" id="detail-'+i+'"><div class="detail-title">CONTRACT DETAIL — '+g.rows.length+' RECORDS</div><table><thead><tr><th>ADVERTISER</th><th>PARTY</th><th>STATE</th><th>STATION</th><th>DMA</th><th>DATES</th><th>RATE</th><th>SPOTS</th><th>TOTAL</th><th>OFFICE</th><th>DOC</th></tr></thead><tbody>'+detailRows+'</tbody></table></div></div>';
+    return'<div class="group-row"><div class="group-main" onclick="toggleDetail('+i+')"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div class="g-bar" style="background:'+barColor+'"></div><div style="min-width:0"><div class="g-name">'+esc(g.label)+'</div><div class="g-pills">'+pills+'</div></div></div><div class="g-num"><div class="g-num-val">'+g.contracts+'</div><div class="g-num-lbl">CONTRACTS</div></div><div class="g-num"><div class="g-num-val g-spend">'+fmt$(g.spend)+'</div><div class="g-num-lbl">GROSS SPEND</div></div><div class="g-num"><div class="g-num-val g-rate">'+(avgRate?fmtR(avgRate):'--')+'</div><div class="g-num-lbl">AVG RATE</div></div><div class="g-arrow" id="arrow-'+i+'">&#9660;</div></div><div class="detail-wrap" id="detail-'+i+'"><div class="detail-title">CONTRACT DETAIL \u2014 '+g.rows.length+' RECORDS</div><table><thead><tr><th>ADVERTISER</th><th>PARTY</th><th>STATE</th><th>STATION</th><th>DMA</th><th>DATES</th><th>RATE</th><th>SPOTS</th><th>TOTAL</th><th>OFFICE</th><th>DOC</th></tr></thead><tbody>'+detailRows+'</tbody></table></div></div>';
   }).join('');
 }
 function renderRaw(rows){
   document.getElementById('raw-header').textContent=rows.length+' RECORDS';
   document.getElementById('raw-body').innerHTML=rows.map(function(r){
-    var fccLink=r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:#f59e0b;font-size:0.56rem">PDF ↗</a>':'—';
-    return'<tr><td class="'+pc(r.party)+'" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">'+esc(r.advertiser||r.candidate_name||'—')+'</td><td class="'+pc(r.party)+'">'+esc(r.party||'—')+'</td><td style="color:#38bdf8">'+esc(r.state||'—')+'</td><td class="c-muted">'+esc(r.office_type||'—')+'</td><td class="c-amber">'+esc(r.callsign||'—')+'</td><td class="c-muted">'+esc(r.dma_name||'—')+'</td><td class="c-muted">'+(r.start_date?r.start_date.slice(0,10):'—')+'</td><td class="c-muted">'+(r.end_date?r.end_date.slice(0,10):'—')+'</td><td class="c-bright" style="text-align:right">'+fmtR(r.unit_rate)+'</td><td class="c-muted" style="text-align:right">'+(r.spots_count||'—')+'</td><td class="c-green">'+fmt$(r.gross_total)+'</td><td class="c-muted">'+esc(r.agency_name||'—')+'</td><td>'+fccLink+'</td></tr>';
+    var fccLink=r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:var(--blue);font-size:0.56rem">PDF &#8599;</a>':'--';
+    return'<tr><td class="'+pc(r.party)+'" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">'+esc(r.advertiser||r.candidate_name||'--')+'</td><td class="'+pc(r.party)+'">'+esc(r.party||'--')+'</td><td style="color:#2B6CB0">'+esc(r.state||'--')+'</td><td class="c-muted">'+esc(r.office_type||'--')+'</td><td style="color:var(--amber)">'+esc(r.callsign||'--')+'</td><td class="c-muted">'+esc(r.dma_name||'--')+'</td><td class="c-muted">'+(r.start_date?r.start_date.slice(0,10):'--')+'</td><td class="c-muted">'+(r.end_date?r.end_date.slice(0,10):'--')+'</td><td class="c-bright" style="text-align:right">'+fmtR(r.unit_rate)+'</td><td class="c-muted" style="text-align:right">'+(r.spots_count||'--')+'</td><td class="c-green">'+fmt$(r.gross_total)+'</td><td class="c-muted">'+esc(r.agency_name||'--')+'</td><td>'+fccLink+'</td></tr>';
   }).join('');
 }
 function render(){
@@ -220,15 +344,15 @@ function render(){
 window.toggleDetail=function(i){
   var d=document.getElementById('detail-'+i),a=document.getElementById('arrow-'+i),open=d.classList.contains('open');
   document.querySelectorAll('.detail-wrap.open').forEach(function(el){el.classList.remove('open');});
-  document.querySelectorAll('.g-arrow').forEach(function(el){el.textContent='▼';});
-  if(!open){d.classList.add('open');a.textContent='▲';}
+  document.querySelectorAll('.g-arrow').forEach(function(el){el.innerHTML='&#9660;';});
+  if(!open){d.classList.add('open');a.innerHTML='&#9650;';}
 };
 fetch(API+'/api/rates?limit=500')
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(j){
     ALL_DATA=j.data||[];
     document.getElementById('loading').style.display='none';
-    document.getElementById('header-sub').textContent=ALL_DATA.length+' contracts indexed · TX + CA · 2026 cycle';
+    document.getElementById('header-sub').textContent=ALL_DATA.length+' contracts indexed \u00b7 TX + CA \u00b7 2026 cycle';
     var states=Array.from(new Set(ALL_DATA.map(function(r){return r.state;}).filter(Boolean))).sort();
     var stateEl=document.getElementById('f-state');
     states.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;stateEl.appendChild(o);});
@@ -237,7 +361,7 @@ fetch(API+'/api/rates?limit=500')
     dmas.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;dmaEl.appendChild(o);});
     var advs=Array.from(new Set(ALL_DATA.map(function(r){return r.advertiser;}).filter(Boolean))).sort();
     var advEl=document.getElementById('f-adv');
-    advs.forEach(function(a){var o=document.createElement('option');o.value=a;o.textContent=a.length>40?a.slice(0,38)+'…':a;advEl.appendChild(o);});
+    advs.forEach(function(a){var o=document.createElement('option');o.value=a;o.textContent=a.length>40?a.slice(0,38)+'\u2026':a;advEl.appendChild(o);});
     render();
   })
   .catch(function(e){

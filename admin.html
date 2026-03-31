@@ -4,88 +4,109 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Admin — PoliticalWindow.com</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+:root {
+  --navy: #EBEEF3;
+  --navy-border: #E3E8EF;
+  --blue: #2B6CB0;
+  --blue-light: #3B82F6;
+  --blue-glow: rgba(59,130,246,0.08);
+  --amber: #D97706;
+  --red: #DC2626;
+  --green: #059669;
+  --text: #1E293B;
+  --text-muted: #64748B;
+  --text-faint: #94A3B8;
+  --sans: 'DM Sans', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+}
 *{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px}
-body{background:#080e1a;color:#cbd5e1;font-family:'IBM Plex Mono',monospace;min-height:100vh;max-width:600px;margin:0 auto;padding:0 0 40px}
+body{background:var(--navy);background-image:radial-gradient(circle,#D1D5DB 1px,transparent 1px);background-size:20px 20px;color:var(--text-muted);font-family:var(--mono);min-height:100vh;max-width:600px;margin:0 auto;padding:0 0 40px}
 ::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{background:#1e3050;border-radius:2px}
+::-webkit-scrollbar-thumb{background:#C8CDD5;border-radius:2px}
 
 /* header */
-header{background:#0d1a2e;border-bottom:1px solid #1a3156;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:50px;position:sticky;top:0;z-index:100}
-.logo{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.04em;color:#fff}
-.logo span{color:#1e6fff}
-.badge{font-size:0.55rem;font-weight:700;color:#f5a623;background:rgba(245,166,35,0.15);border:1px solid #f5a623;border-radius:2px;padding:2px 6px;letter-spacing:0.1em;margin-left:8px}
+header{background:#FFFFFF;border-bottom:1px solid var(--navy-border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:50px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm)}
 
 /* setup screen */
 #setup{display:none;padding:40px 20px}
-.setup-title{font-size:0.7rem;color:#3a506e;letter-spacing:0.12em;margin-bottom:20px}
-.setup-label{font-size:0.6rem;color:#3a506e;letter-spacing:0.1em;display:block;margin-bottom:6px}
-.setup-inp{width:100%;background:#060d18;border:1px solid #1e3050;border-radius:3px;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#e2e8f0;outline:none}
-.setup-inp:focus{border-color:#1e6fff}
-.setup-btn{width:100%;margin-top:12px;padding:14px;background:#f5a623;border:none;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:0.75rem;font-weight:700;letter-spacing:0.1em;color:#060d18;cursor:pointer}
-.setup-err{font-size:0.6rem;color:#ef4444;margin-top:10px;min-height:16px}
+.setup-title{font-size:0.7rem;color:var(--text-faint);letter-spacing:0.12em;margin-bottom:20px}
+.setup-label{font-size:0.6rem;color:var(--text-faint);letter-spacing:0.1em;display:block;margin-bottom:6px}
+.setup-inp{width:100%;background:#F8FAFC;border:1px solid var(--navy-border);border-radius:3px;padding:12px;font-family:var(--mono);font-size:0.72rem;color:var(--text);outline:none}
+.setup-inp:focus{border-color:var(--blue)}
+.setup-btn{width:100%;margin-top:12px;padding:14px;background:var(--blue);border:none;border-radius:3px;font-family:var(--mono);font-size:0.75rem;font-weight:700;letter-spacing:0.1em;color:#fff;cursor:pointer}
+.setup-btn:active{background:#1E5A9E}
+.setup-btn:disabled{opacity:0.5}
+.setup-err{font-size:0.6rem;color:var(--red);margin-top:10px;min-height:16px}
 
 /* main */
 #main{display:none;padding:0}
 
 /* section */
 .section{padding:18px 16px 0}
-.section-title{font-size:0.6rem;font-weight:700;letter-spacing:0.14em;color:#3a506e;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #0f1f33}
+.section-title{font-size:0.6rem;font-weight:700;letter-spacing:0.14em;color:var(--text-faint);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--navy-border)}
 
 /* generate invite */
 .field{margin-bottom:12px}
-.lbl{font-size:0.58rem;color:#2a4060;letter-spacing:0.1em;display:block;margin-bottom:5px}
-.inp{width:100%;background:#060d18;border:1px solid #1e3050;border-radius:3px;padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:#e2e8f0;outline:none;-webkit-appearance:none}
-.inp:focus{border-color:#1e6fff}
+.lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.1em;display:block;margin-bottom:5px}
+.inp{width:100%;background:#F8FAFC;border:1px solid var(--navy-border);border-radius:3px;padding:10px 12px;font-family:var(--mono);font-size:0.72rem;color:var(--text);outline:none;-webkit-appearance:none}
+.inp:focus{border-color:var(--blue)}
 .row{display:flex;gap:10px}
 .row .field{flex:1}
-.gen-btn{width:100%;padding:14px;background:#1e6fff;border:none;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:0.75rem;font-weight:700;letter-spacing:0.1em;color:#fff;cursor:pointer;margin-top:4px;-webkit-appearance:none}
-.gen-btn:active{background:#1559cc}
+.gen-btn{width:100%;padding:14px;background:var(--blue);border:none;border-radius:3px;font-family:var(--mono);font-size:0.75rem;font-weight:700;letter-spacing:0.1em;color:#fff;cursor:pointer;margin-top:4px;-webkit-appearance:none}
+.gen-btn:active{background:#1E5A9E}
 .gen-btn:disabled{opacity:0.5}
 
 /* result card */
-#invite-result{display:none;margin-top:14px;background:#060d18;border:1px solid #1e3050;border-radius:4px;padding:14px}
-.result-lbl{font-size:0.52rem;color:#2a4060;letter-spacing:0.12em;margin-bottom:6px}
-.result-url{font-size:0.65rem;color:#f5a623;word-break:break-all;line-height:1.5;margin-bottom:12px}
-.copy-btn{width:100%;padding:12px;background:rgba(245,166,35,0.15);border:1px solid #f5a623;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:0.7rem;font-weight:700;letter-spacing:0.1em;color:#f5a623;cursor:pointer}
-.copy-btn.copied{background:rgba(16,185,129,0.15);border-color:#10b981;color:#10b981}
-.result-meta{font-size:0.56rem;color:#2a4060;margin-top:10px}
+#invite-result{display:none;margin-top:14px;background:#F8FAFC;border:1px solid var(--navy-border);border-radius:4px;padding:14px}
+.result-lbl{font-size:0.52rem;color:var(--text-faint);letter-spacing:0.12em;margin-bottom:6px}
+.result-url{font-size:0.65rem;color:var(--blue);word-break:break-all;line-height:1.5;margin-bottom:12px}
+.copy-btn{width:100%;padding:12px;background:var(--blue-glow);border:1px solid var(--blue);border-radius:3px;font-family:var(--mono);font-size:0.7rem;font-weight:700;letter-spacing:0.1em;color:var(--blue);cursor:pointer}
+.copy-btn:active{background:rgba(43,108,176,0.15)}
+.copy-btn.copied{background:rgba(5,150,105,0.1);border-color:var(--green);color:var(--green)}
+.result-meta{font-size:0.56rem;color:var(--text-faint);margin-top:10px}
 
 /* list */
 .list{margin-top:12px;display:flex;flex-direction:column;gap:1px}
-.list-item{background:#0a1525;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.list-item{background:#F8FAFC;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--navy-border);border-bottom:none}
 .list-item:first-child{border-radius:4px 4px 0 0}
-.list-item:last-child{border-radius:0 0 4px 4px}
-.list-item:only-child{border-radius:4px}
+.list-item:last-child{border-radius:0 0 4px 4px;border-bottom:1px solid var(--navy-border)}
+.list-item:only-child{border-radius:4px;border-bottom:1px solid var(--navy-border)}
 .item-main{flex:1;min-width:0}
-.item-title{font-size:0.68rem;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.item-sub{font-size:0.55rem;color:#2a4060;margin-top:3px}
-.item-used{color:#10b981}
-.item-pending{color:#f5a623}
-.item-expired{color:#3a506e}
-.revoke-btn{flex-shrink:0;padding:6px 10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:#f87171;cursor:pointer;white-space:nowrap}
-.revoke-btn:active{background:rgba(239,68,68,0.25)}
-.empty{font-size:0.62rem;color:#1e3050;text-align:center;padding:20px;letter-spacing:0.08em}
-.err{font-size:0.6rem;color:#ef4444;margin-top:8px;min-height:16px}
+.item-title{font-size:0.68rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-sub{font-size:0.55rem;color:var(--text-faint);margin-top:3px}
+.item-used{color:var(--green)}
+.item-pending{color:var(--amber)}
+.item-expired{color:var(--text-faint)}
+.revoke-btn{flex-shrink:0;padding:6px 10px;background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.25);border-radius:2px;font-family:var(--mono);font-size:0.56rem;color:var(--red);cursor:pointer;white-space:nowrap}
+.revoke-btn:active{background:rgba(220,38,38,0.15)}
+.empty{font-size:0.62rem;color:#C8CDD5;text-align:center;padding:20px;letter-spacing:0.08em}
+.err{font-size:0.6rem;color:var(--red);margin-top:8px;min-height:16px}
 
 /* logout */
 .logout-wrap{padding:28px 16px 0;text-align:center}
-.logout-btn{background:none;border:none;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:#1e3050;cursor:pointer;letter-spacing:0.08em}
-.logout-btn:active{color:#94a3b8}
+.logout-btn{background:none;border:none;font-family:var(--mono);font-size:0.6rem;color:#C8CDD5;cursor:pointer;letter-spacing:0.08em}
+.logout-btn:active{color:var(--text-faint)}
 
 /* divider */
-.divider{height:1px;background:#0a1828;margin:20px 0 0}
+.divider{height:1px;background:var(--navy-border);margin:20px 0 0}
 </style>
 </head>
 <body>
 
 <header>
   <div>
-    <span class="logo">Political<span>Window</span></span>
-    <span class="badge">ADMIN</span>
+    <a href="/" style="text-decoration:none"><span style="font-family:var(--sans);font-size:1.1rem;font-weight:700;color:var(--text)">Political<span style="color:var(--blue)">Window</span></span></a>
+    <span style="font-family:var(--mono);font-size:0.55rem;font-weight:700;color:var(--amber);background:rgba(217,119,6,0.1);border:1px solid var(--amber);border-radius:3px;padding:2px 6px;letter-spacing:0.1em;margin-left:8px">ADMIN</span>
   </div>
+  <nav style="display:flex;gap:1rem;align-items:center">
+    <a href="/" style="font-family:var(--mono);font-size:0.58rem;color:var(--text-faint);text-decoration:none;letter-spacing:0.06em">Dashboard</a>
+    <a href="/rates" style="font-family:var(--mono);font-size:0.58rem;color:var(--text-faint);text-decoration:none;letter-spacing:0.06em">Rates</a>
+  </nav>
 </header>
 
 <!-- Setup: enter admin key once -->
