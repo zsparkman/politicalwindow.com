@@ -167,9 +167,10 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
 /* ── AUTH OVERLAY ── */
 #auth-overlay{position:fixed;inset:0;background:rgba(235,238,243,0.97);z-index:9999;display:none;align-items:center;justify-content:center}
 #auth-card{background:#fff;border:1px solid var(--navy-border);border-radius:12px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
-.auth-header{padding:20px 24px 16px;border-bottom:1px solid var(--navy-border)}
-.auth-title{font-family:var(--display);font-size:1.6rem;color:var(--text);font-weight:700;letter-spacing:0.01em}
-.auth-sub{font-family:var(--mono);font-size:0.56rem;color:var(--text-faint);margin-top:4px;letter-spacing:0.06em}
+.auth-header{padding:24px 24px 18px;border-bottom:1px solid var(--navy-border);display:flex;flex-direction:column;align-items:center;text-align:center}
+.auth-logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#FF642D,#FF8F6B);display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:0.85rem;color:#fff;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px}
+.auth-title{font-family:var(--display);font-size:1.35rem;color:var(--text);font-weight:700;letter-spacing:0.01em}
+.auth-sub{font-family:var(--mono);font-size:0.5rem;color:var(--text-faint);margin-top:8px;letter-spacing:0.08em}
 .auth-tabs{display:flex;border-bottom:1px solid var(--navy-border)}
 .auth-tab{flex:1;padding:10px;font-family:var(--mono);font-size:0.6rem;font-weight:700;letter-spacing:0.08em;border:none;background:transparent;cursor:pointer;color:var(--text-faint);border-bottom:2px solid transparent;transition:all 0.12s}
 .auth-tab.active{color:var(--blue);border-bottom-color:var(--blue);background:var(--blue-glow)}
@@ -633,8 +634,9 @@ if(RATES_TOKEN){fetch(API+'/auth/me',{headers:{'Authorization':'Bearer '+RATES_T
 <div id="auth-overlay">
   <div id="auth-card">
     <div class="auth-header">
-      <div class="auth-title">Political<span style="color:#2B6CB0">Window</span>.com</div>
-      <div class="auth-sub">POLITICAL ADVERTISING INTELLIGENCE</div>
+      <div class="auth-logo">PW</div>
+      <div class="auth-title">Political<span style="color:#2B6CB0">Window</span></div>
+      <div class="auth-sub">FCC Political Ad Intelligence</div>
     </div>
     <div class="auth-tabs">
       <button class="auth-tab active" data-pane="login">LOGIN</button>
@@ -659,7 +661,7 @@ if(RATES_TOKEN){fetch(API+'/auth/me',{headers:{'Authorization':'Bearer '+RATES_T
       </div>
       <div class="auth-err" id="auth-err"></div>
     </div>
-    <div style="text-align:center;font-family:var(--mono);font-size:0.5rem;color:var(--text-faint);letter-spacing:0.1em;padding:13px 28px 16px;border-top:1px solid var(--navy-border)">FOR AUTHORIZED SUBSCRIBERS ONLY</div>
+    <div style="text-align:center;font-family:var(--mono);font-size:0.5rem;color:var(--text-faint);letter-spacing:0.1em;padding:13px 28px 16px;border-top:1px solid var(--navy-border)">SUBSCRIBER AREA</div>
   </div>
 </div>
 

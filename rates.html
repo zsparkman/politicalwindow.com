@@ -221,11 +221,11 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
 @keyframes auth-fade-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 #auth-overlay{position:fixed;inset:0;background:rgba(226,232,240,0.92);backdrop-filter:blur(8px);z-index:9999;display:none;align-items:center;justify-content:center}
 #auth-card{background:#fff;border:1px solid var(--navy-border);border-top:3px solid var(--blue);border-radius:8px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);animation:auth-fade-in 0.2s ease}
-.auth-brand{padding:30px 28px 22px;border-bottom:1px solid var(--navy-border);text-align:center}
-.auth-lock{display:block;width:30px;height:30px;margin:0 auto 14px;color:var(--blue);opacity:0.75}
-.auth-title{font-family:var(--display);font-size:1.5rem;font-weight:700;color:var(--text);letter-spacing:-0.01em;line-height:1}
+.auth-brand{padding:28px 28px 20px;border-bottom:1px solid var(--navy-border);text-align:center;display:flex;flex-direction:column;align-items:center}
+.auth-logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#FF642D,#FF8F6B);display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:0.85rem;color:#fff;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px}
+.auth-title{font-family:var(--display);font-size:1.35rem;font-weight:700;color:var(--text);letter-spacing:0.01em;line-height:1}
 .auth-title .auth-dot{color:var(--blue)}
-.auth-sub{font-family:var(--mono);font-size:0.54rem;color:var(--text-faint);margin-top:7px;letter-spacing:0.14em}
+.auth-sub{font-family:var(--mono);font-size:0.5rem;color:var(--text-faint);margin-top:8px;letter-spacing:0.08em}
 .auth-tabs{display:flex;border-bottom:1px solid var(--navy-border)}
 .auth-tab{flex:1;padding:11px;font-family:var(--mono);font-size:0.6rem;font-weight:700;letter-spacing:0.1em;border:none;background:transparent;cursor:pointer;color:var(--text-faint);border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s,background 0.15s}
 .auth-tab:hover{color:var(--text-muted)}
@@ -1536,8 +1536,9 @@ document.addEventListener('DOMContentLoaded',function(){
 <div id="auth-overlay">
   <div id="auth-card">
     <div class="auth-brand">
-<div class="auth-title">Political<span class="auth-dot">Window</span>.com</div>
-      <div class="auth-sub">POLITICAL ADVERTISING INTELLIGENCE</div>
+      <div class="auth-logo">PW</div>
+      <div class="auth-title">Political<span class="auth-dot">Window</span></div>
+      <div class="auth-sub">FCC Political Ad Intelligence</div>
     </div>
     <div class="auth-tabs">
       <button class="auth-tab active" data-pane="login">LOGIN</button>
@@ -1562,7 +1563,7 @@ document.addEventListener('DOMContentLoaded',function(){
       </div>
       <div class="auth-err" id="auth-err"></div>
     </div>
-    <div class="auth-note">FOR AUTHORIZED SUBSCRIBERS ONLY</div>
+    <div class="auth-note">SUBSCRIBER AREA</div>
   </div>
 </div>
 
