@@ -176,30 +176,7 @@
   /* ── LAYOUT ── */
   main { max-width:1400px; margin:0 auto; padding:14px 20px 40px; display:grid; gap:10px; width:100%; }
 
-  /* ── PAGE HEADER (breadcrumb area below header) ── */
-  .page-header {
-    display:flex; align-items:center; justify-content:space-between; padding:0 0 4px;
-    flex-wrap:wrap; gap:6px;
-  }
-  .page-header-left { display:flex; flex-direction:column; gap:2px; }
-  .page-breadcrumb {
-    font-family:var(--sans); font-size:0.65rem; color:var(--text-faint); display:flex; align-items:center; gap:4px;
-  }
-  .page-breadcrumb a { color:var(--blue); text-decoration:none; }
-  .page-breadcrumb a:hover { text-decoration:underline; }
-  .page-title { font-family:var(--sans); font-size:1.3rem; font-weight:700; color:var(--text); line-height:1.2; }
-  .page-title .accent { color:var(--blue); }
-  .page-header-actions { display:flex; align-items:center; gap:6px; }
-  .action-btn {
-    font-family:var(--sans); font-size:0.62rem; font-weight:600; padding:5px 12px;
-    border-radius:6px; cursor:pointer; transition:all 0.12s; white-space:nowrap;
-    display:inline-flex; align-items:center; gap:4px;
-  }
-  .action-btn-outline { background:#fff; border:1px solid var(--navy-border); color:var(--text-muted); }
-  .action-btn-outline:hover { border-color:#CBD5E1; color:var(--text); }
-  .action-btn-green { background:#059669; border:1px solid #059669; color:#fff; }
-  .action-btn-green:hover { background:#047857; }
-  .action-btn svg { width:13px; height:13px; }
+  /* (page-header removed — actions live in header bar) */
 
   /* ── KPI STATS ROW ── */
   .kpi-row {
@@ -782,30 +759,6 @@
 </header>
 
 <main>
-
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <div class="page-header-left">
-      <div class="page-breadcrumb">
-        <a href="/">Dashboard</a> <span>›</span> <span>Election Intelligence</span>
-      </div>
-      <div class="page-title">Election Intelligence: <span class="accent">2026 Cycle</span></div>
-    </div>
-    <div class="page-header-actions">
-      <button class="action-btn action-btn-outline">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export PDF
-      </button>
-      <button class="action-btn action-btn-outline">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        Refresh
-      </button>
-      <a href="/public-file?uploaded=week" class="action-btn action-btn-green" id="scanBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        Scan New Filings
-      </a>
-    </div>
-  </div>
 
   <!-- KPI STATS ROW -->
   <div class="kpi-row" id="kpiRow">
