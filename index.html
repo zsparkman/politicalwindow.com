@@ -20,33 +20,33 @@
   html { font-size: 18px; }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --navy:       #EBEEF3;
-    --navy-mid:   #FFFFFF;
+    --navy:       #E2E6ED;
+    --navy-mid:   #F8F9FB;
     --navy-card:  #FFFFFF;
-    --navy-border:#E3E8EF;
-    --blue:       #2B6CB0;
-    --blue-light: #3B82F6;
-    --blue-glow:  rgba(59,130,246,0.08);
+    --navy-border:#D1D9E6;
+    --blue:       #1D4ED8;
+    --blue-light: #2563EB;
+    --blue-glow:  rgba(29,78,216,0.10);
     --amber:      #D97706;
-    --amber-dim:  rgba(217,119,6,0.08);
+    --amber-dim:  rgba(217,119,6,0.10);
     --red:        #DC2626;
-    --red-dim:    rgba(220,38,38,0.06);
+    --red-dim:    rgba(220,38,38,0.08);
     --green:      #059669;
-    --green-dim:  rgba(5,150,105,0.06);
+    --green-dim:  rgba(5,150,105,0.08);
     --slate:      #94A3B8;
     --slate-dim:  rgba(148,163,184,0.12);
-    --dem:        #3B82F6;
+    --dem:        #2563EB;
     --rep:        #EF4444;
     --ind:        #8B5CF6;
-    --text:       #1E293B;
-    --text-muted: #64748B;
+    --text:       #0F172A;
+    --text-muted: #475569;
     --text-faint: #94A3B8;
     --mono:       'IBM Plex Mono', monospace;
     --sans:       'DM Sans', sans-serif;
     --display:    'DM Sans', sans-serif;
-    --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md:  0 4px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
-    --shadow-lg:  0 8px 24px rgba(0,0,0,0.09), 0 2px 6px rgba(0,0,0,0.05);
+    --shadow-sm:  0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md:  0 4px 12px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-lg:  0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
   }
 
   body {
@@ -79,8 +79,9 @@
     border-left:3px solid transparent; border-right:3px solid transparent;
   }
   .rail-item:hover { background:#F1F5F9; }
-  .rail-item.active { background:rgba(43,108,176,0.06); border-left-color:var(--blue); }
-  .rail-item svg { width:20px; height:20px; color:var(--text-muted); flex-shrink:0; }
+  .rail-item.active { background:rgba(29,78,216,0.08); border-left-color:var(--blue); box-shadow:inset 3px 0 0 var(--blue); }
+  .rail-item svg { width:20px; height:20px; color:var(--text-faint); flex-shrink:0; transition:color 0.12s; }
+  .rail-item:hover svg { color:var(--text-muted); }
   .rail-item.active svg { color:var(--blue); }
   .rail-item-label {
     font-family:var(--sans); font-size:0.48rem; font-weight:600; color:var(--text-faint);
@@ -105,7 +106,7 @@
     border-left:3px solid transparent;
   }
   .sidebar-panel-link:hover { color:var(--text); background:#F8FAFC; }
-  .sidebar-panel-link.active { color:var(--blue); background:rgba(43,108,176,0.04); border-left-color:var(--blue); font-weight:600; }
+  .sidebar-panel-link.active { color:var(--blue); background:rgba(29,78,216,0.06); border-left-color:var(--blue); font-weight:700; }
   .sidebar-panel-section {
     font-family:var(--mono); font-size:0.5rem; letter-spacing:0.1em; text-transform:uppercase;
     color:var(--text-faint); padding:12px 16px 4px; font-weight:600;
@@ -125,7 +126,7 @@
 
   /* ── HEADER ── */
   header {
-    background:#fff; border-bottom:1px solid var(--navy-border);
+    background:#1E293B; border-bottom:1px solid #334155;
     padding:0 20px; display:grid; grid-template-columns:auto 1fr auto;
     align-items:center; gap:16px; height:48px; position:sticky; top:0; z-index:100;
   }
@@ -136,30 +137,32 @@
   .logo-badge { font-family:var(--mono); font-size:0.55rem; font-weight:600; color:var(--blue); background:rgba(43,108,176,0.08); border:1px solid rgba(43,108,176,0.2); border-radius:10px; padding:2px 8px; letter-spacing:0.06em; }
   .header-search {
     max-width:520px; width:100%; justify-self:center;
-    display:flex; align-items:center; background:#F8FAFC; border:1px solid var(--navy-border);
+    display:flex; align-items:center; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
     border-radius:20px; padding:0 14px; height:34px; transition:border-color 0.15s, box-shadow 0.15s;
   }
-  .header-search:focus-within { border-color:var(--blue); box-shadow:0 0 0 3px rgba(43,108,176,0.08); background:#fff; }
-  .header-search svg { width:16px; height:16px; color:var(--text-faint); flex-shrink:0; }
+  .header-search:focus-within { border-color:var(--blue-light); box-shadow:0 0 0 3px rgba(37,99,235,0.15); background:rgba(255,255,255,0.12); }
+  .header-search svg { width:16px; height:16px; color:rgba(255,255,255,0.45); flex-shrink:0; }
   .header-search input {
     border:none; outline:none; background:transparent; font-family:var(--sans); font-size:0.75rem;
-    color:var(--text); width:100%; padding:0 8px;
+    color:#F1F5F9; width:100%; padding:0 8px;
   }
-  .header-search input::placeholder { color:var(--text-faint); }
+  .header-search input::placeholder { color:rgba(255,255,255,0.4); }
   .header-right { display:flex; align-items:center; gap:8px; justify-content:flex-end; }
-  .header-meta { font-family:var(--mono); font-size:0.58rem; color:var(--text-muted); }
+  .header-meta { font-family:var(--mono); font-size:0.58rem; color:rgba(255,255,255,0.7); }
   .header-btn {
     font-family:var(--sans); font-size:0.65rem; font-weight:600; padding:5px 12px;
-    border-radius:6px; border:1px solid var(--navy-border); background:#fff;
-    color:var(--text-muted); cursor:pointer; transition:all 0.12s; white-space:nowrap;
+    border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.06);
+    color:rgba(255,255,255,0.75); cursor:pointer; transition:all 0.12s; white-space:nowrap;
   }
-  .header-btn:hover { border-color:#CBD5E1; color:var(--text); }
+  .header-btn:hover { border-color:rgba(255,255,255,0.35); color:#fff; background:rgba(255,255,255,0.1); }
   .header-btn-cta {
-    background:#059669; border-color:#059669; color:#fff;
-    font-family:var(--sans); font-size:0.65rem; font-weight:600; padding:5px 14px;
-    border-radius:6px; border:1px solid #059669; cursor:pointer; transition:all 0.12s; white-space:nowrap;
+    background:var(--blue); border-color:var(--blue); color:#fff;
+    font-family:var(--sans); font-size:0.65rem; font-weight:700; padding:6px 16px;
+    border-radius:6px; border:1px solid var(--blue); cursor:pointer; transition:all 0.18s; white-space:nowrap;
+    box-shadow:0 0 12px rgba(29,78,216,0.35), 0 0 4px rgba(29,78,216,0.2);
+    text-transform:uppercase; letter-spacing:0.04em;
   }
-  .header-btn-cta:hover { background:#047857; border-color:#047857; }
+  .header-btn-cta:hover { background:var(--blue-light); border-color:var(--blue-light); box-shadow:0 0 20px rgba(37,99,235,0.5), 0 0 6px rgba(37,99,235,0.3); }
   .header-page-title { font-family:var(--sans); font-size:0.95rem; font-weight:700; color:var(--text); letter-spacing:0.01em; }
   .header-page-title span { color:var(--text-muted); font-weight:400; font-size:0.75rem; margin-left:0.5rem; }
 
@@ -203,18 +206,28 @@
     display:grid; grid-template-columns:repeat(4,1fr); gap:10px;
   }
   .kpi-card {
-    background:#fff; border:1px solid var(--navy-border); border-radius:6px;
-    padding:12px 14px; display:flex; flex-direction:column; gap:2px;
+    background:#fff; border:1px solid var(--navy-border); border-radius:8px;
+    padding:14px 16px; display:flex; flex-direction:column; gap:2px;
     transition:border-color 0.15s, box-shadow 0.15s; box-shadow:var(--shadow-sm);
+    border-top:3px solid var(--navy-border);
   }
-  .kpi-card:hover { border-color:#CBD5E1; box-shadow:var(--shadow-md); }
+  .kpi-card:hover { border-color:#94A3B8; box-shadow:var(--shadow-md); }
+  .kpi-card.kpi-card-red { border-top-color:var(--red); }
+  .kpi-card.kpi-card-amber { border-top-color:var(--amber); }
+  .kpi-card.kpi-card-blue { border-top-color:var(--blue); }
+  .kpi-card.kpi-card-green { border-top-color:var(--green); }
   .kpi-label {
-    font-family:var(--sans); font-size:0.6rem; font-weight:500;
+    font-family:var(--sans); font-size:0.55rem; font-weight:500;
     color:var(--text-muted); display:flex; align-items:center; gap:0.35rem;
+    text-transform:uppercase; letter-spacing:0.06em;
   }
-  .kpi-label svg { width:13px; height:13px; opacity:0.5; }
-  .kpi-value { font-family:var(--sans); font-size:1.45rem; font-weight:800; color:var(--text); line-height:1.15; }
+  .kpi-label svg { width:12px; height:12px; opacity:0.4; }
+  .kpi-value { font-family:var(--sans); font-size:1.85rem; font-weight:800; color:var(--text); line-height:1.1; }
   .kpi-sub { font-family:var(--sans); font-size:0.55rem; color:var(--text-faint); }
+  .kpi-change { font-family:var(--mono); font-size:0.56rem; font-weight:600; display:inline-flex; align-items:center; gap:2px; margin-top:2px; }
+  .kpi-change-up { color:var(--red); }
+  .kpi-change-down { color:var(--green); }
+  .kpi-change-neutral { color:var(--text-faint); }
   .kpi-value.kpi-red { color:var(--red); }
   .kpi-value.kpi-amber { color:var(--amber); }
   .kpi-value.kpi-green { color:var(--green); }
@@ -250,7 +263,7 @@
   .map-table-col { display:flex; flex-direction:column; gap:1rem; min-width:0; }
 
   /* ── MAP CARD ── */
-  .map-card { background:#fff; border:1px solid var(--navy-border); border-radius:6px; padding:14px 14px; overflow:visible; min-width:0; box-shadow:var(--shadow-sm); }
+  .map-card { background:#fff; border:1px solid var(--navy-border); border-radius:8px; padding:14px 14px; overflow:visible; min-width:0; box-shadow:var(--shadow-md); }
   .card-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; gap:0.5rem; }
   .card-title { font-family:var(--sans); font-size:0.95rem; font-weight:700; color:var(--text); }
   .card-sub { font-family:var(--sans); font-size:0.6rem; color:var(--text-muted); line-height:1.5; }
@@ -324,8 +337,8 @@
 
   /* ── DETAIL PANEL ── */
   .detail-panel {
-    background:#fff; border:1px solid var(--navy-border); border-radius:6px;
-    padding:14px; overflow-y:auto; align-self:stretch; box-shadow:var(--shadow-sm);
+    background:#fff; border:1px solid var(--navy-border); border-radius:8px;
+    padding:14px; overflow-y:auto; align-self:stretch; box-shadow:var(--shadow-md);
   }
   .detail-panel.has-more { box-shadow:inset 0 -40px 16px -16px rgba(255,255,255,0.95); }
   .detail-state-name { font-family:var(--sans); font-size:1.6rem; font-weight:800; color:var(--text); line-height:1.1; }
@@ -345,9 +358,27 @@
   .wbar { margin-top:0.4rem; height:5px; background:var(--navy-border); border-radius:3px; overflow:hidden; }
   .wbar-fill { height:100%; border-radius:3px; }
   .wbar-note { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); margin-top:3px; }
-  .no-sel { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:1rem; text-align:center; gap:0.5rem; }
+  .no-sel { display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; padding-top:0; text-align:left; gap:0; }
   .no-sel-icon { font-size:2rem; opacity:0.35; }
   .no-sel-txt { font-family:var(--mono); font-size:0.65rem; color:var(--text-faint); letter-spacing:0.08em; line-height:1.9; }
+  .insight-section { margin-bottom:1rem; }
+  .insight-title { font-family:var(--sans); font-size:0.58rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:0.5rem; display:flex; align-items:center; gap:0.3rem; }
+  .insight-title svg { width:12px; height:12px; opacity:0.5; }
+  .insight-list { list-style:none; padding:0; margin:0; }
+  .insight-item {
+    display:flex; align-items:center; gap:0.5rem; padding:7px 10px; margin-bottom:3px;
+    border-radius:6px; background:#F8FAFC; border:1px solid transparent;
+    cursor:pointer; transition:all 0.12s; font-family:var(--sans); font-size:0.72rem;
+  }
+  .insight-item:hover { border-color:var(--navy-border); background:#fff; box-shadow:var(--shadow-sm); }
+  .insight-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .insight-item-name { font-weight:600; color:var(--text); flex:1; min-width:0; }
+  .insight-item-meta { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); flex-shrink:0; }
+  .insight-item-tag { font-family:var(--mono); font-size:0.5rem; padding:1px 5px; border-radius:2px; font-weight:600; flex-shrink:0; }
+  .insight-empty { font-family:var(--mono); font-size:0.62rem; color:var(--text-faint); padding:6px 0; }
+  .insight-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem; padding-bottom:0.5rem; border-bottom:1px solid var(--navy-border); }
+  .insight-header-title { font-family:var(--sans); font-size:0.85rem; font-weight:700; color:var(--text); }
+  .insight-header-sub { font-family:var(--mono); font-size:0.52rem; color:var(--text-faint); }
 
   /* Candidates */
   .cand-race-block { margin-bottom:0.6rem; }
@@ -362,7 +393,7 @@
   .cparty { font-family:var(--mono); font-size:0.56rem; flex-shrink:0; }
 
   /* ── TABLE ── */
-  .table-card { background:#fff; border:1px solid var(--navy-border); border-radius:6px; overflow:hidden; box-shadow:var(--shadow-sm); }
+  .table-card { background:#fff; border:1px solid var(--navy-border); border-radius:8px; overflow:hidden; box-shadow:var(--shadow-md); }
   .table-toolbar {
     display:flex; align-items:center; gap:0.75rem; padding:0.875rem 1rem;
     border-bottom:1px solid var(--navy-border); flex-wrap:wrap;
@@ -725,7 +756,7 @@
     <a href="/" class="sidebar-panel-link">FCC Window Map</a>
     <a href="/" class="sidebar-panel-link">Candidate Tracker</a>
     <div class="sidebar-panel-section">Data</div>
-    <a href="/public-file" class="sidebar-panel-link">Public File Activity</a>
+    <a href="/public-file" class="sidebar-panel-link">Filings</a>
     <a href="/rates" class="sidebar-panel-link">Rate Analytics</a>
     <a href="/explorer" class="sidebar-panel-link">Rate Explorer</a>
     <div class="sidebar-panel-section">Reference</div>
@@ -738,16 +769,15 @@
 
 <header>
   <div class="header-left">
-    <span class="header-meta" id="data-badge" style="color:var(--text-faint);font-size:0.55rem;letter-spacing:0.03em">● LOADING…</span>
+    <span class="header-meta" id="data-badge" style="color:rgba(255,255,255,0.5);font-size:0.55rem;letter-spacing:0.03em">● LOADING…</span>
   </div>
   <div class="header-search">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input type="text" placeholder="Search states, candidates, races..." id="globalSearch">
   </div>
   <div class="header-right">
-    <span class="header-meta" id="live-date"></span>
     <button class="header-btn">Export</button>
-    <button class="header-btn-cta">+ Add Data</button>
+    <a href="/public-file?uploaded=week" class="header-btn-cta" id="scanNewFilings">Scan New Filings</a>
   </div>
 </header>
 
@@ -770,16 +800,16 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         Refresh
       </button>
-      <button class="action-btn action-btn-green" id="scanBtn">
+      <a href="/public-file?uploaded=week" class="action-btn action-btn-green" id="scanBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        Scan FCC Files
-      </button>
+        Scan New Filings
+      </a>
     </div>
   </div>
 
   <!-- KPI STATS ROW -->
   <div class="kpi-row" id="kpiRow">
-    <div class="kpi-card">
+    <div class="kpi-card kpi-card-blue">
       <div class="kpi-label">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
         States Tracked
@@ -787,23 +817,25 @@
       <div class="kpi-value kpi-blue" id="kpiStates">51</div>
       <div class="kpi-sub">50 states + DC</div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card kpi-card-red">
       <div class="kpi-label">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         Active FCC Windows
       </div>
       <div class="kpi-value kpi-red" id="kpiWindows">0</div>
+      <div class="kpi-change kpi-change-up" id="kpiWindowsChange"></div>
       <div class="kpi-sub" id="kpiWindowsSub">primary windows open now</div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card kpi-card-green">
       <div class="kpi-label">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Declared Candidates
       </div>
       <div class="kpi-value" id="kpiCands">0</div>
+      <div class="kpi-change kpi-change-neutral" id="kpiCandsChange"></div>
       <div class="kpi-sub" id="kpiCandsSub">across all races</div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card kpi-card-amber">
       <div class="kpi-label">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Days to General
@@ -848,9 +880,15 @@
             </div>
             <div class="card-sub" id="mapSubtitle">Tap any state · FCC window + declared candidates</div>
           </div>
-          <div class="card-sub" style="text-align:right;flex-shrink:0">
-            General: <span style="color:var(--blue)">Nov 3, 2026</span><br>
-            FCC Gen Window: <span style="color:var(--blue)">Sep 4, 2026</span>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+            <div class="card-sub" style="text-align:right">
+              General: <span style="color:var(--blue)">Nov 3, 2026</span><br>
+              FCC Gen Window: <span style="color:var(--blue)">Sep 4, 2026</span>
+            </div>
+            <div class="map-layer-toggles" style="display:flex;gap:4px">
+              <button class="filter-btn active" data-layer="window" onclick="setMapLayer('window')">Window Timing</button>
+              <button class="filter-btn" data-layer="density" onclick="setMapLayer('density')">Candidate Density</button>
+            </div>
           </div>
         </div>
         <button class="back-to-usa" id="backToUSA" style="display:none" onclick="mapBackToUSA()">
@@ -899,9 +937,34 @@
 
     <!-- Desktop detail panel (hidden on mobile, replaced by drawer) -->
     <div class="detail-panel" id="detailPanel">
-      <div class="no-sel">
-        <div class="no-sel-icon">🗳</div>
-        <div class="no-sel-txt">SELECT A STATE<br>TO VIEW FCC WINDOW<br>&amp; DECLARED CANDIDATES</div>
+      <div class="no-sel" id="insightPanel">
+        <div class="insight-header">
+          <div>
+            <div class="insight-header-title">Market Intelligence</div>
+            <div class="insight-header-sub">Select a state for full breakdown</div>
+          </div>
+        </div>
+        <div class="insight-section" id="insightActive">
+          <div class="insight-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Top Active States
+          </div>
+          <ul class="insight-list" id="insightActiveList"></ul>
+        </div>
+        <div class="insight-section" id="insightUpcoming">
+          <div class="insight-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Windows Opening Next 30 Days
+          </div>
+          <ul class="insight-list" id="insightUpcomingList"></ul>
+        </div>
+        <div class="insight-section" id="insightDensity">
+          <div class="insight-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Highest Candidate Density
+          </div>
+          <ul class="insight-list" id="insightDensityList"></ul>
+        </div>
       </div>
     </div>
 
@@ -1421,19 +1484,24 @@ function wireMapInteractions() {
 
     // Position tooltip
     const statusLabel = {
-      'window-open': '🔴 Window Open',
-      'window-soon': '🟡 Opens Soon',
-      'upcoming': '🔵 Upcoming',
-      'general-only': '🔵 General Only',
-      'inactive': '⚫ None'
+      'window-open': '<span style="color:var(--red);font-weight:600">WINDOW OPEN</span>',
+      'window-soon': '<span style="color:var(--amber);font-weight:600">OPENS SOON</span>',
+      'upcoming': '<span style="color:var(--blue);font-weight:600">UPCOMING</span>',
+      'general-only': '<span style="color:var(--blue-light);font-weight:600">GENERAL ONLY</span>',
+      'inactive': '<span style="color:var(--slate)">NO WINDOW</span>'
     }[s.status] || '';
 
     const races = s.races ? s.races.join(' · ') : '';
     const primary = s.pDate ? fmtS(s.pDate) : '—';
     const fccOpen = s.pWindow ? fmtS(s.pWindow) : '—';
-    const daysStr = s.dWin !== null && s.dWin > 0 ? `${s.dWin}d to window` : '';
+    const daysStr = s.dWin !== null && s.dWin > 0 ? `<span style="color:var(--amber)">${s.dWin}d to window</span>` : '';
 
-    tooltip.innerHTML = `<strong>${s.name}</strong><br>${statusLabel}<br>Primary: ${primary}<br>FCC Opens: ${fccOpen}${daysStr ? '<br>' + daysStr : ''}<br>${races}`;
+    // Candidate count for this state
+    const stateCands = s.cands ? s.cands.reduce((a, rc) => a + rc.list.length, 0) : 0;
+    const candsLine = stateCands > 0 ? `<br><span style="color:var(--text)">Candidates: <strong>${stateCands}</strong></span>` : '';
+    const racesLine = races ? `<br><span style="font-size:0.56rem;color:var(--text-muted)">${races}</span>` : '';
+
+    tooltip.innerHTML = `<strong style="font-size:0.68rem">${s.name}</strong> <span style="font-size:0.54rem;color:var(--text-faint)">${abbr}</span><br>${statusLabel}<br>Primary: ${primary} · FCC: ${fccOpen}${daysStr ? '<br>' + daysStr : ''}${candsLine}${racesLine}`;
     tooltip.style.borderLeftColor = STATUS_COLORS[s.status] || 'var(--blue)';
     tooltip.style.display = 'block';
 
@@ -1459,6 +1527,41 @@ function wireMapInteractions() {
     if (!e.features.length) return;
     pick(e.features[0].properties.abbr);
   });
+}
+
+// ── MAP: Layer toggle (Window Timing vs Candidate Density) ───────────────────
+let currentMapLayer = 'window';
+function setMapLayer(layer) {
+  currentMapLayer = layer;
+  document.querySelectorAll('.map-layer-toggles .filter-btn').forEach(b => b.classList.toggle('active', b.dataset.layer === layer));
+  if (!glMap || !statesGeoJSON) return;
+
+  if (layer === 'density') {
+    // Color states by candidate count
+    const maxCands = Math.max(1, ...STATES.map(s => s.cands.reduce((a, rc) => a + rc.list.length, 0)));
+    const densityColors = {};
+    STATES.forEach(s => {
+      const c = s.cands.reduce((a, rc) => a + rc.list.length, 0);
+      const ratio = c / maxCands;
+      if (c === 0) densityColors[s.abbr] = '#E2E8F0';
+      else if (ratio > 0.6) densityColors[s.abbr] = '#1D4ED8';
+      else if (ratio > 0.3) densityColors[s.abbr] = '#3B82F6';
+      else densityColors[s.abbr] = '#93C5FD';
+    });
+    const matchExpr = ['match', ['get', 'abbr']];
+    STATES.forEach(s => { matchExpr.push(s.abbr, densityColors[s.abbr] || '#E2E8F0'); });
+    matchExpr.push('#E2E8F0');
+    glMap.setPaintProperty('states-fill', 'fill-color', matchExpr);
+  } else {
+    // Restore status-based coloring
+    glMap.setPaintProperty('states-fill', 'fill-color', ['match', ['get', 'status'],
+      'window-open',  STATUS_COLORS['window-open'],
+      'window-soon',  STATUS_COLORS['window-soon'],
+      'upcoming',     STATUS_COLORS['upcoming'],
+      'general-only', STATUS_COLORS['general-only'],
+      STATUS_COLORS['inactive']
+    ]);
+  }
 }
 
 // ── MAP: State zoom + district loading ────────────────────────────────────────
@@ -1911,7 +2014,13 @@ function pick(abbr) {
 
 function emptyDetail() {
   const p = document.getElementById('detailPanel');
-  p.innerHTML = `<div class="no-sel"><div class="no-sel-icon">🗳</div><div class="no-sel-txt">SELECT A STATE<br>TO VIEW FCC WINDOW<br>&amp; DECLARED CANDIDATES</div></div>`;
+  p.innerHTML = `<div class="no-sel" id="insightPanel">
+    <div class="insight-header"><div><div class="insight-header-title">Market Intelligence</div><div class="insight-header-sub">Select a state for full breakdown</div></div></div>
+    <div class="insight-section" id="insightActive"><div class="insight-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Top Active States</div><ul class="insight-list" id="insightActiveList"></ul></div>
+    <div class="insight-section" id="insightUpcoming"><div class="insight-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Windows Opening Next 30 Days</div><ul class="insight-list" id="insightUpcomingList"></ul></div>
+    <div class="insight-section" id="insightDensity"><div class="insight-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Highest Candidate Density</div><ul class="insight-list" id="insightDensityList"></ul></div>
+  </div>`;
+  updateInsightPanel();
   checkDetailScroll();
 }
 
@@ -2208,15 +2317,15 @@ async function loadLiveData() {
     const updatedAt = new Date(statesJson.generatedAt);
     const timeStr = updatedAt.toLocaleDateString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
     if (DATA_BADGE) {
-      DATA_BADGE.style.color = '#059669';
-      DATA_BADGE.textContent = `● LIVE · UPDATED ${timeStr.toUpperCase()}`;
+      DATA_BADGE.style.color = '#34D399';
+      DATA_BADGE.textContent = `● LIVE · Updated ${timeStr}`;
     }
 
   } catch (err) {
     console.warn('[PoliticalWindow] Could not fetch live data, using cached snapshot:', err.message);
     if (DATA_BADGE) {
-      DATA_BADGE.style.color = 'var(--amber)';
-      DATA_BADGE.textContent = '● CACHED SNAPSHOT · FEB 2026';
+      DATA_BADGE.style.color = '#FBBF24';
+      DATA_BADGE.textContent = '● CACHED SNAPSHOT · Feb 2026';
     }
   }
 }
@@ -2271,8 +2380,7 @@ function stateHasBallot(abbr) { return !!(BALLOT[abbr] && BALLOT[abbr].length > 
 // ── INIT ───────────────────────────────────────────────────────────────────────
 buildMap(); buildHead(); drawTable();
 initMap().catch(() => {});
-document.getElementById('live-date').textContent =
-  new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
+// live-date removed from header — date now in data-badge after load
 
 // Attempt to load live data (non-blocking)
 loadLiveData();
@@ -2300,6 +2408,8 @@ document.getElementById('globalSearch').addEventListener('input', e => {
 });
 
 // ── KPI STATS ─────────────────────────────────────────────────────────────────
+let _prevWindowOpen = null;
+let _prevTotalCands = null;
 function updateKPIStats() {
   const windowOpen = STATES.filter(s => s.status === 'window-open').length;
   const windowSoon = STATES.filter(s => s.status === 'window-soon').length;
@@ -2311,10 +2421,84 @@ function updateKPIStats() {
   document.getElementById('kpiWindowsSub').textContent = windowOpen > 0
     ? `${windowOpen} open · ${windowSoon} opening soon`
     : windowSoon > 0 ? `${windowSoon} opening within 30d` : 'no primary windows open';
+
+  // Directional change indicators
+  const winChange = document.getElementById('kpiWindowsChange');
+  if (winChange) {
+    if (windowSoon > 0) {
+      winChange.className = 'kpi-change kpi-change-up';
+      winChange.textContent = `+${windowSoon} opening soon`;
+    } else {
+      winChange.className = 'kpi-change kpi-change-neutral';
+      winChange.textContent = 'stable';
+    }
+  }
+
   document.getElementById('kpiCands').textContent = totalCands;
   document.getElementById('kpiCandsSub').textContent = `across ${STATES.filter(s => s.cands.length > 0).length} states`;
+
+  const candsChange = document.getElementById('kpiCandsChange');
+  if (candsChange) {
+    if (_prevTotalCands !== null && totalCands !== _prevTotalCands) {
+      const diff = totalCands - _prevTotalCands;
+      candsChange.className = 'kpi-change ' + (diff > 0 ? 'kpi-change-up' : 'kpi-change-down');
+      candsChange.textContent = (diff > 0 ? '+' : '') + diff + ' since last refresh';
+    } else {
+      candsChange.className = 'kpi-change kpi-change-neutral';
+      candsChange.textContent = totalCands > 0 ? 'tracking' : '';
+    }
+  }
+  _prevTotalCands = totalCands;
+  _prevWindowOpen = windowOpen;
+
   document.getElementById('kpiGeneral').textContent = dGen > 0 ? dGen : 0;
+
+  // Update insight panel
+  updateInsightPanel();
 }
+
+function updateInsightPanel() {
+  const activeList = document.getElementById('insightActiveList');
+  const upcomingList = document.getElementById('insightUpcomingList');
+  const densityList = document.getElementById('insightDensityList');
+  if (!activeList || !upcomingList || !densityList) return;
+
+  const statusDot = { 'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'var(--blue-light)', 'general-only':'var(--blue-light)', 'inactive':'var(--slate)' };
+  const statusTag = {
+    'window-open':  '<span class="insight-item-tag" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(220,38,38,0.2)">OPEN</span>',
+    'window-soon':  '<span class="insight-item-tag" style="background:var(--amber-dim);color:var(--amber);border:1px solid rgba(217,119,6,0.2)">SOON</span>',
+    'upcoming':     '<span class="insight-item-tag" style="background:var(--blue-glow);color:var(--blue);border:1px solid rgba(29,78,216,0.2)">UPCOMING</span>',
+    'general-only': '<span class="insight-item-tag" style="background:var(--blue-glow);color:var(--blue);border:1px solid rgba(29,78,216,0.15)">GENERAL</span>',
+    'inactive':     '<span class="insight-item-tag" style="background:var(--slate-dim);color:var(--slate);border:1px solid rgba(148,163,184,0.2)">NONE</span>',
+  };
+
+  // Top Active States (window-open first, then window-soon)
+  const active = STATES.filter(s => s.status === 'window-open' || s.status === 'window-soon')
+    .sort((a, b) => (a.status === 'window-open' ? 0 : 1) - (b.status === 'window-open' ? 0 : 1))
+    .slice(0, 5);
+  activeList.innerHTML = active.length ? active.map(s => {
+    const races = s.races ? s.races.join(', ') : '';
+    return `<li class="insight-item" onclick="pick('${s.abbr}')"><div class="insight-dot" style="background:${statusDot[s.status]}"></div><span class="insight-item-name">${s.name}</span><span class="insight-item-meta">${races}</span>${statusTag[s.status]}</li>`;
+  }).join('') : '<li class="insight-empty">No active windows</li>';
+
+  // Windows opening within next 30 days
+  const upcoming = STATES.filter(s => s.status === 'window-soon' && s.dWin !== null && s.dWin > 0)
+    .sort((a, b) => a.dWin - b.dWin)
+    .slice(0, 5);
+  upcomingList.innerHTML = upcoming.length ? upcoming.map(s => {
+    return `<li class="insight-item" onclick="pick('${s.abbr}')"><div class="insight-dot" style="background:var(--amber)"></div><span class="insight-item-name">${s.name}</span><span class="insight-item-meta">${s.dWin}d</span>${statusTag['window-soon']}</li>`;
+  }).join('') : '<li class="insight-empty">No windows opening soon</li>';
+
+  // Highest candidate density
+  const density = STATES.filter(s => s.cands.length > 0)
+    .map(s => ({ ...s, totalCands: s.cands.reduce((a, rc) => a + rc.list.length, 0) }))
+    .sort((a, b) => b.totalCands - a.totalCands)
+    .slice(0, 5);
+  densityList.innerHTML = density.length ? density.map(s => {
+    return `<li class="insight-item" onclick="pick('${s.abbr}')"><div class="insight-dot" style="background:${statusDot[s.status]}"></div><span class="insight-item-name">${s.name}</span><span class="insight-item-meta">${s.totalCands} candidates</span></li>`;
+  }).join('') : '<li class="insight-empty">No candidates declared</li>';
+}
+
 updateKPIStats();
 </script>
 
