@@ -578,6 +578,9 @@ authFetch(API+'/api/rates?limit=5000')
     var stations=Array.from(new Set(ALL_DATA.map(function(r){return r.callsign;}).filter(Boolean))).sort();
     var stationEl=document.getElementById('f-station');
     stations.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;stationEl.appendChild(o);});
+    // Apply ?q= search param from global search bar
+    var qParam=new URLSearchParams(window.location.search).get('q');
+    if(qParam){document.getElementById('f-search').value=qParam;}
     render();
   })
   .catch(function(e){

@@ -163,8 +163,8 @@
     text-transform:uppercase; letter-spacing:0.04em;
   }
   .header-btn-cta:hover { background:var(--blue-light); border-color:var(--blue-light); box-shadow:0 0 20px rgba(37,99,235,0.5), 0 0 6px rgba(37,99,235,0.3); }
-  .header-page-title { font-family:var(--sans); font-size:0.95rem; font-weight:700; color:var(--text); letter-spacing:0.01em; }
-  .header-page-title span { color:var(--text-muted); font-weight:400; font-size:0.75rem; margin-left:0.5rem; }
+  .header-page-title { font-family:var(--sans); font-size:0.85rem; font-weight:600; color:rgba(255,255,255,0.85); letter-spacing:0.02em; }
+  .header-page-title span { color:rgba(255,255,255,0.5); font-weight:400; font-size:0.75rem; margin-left:0.5rem; }
 
   /* ── PAGE WRAP (next to sidebar) ── */
   .page-wrap {
@@ -748,10 +748,10 @@
   <div class="header-left">
     <span class="header-meta" id="data-badge" style="color:rgba(255,255,255,0.5);font-size:0.55rem;letter-spacing:0.03em">● LOADING…</span>
   </div>
-  <div class="header-search">
+  <form class="header-search" id="globalSearchForm" action="/public-file" method="get">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="text" placeholder="Search states, candidates, races..." id="globalSearch">
-  </div>
+    <input type="text" name="q" placeholder="Search filings, stations, candidates..." id="globalSearch">
+  </form>
   <div class="header-right">
     <button class="header-btn">Export</button>
     <a href="/public-file?uploaded=week" class="header-btn-cta" id="scanNewFilings">Scan New Filings</a>
@@ -2353,12 +2353,7 @@ function toggleSidebar() {
   setTimeout(() => { if (glMap) glMap.resize(); }, 250);
 }
 
-// Wire global search to table filter
-document.getElementById('globalSearch').addEventListener('input', e => {
-  const v = e.target.value.toLowerCase().trim();
-  document.getElementById('searchInput').value = v;
-  q = v; drawTable();
-});
+// Global search navigates to /public-file with query param (handled by form action)
 
 // ── KPI STATS ─────────────────────────────────────────────────────────────────
 let _prevWindowOpen = null;
