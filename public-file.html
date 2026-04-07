@@ -274,7 +274,8 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
 </div>
 <div id="controls">
   <div class="tab-group">
-    <button class="tab active" data-view="candidate">BY CANDIDATE</button>
+    <button class="tab active" data-view="date">BY DATE</button>
+    <button class="tab" data-view="candidate">BY CANDIDATE</button>
     <button class="tab" data-view="dma">BY DMA</button>
     <button class="tab" data-view="station">BY STATION</button>
     <button class="tab" data-view="raw">CONTRACTS</button>
@@ -330,9 +331,9 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
     <div id="raw-header"></div>
     <table>
       <colgroup>
-        <col style="width:12%"><col style="width:14%"><col style="width:3%"><col style="width:7%">
-        <col style="width:4%"><col style="width:10%"><col style="width:6%"><col style="width:8%">
-        <col style="width:10%"><col style="width:4%"><col style="width:6%"><col style="width:7%">
+        <col style="width:11%"><col style="width:13%"><col style="width:3%"><col style="width:6%">
+        <col style="width:3%"><col style="width:9%"><col style="width:5%"><col style="width:7%">
+        <col style="width:9%"><col style="width:7%"><col style="width:4%"><col style="width:5%"><col style="width:7%">
         <col style="width:4%">
       </colgroup>
       <thead><tr id="raw-thead">
@@ -344,7 +345,8 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
         <th class="sortable" data-col="dma_name">DMA</th>
         <th class="sortable" data-col="callsign">STATION</th>
         <th class="sortable" data-col="order_number">ORDER #</th>
-        <th class="sortable sort-desc" data-col="start_date">DATES</th>
+        <th class="sortable" data-col="start_date">DATES</th>
+        <th class="sortable" data-col="upload_date">UPLOADED</th>
         <th>DPTCD</th>
         <th class="sortable" data-col="window_status">WINDOW</th>
         <th class="sortable" data-col="gross_total">TOTAL</th>
@@ -377,7 +379,7 @@ document.getElementById('live-date').textContent =
 var API='https://rates.politicalwindow.com';
 var RATES_TOKEN=localStorage.getItem('pw_token');
 function authFetch(url,opts){var o=opts||{};o.headers=Object.assign({},o.headers,{'Authorization':'Bearer '+(RATES_TOKEN||'')});return fetch(url,o);}
-var ALL_DATA=[],SERVER_STATS={},currentView='candidate',currentSort='spend';
+var ALL_DATA=[],SERVER_STATS={},currentView='date',currentSort='spend';
 var rawSort={col:'start_date',dir:'desc'};
 
 function fmt$(n){if(!n&&n!==0)return'\u2014';var v=parseFloat(n);if(isNaN(v))return'\u2014';if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';if(v>=1000)return'$'+(v/1000).toFixed(0)+'K';return'$'+v.toFixed(0);}
@@ -386,6 +388,7 @@ function pc(p){return p==='R'?'c-r':p==='D'?'c-d':'c-muted';}
 function pill(label,color,bg){return'<span class="pill" style="color:'+(color||'#64748B')+';background:'+(bg||'rgba(148,163,184,0.08)')+';border-color:'+(color||'#64748B')+'33">'+esc(label)+'</span>';}
 function partyPill(p){var c={R:'#DC2626',D:'#3b82f6',I:'#8B5CF6'},b={R:'rgba(220,38,38,0.08)',D:'rgba(59,130,246,0.08)',I:'rgba(139,92,246,0.08)'};return pill(p,c[p],b[p]);}
 function fmtDate(d){if(!d)return'';return d.slice(5,10).replace('-','/');}
+function fmtUploadDateShort(d){if(!d)return'\u2014';var dt=new Date(d);if(isNaN(dt.getTime()))return'\u2014';return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
 function fmtDates(r){var s=fmtDate(r.start_date),e=fmtDate(r.end_date);if(!s&&!e)return'\u2014';if(!e)return s;if(!s)return e;return s+'\u2013'+e;}
 var DAYPART_CODES={'Early Morning':'EM','Daytime':'DT','Early Fringe':'EF','Early News':'EN','Prime Access':'PA','Primetime':'PT','Late News':'LN','Late Fringe':'LF','Overnight':'ON'};
 function fmtDayparts(str){if(!str)return'\u2014';return str.split(/[,;\/+|&]+/).map(function(s){var t=s.trim();return DAYPART_CODES[t]||t;}).filter(Boolean).join('\u00B7');}
@@ -427,20 +430,38 @@ function updateStats(rows){
   }
 }
 
+function fmtUploadDate(d){
+  if(!d)return 'Unknown';
+  var dt=new Date(d);
+  if(isNaN(dt.getTime()))return 'Unknown';
+  return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+function uploadDateKey(d){
+  if(!d)return '0000-00-00';
+  return d.slice(0,10);
+}
 function buildGroups(rows){
   var map={};
   rows.forEach(function(r){
-    var k=currentView==='candidate'?candKey(r):currentView==='dma'?(r.dma_name||'Unknown'):(r.callsign||'Unknown');
-    if(!map[k])map[k]={label:k,contracts:0,spend:0,parties:new Set(),states:new Set(),dmas:new Set(),stations:new Set(),rows:[]};
+    var k=currentView==='date'?uploadDateKey(r.upload_date):currentView==='candidate'?candKey(r):currentView==='dma'?(r.dma_name||'Unknown'):(r.callsign||'Unknown');
+    var label=currentView==='date'?fmtUploadDate(r.upload_date):k;
+    if(!map[k])map[k]={label:label,sortKey:k,contracts:0,spend:0,parties:new Set(),states:new Set(),dmas:new Set(),stations:new Set(),candidates:new Set(),rows:[]};
     map[k].contracts++;map[k].spend+=parseFloat(r.gross_total)||0;
     if(r.party)map[k].parties.add(r.party);if(r.state)map[k].states.add(r.state);
     if(r.dma_name)map[k].dmas.add(r.dma_name);if(r.callsign)map[k].stations.add(r.callsign);
+    if(r.candidate)map[k].candidates.add(r.candidate);
     map[k].rows.push(r);
   });
-  return Object.values(map).sort(function(a,b){return currentSort==='spend'?b.spend-a.spend:b.contracts-a.contracts;});
+  var groups=Object.values(map);
+  if(currentView==='date'){
+    groups.sort(function(a,b){return b.sortKey.localeCompare(a.sortKey);});
+  } else {
+    groups.sort(function(a,b){return currentSort==='spend'?b.spend-a.spend:b.contracts-a.contracts;});
+  }
+  return groups;
 }
 
-var DETAIL_TH='<tr><th>CANDIDATE</th><th>ADVERTISER</th><th>PARTY</th><th>OFFICE</th><th>STATE</th><th>DMA</th><th>STATION</th><th>ORDER #</th><th>DATES</th><th>DPTCD</th><th>WINDOW</th><th>TOTAL</th><th>DOC</th></tr>';
+var DETAIL_TH='<tr><th>CANDIDATE</th><th>ADVERTISER</th><th>PARTY</th><th>OFFICE</th><th>STATE</th><th>DMA</th><th>STATION</th><th>ORDER #</th><th>DATES</th><th>UPLOADED</th><th>DPTCD</th><th>WINDOW</th><th>TOTAL</th><th>DOC</th></tr>';
 
 function detailRow(r){
   return'<tr>'+
@@ -453,6 +474,7 @@ function detailRow(r){
     '<td class="c-amber">'+esc(r.callsign||'\u2014')+'</td>'+
     '<td class="c-muted">'+esc(r.order_number||'\u2014')+'</td>'+
     '<td class="c-muted">'+esc(fmtDates(r))+'</td>'+
+    '<td class="c-muted">'+fmtUploadDateShort(r.upload_date)+'</td>'+
     '<td class="c-muted">'+fmtDaypartCodes(r)+'</td>'+
     '<td class="'+(r.window_status==='OOW'?'c-bright':r.window_status==='General'?'c-green':'c-amber')+'">'+esc(r.window_status||'\u2014')+'</td>'+
     '<td class="c-green">'+fmt$(r.gross_total)+'</td>'+
@@ -465,6 +487,7 @@ function renderGrouped(groups){
   document.getElementById('grouped-body').innerHTML=groups.map(function(g,i){
     var barColor=i<3?'#2B6CB0':'#E3E8EF';
     var pills=[...g.parties].map(partyPill).join('');
+    if(currentView==='date'){var cands=g.candidates?g.candidates.size:0;if(cands>0)pills+=pill(cands+' candidate'+(cands!==1?'s':''));[...g.states].sort().forEach(function(s){pills+=pill(s,'#2B6CB0','rgba(43,108,176,0.06)');});pills+=pill(g.stations.size+' STN');}
     if(currentView==='candidate'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#2B6CB0','rgba(43,108,176,0.06)');});pills+=pill(g.dmas.size+' DMA'+(g.dmas.size!==1?'s':''));pills+=pill(g.stations.size+' STN');}
     if(currentView==='dma'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#2B6CB0','rgba(43,108,176,0.06)');});pills+=pill(g.stations.size+' stations');}
     if(currentView==='station'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#2B6CB0','rgba(43,108,176,0.06)');});}
@@ -606,7 +629,7 @@ document.querySelectorAll('#raw-thead th.sortable').forEach(function(th){
   th.addEventListener('click',function(){
     var col=th.dataset.col;
     if(rawSort.col===col){rawSort.dir=rawSort.dir==='asc'?'desc':'asc';}
-    else{rawSort.col=col;rawSort.dir=col==='gross_total'?'desc':'asc';}
+    else{rawSort.col=col;rawSort.dir=(col==='gross_total'||col==='upload_date')?'desc':'asc';}
     render();
   });
 });
