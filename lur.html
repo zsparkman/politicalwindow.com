@@ -94,7 +94,7 @@ td{font-family:var(--mono);font-size:0.6rem;padding:5px 10px;border-bottom:1px s
 .highlight-row td{font-weight:600}
 
 /* ── AUTH ── */
-#auth-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.7);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center}
+#auth-overlay{display:flex;position:fixed;inset:0;background:rgba(15,23,42,0.7);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center}
 #auth-card{background:#fff;border-radius:10px;width:360px;max-width:90vw;padding:32px 28px;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
 .auth-header{text-align:center;margin-bottom:24px}
 .auth-logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#FF642D,#FF8F6B);display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:0.8rem;color:#fff;font-weight:800;margin:0 auto 10px}
@@ -463,6 +463,7 @@ function hideOverlay(){document.getElementById('auth-overlay').style.display='no
 window.logout=function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');TOKEN=null;ALL_DATA=[];showOverlay();var lb=document.getElementById('logout-btn');if(lb)lb.style.display='none';};
 function showIdleState(){
   var el=document.getElementById('loading');el.style.display='flex';el.textContent='SELECT FILTERS AND CLICK RUN REPORT';
+  var badge=document.getElementById('data-badge');if(badge){badge.style.color='rgba(255,255,255,0.7)';badge.textContent='\u25CF READY';}
   loadFilters();
 }
 function loadFilters(){
