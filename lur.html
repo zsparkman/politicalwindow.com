@@ -466,6 +466,22 @@ function showIdleState(){
   var badge=document.getElementById('data-badge');if(badge){badge.style.color='rgba(255,255,255,0.7)';badge.textContent='\u25CF READY';}
   loadFilters();
 }
+function populateCandidateDropdown(candidates){
+  var sel=document.getElementById('f-candidate');
+  sel.innerHTML='<option value="ALL">All Candidates</option>';
+  candidates.sort().forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+  var entityParam=new URLSearchParams(window.location.search).get('candidate');
+  if(entityParam)sel.value=entityParam;
+}
+function loadCandidateList(){
+  authFetch(API+'/api/candidates/tracker')
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(j){
+      var data=j.data||[];
+      var names=[...new Set(data.map(function(c){return c.candidate_name;}).filter(Boolean))];
+      if(names.length)populateCandidateDropdown(names);
+    }).catch(function(){});
+}
 function loadFilters(){
   authFetch(API+'/api/lines/filters')
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
@@ -483,16 +499,16 @@ function loadFilters(){
       if(j.dayparts&&j.dayparts.length)pop('f-daypart',j.dayparts);
       // Also populate candidates from filters
       if(j.candidates&&j.candidates.length){
-        var sel=document.getElementById('f-candidate');
-        sel.innerHTML='<option value="ALL">All Candidates</option>';
-        j.candidates.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+        populateCandidateDropdown(j.candidates);
+      }else{
+        loadCandidateList();
       }
       // Apply URL params
       var params=new URLSearchParams(window.location.search);
       if(params.get('candidate'))document.getElementById('f-candidate').value=params.get('candidate');
       if(params.get('state'))document.getElementById('f-state').value=params.get('state');
       if(params.get('station'))document.getElementById('f-station').value=params.get('station');
-    }).catch(function(){});
+    }).catch(function(){loadCandidateList();});
 }
 
 document.addEventListener('DOMContentLoaded',function(){
