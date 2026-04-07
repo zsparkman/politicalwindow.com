@@ -112,7 +112,7 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
 /* ── INVOICE REVIEW MODAL ── */
 #invoice-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);align-items:center;justify-content:center}
 #invoice-overlay.open{display:flex}
-#invoice-modal{background:#fff;border-radius:10px;width:96vw;max-width:1100px;height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden}
+#invoice-modal{background:#fff;border-radius:10px;width:98vw;max-width:1600px;height:94vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden}
 .inv-topbar{background:#0f1623;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;flex-shrink:0}
 .inv-topbar-left{font-family:var(--mono);font-size:0.58rem;color:#E2E8F0;letter-spacing:0.06em;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .inv-topbar-left .inv-badge{font-size:0.5rem;padding:1px 5px;border-radius:2px;font-weight:700;letter-spacing:0.08em}
@@ -142,7 +142,8 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
 .inv-pdf-banner{background:var(--red);color:#fff;font-family:var(--mono);font-size:0.58rem;font-weight:700;letter-spacing:0.06em;padding:8px 14px;text-align:center;position:sticky;top:0;z-index:2}
 .inv-pdf-canvas-wrap{position:relative}
 .inv-pdf-canvas-wrap canvas{display:block;width:100%}
-.inv-pdf-highlight{position:absolute;border:2.5px solid #dc2626;background:rgba(220,38,38,0.08);border-radius:2px;pointer-events:none;z-index:1}
+.inv-pdf-highlight{position:absolute;border:2.5px solid #dc2626;background:rgba(220,38,38,0.10);border-radius:2px;pointer-events:none;z-index:1}
+.inv-pdf-highlight-row{position:absolute;left:0;right:0;border-top:2px solid #dc2626;border-bottom:2px solid #dc2626;background:rgba(220,38,38,0.06);pointer-events:none;z-index:1}
 .inv-pdf-skeleton{padding:20px;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;min-height:200px}
 .inv-pdf-skeleton-bar{height:8px;background:#D1D5DB;border-radius:4px;animation:inv-pulse 1.5s ease-in-out infinite}
 @keyframes inv-pulse{0%,100%{opacity:0.4}50%{opacity:1}}
@@ -389,7 +390,7 @@ function renderMatchups(rows){
   if(!matchups.length){
     document.getElementById('matchups-count').textContent='';
     document.getElementById('matchups-thead').innerHTML='';
-    document.getElementById('matchups-body').innerHTML='<tr><td colspan="11" style="padding:40px 14px;text-align:center;color:var(--text-faint);font-size:0.72rem;letter-spacing:0.08em">NO RATE VARIANCES FOUND</td></tr>';
+    document.getElementById('matchups-body').innerHTML='<tr><td colspan="13" style="padding:40px 14px;text-align:center;color:var(--text-faint);font-size:0.72rem;letter-spacing:0.08em">NO RATE VARIANCES FOUND</td></tr>';
     return;
   }
 
@@ -408,7 +409,7 @@ function renderMatchups(rows){
   document.getElementById('s-weeks').textContent=new Set(allRows.map(function(r){return r.week_of;}).filter(Boolean)).size;
 
   document.getElementById('matchups-count').textContent=matchups.length+' VARIANCES';
-  document.getElementById('matchups-thead').innerHTML='<tr><th>CANDIDATE</th><th>PARTY</th><th>STATION</th><th>DESCRIPTION</th><th>TIME PERIOD</th><th>WEEK OF</th><th>ORDER #</th><th>RATE</th><th>UNITS</th><th>LINE TOTAL</th><th>INVOICE</th></tr>';
+  document.getElementById('matchups-thead').innerHTML='<tr><th>CANDIDATE</th><th>PARTY</th><th>STATION</th><th>DESCRIPTION</th><th>TIME PERIOD</th><th>WEEK OF</th><th>ORDER #</th><th>LINE #</th><th>RATE CLASS</th><th>RATE</th><th>UNITS</th><th>LINE TOTAL</th><th>INVOICE</th></tr>';
 
   var html='';
   var cap=Math.min(matchups.length,300);
@@ -418,10 +419,10 @@ function renderMatchups(rows){
     var winBadge=winStatus?(' <span style="font-size:0.5rem;padding:1px 4px;border-radius:2px;'+(winStatus==='Primary'?'color:var(--amber);background:var(--amber-dim)':winStatus==='General'?'color:var(--green);background:var(--green-dim)':'color:var(--text-faint);background:var(--navy)')+'">'+winStatus+'</span>'):'';
 
     var groupIdx=i;
-    html+='<tr><td colspan="11" class="matchup-slot-hdr">'
+    html+='<tr><td colspan="13" class="matchup-slot-hdr">'
       +esc(s.station||'\u2014')+' \u00B7 '+esc(s.description||'\u2014')+' \u00B7 '+esc(s.time_period||'\u2014')+' \u00B7 WK '+esc(fmtWeek(s.week_of))
       +winBadge
-      +' <span style="color:#94A3B8">('+s.rows.length+' buyers)</span>'
+      +' <span style="color:#94A3B8">('+new Set(s.rows.map(function(r){return r.candidate||r.advertiser||'\u2014';})).size+' buyers)</span>'
       +'<button class="inv-review-btn" data-group-idx="'+groupIdx+'" title="Review invoices">&#10530;</button>'
       +'</td></tr>';
 
@@ -444,6 +445,8 @@ function renderMatchups(rows){
         +'<td class="c-muted">'+esc(r.time_period||'\u2014')+'</td>'
         +'<td>'+fmtWeek(r.week_of)+'</td>'
         +'<td class="c-muted">'+esc(r.order_number||'\u2014')+'</td>'
+        +'<td class="c-muted">'+esc(r.line_number||'\u2014')+'</td>'
+        +'<td class="c-muted">'+esc(r.rate_class||'\u2014')+'</td>'
         +'<td class="c-bright">'+(r.rate?'$'+parseFloat(r.rate).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'\u2014')+'</td>'
         +'<td>'+esc(r.units||'\u2014')+'</td>'
         +'<td class="c-green">'+(r.line_total?'$'+parseFloat(r.line_total).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'\u2014')+'</td>'
@@ -451,8 +454,16 @@ function renderMatchups(rows){
         +'</tr>';
     });
   }
-  if(matchups.length>cap)html+='<tr><td colspan="11" class="c-muted" style="padding:6px 14px;font-size:0.58rem">'+(matchups.length-cap)+' more variances \u2014 apply filters to narrow</td></tr>';
+  if(matchups.length>cap)html+='<tr><td colspan="13" class="c-muted" style="padding:6px 14px;font-size:0.58rem">'+(matchups.length-cap)+' more variances \u2014 apply filters to narrow</td></tr>';
   document.getElementById('matchups-body').innerHTML=html;
+
+  // Pre-warm PDF cache for variance invoices (fire-and-forget)
+  var warmIds={};
+  matchups.forEach(function(s){s.rows.forEach(function(r){if(r.fcc_file_id)warmIds[r.fcc_file_id]=1;});});
+  var warmList=Object.keys(warmIds).slice(0,20);
+  if(warmList.length&&TOKEN){
+    fetch(API+'/api/pdf-warm',{method:'POST',headers:{'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'},body:JSON.stringify({file_ids:warmList})}).catch(function(){});
+  }
 
   // Store matchups for modal access and wire review buttons
   window._lur_matchups=matchups;
@@ -653,7 +664,8 @@ function openInvoiceReview(group){
   // Top bar
   var topHtml=esc(group.station)+' &middot; '+esc(group.description)+' &middot; WK '+esc(fmtWeek(group.week_of));
   if(winStatus&&winStatus!=='OOW') topHtml+=' <span class="inv-badge inv-badge-win">'+winStatus+'</span>';
-  topHtml+=' <span class="inv-badge inv-badge-var">'+sorted.length+' BUYERS &middot; +'+variancePct+'% VARIANCE</span>';
+  var uniqueBuyers=new Set(sorted.map(function(r){return r.candidate||r.advertiser||'\u2014';})).size;
+  topHtml+=' <span class="inv-badge inv-badge-var">'+uniqueBuyers+' BUYERS &middot; +'+variancePct+'% VARIANCE</span>';
   document.getElementById('inv-topbar-left').innerHTML=topHtml;
 
   // Callout strip
@@ -719,10 +731,11 @@ function buildPanelHTML(row,label,idx,isLur,lurRate){
   var panelId=isLur?'inv-pdf-right':'inv-pdf-left';
   var units=row.units||'\u2014';
   var total=row.line_total?'$'+fmtRate(row.line_total):'\u2014';
+  var lineNum=row.line_number?'Line #'+esc(row.line_number):'';
 
   var h='<div class="inv-panel">';
   h+='<div class="inv-panel-hdr">';
-  h+='<div class="inv-panel-label">Invoice '+esc(label)+'</div>';
+  h+='<div class="inv-panel-label">Invoice '+esc(label)+(lineNum?' &middot; <span style="color:var(--text);font-weight:700">'+lineNum+'</span>':'')+'</div>';
   h+='<div class="inv-panel-cand">'+esc(cand)+' &middot; <span style="font-size:0.6rem;color:var(--text-muted);font-weight:400">Order #'+esc(row.order_number||'\u2014')+'</span></div>';
   h+='<div class="inv-panel-rate" style="color:'+rateColor+'">$'+fmtRate(row.rate)+'<span class="inv-panel-rate-sub">'+esc(units)+' units &middot; '+esc(total)+' total</span></div>';
   h+='</div>';
@@ -730,7 +743,7 @@ function buildPanelHTML(row,label,idx,isLur,lurRate){
   h+='<div class="inv-pdf-skeleton"><div class="inv-pdf-skeleton-bar" style="width:80%"></div><div class="inv-pdf-skeleton-bar" style="width:60%"></div><div class="inv-pdf-skeleton-bar" style="width:70%"></div><div style="margin-top:10px;font-family:var(--mono);font-size:0.52rem;color:var(--text-faint)">LOADING PDF\u2026</div></div>';
   h+='</div>';
   h+='<div class="inv-panel-footer">';
-  h+='<span>Order #'+esc(row.order_number||'\u2014')+' &middot; <span style="color:'+rateColor+';font-weight:700">$'+fmtRate(row.rate)+'/spot</span> &middot; '+esc(units)+' units &middot; WK '+esc(fmtWeek(row.week_of))+'</span>';
+  h+='<span>Order #'+esc(row.order_number||'\u2014')+(lineNum?' &middot; '+lineNum:'')+' &middot; <span style="color:'+rateColor+';font-weight:700">$'+fmtRate(row.rate)+'/spot</span> &middot; '+esc(units)+' units &middot; WK '+esc(fmtWeek(row.week_of))+'</span>';
   if(isLur) h+='<span style="color:var(--text-faint);font-size:0.45rem">LUR Rate</span>';
   h+=' ';
   if(row.fcc_pdf_url) h+='<a href="'+esc(row.fcc_pdf_url)+'" target="_blank" rel="noopener">Open PDF &#8599;</a>';
@@ -739,29 +752,50 @@ function buildPanelHTML(row,label,idx,isLur,lurRate){
   return h;
 }
 
+function getPdfProxyUrl(row){
+  if(row.fcc_file_id)return API+'/api/pdf-proxy/'+encodeURIComponent(row.fcc_file_id);
+  return row.fcc_pdf_url||null;
+}
+
 function loadPanelPdf(containerId,row){
   var container=document.getElementById(containerId);
   if(!container)return;
-  if(!row.fcc_pdf_url){
+  var proxyUrl=getPdfProxyUrl(row);
+  if(!proxyUrl){
     container.innerHTML='<div class="inv-pdf-error">No PDF available for this invoice.<br><br>Order #'+esc(row.order_number||'\u2014')+'</div>';
     return;
   }
   ensurePdfJs(function(lib){
     if(!lib){
-      container.innerHTML='<div class="inv-pdf-error">Could not load PDF viewer.<br><br><a href="'+esc(row.fcc_pdf_url)+'" target="_blank" rel="noopener">Open PDF &#8599;</a></div>';
+      container.innerHTML='<div class="inv-pdf-error">Could not load PDF viewer.<br><br><a href="'+esc(row.fcc_pdf_url||'')+'" target="_blank" rel="noopener">Open PDF &#8599;</a></div>';
       return;
     }
+
+    // Build search signals for locating the relevant line
     var orderNum=row.order_number||'';
-    var loadingTask=lib.getDocument({url:row.fcc_pdf_url,withCredentials:false});
-    loadingTask.promise.then(function(pdf){
+    var lineNum=row.line_number?String(row.line_number):'';
+    var rateStr=row.rate?parseFloat(row.rate).toFixed(2):'';
+    // Also try rate without trailing zeros (e.g. "150" for "150.00")
+    var rateAlt=row.rate?String(parseFloat(row.rate)):'';
+
+    // Fetch PDF through proxy (solves CORS)
+    var fetchOpts={};
+    if(TOKEN)fetchOpts.headers={'Authorization':'Bearer '+TOKEN};
+    fetch(proxyUrl,fetchOpts).then(function(r){
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      return r.arrayBuffer();
+    }).then(function(buf){
+      return lib.getDocument({data:buf}).promise;
+    }).then(function(pdf){
       container.innerHTML='';
       var found=false;
+      var scrollTarget=null;
       var renderChain=Promise.resolve();
       for(var p=1;p<=pdf.numPages;p++){
         (function(pageNum){
           renderChain=renderChain.then(function(){
             return pdf.getPage(pageNum).then(function(page){
-              var scale=1.5;
+              var scale=2.5;
               var viewport=page.getViewport({scale:scale});
               var wrap=document.createElement('div');
               wrap.className='inv-pdf-canvas-wrap';
@@ -773,31 +807,62 @@ function loadPanelPdf(containerId,row){
               container.appendChild(wrap);
               var ctx=canvas.getContext('2d');
               return page.render({canvasContext:ctx,viewport:viewport}).promise.then(function(){
-                if(!orderNum)return;
+                if(found||(!orderNum&&!lineNum))return;
                 return page.getTextContent().then(function(textContent){
                   if(found)return;
                   var items=textContent.items;
-                  for(var i=0;i<items.length;i++){
-                    var item=items[i];
-                    if(item.str&&item.str.indexOf(orderNum)!==-1){
-                      found=true;
+
+                  // Strategy: find the text row that best matches our line.
+                  // Group text items by Y position (same row = similar Y)
+                  var rows={};
+                  items.forEach(function(item){
+                    if(!item.str||!item.str.trim())return;
+                    var y=Math.round(item.transform[5]);
+                    // Bucket by Y within 3-unit tolerance
+                    var bucketY=Math.round(y/3)*3;
+                    if(!rows[bucketY])rows[bucketY]={y:y,items:[],text:''};
+                    rows[bucketY].items.push(item);
+                    rows[bucketY].text+=' '+item.str;
+                  });
+
+                  // Score each row for match quality
+                  var bestRow=null,bestScore=0;
+                  Object.keys(rows).forEach(function(ky){
+                    var r=rows[ky];
+                    var txt=r.text;
+                    var score=0;
+                    // Highest signal: line number match in context of order
+                    if(lineNum&&txt.indexOf(lineNum)!==-1)score+=2;
+                    if(orderNum&&txt.indexOf(orderNum)!==-1)score+=3;
+                    if(rateStr&&txt.indexOf(rateStr)!==-1)score+=2;
+                    else if(rateAlt&&txt.indexOf(rateAlt)!==-1)score+=1;
+                    // We want the row that has the most matching signals
+                    if(score>bestScore){bestScore=score;bestRow=r;}
+                  });
+
+                  // If we found a strong match (at least order# or line#+rate)
+                  if(bestRow&&bestScore>=3){
+                    found=true;
+                    // Calculate bounding box spanning the full row
+                    var minX=Infinity,maxX=0,minY=Infinity,maxY=0;
+                    bestRow.items.forEach(function(item){
                       var tx=item.transform;
-                      var x=tx[4]*scale;
-                      var y=viewport.height-tx[5]*scale-item.height*scale;
-                      var w=item.width*scale;
-                      var h=item.height*scale;
-                      var hl=document.createElement('div');
-                      hl.className='inv-pdf-highlight';
-                      hl.style.left=Math.max(0,x-4)+'px';
-                      hl.style.top=Math.max(0,y-4)+'px';
-                      hl.style.width=(w+8)+'px';
-                      hl.style.height=(h+8)+'px';
-                      wrap.appendChild(hl);
-                      setTimeout(function(){
-                        wrap.scrollIntoView({behavior:'smooth',block:'center'});
-                      },100);
-                      break;
-                    }
+                      var ix=tx[4]*scale;
+                      var ih=(item.height||tx[0])*scale;
+                      var iw=(item.width||0)*scale;
+                      var iy=viewport.height-tx[5]*scale-ih;
+                      if(ix<minX)minX=ix;
+                      if(ix+iw>maxX)maxX=ix+iw;
+                      if(iy<minY)minY=iy;
+                      if(iy+ih>maxY)maxY=iy+ih;
+                    });
+                    // Draw full-width row highlight
+                    var hl=document.createElement('div');
+                    hl.className='inv-pdf-highlight-row';
+                    hl.style.top=Math.max(0,minY-4)+'px';
+                    hl.style.height=Math.max(12,(maxY-minY)+8)+'px';
+                    wrap.appendChild(hl);
+                    scrollTarget=wrap;
                   }
                 }).catch(function(){});
               });
@@ -806,15 +871,22 @@ function loadPanelPdf(containerId,row){
         })(p);
       }
       renderChain.then(function(){
-        if(!found&&orderNum){
+        if(scrollTarget){
+          setTimeout(function(){scrollTarget.scrollIntoView({behavior:'smooth',block:'center'});},150);
+        }
+        if(!found&&(orderNum||lineNum)){
           var banner=document.createElement('div');
           banner.className='inv-pdf-banner';
-          banner.textContent='Locate Order #'+orderNum+' in the document below';
+          var hint='Locate ';
+          if(orderNum)hint+='Order #'+orderNum;
+          if(lineNum)hint+=(orderNum?', ':'')+' Line #'+lineNum;
+          hint+=' in the document below';
+          banner.textContent=hint;
           container.insertBefore(banner,container.firstChild);
         }
       });
     }).catch(function(){
-      container.innerHTML='<div class="inv-pdf-error">Could not load PDF.<br>This may be due to browser security restrictions on cross-origin documents.<br><br><a href="'+esc(row.fcc_pdf_url)+'" target="_blank" rel="noopener">Open PDF &#8599;</a></div>';
+      container.innerHTML='<div class="inv-pdf-error">Could not load PDF.'+(row.fcc_pdf_url?'<br><br><a href="'+esc(row.fcc_pdf_url)+'" target="_blank" rel="noopener">Open PDF &#8599;</a>':'')+'</div>';
     });
   });
 }
