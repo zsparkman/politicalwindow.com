@@ -235,7 +235,7 @@ function loadDropdowns(){
   }).catch(function(){});
   authFetch(API+'/api/lur-entities').then(function(r){return r.json();}).then(function(j){
     var sel=document.getElementById('f-entity');
-    var entities=(j||[]).sort(function(a,b){return(a.candidate_name||'').localeCompare(b.candidate_name||'');});
+    var entities=(j.data||j||[]).sort(function(a,b){return(a.candidate_name||'').localeCompare(b.candidate_name||'');});
     entities.forEach(function(e){
       var o=document.createElement('option');o.value=e.political_entity_id;
       o.textContent=e.candidate_name+' ('+e.party+'-'+e.state+' '+e.office+')';sel.appendChild(o);
