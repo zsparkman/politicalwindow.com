@@ -369,11 +369,15 @@ function fmtMoney(n) {
 }
 function fmtDate(d) {
   if (!d) return '\u2014';
-  return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  var dt = new Date(d);
+  if (isNaN(dt.getTime())) return '\u2014';
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 function fmtShortDate(d) {
   if (!d) return '\u2014';
-  return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  var dt = new Date(d);
+  if (isNaN(dt.getTime())) return '\u2014';
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 // ── AUTH ──
