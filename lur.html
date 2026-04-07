@@ -220,6 +220,7 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
   <div class="filter-wrap"><div class="filter-lbl">OFFICE</div><select id="f-office"><option value="ALL">All Offices</option></select></div>
   <div class="filter-wrap"><div class="filter-lbl">DMA</div><select id="f-dma"><option value="ALL">All DMAs</option></select></div>
   <div class="filter-wrap"><div class="filter-lbl">STATION</div><select id="f-station"><option value="ALL">All Stations</option></select></div>
+  <div class="filter-wrap"><div class="filter-lbl">RATE CLASS</div><select id="f-rateclass"><option value="ALL">All</option></select></div>
   <div class="filter-wrap"><div class="filter-lbl">DAYPART</div><select id="f-daypart"><option value="ALL">All</option><option value="EM">EM</option><option value="MN">MN</option><option value="DT">DT</option><option value="EF">EF</option><option value="EN">EN</option><option value="PA">PA</option><option value="PT">PT</option><option value="LN">LN</option><option value="LF">LF</option><option value="ON">ON</option></select></div>
   <div class="filter-wrap"><div class="filter-lbl">WINDOW</div><select id="f-window"><option value="ALL">All</option><option value="IN" selected>In Window</option><option value="Primary">Primary</option><option value="General">General</option><option value="OOW">Out of Window</option></select></div>
   <div class="filter-wrap"><div class="filter-lbl">WEEK FROM</div><input type="date" id="f-week-from"></div>
@@ -338,6 +339,7 @@ function getFiltered(){
   var dma=document.getElementById('f-dma').value;
   var station=document.getElementById('f-station').value;
   var daypart=document.getElementById('f-daypart').value;
+  var rateclass=document.getElementById('f-rateclass').value;
   var winFilter=document.getElementById('f-window').value;
   var wkFrom=document.getElementById('f-week-from').value;
   var wkTo=document.getElementById('f-week-to').value;
@@ -350,6 +352,7 @@ function getFiltered(){
     if(dma!=='ALL'&&r.dma!==dma)return false;
     if(station!=='ALL'&&r.station!==station)return false;
     if(daypart!=='ALL'&&r.daypart_code!==daypart)return false;
+    if(rateclass!=='ALL'&&(r.rate_class||'')!==rateclass)return false;
     if(winFilter!=='ALL'){
       if(winFilter==='IN'){if(r.window_status!=='Primary'&&r.window_status!=='General')return false;}
       else{if(r.window_status!==winFilter)return false;}
@@ -541,17 +544,18 @@ function buildDropdowns(){
   pop('f-office',[...new Set(data.map(function(r){return r.office;}).filter(Boolean))].sort());
   pop('f-dma',[...new Set(data.map(function(r){return r.dma;}).filter(Boolean))].sort());
   pop('f-station',[...new Set(data.map(function(r){return r.station;}).filter(Boolean))].sort());
+  pop('f-rateclass',[...new Set(data.map(function(r){return r.rate_class;}).filter(Boolean))].sort());
 }
 
 // ── Events ──
 document.getElementById('run-report').addEventListener('click',loadData);
-['f-party','f-state','f-office','f-dma','f-station','f-daypart','f-window','f-candidate'].forEach(function(id){
+['f-party','f-state','f-office','f-dma','f-station','f-rateclass','f-daypart','f-window','f-candidate'].forEach(function(id){
   document.getElementById(id).addEventListener('change',function(){if(ALL_DATA.length)render();});
 });
 ['f-week-from','f-week-to'].forEach(function(id){document.getElementById(id).addEventListener('change',function(){if(ALL_DATA.length)render();});});
 document.getElementById('f-search').addEventListener('input',function(){if(ALL_DATA.length)render();});
 document.getElementById('clear-filters').addEventListener('click',function(){
-  ['f-party','f-state','f-office','f-dma','f-station','f-daypart','f-candidate'].forEach(function(id){document.getElementById(id).value='ALL';});
+  ['f-party','f-state','f-office','f-dma','f-station','f-rateclass','f-daypart','f-candidate'].forEach(function(id){document.getElementById(id).value='ALL';});
   document.getElementById('f-window').value='IN';
   document.getElementById('f-week-from').value='';document.getElementById('f-week-to').value='';document.getElementById('f-search').value='';
   if(ALL_DATA.length)render();
