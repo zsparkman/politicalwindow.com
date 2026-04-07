@@ -147,7 +147,7 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
 
 <div id="sub-header">
   <div>
-    <div style="font-size:0.95rem;font-weight:800;color:var(--text);font-family:var(--sans)">LUR Rate Variance</div>
+    <div style="font-size:0.95rem;font-weight:800;color:var(--text);font-family:var(--sans)">LUR Monitor Report</div>
     <div class="sub" id="header-sub">Slots where 2+ candidates paid different rates for the same airtime</div>
   </div>
   <div id="stats">
@@ -166,7 +166,7 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
   <div class="filter-wrap"><div class="filter-lbl">DMA</div><select id="f-dma"><option value="ALL">All DMAs</option></select></div>
   <div class="filter-wrap"><div class="filter-lbl">STATION</div><select id="f-station"><option value="ALL">All Stations</option></select></div>
   <div class="filter-wrap"><div class="filter-lbl">DAYPART</div><select id="f-daypart"><option value="ALL">All</option><option value="EM">EM</option><option value="MN">MN</option><option value="DT">DT</option><option value="EF">EF</option><option value="EN">EN</option><option value="PA">PA</option><option value="PT">PT</option><option value="LN">LN</option><option value="LF">LF</option><option value="ON">ON</option></select></div>
-  <div class="filter-wrap"><div class="filter-lbl">WINDOW</div><select id="f-window"><option value="ALL">All</option><option value="IN">In Window</option><option value="Primary">Primary</option><option value="General">General</option><option value="OOW">Out of Window</option></select></div>
+  <div class="filter-wrap"><div class="filter-lbl">WINDOW</div><select id="f-window"><option value="ALL">All</option><option value="IN" selected>In Window</option><option value="Primary">Primary</option><option value="General">General</option><option value="OOW">Out of Window</option></select></div>
   <div class="filter-wrap"><div class="filter-lbl">WEEK FROM</div><input type="date" id="f-week-from"></div>
   <div class="filter-wrap"><div class="filter-lbl">WEEK TO</div><input type="date" id="f-week-to"></div>
   <div class="filter-wrap"><div class="filter-lbl">SEARCH</div><input type="text" id="f-search" placeholder="advertiser, station..."></div>
@@ -405,16 +405,18 @@ function loadData(){
       var DATA_BADGE=document.getElementById('data-badge');
       if(DATA_BADGE){var t=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});DATA_BADGE.style.color='#34D399';DATA_BADGE.textContent='\u25CF LIVE \u00B7 '+ALL_DATA.length.toLocaleString()+' lines';}
 
-      // Populate candidate dropdown from loaded data
+      // Populate candidate dropdown from loaded data (preserve prior selection)
       var candSel=document.getElementById('f-candidate');
+      var prevCand=candSel.value;
+      var entityParam=new URLSearchParams(window.location.search).get('candidate');
       var cands=new Set();ALL_DATA.forEach(function(r){if(r.candidate)cands.add(r.candidate);});
       var sorted=[...cands].sort();
       candSel.innerHTML='<option value="ALL">All Candidates</option>';
       sorted.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;candSel.appendChild(o);});
 
-      // Apply URL param for candidate
-      var entityParam=new URLSearchParams(window.location.search).get('candidate');
+      // Restore candidate selection: URL param takes priority, then prior dropdown value
       if(entityParam)candSel.value=entityParam;
+      else if(prevCand!=='ALL')candSel.value=prevCand;
 
       // Populate other dropdowns
       buildDropdowns();
@@ -449,7 +451,8 @@ document.getElementById('run-report').addEventListener('click',loadData);
 ['f-week-from','f-week-to'].forEach(function(id){document.getElementById(id).addEventListener('change',function(){if(ALL_DATA.length)render();});});
 document.getElementById('f-search').addEventListener('input',function(){if(ALL_DATA.length)render();});
 document.getElementById('clear-filters').addEventListener('click',function(){
-  ['f-party','f-state','f-office','f-dma','f-station','f-daypart','f-window','f-candidate'].forEach(function(id){document.getElementById(id).value='ALL';});
+  ['f-party','f-state','f-office','f-dma','f-station','f-daypart','f-candidate'].forEach(function(id){document.getElementById(id).value='ALL';});
+  document.getElementById('f-window').value='IN';
   document.getElementById('f-week-from').value='';document.getElementById('f-week-to').value='';document.getElementById('f-search').value='';
   if(ALL_DATA.length)render();
 });
