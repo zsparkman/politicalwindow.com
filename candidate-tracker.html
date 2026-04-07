@@ -13,7 +13,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Candidate Tracker — PoliticalWindow.com</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 html{font-size:18px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -57,11 +56,12 @@ a{color:var(--blue);text-decoration:none}
 .sidebar{position:fixed;top:0;left:0;bottom:0;z-index:110;display:flex;flex-direction:row}
 .sidebar-rail{width:62px;background:#fff;border-right:1px solid var(--navy-border);display:flex;flex-direction:column;align-items:center;padding:10px 0 6px;overflow-y:auto;overflow-x:visible;flex-shrink:0;position:relative}
 .sidebar-rail-logo{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#FF642D,#FF8F6B);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--sans);font-size:0.7rem;color:#fff;font-weight:800;letter-spacing:-0.02em;margin-bottom:12px;cursor:pointer}
-.rail-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px 6px;margin:1px 0;cursor:pointer;border-radius:6px;transition:all 0.12s;text-decoration:none;width:54px}
-.rail-item svg{width:20px;height:20px;color:var(--text-faint);transition:color 0.12s}
+.rail-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px 6px;margin:1px 0;cursor:pointer;border-radius:6px;transition:all 0.12s;text-decoration:none;width:54px;border-left:3px solid transparent;border-right:3px solid transparent}
+.rail-item svg{width:20px;height:20px;color:var(--text-faint);flex-shrink:0;transition:color 0.12s}
+.rail-item:hover svg{color:var(--text-muted)}
 .rail-item-label{font-family:var(--sans);font-size:0.48rem;font-weight:600;color:var(--text-faint);letter-spacing:0.02em;transition:color 0.12s}
-.rail-item:hover svg,.rail-item:hover .rail-item-label{color:var(--text)}
-.rail-item.active{background:rgba(29,78,216,0.08)}
+.rail-item:hover{background:#F1F5F9}
+.rail-item.active{background:rgba(29,78,216,0.08);border-left-color:var(--blue);box-shadow:inset 3px 0 0 var(--blue)}
 .rail-item.active svg{color:var(--blue)}
 .rail-item.active .rail-item-label{color:var(--blue)}
 .rail-divider{width:36px;height:1px;background:var(--navy-border);margin:6px 0}
@@ -216,112 +216,6 @@ main{max-width:1400px;margin:0 auto;padding:14px 20px 40px;display:flex;flex-dir
 }
 
 footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;color:#94A3B8;border-top:1px solid var(--navy-border);margin-top:20px}
-
-/* ── EXPAND BUTTON ON DETAIL PANEL ── */
-.detail-expand-btn{position:absolute;top:12px;right:12px;width:28px;height:28px;border:1px solid var(--navy-border);border-radius:4px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:var(--text-muted);transition:all 0.12s;z-index:5}
-.detail-expand-btn:hover{border-color:var(--blue);color:var(--blue);box-shadow:0 0 0 2px rgba(29,78,216,0.1)}
-
-/* ── SHARE BUTTON ON CARDS ── */
-.cand-card-share{position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:4px;border:1px solid transparent;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:all 0.12s;z-index:5}
-.cand-card-share svg{width:14px;height:14px;color:var(--text-faint)}
-.cand-card:hover .cand-card-share{opacity:1}
-.cand-card-share:hover{border-color:var(--navy-border);background:#F8FAFC}
-.cand-card-share:hover svg{color:var(--blue)}
-.cand-card-share .share-copied{position:absolute;top:-24px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:0.48rem;color:var(--green);background:#fff;border:1px solid var(--green-dim);padding:2px 6px;border-radius:3px;white-space:nowrap;pointer-events:none}
-
-/* ── MODAL OVERLAY ── */
-@keyframes modal-slide-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes skeleton-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-.modal-overlay.active{display:flex}
-.modal-container{background:#fff;border-radius:12px;width:calc(100vw - 120px);max-width:1400px;max-height:calc(100vh - 60px);overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;animation:modal-slide-up 0.25s ease}
-
-/* ── MODAL TOP BAR ── */
-.modal-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--navy-border);position:sticky;top:0;background:#fff;z-index:10;border-radius:12px 12px 0 0;gap:16px}
-.modal-topbar-left{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
-.modal-topbar-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.modal-topbar-name{font-family:var(--sans);font-size:1.2rem;font-weight:800;color:var(--text);white-space:nowrap}
-.modal-topbar-meta{font-family:var(--sans);font-size:0.62rem;color:var(--text-muted)}
-.modal-topbar-stats{display:flex;gap:14px;flex-wrap:wrap}
-.modal-topbar-stat{display:flex;flex-direction:column;gap:1px}
-.modal-topbar-stat-label{font-family:var(--mono);font-size:0.45rem;color:var(--text-faint);letter-spacing:0.06em;text-transform:uppercase}
-.modal-topbar-stat-value{font-family:var(--mono);font-size:0.72rem;font-weight:600;color:var(--text)}
-.modal-close-btn{width:36px;height:36px;border:1px solid var(--navy-border);border-radius:6px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.12s}
-.modal-close-btn svg{width:18px;height:18px;color:var(--text-muted)}
-.modal-close-btn:hover{border-color:#CBD5E1;background:#F8FAFC}
-.modal-close-btn:hover svg{color:var(--text)}
-
-/* ── MODAL BODY GRID ── */
-.modal-body{padding:20px 24px 24px}
-.modal-row{display:grid;gap:16px;margin-bottom:16px}
-.modal-row-3{grid-template-columns:1fr 1fr 1fr}
-.modal-row-2a{grid-template-columns:3fr 2fr}
-.modal-row-2b{grid-template-columns:1fr 1fr}
-.modal-section{background:#fff;border:1px solid var(--navy-border);border-radius:8px;padding:16px;box-shadow:var(--shadow-sm)}
-.modal-section-title{font-family:var(--sans);font-size:0.55rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-faint);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
-.modal-chart-wrap{position:relative;height:220px}
-.modal-empty{font-family:var(--mono);font-size:0.58rem;color:var(--text-faint);text-align:center;padding:40px 10px}
-
-/* ── SKELETON LOADERS ── */
-.skeleton{background:linear-gradient(90deg,#F1F5F9 25%,#E2E8F0 50%,#F1F5F9 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:4px}
-.skeleton-chart{height:200px;border-radius:8px}
-.skeleton-row{height:18px;margin-bottom:8px;border-radius:4px}
-
-/* ── MODAL TABLE ── */
-.modal-table{width:100%;border-collapse:collapse;font-family:var(--sans);font-size:0.62rem}
-.modal-table th{font-family:var(--mono);font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-faint);text-align:left;padding:6px 8px;border-bottom:1px solid var(--navy-border);font-weight:600}
-.modal-table td{padding:6px 8px;border-bottom:1px solid #F1F5F9;color:var(--text-muted)}
-.modal-table tbody tr:hover{background:#F8FAFC}
-.modal-table-wrap{max-height:300px;overflow-y:auto}
-
-/* ── TOGGLE BUTTONS ── */
-.toggle-group{display:inline-flex;border:1px solid var(--navy-border);border-radius:4px;overflow:hidden}
-.toggle-btn{font-family:var(--mono);font-size:0.5rem;padding:3px 10px;background:#fff;border:none;cursor:pointer;color:var(--text-muted);transition:all 0.12s;letter-spacing:0.04em}
-.toggle-btn.active{background:var(--blue);color:#fff}
-.toggle-btn:hover:not(.active){background:#F8FAFC}
-
-/* ── NEWS ITEMS ── */
-.news-item{padding:8px 0;border-bottom:1px solid #F1F5F9}
-.news-item:last-child{border-bottom:none}
-.news-title{font-family:var(--sans);font-size:0.65rem;font-weight:600;color:var(--text);line-height:1.3}
-.news-title a{color:var(--text);text-decoration:none;transition:color 0.12s}
-.news-title a:hover{color:var(--blue)}
-.news-source{font-family:var(--mono);font-size:0.5rem;color:var(--text-faint);margin-top:2px}
-.news-wrap{max-height:320px;overflow-y:auto}
-
-/* ── POLL ITEMS ── */
-.poll-item{padding:8px 0;border-bottom:1px solid #F1F5F9}
-.poll-item:last-child{border-bottom:none}
-.poll-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
-.poll-name{font-family:var(--sans);font-size:0.62rem;font-weight:600;color:var(--text)}
-.poll-date{font-family:var(--mono);font-size:0.5rem;color:var(--text-faint)}
-.poll-meta{font-family:var(--mono);font-size:0.48rem;color:var(--text-faint);margin-bottom:4px}
-.poll-bar-row{display:flex;align-items:center;gap:6px;margin-bottom:2px}
-.poll-bar-label{font-family:var(--mono);font-size:0.5rem;color:var(--text-muted);min-width:40px;text-align:right}
-.poll-bar-track{flex:1;height:6px;background:#F1F5F9;border-radius:3px;overflow:hidden}
-.poll-bar-fill{height:100%;border-radius:3px;transition:width 0.3s ease}
-.poll-bar-pct{font-family:var(--mono);font-size:0.5rem;font-weight:600;min-width:30px}
-.poll-wrap{max-height:320px;overflow-y:auto}
-
-/* ── MODAL WEEKLY TREND (expanded) ── */
-.modal-weekly-chart{display:flex;align-items:flex-end;gap:3px;height:160px;padding-top:4px}
-.modal-week-bar{flex:1;min-width:4px;background:linear-gradient(180deg,var(--blue),var(--blue-light));border-radius:2px 2px 0 0;transition:height 0.3s ease;position:relative;cursor:default}
-.modal-week-bar:hover{opacity:0.8}
-.modal-week-bar .week-bar-tooltip{display:none;position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:#1E293B;color:#fff;font-family:var(--mono);font-size:0.5rem;padding:3px 6px;border-radius:3px;white-space:nowrap;z-index:10}
-.modal-week-bar:hover .week-bar-tooltip{display:block}
-
-/* ── MODAL RESPONSIVE ── */
-@media(max-width:900px){
-  .modal-container{width:100vw;height:100vh;max-width:100vw;max-height:100vh;border-radius:0}
-  .modal-topbar{border-radius:0}
-  .modal-row-3{grid-template-columns:1fr}
-  .modal-row-2a,.modal-row-2b{grid-template-columns:1fr}
-}
-@media(max-width:640px){
-  .modal-container{width:100vw;height:100vh;border-radius:0}
-  .modal-chart-wrap{height:180px}
-  .modal-topbar-stats{gap:8px}
-}
 </style>
 </head>
 <body>
@@ -449,55 +343,6 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
 
 </main>
 
-<!-- ── CANDIDATE MODAL ── -->
-<div class="modal-overlay" id="candidateModal">
-  <div class="modal-container">
-    <div class="modal-topbar" id="modalTopbar"></div>
-    <div class="modal-body">
-      <div class="modal-row modal-row-3">
-        <div class="modal-section" id="modalDma">
-          <div class="modal-section-title">Spend by DMA</div>
-          <div class="modal-chart-wrap"><canvas id="chartDma"></canvas></div>
-        </div>
-        <div class="modal-section" id="modalDaypart">
-          <div class="modal-section-title">Spend by Daypart</div>
-          <div class="modal-chart-wrap"><canvas id="chartDaypart"></canvas></div>
-        </div>
-        <div class="modal-section" id="modalStation">
-          <div class="modal-section-title">Spend by Station</div>
-          <div class="modal-chart-wrap"><canvas id="chartStation"></canvas></div>
-        </div>
-      </div>
-      <div class="modal-row modal-row-2a">
-        <div class="modal-section" id="modalPrograms">
-          <div class="modal-section-title">Top Programs</div>
-          <div class="modal-table-wrap" id="modalProgramsBody"></div>
-        </div>
-        <div class="modal-section" id="modalTrend">
-          <div class="modal-section-title">
-            Weekly Ad Spend Trend
-            <div class="toggle-group">
-              <button class="toggle-btn active" data-metric="spend" onclick="toggleTrendMetric('spend')">Spend</button>
-              <button class="toggle-btn" data-metric="spots" onclick="toggleTrendMetric('spots')">Spots</button>
-            </div>
-          </div>
-          <div id="modalTrendBody"></div>
-        </div>
-      </div>
-      <div class="modal-row modal-row-2b">
-        <div class="modal-section" id="modalNews">
-          <div class="modal-section-title">Recent News <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:4px"></span></div>
-          <div class="news-wrap" id="modalNewsBody"></div>
-        </div>
-        <div class="modal-section" id="modalPolling">
-          <div class="modal-section-title">Recent Polling</div>
-          <div class="poll-wrap" id="modalPollingBody"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <footer>&copy; 2026 PoliticalWindow.com &middot; All rights reserved &middot; FCC Political Ad Intelligence</footer>
 
 </div><!-- /page-wrap -->
@@ -507,17 +352,6 @@ const RATES_API = 'https://rates.politicalwindow.com';
 let ALL_CANDIDATES = [];
 let FILTERED = [];
 let selectedId = null;
-let modalOpen = false;
-let chartInstances = { dma: null, daypart: null, station: null };
-let trendMetric = 'spend';
-let modalTrendData = null;
-var _pendingCandidate = null;
-
-const CHART_COLORS = [
-  '#1D4ED8','#059669','#D97706','#DC2626','#8B5CF6',
-  '#0891B2','#DB2777','#65A30D','#EA580C','#6366F1',
-  '#0D9488','#CA8A04','#E11D48','#7C3AED','#2563EB'
-];
 
 // ── FORMAT HELPERS ──
 function fmtMoney(n) {
@@ -570,16 +404,6 @@ async function loadCandidates() {
     updateKPIs();
     filterAndRender();
 
-    // Deep-link: open modal if ?candidate= param present
-    if (_pendingCandidate) {
-      var pc = ALL_CANDIDATES.find(function(x) { return x.political_entity_id === _pendingCandidate; });
-      if (pc) {
-        selectCandidate(_pendingCandidate);
-        openModal(_pendingCandidate);
-      }
-      _pendingCandidate = null;
-    }
-
     // Update badge
     document.getElementById('data-badge').style.color = '#34D399';
     document.getElementById('data-badge').textContent = '\u25CF LIVE \u00B7 ' + ALL_CANDIDATES.length + ' entities';
@@ -607,8 +431,6 @@ function applyUrlParams() {
   }
   if (state) document.getElementById('stateFilter').value = state;
   if (search) document.getElementById('searchInput').value = search;
-  var candidateParam = params.get('candidate');
-  if (candidateParam) _pendingCandidate = candidateParam;
 }
 function updateUrl() {
   var office = document.querySelector('#raceFilters .filter-btn.active').dataset.office;
@@ -687,7 +509,6 @@ function filterAndRender() {
     if (c.new_stations_7d && Number(c.new_stations_7d) > 0) badges += '<span class="cand-activity cand-activity-newstation">NEW STATION ADDED</span>';
 
     return '<div class="cand-card' + selClass + (isTop ? ' top-spender' : '') + '" data-id="' + c.political_entity_id + '" onclick="selectCandidate(\'' + c.political_entity_id + '\')">' +
-      '<button class="cand-card-share" onclick="shareCandidateLink(\'' + c.political_entity_id + '\', event)" title="Copy link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>' +
       '<div class="cand-card-top">' +
         '<div><div class="cand-name">' + (c.candidate_name || 'Unknown') + '</div>' +
         '<div class="cand-meta">' + (c.state || '') + ' \u00B7 ' + (c.office || 'Other') + (c.district ? ' \u00B7 D-' + c.district : '') + '</div></div>' +
@@ -723,7 +544,6 @@ async function selectCandidate(id) {
   var isFederal = c.office && /senate|house|congress|presidential/i.test(c.office);
 
   panel.innerHTML =
-    '<button class="detail-expand-btn" onclick="openModal(\'' + id + '\')" title="Expand to full view">&#x2922;</button>' +
     '<div class="detail-header">' +
       '<div class="detail-name">' + (c.candidate_name || 'Unknown') + ' <span class="party-badge ' + partyClass + '" style="font-size:0.5rem;vertical-align:middle">' + (c.party || '\u2013') + '</span></div>' +
       '<div class="detail-sub">' + (c.state || '') + ' \u00B7 ' + (c.office || 'Other') + (c.district ? ' \u00B7 District ' + c.district : '') + ' \u00B7 ' + (c.cycle || 2026) + ' Cycle</div>' +
@@ -883,280 +703,6 @@ function showFilingPending() {
 
 function clearDetail() {
   document.getElementById('detailPanel').innerHTML = '<div class="detail-empty"><div class="detail-empty-icon">&#x1F464;</div><div class="detail-empty-text">SELECT A CANDIDATE<br>TO VIEW SPEND DETAILS<br>&amp; FEC FILINGS</div></div>';
-}
-
-// ── MODAL HELPERS ──
-function showSkeleton(elementId, type) {
-  var el = document.getElementById(elementId);
-  if (!el) return;
-  if (type === 'chart') {
-    // Reset canvas for Chart.js
-    var wrap = el.closest('.modal-section');
-    if (wrap) {
-      var cw = wrap.querySelector('.modal-chart-wrap');
-      if (cw) cw.innerHTML = '<div class="skeleton skeleton-chart"></div>';
-    }
-  } else if (type === 'table') {
-    el.innerHTML = '<div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row" style="width:80%"></div><div class="skeleton skeleton-row" style="width:60%"></div>';
-  } else {
-    el.innerHTML = '<div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row" style="width:85%"></div><div class="skeleton skeleton-row" style="width:70%"></div>';
-  }
-}
-
-function renderPieChart(canvasId, chartKey, labels, values) {
-  if (chartInstances[chartKey]) { chartInstances[chartKey].destroy(); chartInstances[chartKey] = null; }
-  var section = document.getElementById(canvasId).closest('.modal-section');
-  var wrap = section.querySelector('.modal-chart-wrap');
-  wrap.innerHTML = '<canvas id="' + canvasId + '"></canvas>';
-  var ctx = document.getElementById(canvasId).getContext('2d');
-  chartInstances[chartKey] = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: labels,
-      datasets: [{ data: values, backgroundColor: CHART_COLORS.slice(0, labels.length), borderWidth: 1, borderColor: '#fff' }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'right', labels: { font: { family: 'DM Sans', size: 10 }, padding: 6, boxWidth: 10 } },
-        tooltip: { callbacks: { label: function(ctx) { var total = ctx.dataset.data.reduce(function(a,b){return a+b},0); var pct = total ? Math.round(ctx.raw/total*100) : 0; return ctx.label + ': ' + fmtMoney(ctx.raw) + ' (' + pct + '%)'; } } }
-      }
-    }
-  });
-}
-
-function shareCandidateLink(id, event) {
-  event.stopPropagation();
-  var url = location.origin + location.pathname + '?candidate=' + encodeURIComponent(id);
-  navigator.clipboard.writeText(url).then(function() {
-    var btn = event.currentTarget;
-    var orig = btn.innerHTML;
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>';
-    setTimeout(function() { btn.innerHTML = orig; }, 1500);
-  });
-}
-
-// ── MODAL OPEN / CLOSE ──
-function openModal(id) {
-  var c = ALL_CANDIDATES.find(function(x) { return x.political_entity_id === id; });
-  if (!c) return;
-  selectedId = id;
-  modalOpen = true;
-
-  var partyClass = c.party === 'R' ? 'party-R' : c.party === 'D' ? 'party-D' : c.party === 'I' ? 'party-I' : 'party-none';
-  document.getElementById('modalTopbar').innerHTML =
-    '<div class="modal-topbar-left">' +
-      '<div class="modal-topbar-title">' +
-        '<span class="modal-topbar-name">' + (c.candidate_name || 'Unknown') + '</span>' +
-        '<span class="party-badge ' + partyClass + '">' + (c.party || '\u2013') + '</span>' +
-      '</div>' +
-      '<div class="modal-topbar-meta">' + (c.state || '') + ' \u00B7 ' + (c.office || 'Other') + (c.district ? ' \u00B7 District ' + c.district : '') + ' \u00B7 ' + (c.cycle || 2026) + ' Cycle</div>' +
-      '<div class="modal-topbar-stats">' +
-        '<div class="modal-topbar-stat"><div class="modal-topbar-stat-label">Total Spend</div><div class="modal-topbar-stat-value" style="color:var(--green)">' + fmtMoney(c.total_spend) + '</div></div>' +
-        '<div class="modal-topbar-stat"><div class="modal-topbar-stat-label">Filings</div><div class="modal-topbar-stat-value">' + (c.filing_count || 0) + '</div></div>' +
-        '<div class="modal-topbar-stat"><div class="modal-topbar-stat-label">Spots</div><div class="modal-topbar-stat-value">' + (c.total_spots || 0).toLocaleString() + '</div></div>' +
-        '<div class="modal-topbar-stat"><div class="modal-topbar-stat-label">Stations</div><div class="modal-topbar-stat-value">' + (c.station_count || 0) + '</div></div>' +
-        '<div class="modal-topbar-stat"><div class="modal-topbar-stat-label">First Flight</div><div class="modal-topbar-stat-value">' + fmtShortDate(c.first_flight) + '</div></div>' +
-        '<div class="modal-topbar-stat"><div class="modal-topbar-stat-label">Last Flight</div><div class="modal-topbar-stat-value">' + fmtShortDate(c.last_flight) + '</div></div>' +
-      '</div>' +
-    '</div>' +
-    '<button class="modal-close-btn" onclick="closeModal()" title="Close">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-    '</button>';
-
-  // Show skeletons
-  showSkeleton('chartDma', 'chart');
-  showSkeleton('chartDaypart', 'chart');
-  showSkeleton('chartStation', 'chart');
-  showSkeleton('modalProgramsBody', 'table');
-  showSkeleton('modalTrendBody', 'text');
-  showSkeleton('modalNewsBody', 'text');
-  showSkeleton('modalPollingBody', 'text');
-
-  document.getElementById('candidateModal').classList.add('active');
-  document.body.style.overflow = 'hidden';
-
-  // Update URL
-  var params = new URLSearchParams(window.location.search);
-  params.set('candidate', id);
-  history.replaceState(null, '', '?' + params.toString());
-
-  // Load all sections in parallel
-  loadModalDma(id);
-  loadModalDaypart(id);
-  loadModalStation(id);
-  loadModalPrograms(id);
-  loadModalTrend(id);
-  loadModalNews(id);
-  loadModalPolling(id);
-}
-
-function closeModal() {
-  document.getElementById('candidateModal').classList.remove('active');
-  document.body.style.overflow = '';
-  modalOpen = false;
-  Object.keys(chartInstances).forEach(function(k) {
-    if (chartInstances[k]) { chartInstances[k].destroy(); chartInstances[k] = null; }
-  });
-  // Remove candidate param from URL
-  var params = new URLSearchParams(window.location.search);
-  params.delete('candidate');
-  var qs = params.toString();
-  history.replaceState(null, '', qs ? '?' + qs : location.pathname);
-}
-
-document.getElementById('candidateModal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape' && modalOpen) closeModal();
-});
-
-// ── MODAL DATA LOADERS ──
-function loadModalDma(id) {
-  fetch(RATES_API + '/api/candidates/' + id + '/spend-by-dma', { headers: authHeaders() })
-    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function(j) {
-      var data = j.data || j || [];
-      if (!data.length) { document.getElementById('modalDma').querySelector('.modal-chart-wrap').innerHTML = '<div class="modal-empty">No DMA data available</div>'; return; }
-      var labels = data.map(function(d) { return d.dma || d.name || 'Unknown'; });
-      var values = data.map(function(d) { return Number(d.spend || d.total_spend || 0); });
-      renderPieChart('chartDma', 'dma', labels, values);
-    })
-    .catch(function() { document.getElementById('modalDma').querySelector('.modal-chart-wrap').innerHTML = '<div class="modal-empty">DMA data unavailable</div>'; });
-}
-
-function loadModalDaypart(id) {
-  fetch(RATES_API + '/api/candidates/' + id + '/spend-by-daypart', { headers: authHeaders() })
-    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function(j) {
-      var data = j.data || j || [];
-      if (!data.length) { document.getElementById('modalDaypart').querySelector('.modal-chart-wrap').innerHTML = '<div class="modal-empty">No daypart data available</div>'; return; }
-      var labels = data.map(function(d) { return d.daypart || d.name || 'Unknown'; });
-      var values = data.map(function(d) { return Number(d.spend || d.total_spend || 0); });
-      renderPieChart('chartDaypart', 'daypart', labels, values);
-    })
-    .catch(function() { document.getElementById('modalDaypart').querySelector('.modal-chart-wrap').innerHTML = '<div class="modal-empty">Daypart data unavailable</div>'; });
-}
-
-function loadModalStation(id) {
-  fetch(RATES_API + '/api/candidates/' + id + '/spend-by-station', { headers: authHeaders() })
-    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function(j) {
-      var data = j.data || j || [];
-      if (!data.length) { document.getElementById('modalStation').querySelector('.modal-chart-wrap').innerHTML = '<div class="modal-empty">No station data available</div>'; return; }
-      var labels = data.map(function(d) { return d.station || d.name || 'Unknown'; });
-      var values = data.map(function(d) { return Number(d.spend || d.total_spend || 0); });
-      renderPieChart('chartStation', 'station', labels, values);
-    })
-    .catch(function() { document.getElementById('modalStation').querySelector('.modal-chart-wrap').innerHTML = '<div class="modal-empty">Station data unavailable</div>'; });
-}
-
-function loadModalPrograms(id) {
-  fetch(RATES_API + '/api/candidates/' + id + '/top-programs', { headers: authHeaders() })
-    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function(j) {
-      var data = (j.data || j || []).slice(0, 20);
-      var el = document.getElementById('modalProgramsBody');
-      if (!data.length) { el.innerHTML = '<div class="modal-empty">No program data available</div>'; return; }
-      var html = '<table class="modal-table"><thead><tr><th>Program</th><th>Station</th><th>Spots</th><th>Spend</th><th>Dates</th></tr></thead><tbody>';
-      data.forEach(function(p) {
-        html += '<tr><td style="color:var(--text);font-weight:500">' + (p.program || p.name || '\u2014') + '</td>' +
-          '<td>' + (p.station || '\u2014') + '</td>' +
-          '<td style="font-family:var(--mono)">' + (p.spots || p.total_spots || 0) + '</td>' +
-          '<td style="font-family:var(--mono);color:var(--green)">' + fmtMoney(p.spend || p.total_spend) + '</td>' +
-          '<td style="font-family:var(--mono);font-size:0.55rem">' + fmtShortDate(p.start_date) + ' \u2013 ' + fmtShortDate(p.end_date) + '</td></tr>';
-      });
-      html += '</tbody></table>';
-      el.innerHTML = html;
-    })
-    .catch(function() { document.getElementById('modalProgramsBody').innerHTML = '<div class="modal-empty">Program data unavailable</div>'; });
-}
-
-function loadModalTrend(id) {
-  fetch(RATES_API + '/api/candidates/tracker/' + id + '/spend', { headers: authHeaders() })
-    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function(j) {
-      modalTrendData = j;
-      renderModalTrend();
-    })
-    .catch(function() { document.getElementById('modalTrendBody').innerHTML = '<div class="modal-empty">Trend data unavailable</div>'; });
-}
-
-function renderModalTrend() {
-  if (!modalTrendData) return;
-  var weeks = modalTrendData.weekly_trend || [];
-  var el = document.getElementById('modalTrendBody');
-  if (!weeks.length) { el.innerHTML = '<div class="modal-empty">No weekly data</div>'; return; }
-  var metric = trendMetric === 'spots' ? 'weekly_spots' : 'weekly_spend';
-  var vals = weeks.map(function(w) { return Number(w[metric] || 0); });
-  var maxVal = Math.max(1, Math.max.apply(null, vals));
-  var html = '<div class="modal-weekly-chart">';
-  weeks.forEach(function(w, i) {
-    var h = Math.max(2, Math.round((vals[i] / maxVal) * 140));
-    var label = trendMetric === 'spots' ? (vals[i] + ' spots') : fmtMoney(vals[i]);
-    html += '<div class="modal-week-bar" style="height:' + h + 'px"><div class="week-bar-tooltip">' + fmtShortDate(w.week_of) + ': ' + label + '</div></div>';
-  });
-  html += '</div>';
-  el.innerHTML = html;
-}
-
-function toggleTrendMetric(metric) {
-  trendMetric = metric;
-  document.querySelectorAll('#modalTrend .toggle-btn').forEach(function(b) {
-    b.classList.toggle('active', b.dataset.metric === metric);
-  });
-  renderModalTrend();
-}
-
-function loadModalNews(id) {
-  var c = ALL_CANDIDATES.find(function(x) { return x.political_entity_id === id; });
-  if (!c) return;
-  fetch(RATES_API + '/api/candidates/' + id + '/news', { headers: authHeaders() })
-    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function(j) {
-      var items = (j.data || j || []).slice(0, 10);
-      var el = document.getElementById('modalNewsBody');
-      if (!items.length) { el.innerHTML = '<div class="modal-empty">No recent news found</div>'; return; }
-      el.innerHTML = items.map(function(n) {
-        return '<div class="news-item">' +
-          '<div class="news-title"><a href="' + (n.link || n.url || '#') + '" target="_blank" rel="noopener">' + (n.title || n.headline || 'Untitled') + '</a></div>' +
-          '<div class="news-source">' + (n.source || '') + (n.published || n.date ? ' \u00B7 ' + fmtShortDate(n.published || n.date) : '') + '</div>' +
-        '</div>';
-      }).join('');
-    })
-    .catch(function() { document.getElementById('modalNewsBody').innerHTML = '<div class="modal-empty">News feed unavailable</div>'; });
-}
-
-function loadModalPolling(id) {
-  var c = ALL_CANDIDATES.find(function(x) { return x.political_entity_id === id; });
-  if (!c) return;
-  fetch(RATES_API + '/api/candidates/' + id + '/polling', { headers: authHeaders() })
-    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function(j) {
-      var polls = (j.data || j || []).slice(0, 8);
-      var el = document.getElementById('modalPollingBody');
-      if (!polls.length) { el.innerHTML = '<div class="modal-empty">No polls available yet for this race</div>'; return; }
-      el.innerHTML = polls.map(function(p) {
-        var html = '<div class="poll-item">' +
-          '<div class="poll-header"><span class="poll-name">' + (p.pollster || p.name || 'Unknown') + '</span><span class="poll-date">' + fmtShortDate(p.date || p.end_date) + '</span></div>' +
-          '<div class="poll-meta">' + (p.sample ? 'n=' + p.sample : '') + (p.moe ? ' \u00B1' + p.moe : '') + '</div>';
-        var results = p.results || p.candidates || [];
-        results.forEach(function(r) {
-          var pct = Number(r.pct || r.value || 0);
-          var color = r.party === 'R' ? 'var(--rep)' : r.party === 'D' ? 'var(--dem)' : 'var(--ind)';
-          html += '<div class="poll-bar-row">' +
-            '<span class="poll-bar-label">' + (r.name || r.candidate || '') + '</span>' +
-            '<div class="poll-bar-track"><div class="poll-bar-fill" style="width:' + Math.min(pct, 100) + '%;background:' + color + '"></div></div>' +
-            '<span class="poll-bar-pct" style="color:' + color + '">' + pct + '%</span>' +
-          '</div>';
-        });
-        html += '</div>';
-        return html;
-      }).join('');
-    })
-    .catch(function() { document.getElementById('modalPollingBody').innerHTML = '<div class="modal-empty">Polling data unavailable</div>'; });
 }
 
 // ── EVENT LISTENERS ──
