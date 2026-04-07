@@ -11,15 +11,15 @@ html{font-size:18px}
 :root{
   --navy:#E2E6ED;--navy-mid:#F8F9FB;--navy-card:#FFFFFF;--navy-border:#D1D9E6;
   --blue:#1D4ED8;--blue-light:#2563EB;--blue-glow:rgba(29,78,216,0.10);
-  --amber:#D97706;--red:#DC2626;--green:#059669;
+  --amber:#D97706;--amber-dim:rgba(217,119,6,0.10);--red:#DC2626;--red-dim:rgba(220,38,38,0.08);
+  --green:#059669;--green-dim:rgba(5,150,105,0.08);
   --text:#0F172A;--text-muted:#475569;--text-faint:#94A3B8;
-  --sans:'DM Sans',sans-serif;--mono:'IBM Plex Mono',monospace;--display:'DM Sans',sans-serif;
+  --sans:'DM Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
   --shadow-sm:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.05);
   --shadow-md:0 4px 12px rgba(0,0,0,0.10),0 1px 3px rgba(0,0,0,0.06);
 }
 body{background:var(--navy);color:var(--text);font-family:var(--sans);min-height:100vh;
-  background-image:radial-gradient(circle,#C8CDD5 0.6px,transparent 0.6px);background-size:16px 16px;
-}
+  background-image:radial-gradient(circle,#C8CDD5 0.6px,transparent 0.6px);background-size:16px 16px;}
 a{color:var(--blue);text-decoration:none}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-thumb{background:#C8CDD5;border-radius:3px}
@@ -32,7 +32,7 @@ select,input,button{font-family:var(--mono);outline:none}
 .rail-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px 6px;margin:1px 0;cursor:pointer;border-radius:6px;transition:all 0.12s;text-decoration:none;width:54px;border-left:3px solid transparent;border-right:3px solid transparent}
 .rail-item svg{width:20px;height:20px;color:var(--text-faint);flex-shrink:0;transition:color 0.12s}
 .rail-item:hover svg{color:var(--text-muted)}
-.rail-item-label{font-family:var(--sans);font-size:0.48rem;font-weight:600;color:var(--text-faint);letter-spacing:0.02em;transition:color 0.12s}
+.rail-item-label{font-family:var(--sans);font-size:0.48rem;font-weight:600;color:var(--text-faint);letter-spacing:0.02em}
 .rail-item:hover{background:#F1F5F9}
 .rail-item.active{background:rgba(29,78,216,0.08);border-left-color:var(--blue);box-shadow:inset 3px 0 0 var(--blue)}
 .rail-item.active svg{color:var(--blue)}
@@ -57,11 +57,11 @@ header{background:#1E293B;border-bottom:1px solid #334155;padding:0 20px;display
 .header-meta{font-family:var(--mono);font-size:0.58rem;color:rgba(255,255,255,0.7)}
 .header-right{display:flex;align-items:center;gap:10px;justify-content:flex-end}
 .logo-badge{font-family:var(--mono);font-size:0.6rem;font-weight:600;color:#FBBF24;background:rgba(217,119,6,0.15);border:1px solid rgba(217,119,6,0.3);border-radius:2px;padding:2px 5px;letter-spacing:0.08em}
-#logout-btn{font-family:var(--mono);font-size:0.58rem;color:rgba(255,255,255,0.5);background:none;border:none;cursor:pointer;padding:2px 6px;letter-spacing:0.06em}
+#logout-btn{font-family:var(--mono);font-size:0.58rem;color:rgba(255,255,255,0.5);background:none;border:none;cursor:pointer;padding:2px 6px}
 #logout-btn:hover{color:#F1F5F9}
 
-/* ── SUB-HEADER + STATS ── */
-#header{border-bottom:1px solid var(--navy-border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff}
+/* ── SUB-HEADER ── */
+#sub-header{border-bottom:1px solid var(--navy-border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff}
 .sub{font-size:0.65rem;color:var(--text-muted);margin-top:2px;font-family:var(--mono)}
 #stats{display:flex;gap:24px}
 .stat-val{font-size:1rem;font-weight:700;color:var(--blue);text-align:right;font-family:var(--mono)}
@@ -73,9 +73,20 @@ header{background:#1E293B;border-bottom:1px solid #334155;padding:0 20px;display
 .filter-lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.1em;font-family:var(--mono);font-weight:500}
 select,input[type=text]{font-size:0.65rem;color:var(--text);background:#fff;border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px}
 select:focus,input:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-glow)}
-input[type=text]{width:170px}
 .sort-btn{background:transparent;border:none;cursor:pointer;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;color:var(--text-faint);padding:2px 6px}
-.sort-btn:hover{color:var(--text)}
+
+/* ── CANDIDATE SUMMARY CARD ── */
+#cand-summary{display:none;margin:0 24px;padding:14px 18px;background:#fff;border:1px solid var(--navy-border);border-radius:8px;box-shadow:var(--shadow-sm)}
+.cs-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cs-name{font-family:var(--sans);font-size:0.95rem;font-weight:700;color:var(--text)}
+.cs-party{font-family:var(--mono);font-size:0.56rem;font-weight:700;padding:2px 8px;border-radius:3px}
+.cs-party-R{background:rgba(239,68,68,0.08);color:#EF4444;border:1px solid rgba(239,68,68,0.2)}
+.cs-party-D{background:rgba(37,99,235,0.08);color:#2563EB;border:1px solid rgba(37,99,235,0.2)}
+.cs-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.cs-item{text-align:center}
+.cs-val{font-family:var(--mono);font-size:0.9rem;font-weight:700}
+.cs-label{font-family:var(--mono);font-size:0.5rem;color:var(--text-faint);letter-spacing:0.08em;margin-top:2px}
+.cs-positive{color:var(--green)}.cs-negative{color:var(--red)}.cs-neutral{color:var(--text)}
 
 /* ── MAIN ── */
 #main{padding:16px 24px;display:flex;flex-direction:column;gap:14px}
@@ -89,44 +100,39 @@ input[type=text]{width:170px}
 table{width:100%;border-collapse:collapse}
 th{font-family:var(--mono);font-size:0.56rem;font-weight:700;letter-spacing:0.08em;color:var(--text-faint);padding:6px 10px;text-align:left;border-bottom:1px solid var(--navy-border);background:#FAFBFC;white-space:nowrap}
 td{font-family:var(--mono);font-size:0.6rem;padding:5px 10px;border-bottom:1px solid #F1F5F9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
-.c-r{color:#EF4444}.c-d{color:#2563EB}.c-muted{color:var(--text-muted)}.c-faint{color:var(--text-faint)}.c-amber{color:var(--amber)}.c-green{color:var(--green)}.c-blue{color:var(--blue)}.c-bright{color:var(--text)}
+.c-r{color:#EF4444}.c-d{color:#2563EB}.c-muted{color:var(--text-muted)}.c-faint{color:var(--text-faint)}.c-amber{color:var(--amber)}.c-green{color:var(--green)}.c-bright{color:var(--text)}
 .slot-hdr{background:#F8FAFC;font-weight:700;font-size:0.58rem;color:var(--text);border-bottom:1px solid var(--navy-border)}
 .slot-hdr td{padding:8px 10px}
 .spread-badge{font-family:var(--mono);font-size:0.5rem;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:0.04em}
 .spread-low{background:rgba(5,150,105,0.08);color:var(--green);border:1px solid rgba(5,150,105,0.2)}
-.spread-med{background:rgba(217,119,6,0.08);color:var(--amber);border:1px solid rgba(217,119,6,0.2)}
-.spread-high{background:rgba(220,38,38,0.08);color:var(--red);border:1px solid rgba(220,38,38,0.2)}
+.spread-med{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(217,119,6,0.2)}
+.spread-high{background:var(--red-dim);color:var(--red);border:1px solid rgba(220,38,38,0.2)}
 .lur-badge{font-family:var(--mono);font-size:0.48rem;font-weight:700;color:var(--green);background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.2);border-radius:2px;padding:1px 4px;margin-left:4px}
 .over-badge{font-family:var(--mono);font-size:0.48rem;font-weight:700;color:var(--red);background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.15);border-radius:2px;padding:1px 4px;margin-left:4px}
+.window-badge{font-family:var(--mono);font-size:0.48rem;font-weight:600;padding:1px 5px;border-radius:2px;margin-left:6px}
+.window-Primary{color:var(--amber);background:var(--amber-dim);border:1px solid rgba(217,119,6,0.2)}
+.window-General{color:var(--green);background:var(--green-dim);border:1px solid rgba(5,150,105,0.2)}
+.highlight-row{background:rgba(29,78,216,0.04)}
+.highlight-row td{font-weight:600}
 
-/* ── AUTH OVERLAY ── */
+/* ── AUTH ── */
 #auth-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.7);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center}
 #auth-card{background:#fff;border-radius:10px;width:360px;max-width:90vw;padding:32px 28px;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
 .auth-header{text-align:center;margin-bottom:24px}
 .auth-logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#FF642D,#FF8F6B);display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:0.8rem;color:#fff;font-weight:800;margin:0 auto 10px}
 .auth-title{font-family:var(--sans);font-size:1.2rem;font-weight:700;color:var(--text)}
 .auth-sub{font-family:var(--mono);font-size:0.55rem;color:var(--text-faint);margin-top:4px;letter-spacing:0.06em}
-.auth-tabs{display:flex;gap:0;border-bottom:1px solid var(--navy-border);margin-bottom:16px}
+.auth-tabs{display:flex;border-bottom:1px solid var(--navy-border);margin-bottom:16px}
 .auth-tab{flex:1;text-align:center;font-family:var(--mono);font-size:0.6rem;font-weight:700;letter-spacing:0.1em;padding:8px;border:none;background:transparent;color:var(--text-faint);cursor:pointer;border-bottom:2px solid transparent}
 .auth-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
 .auth-field{margin-bottom:12px}
 .auth-field label{display:block;font-family:var(--mono);font-size:0.55rem;color:var(--text-faint);letter-spacing:0.08em;margin-bottom:4px}
 .auth-field input{width:100%;padding:8px 10px;border:1px solid var(--navy-border);border-radius:4px;font-family:var(--mono);font-size:0.7rem;color:var(--text)}
-.auth-field input:focus{border-color:var(--blue)}
-.auth-btn{width:100%;padding:10px;border:none;border-radius:6px;background:var(--blue);color:#fff;font-family:var(--mono);font-size:0.65rem;font-weight:700;letter-spacing:0.1em;cursor:pointer;margin-top:4px}
-.auth-btn:hover{background:var(--blue-light)}
+.auth-btn{width:100%;padding:10px;border:none;border-radius:6px;background:var(--blue);color:#fff;font-family:var(--mono);font-size:0.65rem;font-weight:700;letter-spacing:0.1em;cursor:pointer}
 #auth-err{font-family:var(--mono);font-size:0.55rem;color:var(--red);text-align:center;margin-top:8px;min-height:16px}
-.auth-pane{display:none}
-.auth-pane:first-of-type{display:block}
-
+.auth-pane{display:none}.auth-pane:first-of-type{display:block}
 footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;color:#94A3B8;border-top:1px solid var(--navy-border);margin-top:20px}
-
-@media(max-width:640px){
-  .page-wrap{margin-left:62px}
-  .sidebar-panel{display:none}
-  #stats{gap:12px;flex-wrap:wrap}
-  #filters{gap:6px}
-}
+@media(max-width:640px){.page-wrap{margin-left:62px}.sidebar-panel{display:none}#stats{gap:12px;flex-wrap:wrap}.cs-grid{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
@@ -134,26 +140,12 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-rail">
     <div class="sidebar-rail-logo" title="PoliticalWindow.com" onclick="location.href='/'">PW</div>
-    <a href="/" class="rail-item" title="Election Intel">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span class="rail-item-label">Election Intel</span>
-    </a>
-    <a href="/public-file" class="rail-item" title="Public File">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      <span class="rail-item-label">Public File</span>
-    </a>
-    <a href="/rates" class="rail-item" title="Rate Analytics">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      <span class="rail-item-label">Rates</span>
-    </a>
+    <a href="/" class="rail-item" title="Election Intel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="rail-item-label">Election Intel</span></a>
+    <a href="/public-file" class="rail-item" title="Public File"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="rail-item-label">Public File</span></a>
+    <a href="/rates" class="rail-item" title="Rate Analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="rail-item-label">Rates</span></a>
     <div class="rail-divider"></div>
-    <a href="/lur" class="rail-item active" title="LUR Monitor">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <span class="rail-item-label">LUR Monitor</span>
-    </a>
-    <div class="sidebar-collapse-btn" onclick="toggleSidebar()" id="sidebarToggleBtn" title="Collapse panel">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/></svg>
-    </div>
+    <a href="/lur" class="rail-item active" title="LUR Monitor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="rail-item-label">LUR Monitor</span></a>
+    <div class="sidebar-collapse-btn" onclick="toggleSidebar()" id="sidebarToggleBtn" title="Collapse panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/></svg></div>
   </div>
   <div class="sidebar-panel">
     <div class="sidebar-panel-header">LUR Monitor</div>
@@ -166,105 +158,57 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
 </nav>
 
 <div class="page-wrap">
-
 <header>
-  <div class="header-left">
-    <span class="logo-badge">LUR MONITOR</span>
-    <span class="header-meta" id="data-badge" style="color:rgba(255,255,255,0.5);font-size:0.55rem">&#x25CF; LOADING...</span>
-  </div>
+  <div class="header-left"><span class="logo-badge">LUR MONITOR</span><span class="header-meta" id="data-badge" style="color:rgba(255,255,255,0.5);font-size:0.55rem">&#x25CF; LOADING...</span></div>
   <div></div>
-  <div class="header-right">
-    <button id="logout-btn" onclick="logout()" style="display:none">LOGOUT</button>
-  </div>
+  <div class="header-right"><button id="logout-btn" onclick="logout()" style="display:none">LOGOUT</button></div>
 </header>
 
-<div id="header">
+<div id="sub-header">
   <div>
-    <div style="font-size:0.95rem;font-weight:700;color:var(--text);letter-spacing:0.02em;font-family:var(--sans)">LUR Rate Variance</div>
-    <div class="sub" id="header-sub">Slots where candidates paid different rates for the same airtime</div>
+    <div style="font-size:0.95rem;font-weight:700;color:var(--text);font-family:var(--sans)">LUR Rate Variance</div>
+    <div class="sub" id="header-sub">In-window slots where 2+ candidates paid different rates for the same airtime</div>
   </div>
   <div id="stats">
     <div><div class="stat-val" id="s-slots">&mdash;</div><div class="stat-lbl">VARIANCE SLOTS</div></div>
     <div><div class="stat-val" id="s-stations">&mdash;</div><div class="stat-lbl">STATIONS</div></div>
     <div><div class="stat-val" id="s-states">&mdash;</div><div class="stat-lbl">STATES</div></div>
-    <div><div class="stat-val" id="s-overcharge">&mdash;</div><div class="stat-lbl">EST. OVERCHARGE</div></div>
+    <div><div class="stat-val" id="s-overcharge" style="color:var(--red)">&mdash;</div><div class="stat-lbl">EST. OVERCHARGE</div></div>
   </div>
 </div>
 
 <div id="filters">
-  <div class="filter-wrap">
-    <div class="filter-lbl">STATE</div>
-    <select id="f-state"><option value="">All States</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option><option>DC</option></select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">STATION</div>
-    <select id="f-station"><option value="">All Stations</option></select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">DAYPART</div>
-    <select id="f-daypart"><option value="">All Dayparts</option><option value="EM">EM</option><option value="MN">MN</option><option value="DT">DT</option><option value="EF">EF</option><option value="EN">EN</option><option value="PA">PA</option><option value="PT">PT</option><option value="LN">LN</option><option value="LF">LF</option><option value="ON">ON</option></select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">MIN SPREAD %</div>
-    <select id="f-spread"><option value="0">0%</option><option value="5">5%</option><option value="10" selected>10%</option><option value="25">25%</option><option value="50">50%</option></select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">LIMIT</div>
-    <select id="f-limit"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option></select>
-  </div>
+  <div class="filter-wrap"><div class="filter-lbl">CANDIDATE</div><select id="f-entity"><option value="">All Candidates</option></select></div>
+  <div class="filter-wrap"><div class="filter-lbl">STATE</div><select id="f-state"><option value="">All States</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option><option>DC</option></select></div>
+  <div class="filter-wrap"><div class="filter-lbl">STATION</div><select id="f-station"><option value="">All Stations</option></select></div>
+  <div class="filter-wrap"><div class="filter-lbl">DAYPART</div><select id="f-daypart"><option value="">All</option><option value="EM">EM</option><option value="MN">MN</option><option value="DT">DT</option><option value="EF">EF</option><option value="EN">EN</option><option value="PA">PA</option><option value="PT">PT</option><option value="LN">LN</option><option value="LF">LF</option><option value="ON">ON</option></select></div>
   <button id="clear-filters" class="sort-btn" style="color:var(--blue)">CLEAR</button>
   <button id="run-btn" style="font-family:var(--mono);font-size:0.7rem;font-weight:700;letter-spacing:0.12em;padding:6px 18px;border:1px solid var(--blue);border-radius:6px;cursor:pointer;background:var(--blue);color:#fff;margin-left:auto">RUN REPORT</button>
 </div>
 
+<div id="cand-summary"></div>
+
 <div id="main">
-  <div id="loading">RUN REPORT TO SCAN FOR LUR RATE VARIANCES</div>
+  <div id="loading">RUN REPORT TO SCAN FOR IN-WINDOW RATE VARIANCES</div>
   <div id="error-msg"></div>
   <div id="variance-wrap" style="display:none">
-    <div class="tbl-hdr">
-      <span>RATE VARIANCE REPORT</span>
-      <span id="variance-count"></span>
-    </div>
-    <table>
-      <thead id="variance-thead"></thead>
-      <tbody id="variance-body"></tbody>
-    </table>
+    <div class="tbl-hdr"><span>RATE VARIANCE REPORT</span><span id="variance-count"></span></div>
+    <table><thead id="variance-thead"></thead><tbody id="variance-body"></tbody></table>
   </div>
 </div>
 
-<footer>DATA SOURCE: FCC OPIF PUBLIC FILES &middot; POLITICALWINDOW.COM &copy; 2026</footer>
+<footer>DATA SOURCE: FCC OPIF PUBLIC FILES &middot; IN-WINDOW SLOTS ONLY &middot; POLITICALWINDOW.COM &copy; 2026</footer>
+</div>
 
-</div><!-- /page-wrap -->
-
-<!-- AUTH OVERLAY -->
+<!-- AUTH -->
 <div id="auth-overlay">
   <div id="auth-card">
-    <div class="auth-header">
-      <div class="auth-logo">PW</div>
-      <div class="auth-title">Political<span style="color:var(--blue)">Window</span></div>
-      <div class="auth-sub">FCC Political Ad Intelligence</div>
-    </div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" data-pane="login">LOGIN</button>
-      <button class="auth-tab" data-pane="register">REGISTER</button>
-    </div>
+    <div class="auth-header"><div class="auth-logo">PW</div><div class="auth-title">Political<span style="color:var(--blue)">Window</span></div><div class="auth-sub">FCC Political Ad Intelligence</div></div>
+    <div class="auth-tabs"><button class="auth-tab active" data-pane="login">LOGIN</button><button class="auth-tab" data-pane="register">REGISTER</button></div>
     <div class="auth-body">
       <div id="auth-err"></div>
-      <div class="auth-pane" id="pane-login">
-        <form id="login-form">
-          <div class="auth-field"><label>EMAIL</label><input type="email" id="login-email" required></div>
-          <div class="auth-field"><label>PASSWORD</label><input type="password" id="login-password" required></div>
-          <button class="auth-btn" type="submit" id="login-btn">LOGIN</button>
-        </form>
-      </div>
-      <div class="auth-pane" id="pane-register" style="display:none">
-        <form id="register-form">
-          <div class="auth-field"><label>INVITE CODE</label><input type="text" id="reg-invite" required></div>
-          <div class="auth-field"><label>EMAIL</label><input type="email" id="reg-email" required></div>
-          <div class="auth-field"><label>PASSWORD</label><input type="password" id="reg-password" required></div>
-          <div class="auth-field"><label>CONFIRM PASSWORD</label><input type="password" id="reg-password2" required></div>
-          <button class="auth-btn" type="submit" id="register-btn">CREATE ACCOUNT</button>
-        </form>
-      </div>
+      <div class="auth-pane" id="pane-login"><form id="login-form"><div class="auth-field"><label>EMAIL</label><input type="email" id="login-email" required></div><div class="auth-field"><label>PASSWORD</label><input type="password" id="login-password" required></div><button class="auth-btn" type="submit" id="login-btn">LOGIN</button></form></div>
+      <div class="auth-pane" id="pane-register" style="display:none"><form id="register-form"><div class="auth-field"><label>INVITE CODE</label><input type="text" id="reg-invite" required></div><div class="auth-field"><label>EMAIL</label><input type="email" id="reg-email" required></div><div class="auth-field"><label>PASSWORD</label><input type="password" id="reg-password" required></div><div class="auth-field"><label>CONFIRM PASSWORD</label><input type="password" id="reg-password2" required></div><button class="auth-btn" type="submit" id="register-btn">CREATE ACCOUNT</button></form></div>
     </div>
   </div>
 </div>
@@ -280,44 +224,44 @@ function fmtWeek(d){if(!d)return'\u2014';return d.slice(5,10).replace('-','/');}
 function fmt$(n){if(!n&&n!==0)return'\u2014';var v=parseFloat(n);if(isNaN(v))return'\u2014';if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';if(v>=1000)return'$'+(v/1000).toFixed(0)+'K';return'$'+v.toFixed(2);}
 function fmtRate(n){if(!n)return'\u2014';return'$'+parseFloat(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
 
-function authFetch(url){
-  var h={};
-  if(TOKEN)h['Authorization']='Bearer '+TOKEN;
-  return fetch(url,{headers:h});
-}
+function authFetch(url){var h={};if(TOKEN)h['Authorization']='Bearer '+TOKEN;return fetch(url,{headers:h});}
 
-// ── POPULATE STATIONS ──
-function loadStations(){
+function loadDropdowns(){
   authFetch(API+'/api/lur-options').then(function(r){return r.json();}).then(function(j){
     var sel=document.getElementById('f-station');
-    var stations=(j.stations||[]).sort(function(a,b){return(a.station||'').localeCompare(b.station||'');});
-    stations.forEach(function(s){
+    (j.stations||[]).sort(function(a,b){return(a.station||'').localeCompare(b.station||'');}).forEach(function(s){
       var o=document.createElement('option');o.value=s.station;o.textContent=s.station+(s.dma?' \u00B7 '+s.dma:'');sel.appendChild(o);
+    });
+  }).catch(function(){});
+  authFetch(API+'/api/lur-entities').then(function(r){return r.json();}).then(function(j){
+    var sel=document.getElementById('f-entity');
+    var entities=(j||[]).sort(function(a,b){return(a.candidate_name||'').localeCompare(b.candidate_name||'');});
+    entities.forEach(function(e){
+      var o=document.createElement('option');o.value=e.political_entity_id;
+      o.textContent=e.candidate_name+' ('+e.party+'-'+e.state+' '+e.office+')';sel.appendChild(o);
     });
   }).catch(function(){});
 }
 
-// ── RUN REPORT ──
 function runReport(){
+  var entity=document.getElementById('f-entity').value;
   var state=document.getElementById('f-state').value;
   var station=document.getElementById('f-station').value;
   var daypart=document.getElementById('f-daypart').value;
-  var spread=document.getElementById('f-spread').value;
-  var limit=document.getElementById('f-limit').value;
 
   var params=[];
+  if(entity)params.push('entity_id='+encodeURIComponent(entity));
   if(state)params.push('state='+state);
   if(station)params.push('station='+encodeURIComponent(station));
   if(daypart)params.push('daypart_code='+daypart);
-  params.push('min_spread='+spread);
-  params.push('limit='+limit);
 
   document.getElementById('loading').style.display='block';
-  document.getElementById('loading').textContent='SCANNING FOR RATE VARIANCES...';
+  document.getElementById('loading').textContent='SCANNING IN-WINDOW RATE VARIANCES...';
   document.getElementById('variance-wrap').style.display='none';
   document.getElementById('error-msg').style.display='none';
+  document.getElementById('cand-summary').style.display='none';
 
-  authFetch(API+'/api/lur-violations?'+params.join('&'))
+  authFetch(API+'/api/lur-monitor?'+params.join('&'))
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(j){
       document.getElementById('loading').style.display='none';
@@ -328,14 +272,29 @@ function runReport(){
       document.getElementById('s-stations').textContent=summary.total_stations||0;
       document.getElementById('s-states').textContent=summary.total_states||0;
       document.getElementById('s-overcharge').textContent=fmt$(summary.total_overcharge);
-      document.getElementById('s-overcharge').style.color='var(--red)';
-
-      var data=j.data||[];
-      document.getElementById('header-sub').textContent=data.length+' variance slots found \u00B7 2026 cycle';
+      document.getElementById('header-sub').textContent=(j.data||[]).length+' variance slots \u00B7 in-window only \u00B7 2026 cycle';
       document.getElementById('data-badge').style.color='#34D399';
-      document.getElementById('data-badge').textContent='\u25CF LIVE \u00B7 '+data.length+' slots';
+      document.getElementById('data-badge').textContent='\u25CF LIVE';
 
-      renderVariance(data);
+      // Candidate summary card
+      if(j.candidate_summary&&j.candidate_summary.slots_appearing>0){
+        var cs=j.candidate_summary;
+        var partyClass=cs.party==='R'?'cs-party-R':cs.party==='D'?'cs-party-D':'';
+        document.getElementById('cand-summary').style.display='block';
+        document.getElementById('cand-summary').innerHTML=
+          '<div class="cs-header"><span class="cs-name">'+esc(cs.candidate_name||'')+'</span><span class="cs-party '+partyClass+'">'+esc(cs.party||'')+'</span></div>'+
+          '<div class="cs-grid">'+
+            '<div class="cs-item"><div class="cs-val cs-neutral">'+cs.slots_appearing+'</div><div class="cs-label">COMPETITIVE SLOTS</div></div>'+
+            '<div class="cs-item"><div class="cs-val cs-neutral">'+cs.total_spots.toLocaleString()+'</div><div class="cs-label">TOTAL SPOTS</div></div>'+
+            '<div class="cs-item"><div class="cs-val cs-negative">'+cs.spots_above_lur.toLocaleString()+'</div><div class="cs-label">SPOTS ABOVE LUR</div></div>'+
+            '<div class="cs-item"><div class="cs-val cs-negative">'+fmt$(cs.total_overpaid)+'</div><div class="cs-label">EST. OVERPAID</div></div>'+
+            '<div class="cs-item"><div class="cs-val '+(cs.net_position>=0?'cs-positive':'cs-negative')+'">'+fmt$(Math.abs(cs.net_position))+(cs.net_position>=0?' saved':' over')+'</div><div class="cs-label">NET POSITION VS AVG</div></div>'+
+          '</div>';
+      } else {
+        document.getElementById('cand-summary').style.display='none';
+      }
+
+      renderVariance(j.data||[],entity);
     })
     .catch(function(e){
       document.getElementById('loading').style.display='none';
@@ -346,28 +305,27 @@ function runReport(){
     });
 }
 
-function renderVariance(data){
+function renderVariance(data,entityFilter){
   if(!data.length){
     document.getElementById('variance-count').textContent='';
     document.getElementById('variance-thead').innerHTML='';
-    document.getElementById('variance-body').innerHTML='<tr><td colspan="9" style="padding:40px;text-align:center;color:var(--text-faint);font-size:0.72rem;letter-spacing:0.08em">NO VARIANCES FOUND — TRY ADJUSTING FILTERS</td></tr>';
+    document.getElementById('variance-body').innerHTML='<tr><td colspan="10" style="padding:40px;text-align:center;color:var(--text-faint);font-size:0.72rem;letter-spacing:0.08em">NO IN-WINDOW VARIANCES FOUND</td></tr>';
     return;
   }
-
-  document.getElementById('variance-count').textContent=data.length+' SLOTS';
-  document.getElementById('variance-thead').innerHTML='<tr><th>STATION</th><th>DMA</th><th>DAYPART</th><th>WEEK</th><th>BUYERS</th><th>LUR FLOOR</th><th>MAX RATE</th><th>SPREAD</th><th>EST. OVERCHARGE</th></tr>';
+  document.getElementById('variance-count').textContent=data.length+' SLOTS \u00B7 IN-WINDOW ONLY';
+  document.getElementById('variance-thead').innerHTML='<tr><th>STATION</th><th>DMA</th><th>DAYPART</th><th>WEEK</th><th>WINDOW</th><th>BUYERS</th><th>LUR FLOOR</th><th>MAX RATE</th><th>SPREAD</th><th>EST. OVERCHARGE</th></tr>';
 
   var html='';
   data.forEach(function(slot){
-    // Spread badge color
     var sp=parseFloat(slot.spread_pct)||0;
     var sc=sp>=50?'spread-high':sp>=25?'spread-med':'spread-low';
+    var wc=slot.window_status==='Primary'?'window-Primary':'window-General';
 
-    // Slot header row
     html+='<tr class="slot-hdr"><td>'+esc(slot.station||'\u2014')+'</td>'
       +'<td class="c-muted">'+esc(slot.dma||'\u2014')+'</td>'
       +'<td><span style="color:var(--blue);font-weight:600">'+esc(slot.daypart_code||'')+'</span> <span class="c-faint">'+(DP[slot.daypart_code]||'')+'</span></td>'
       +'<td>'+fmtWeek(slot.week_of)+'</td>'
+      +'<td><span class="window-badge '+wc+'">'+(slot.window_status||'')+'</span></td>'
       +'<td>'+slot.candidate_count+'</td>'
       +'<td class="c-green">'+fmtRate(slot.lur_rate)+'</td>'
       +'<td class="c-bright">'+fmtRate(slot.max_rate)+'</td>'
@@ -375,7 +333,6 @@ function renderVariance(data){
       +'<td style="color:var(--red);font-weight:600">'+fmt$(slot.est_overcharge)+'</td>'
       +'</tr>';
 
-    // Buyer detail rows
     var buyers=slot.buyers||[];
     var lurRate=parseFloat(slot.lur_rate)||0;
     buyers.forEach(function(b){
@@ -383,103 +340,56 @@ function renderVariance(data){
       var isLur=Math.abs(rate-lurRate)<0.01;
       var overPct=b.overpaid_pct?'+'+b.overpaid_pct+'%':'';
       var cand=b.candidate_name||b.advertiser||'\u2014';
+      var isSelected=entityFilter&&b.entity_id===entityFilter;
 
-      // FCC link from first invoice
-      var fccLink='\u2014';
+      // Invoice links
+      var invoiceLinks='\u2014';
       if(b.invoices&&b.invoices.length){
-        var inv=b.invoices[0];
-        if(inv.folder_id&&inv.file_manager_id){
-          fccLink='<a href="https://publicfiles.fcc.gov/api/manager/download/'+inv.folder_id+'/'+inv.file_manager_id+'.pdf" target="_blank" rel="noopener" style="color:var(--blue)">PDF</a>';
-        }
+        invoiceLinks=b.invoices.slice(0,3).map(function(inv){
+          if(!inv.folder_id||!inv.file_manager_id)return '';
+          return '<a href="https://publicfiles.fcc.gov/api/manager/download/'+inv.folder_id+'/'+inv.file_manager_id+'.pdf" target="_blank" rel="noopener" style="color:var(--blue);font-size:0.52rem" title="Order '+esc(inv.order_number||'')+' Line '+esc(String(inv.line_number||''))+'">PDF</a>';
+        }).filter(Boolean).join(' ');
+        if(!invoiceLinks)invoiceLinks='\u2014';
       }
 
-      html+='<tr>'
+      html+='<tr class="'+(isSelected?'highlight-row':'')+'">'
         +'<td class="'+pc(b.party)+'">'+esc(cand)+(isLur?'<span class="lur-badge">LUR</span>':overPct?'<span class="over-badge">'+overPct+'</span>':'')+'</td>'
-        +'<td class="c-muted">'+esc(b.party||'\u2014')+'</td>'
+        +'<td class="'+pc(b.party)+'">'+esc(b.party||'\u2014')+'</td>'
         +'<td class="c-muted">'+esc(b.office||'\u2014')+'</td>'
-        +'<td></td>'
-        +'<td></td>'
+        +'<td></td><td></td><td></td>'
         +'<td class="'+(isLur?'c-green':'c-muted')+'">'+fmtRate(b.rate)+'</td>'
-        +'<td class="c-muted">'+esc(b.units||'\u2014')+'</td>'
+        +'<td class="c-muted">'+esc(b.units||'\u2014')+' spots</td>'
         +'<td class="c-muted">'+fmt$(b.spend)+'</td>'
-        +'<td>'+fccLink+'</td>'
+        +'<td>'+invoiceLinks+'</td>'
         +'</tr>';
     });
   });
-
   document.getElementById('variance-body').innerHTML=html;
 }
 
-// ── FILTER EVENTS ──
+// ── EVENTS ──
 document.getElementById('run-btn').addEventListener('click',runReport);
 document.getElementById('clear-filters').addEventListener('click',function(){
+  document.getElementById('f-entity').value='';
   document.getElementById('f-state').value='';
   document.getElementById('f-station').value='';
   document.getElementById('f-daypart').value='';
-  document.getElementById('f-spread').value='10';
-  document.getElementById('f-limit').value='200';
+  document.getElementById('cand-summary').style.display='none';
 });
 
-// ── SIDEBAR TOGGLE ──
-function toggleSidebar(){
-  var sb=document.getElementById('sidebar');sb.classList.toggle('collapsed');
-  var btn=document.getElementById('sidebarToggleBtn');
-  btn.innerHTML=sb.classList.contains('collapsed')?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/></svg>';
-}
+// ── SIDEBAR ──
+function toggleSidebar(){var sb=document.getElementById('sidebar');sb.classList.toggle('collapsed');var btn=document.getElementById('sidebarToggleBtn');btn.innerHTML=sb.classList.contains('collapsed')?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/></svg>';}
 
 // ── AUTH ──
 function showOverlay(){document.getElementById('auth-overlay').style.display='flex';}
 function hideOverlay(){document.getElementById('auth-overlay').style.display='none';var lb=document.getElementById('logout-btn');if(lb)lb.style.display='';}
 window.logout=function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');TOKEN=null;showOverlay();var lb=document.getElementById('logout-btn');if(lb)lb.style.display='none';};
-
 document.addEventListener('DOMContentLoaded',function(){
-  // Auth tabs
-  document.querySelectorAll('.auth-tab').forEach(function(tab){tab.addEventListener('click',function(){
-    document.querySelectorAll('.auth-tab').forEach(function(t){t.classList.remove('active');});
-    tab.classList.add('active');
-    document.querySelectorAll('.auth-pane').forEach(function(p){p.style.display='none';});
-    document.getElementById('pane-'+tab.dataset.pane).style.display='block';
-    document.getElementById('auth-err').textContent='';
-  });});
-
-  // Invite param
-  var inviteParam=new URLSearchParams(window.location.search).get('invite');
-  if(inviteParam){var ri=document.getElementById('reg-invite');if(ri)ri.value=inviteParam;var rt=document.querySelector('.auth-tab[data-pane="register"]');if(rt)rt.click();}
-
-  // Login
-  document.getElementById('login-form').addEventListener('submit',function(e){
-    e.preventDefault();var btn=document.getElementById('login-btn'),err=document.getElementById('auth-err');
-    btn.disabled=true;btn.textContent='AUTHENTICATING\u2026';err.textContent='';
-    fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('login-email').value.trim(),password:document.getElementById('login-password').value})})
-    .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
-    .then(function(res){
-      if(!res.ok){err.textContent=res.d.error||'Login failed';btn.disabled=false;btn.textContent='LOGIN';return;}
-      TOKEN=res.d.token;localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);
-      hideOverlay();loadStations();
-    }).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='LOGIN';});
-  });
-
-  // Register
-  document.getElementById('register-form').addEventListener('submit',function(e){
-    e.preventDefault();var btn=document.getElementById('register-btn'),err=document.getElementById('auth-err');
-    var pw=document.getElementById('reg-password').value,pw2=document.getElementById('reg-password2').value;
-    if(pw!==pw2){err.textContent='Passwords do not match';return;}
-    btn.disabled=true;btn.textContent='CREATING ACCOUNT\u2026';err.textContent='';
-    fetch(API+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('reg-email').value.trim(),password:pw,invite_token:document.getElementById('reg-invite').value.trim()})})
-    .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
-    .then(function(res){
-      if(!res.ok){err.textContent=res.d.error||'Registration failed';btn.disabled=false;btn.textContent='CREATE ACCOUNT';return;}
-      TOKEN=res.d.token;localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);
-      hideOverlay();loadStations();
-    }).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='CREATE ACCOUNT';});
-  });
-
-  // Auto-login check
-  if(TOKEN){
-    fetch(API+'/auth/me',{headers:{'Authorization':'Bearer '+TOKEN}})
-    .then(function(r){if(r.ok){hideOverlay();loadStations();}else{localStorage.removeItem('pw_token');TOKEN=null;showOverlay();}})
-    .catch(function(){showOverlay();});
-  } else {showOverlay();}
+  document.querySelectorAll('.auth-tab').forEach(function(tab){tab.addEventListener('click',function(){document.querySelectorAll('.auth-tab').forEach(function(t){t.classList.remove('active');});tab.classList.add('active');document.querySelectorAll('.auth-pane').forEach(function(p){p.style.display='none';});document.getElementById('pane-'+tab.dataset.pane).style.display='block';document.getElementById('auth-err').textContent='';});});
+  var inviteParam=new URLSearchParams(window.location.search).get('invite');if(inviteParam){var ri=document.getElementById('reg-invite');if(ri)ri.value=inviteParam;var rt=document.querySelector('.auth-tab[data-pane="register"]');if(rt)rt.click();}
+  document.getElementById('login-form').addEventListener('submit',function(e){e.preventDefault();var btn=document.getElementById('login-btn'),err=document.getElementById('auth-err');btn.disabled=true;btn.textContent='AUTHENTICATING\u2026';err.textContent='';fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('login-email').value.trim(),password:document.getElementById('login-password').value})}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});}).then(function(res){if(!res.ok){err.textContent=res.d.error||'Login failed';btn.disabled=false;btn.textContent='LOGIN';return;}TOKEN=res.d.token;localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);hideOverlay();loadDropdowns();}).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='LOGIN';});});
+  document.getElementById('register-form').addEventListener('submit',function(e){e.preventDefault();var btn=document.getElementById('register-btn'),err=document.getElementById('auth-err');var pw=document.getElementById('reg-password').value,pw2=document.getElementById('reg-password2').value;if(pw!==pw2){err.textContent='Passwords do not match';return;}btn.disabled=true;btn.textContent='CREATING ACCOUNT\u2026';err.textContent='';fetch(API+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('reg-email').value.trim(),password:pw,invite_token:document.getElementById('reg-invite').value.trim()})}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});}).then(function(res){if(!res.ok){err.textContent=res.d.error||'Registration failed';btn.disabled=false;btn.textContent='CREATE ACCOUNT';return;}TOKEN=res.d.token;localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);hideOverlay();loadDropdowns();}).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='CREATE ACCOUNT';});});
+  if(TOKEN){fetch(API+'/auth/me',{headers:{'Authorization':'Bearer '+TOKEN}}).then(function(r){if(r.ok){hideOverlay();loadDropdowns();}else{localStorage.removeItem('pw_token');TOKEN=null;showOverlay();}}).catch(function(){showOverlay();});}else{showOverlay();}
 });
 </script>
 </body>
