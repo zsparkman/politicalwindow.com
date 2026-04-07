@@ -152,7 +152,7 @@ th.sortable:hover::after{background:#F1F5F9}
 th.sortable::after{content:'\21C5';position:absolute;right:0;top:0;bottom:0;width:26px;display:flex;align-items:center;justify-content:center;background:#F8FAFC;border-left:1px solid #E3E8EF;font-size:0.78rem;color:#CBD5E1;pointer-events:none}
 th.sort-asc::after{content:'\25B2';color:var(--blue);font-size:0.65rem;background:#EFF6FF;border-left-color:#BFDBFE}
 th.sort-desc::after{content:'\25BC';color:var(--blue);font-size:0.65rem;background:#EFF6FF;border-left-color:#BFDBFE}
-td{padding:5px 8px;border-bottom:1px solid #F1F5F9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+td{padding:5px 6px;border-bottom:1px solid #F1F5F9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
 tr:nth-child(even) td{background:#F8FAFC}
 .c-green{color:#059669;font-weight:700}
 .c-amber{color:#D97706;font-weight:600}
@@ -162,7 +162,9 @@ tr:nth-child(even) td{background:#F8FAFC}
 .c-r{color:#DC2626;font-weight:700}
 .c-d{color:#3b82f6;font-weight:700}
 #trend-table-wrap{overflow-x:auto}
-#lines-wrap{overflow-x:auto}
+#lines-wrap{overflow-x:auto;padding:0 2px}
+#lines-wrap table{table-layout:fixed;width:100%}
+#lines-wrap th,#lines-wrap td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #loading{display:flex;align-items:center;justify-content:center;height:200px;font-size:0.8rem;color:var(--blue);letter-spacing:0.15em}
 #error-msg{color:#ef4444;text-align:center;padding:40px;font-size:0.8rem;display:none}
 footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing:0.08em;padding:20px}
