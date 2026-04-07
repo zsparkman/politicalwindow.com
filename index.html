@@ -2146,7 +2146,7 @@ async function enrichCandidateFinance(abbr, container) {
             }
           } catch (e) { /* silent */ }
         }
-        html += `<a href="/lur?entity=${entity.political_entity_id}" class="cand-finance-item" style="color:var(--blue);text-decoration:none;cursor:pointer" title="Run LUR analysis">LUR</a>`;
+        html += `<a href="/lur?candidate=${encodeURIComponent(entity.candidate_name)}" class="cand-finance-item" style="color:var(--blue);text-decoration:none;cursor:pointer" title="Run LUR analysis">LUR</a>`;
         financeEl.innerHTML = html;
       }
     }

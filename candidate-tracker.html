@@ -556,7 +556,7 @@ async function selectCandidate(id) {
     '<div class="detail-actions">' +
       (c.fec_candidate_id ? '<a href="https://www.fec.gov/data/candidate/' + c.fec_candidate_id + '/" target="_blank" class="detail-btn detail-btn-primary">View FEC Profile</a>' : isFederal ? '<span class="detail-btn detail-btn-outline" style="opacity:0.5;cursor:default">FEC ID Pending</span>' : '') +
       '<a href="/public-file?q=' + encodeURIComponent(c.candidate_name) + '" class="detail-btn detail-btn-outline">View All Filings</a>' +
-      '<a href="/lur?entity=' + c.political_entity_id + '" class="detail-btn detail-btn-outline">Run LUR Analysis</a>' +
+      '<a href="/lur?candidate=' + encodeURIComponent(c.candidate_name) + '" class="detail-btn detail-btn-outline">Run LUR Analysis</a>' +
     '</div>';
 
   // Load spend + filings + FEC in parallel
