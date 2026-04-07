@@ -109,7 +109,61 @@ td{font-family:var(--mono);font-size:0.6rem;padding:5px 10px;border-bottom:1px s
 #auth-err{font-family:var(--mono);font-size:0.55rem;color:var(--red);text-align:center;margin-top:8px;min-height:16px}
 .auth-pane{display:none}.auth-pane:first-of-type{display:block}
 footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;color:#94A3B8;border-top:1px solid var(--navy-border);margin-top:20px}
-@media(max-width:640px){.page-wrap{margin-left:62px}.sidebar-panel{display:none}#stats{gap:12px;flex-wrap:wrap}}
+/* ── INVOICE REVIEW MODAL ── */
+#invoice-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);align-items:center;justify-content:center}
+#invoice-overlay.open{display:flex}
+#invoice-modal{background:#fff;border-radius:10px;width:96vw;max-width:1100px;height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden}
+.inv-topbar{background:#0f1623;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;flex-shrink:0}
+.inv-topbar-left{font-family:var(--mono);font-size:0.58rem;color:#E2E8F0;letter-spacing:0.06em;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.inv-topbar-left .inv-badge{font-size:0.5rem;padding:1px 5px;border-radius:2px;font-weight:700;letter-spacing:0.08em}
+.inv-badge-win{color:var(--amber);background:rgba(217,119,6,0.2)}
+.inv-badge-var{color:#FCA5A5;background:rgba(220,38,38,0.25)}
+.inv-close-btn{background:none;border:none;color:#94A3B8;font-size:1.2rem;cursor:pointer;padding:4px 8px;line-height:1}
+.inv-close-btn:hover{color:#fff}
+.inv-callout{background:rgba(220,38,38,0.08);border-bottom:1px solid rgba(220,38,38,0.15);padding:8px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0}
+.inv-callout-label{font-family:var(--mono);font-size:0.52rem;font-weight:700;letter-spacing:0.1em;color:var(--red)}
+.inv-callout-detail{font-family:var(--mono);font-size:0.56rem;color:var(--text)}
+.inv-callout .inv-badge{font-family:var(--mono);font-size:0.48rem;padding:1px 5px;border-radius:2px;font-weight:700;color:var(--red);background:rgba(220,38,38,0.1)}
+.inv-tabs{display:none;padding:6px 18px 0;border-bottom:1px solid var(--navy-border);background:#FAFBFC;flex-shrink:0}
+.inv-tabs.show{display:flex;gap:0}
+.inv-tab{font-family:var(--mono);font-size:0.55rem;font-weight:700;letter-spacing:0.08em;color:var(--text-faint);padding:6px 14px;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent}
+.inv-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.inv-tab:hover{color:var(--text)}
+.inv-body{display:flex;flex:1;overflow:hidden;min-height:0}
+.inv-panel{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--navy-border);overflow:hidden}
+.inv-panel:last-child{border-right:none}
+.inv-panel-hdr{padding:10px 14px;border-bottom:1px solid var(--navy-border);background:#FAFBFC;flex-shrink:0}
+.inv-panel-label{font-family:var(--mono);font-size:0.48rem;font-weight:700;letter-spacing:0.1em;color:var(--text-faint);text-transform:uppercase}
+.inv-panel-cand{font-family:var(--sans);font-size:0.78rem;font-weight:700;color:var(--text);margin-top:2px}
+.inv-panel-meta{font-family:var(--mono);font-size:0.52rem;color:var(--text-muted);margin-top:2px}
+.inv-panel-rate{font-family:var(--mono);font-size:1.1rem;font-weight:700;margin-top:4px}
+.inv-panel-rate-sub{font-family:var(--mono);font-size:0.52rem;color:var(--text-muted);display:inline;margin-left:6px;font-weight:400}
+.inv-pdf-wrap{flex:1;overflow-y:auto;background:#E5E7EB;position:relative;min-height:0}
+.inv-pdf-banner{background:var(--red);color:#fff;font-family:var(--mono);font-size:0.58rem;font-weight:700;letter-spacing:0.06em;padding:8px 14px;text-align:center;position:sticky;top:0;z-index:2}
+.inv-pdf-canvas-wrap{position:relative}
+.inv-pdf-canvas-wrap canvas{display:block;width:100%}
+.inv-pdf-highlight{position:absolute;border:2.5px solid #dc2626;background:rgba(220,38,38,0.08);border-radius:2px;pointer-events:none;z-index:1}
+.inv-pdf-skeleton{padding:20px;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;min-height:200px}
+.inv-pdf-skeleton-bar{height:8px;background:#D1D5DB;border-radius:4px;animation:inv-pulse 1.5s ease-in-out infinite}
+@keyframes inv-pulse{0%,100%{opacity:0.4}50%{opacity:1}}
+.inv-pdf-error{padding:30px 14px;text-align:center;font-family:var(--mono);font-size:0.6rem;color:var(--text-muted)}
+.inv-pdf-error a{color:var(--blue);font-weight:700}
+.inv-panel-footer{padding:8px 14px;border-top:1px solid var(--navy-border);background:#FAFBFC;font-family:var(--mono);font-size:0.5rem;color:var(--text-muted);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.inv-panel-footer a{color:var(--blue);font-weight:700;font-size:0.5rem}
+.inv-bottombar{padding:8px 18px;border-top:1px solid var(--navy-border);display:flex;align-items:center;justify-content:space-between;background:#FAFBFC;flex-shrink:0}
+.inv-bottombar-left{font-family:var(--mono);font-size:0.48rem;color:var(--text-faint);letter-spacing:0.04em}
+.inv-bottombar-right{display:flex;align-items:center;gap:12px}
+.inv-bottombar-right a{font-family:var(--mono);font-size:0.52rem;color:var(--blue);font-weight:700}
+.inv-bottombar-right button{font-family:var(--mono);font-size:0.55rem;font-weight:700;letter-spacing:0.08em;padding:5px 16px;border:1px solid var(--navy-border);border-radius:5px;background:#fff;color:var(--text);cursor:pointer}
+.inv-bottombar-right button:hover{border-color:var(--blue);color:var(--blue)}
+.inv-review-btn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:3px;background:rgba(29,78,216,0.08);color:var(--blue);font-size:0.6rem;cursor:pointer;border:none;margin-left:8px;vertical-align:middle;transition:all 0.12s;line-height:1}
+.inv-review-btn:hover{background:var(--blue);color:#fff}
+
+@media(max-width:640px){.page-wrap{margin-left:62px}.sidebar-panel{display:none}#stats{gap:12px;flex-wrap:wrap}
+.inv-body{flex-direction:column}
+.inv-panel{border-right:none;border-bottom:1px solid var(--navy-border)}
+#invoice-modal{width:100vw;height:100vh;border-radius:0;max-width:none}
+}
 </style>
 </head>
 <body>
@@ -184,6 +238,26 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
 </div>
 
 <footer>DATA SOURCE: FCC OPIF PUBLIC FILES &middot; POLITICALWINDOW.COM &copy; 2026</footer>
+</div>
+
+<!-- INVOICE REVIEW MODAL -->
+<div id="invoice-overlay" onclick="if(event.target===this)closeInvoiceReview()">
+  <div id="invoice-modal">
+    <div class="inv-topbar">
+      <div class="inv-topbar-left" id="inv-topbar-left"></div>
+      <button class="inv-close-btn" onclick="closeInvoiceReview()" title="Close">&#10005;</button>
+    </div>
+    <div class="inv-callout" id="inv-callout"></div>
+    <div class="inv-tabs" id="inv-tabs"></div>
+    <div class="inv-body" id="inv-body"></div>
+    <div class="inv-bottombar">
+      <div class="inv-bottombar-left">Read-only review &middot; No actions recorded</div>
+      <div class="inv-bottombar-right">
+        <a href="#" id="inv-open-both" target="_blank" rel="noopener">Open Both PDFs &#8599;</a>
+        <button onclick="closeInvoiceReview()">CLOSE</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- AUTH -->
@@ -343,10 +417,13 @@ function renderMatchups(rows){
     var winStatus=getWeekWindowStatus(s.state,s.week_of);
     var winBadge=winStatus?(' <span style="font-size:0.5rem;padding:1px 4px;border-radius:2px;'+(winStatus==='Primary'?'color:var(--amber);background:var(--amber-dim)':winStatus==='General'?'color:var(--green);background:var(--green-dim)':'color:var(--text-faint);background:var(--navy)')+'">'+winStatus+'</span>'):'';
 
+    var groupIdx=i;
     html+='<tr><td colspan="11" class="matchup-slot-hdr">'
       +esc(s.station||'\u2014')+' \u00B7 '+esc(s.description||'\u2014')+' \u00B7 '+esc(s.time_period||'\u2014')+' \u00B7 WK '+esc(fmtWeek(s.week_of))
       +winBadge
-      +' <span style="color:#94A3B8">('+s.rows.length+' buyers)</span></td></tr>';
+      +' <span style="color:#94A3B8">('+s.rows.length+' buyers)</span>'
+      +'<button class="inv-review-btn" data-group-idx="'+groupIdx+'" title="Review invoices">&#10530;</button>'
+      +'</td></tr>';
 
     s.rows.sort(function(a,b){var ar=parseFloat(a.rate)||0,br=parseFloat(b.rate)||0;return br-ar;});
     var lurRate=Math.min.apply(null,s.rows.map(function(r){return parseFloat(r.rate)||Infinity;}));
@@ -376,6 +453,18 @@ function renderMatchups(rows){
   }
   if(matchups.length>cap)html+='<tr><td colspan="11" class="c-muted" style="padding:6px 14px;font-size:0.58rem">'+(matchups.length-cap)+' more variances \u2014 apply filters to narrow</td></tr>';
   document.getElementById('matchups-body').innerHTML=html;
+
+  // Store matchups for modal access and wire review buttons
+  window._lur_matchups=matchups;
+  document.getElementById('matchups-body').querySelectorAll('.inv-review-btn').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var idx=parseInt(this.dataset.groupIdx);
+      if(window._lur_matchups&&window._lur_matchups[idx]){
+        openInvoiceReview(window._lur_matchups[idx]);
+      }
+    });
+  });
 }
 
 function render(){
@@ -520,6 +609,234 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('login-form').addEventListener('submit',function(e){e.preventDefault();var btn=document.getElementById('login-btn'),err=document.getElementById('auth-err');btn.disabled=true;btn.textContent='AUTHENTICATING\u2026';err.textContent='';fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('login-email').value.trim(),password:document.getElementById('login-password').value})}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});}).then(function(res){if(!res.ok){err.textContent=res.d.error||'Login failed';btn.disabled=false;btn.textContent='LOGIN';return;}TOKEN=res.d.token;localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);hideOverlay();showIdleState();}).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='LOGIN';});});
   document.getElementById('register-form').addEventListener('submit',function(e){e.preventDefault();var btn=document.getElementById('register-btn'),err=document.getElementById('auth-err');var pw=document.getElementById('reg-password').value,pw2=document.getElementById('reg-password2').value;if(pw!==pw2){err.textContent='Passwords do not match';return;}btn.disabled=true;btn.textContent='CREATING ACCOUNT\u2026';err.textContent='';fetch(API+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('reg-email').value.trim(),password:pw,invite_token:document.getElementById('reg-invite').value.trim()})}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});}).then(function(res){if(!res.ok){err.textContent=res.d.error||'Registration failed';btn.disabled=false;btn.textContent='CREATE ACCOUNT';return;}TOKEN=res.d.token;localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);hideOverlay();showIdleState();}).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='CREATE ACCOUNT';});});
   if(TOKEN){fetch(API+'/auth/me',{headers:{'Authorization':'Bearer '+TOKEN}}).then(function(r){if(r.ok){hideOverlay();showIdleState();}else{localStorage.removeItem('pw_token');TOKEN=null;showOverlay();}}).catch(function(){showOverlay();});}else{showOverlay();}
+});
+
+// ── Invoice Review Modal ──
+var _pdfjs=null;
+var _pdfjsLoading=false;
+var _pdfjsCallbacks=[];
+
+function ensurePdfJs(cb){
+  if(_pdfjs){cb(_pdfjs);return;}
+  _pdfjsCallbacks.push(cb);
+  if(_pdfjsLoading)return;
+  _pdfjsLoading=true;
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  s.onload=function(){
+    var lib=window.pdfjsLib;
+    lib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    _pdfjs=lib;
+    _pdfjsCallbacks.forEach(function(fn){fn(lib);});
+    _pdfjsCallbacks=[];
+  };
+  s.onerror=function(){
+    _pdfjsLoading=false;
+    _pdfjsCallbacks.forEach(function(fn){fn(null);});
+    _pdfjsCallbacks=[];
+  };
+  document.head.appendChild(s);
+}
+
+function openInvoiceReview(group){
+  var overlay=document.getElementById('invoice-overlay');
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+
+  // Sort rows: highest rate first
+  var sorted=group.rows.slice().sort(function(a,b){return(parseFloat(b.rate)||0)-(parseFloat(a.rate)||0);});
+  var lurRate=Math.min.apply(null,sorted.map(function(r){return parseFloat(r.rate)||Infinity;}));
+  var hiRate=Math.max.apply(null,sorted.map(function(r){return parseFloat(r.rate)||0;}));
+  var variancePct=lurRate>0?Math.round(((hiRate-lurRate)/lurRate)*100):0;
+  var winStatus=getWeekWindowStatus(group.state,group.week_of);
+
+  // Top bar
+  var topHtml=esc(group.station)+' &middot; '+esc(group.description)+' &middot; WK '+esc(fmtWeek(group.week_of));
+  if(winStatus&&winStatus!=='OOW') topHtml+=' <span class="inv-badge inv-badge-win">'+winStatus+'</span>';
+  topHtml+=' <span class="inv-badge inv-badge-var">'+sorted.length+' BUYERS &middot; +'+variancePct+'% VARIANCE</span>';
+  document.getElementById('inv-topbar-left').innerHTML=topHtml;
+
+  // Callout strip
+  var hiRow=sorted[0],loRow=sorted[sorted.length-1];
+  var hiName=hiRow.candidate||hiRow.advertiser||'\u2014';
+  var loName=loRow.candidate||loRow.advertiser||'\u2014';
+  var callHtml='<span class="inv-callout-label">RATE COMPARISON</span>';
+  callHtml+='<span class="inv-callout-detail">'+esc(hiName)+' paid <strong style="color:var(--red)">$'+fmtRate(hiRow.rate)+'</strong>/spot &middot; vs &middot; '+esc(loName)+' paid <strong style="color:var(--green)">$'+fmtRate(loRow.rate)+'</strong>/spot</span>';
+  var sameProg='Same program',sameWk='Same week';
+  var sameWin=(winStatus&&winStatus!=='OOW')?'Same window':'';
+  callHtml+='<span class="inv-badge">+'+variancePct+'% &middot; '+sameProg+' &middot; '+sameWk+(sameWin?' &middot; '+sameWin:'')+'</span>';
+  document.getElementById('inv-callout').innerHTML=callHtml;
+
+  // Tabs for 3+ buyers
+  var tabsEl=document.getElementById('inv-tabs');
+  if(sorted.length>2){
+    tabsEl.classList.add('show');
+    var tabHtml='';
+    for(var t=0;t<sorted.length-1;t++){
+      tabHtml+='<button class="inv-tab'+(t===0?' active':'')+'" data-tab="'+t+'" onclick="switchInvoiceTab('+t+')">Invoice '+String.fromCharCode(65+t)+' vs '+String.fromCharCode(65+sorted.length-1)+'</button>';
+    }
+    tabsEl.innerHTML=tabHtml;
+  }else{
+    tabsEl.classList.remove('show');
+    tabsEl.innerHTML='';
+  }
+
+  // Store sorted rows for tab switching
+  overlay._sortedRows=sorted;
+  overlay._lurRate=lurRate;
+
+  // Render initial pair
+  renderInvoicePair(sorted,0,lurRate);
+
+  // Open Both PDFs link
+  var bothLink=document.getElementById('inv-open-both');
+  var pdfUrls=sorted.map(function(r){return r.fcc_pdf_url;}).filter(Boolean);
+  if(pdfUrls.length>=2){
+    bothLink.style.display='';
+    bothLink.onclick=function(e){e.preventDefault();pdfUrls.forEach(function(u){window.open(u,'_blank');});};
+  }else{
+    bothLink.style.display='none';
+  }
+}
+
+function fmtRate(v){var n=parseFloat(v);return isNaN(n)?'0.00':n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+function renderInvoicePair(sorted,tabIdx,lurRate){
+  var body=document.getElementById('inv-body');
+  var leftRow=sorted[tabIdx];
+  var rightRow=sorted[sorted.length-1]; // always compare against lowest
+  body.innerHTML=buildPanelHTML(leftRow,'A',tabIdx,false,lurRate)+buildPanelHTML(rightRow,String.fromCharCode(65+sorted.length-1),sorted.length-1,true,lurRate);
+
+  // Load PDFs
+  loadPanelPdf('inv-pdf-left',leftRow);
+  loadPanelPdf('inv-pdf-right',rightRow);
+}
+
+function buildPanelHTML(row,label,idx,isLur,lurRate){
+  var cand=row.candidate||row.advertiser||'\u2014';
+  var rate=parseFloat(row.rate)||0;
+  var rateColor=isLur?'var(--green)':'var(--red)';
+  var panelId=isLur?'inv-pdf-right':'inv-pdf-left';
+  var units=row.units||'\u2014';
+  var total=row.line_total?'$'+fmtRate(row.line_total):'\u2014';
+
+  var h='<div class="inv-panel">';
+  h+='<div class="inv-panel-hdr">';
+  h+='<div class="inv-panel-label">Invoice '+esc(label)+'</div>';
+  h+='<div class="inv-panel-cand">'+esc(cand)+' &middot; <span style="font-size:0.6rem;color:var(--text-muted);font-weight:400">Order #'+esc(row.order_number||'\u2014')+'</span></div>';
+  h+='<div class="inv-panel-rate" style="color:'+rateColor+'">$'+fmtRate(row.rate)+'<span class="inv-panel-rate-sub">'+esc(units)+' units &middot; '+esc(total)+' total</span></div>';
+  h+='</div>';
+  h+='<div class="inv-pdf-wrap" id="'+panelId+'">';
+  h+='<div class="inv-pdf-skeleton"><div class="inv-pdf-skeleton-bar" style="width:80%"></div><div class="inv-pdf-skeleton-bar" style="width:60%"></div><div class="inv-pdf-skeleton-bar" style="width:70%"></div><div style="margin-top:10px;font-family:var(--mono);font-size:0.52rem;color:var(--text-faint)">LOADING PDF\u2026</div></div>';
+  h+='</div>';
+  h+='<div class="inv-panel-footer">';
+  h+='<span>Order #'+esc(row.order_number||'\u2014')+' &middot; <span style="color:'+rateColor+';font-weight:700">$'+fmtRate(row.rate)+'/spot</span> &middot; '+esc(units)+' units &middot; WK '+esc(fmtWeek(row.week_of))+'</span>';
+  if(isLur) h+='<span style="color:var(--text-faint);font-size:0.45rem">LUR Rate</span>';
+  h+=' ';
+  if(row.fcc_pdf_url) h+='<a href="'+esc(row.fcc_pdf_url)+'" target="_blank" rel="noopener">Open PDF &#8599;</a>';
+  h+='</div>';
+  h+='</div>';
+  return h;
+}
+
+function loadPanelPdf(containerId,row){
+  var container=document.getElementById(containerId);
+  if(!container)return;
+  if(!row.fcc_pdf_url){
+    container.innerHTML='<div class="inv-pdf-error">No PDF available for this invoice.<br><br>Order #'+esc(row.order_number||'\u2014')+'</div>';
+    return;
+  }
+  ensurePdfJs(function(lib){
+    if(!lib){
+      container.innerHTML='<div class="inv-pdf-error">Could not load PDF viewer.<br><br><a href="'+esc(row.fcc_pdf_url)+'" target="_blank" rel="noopener">Open PDF &#8599;</a></div>';
+      return;
+    }
+    var orderNum=row.order_number||'';
+    var loadingTask=lib.getDocument({url:row.fcc_pdf_url,withCredentials:false});
+    loadingTask.promise.then(function(pdf){
+      container.innerHTML='';
+      var found=false;
+      var renderChain=Promise.resolve();
+      for(var p=1;p<=pdf.numPages;p++){
+        (function(pageNum){
+          renderChain=renderChain.then(function(){
+            return pdf.getPage(pageNum).then(function(page){
+              var scale=1.5;
+              var viewport=page.getViewport({scale:scale});
+              var wrap=document.createElement('div');
+              wrap.className='inv-pdf-canvas-wrap';
+              wrap.style.position='relative';
+              var canvas=document.createElement('canvas');
+              canvas.width=viewport.width;
+              canvas.height=viewport.height;
+              wrap.appendChild(canvas);
+              container.appendChild(wrap);
+              var ctx=canvas.getContext('2d');
+              return page.render({canvasContext:ctx,viewport:viewport}).promise.then(function(){
+                if(!orderNum)return;
+                return page.getTextContent().then(function(textContent){
+                  if(found)return;
+                  var items=textContent.items;
+                  for(var i=0;i<items.length;i++){
+                    var item=items[i];
+                    if(item.str&&item.str.indexOf(orderNum)!==-1){
+                      found=true;
+                      var tx=item.transform;
+                      var x=tx[4]*scale;
+                      var y=viewport.height-tx[5]*scale-item.height*scale;
+                      var w=item.width*scale;
+                      var h=item.height*scale;
+                      var hl=document.createElement('div');
+                      hl.className='inv-pdf-highlight';
+                      hl.style.left=Math.max(0,x-4)+'px';
+                      hl.style.top=Math.max(0,y-4)+'px';
+                      hl.style.width=(w+8)+'px';
+                      hl.style.height=(h+8)+'px';
+                      wrap.appendChild(hl);
+                      setTimeout(function(){
+                        wrap.scrollIntoView({behavior:'smooth',block:'center'});
+                      },100);
+                      break;
+                    }
+                  }
+                }).catch(function(){});
+              });
+            });
+          });
+        })(p);
+      }
+      renderChain.then(function(){
+        if(!found&&orderNum){
+          var banner=document.createElement('div');
+          banner.className='inv-pdf-banner';
+          banner.textContent='Locate Order #'+orderNum+' in the document below';
+          container.insertBefore(banner,container.firstChild);
+        }
+      });
+    }).catch(function(){
+      container.innerHTML='<div class="inv-pdf-error">Could not load PDF.<br>This may be due to browser security restrictions on cross-origin documents.<br><br><a href="'+esc(row.fcc_pdf_url)+'" target="_blank" rel="noopener">Open PDF &#8599;</a></div>';
+    });
+  });
+}
+
+function switchInvoiceTab(tabIdx){
+  var tabs=document.querySelectorAll('#inv-tabs .inv-tab');
+  tabs.forEach(function(t){t.classList.toggle('active',parseInt(t.dataset.tab)===tabIdx);});
+  var overlay=document.getElementById('invoice-overlay');
+  renderInvoicePair(overlay._sortedRows,tabIdx,overlay._lurRate);
+}
+
+function closeInvoiceReview(){
+  var overlay=document.getElementById('invoice-overlay');
+  overlay.classList.remove('open');
+  document.body.style.overflow='';
+  document.getElementById('inv-body').innerHTML='';
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&document.getElementById('invoice-overlay').classList.contains('open')){
+    closeInvoiceReview();
+  }
 });
 </script>
 </body>
