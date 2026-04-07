@@ -140,6 +140,7 @@ main{max-width:1400px;margin:0 auto;padding:14px 20px 40px;display:flex;flex-dir
 .party-R{background:rgba(239,68,68,0.08);color:var(--rep);border:1px solid rgba(239,68,68,0.2)}
 .party-D{background:rgba(37,99,235,0.08);color:var(--dem);border:1px solid rgba(37,99,235,0.2)}
 .party-I{background:rgba(139,92,246,0.08);color:var(--ind);border:1px solid rgba(139,92,246,0.2)}
+.party-none{background:#F1F5F9;color:var(--text-faint);border:1px solid var(--navy-border)}
 .cand-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--navy-border)}
 .cand-stat-label{font-family:var(--sans);font-size:0.5rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.06em}
 .cand-stat-value{font-family:var(--mono);font-size:0.72rem;font-weight:600;color:var(--text)}
@@ -487,13 +488,13 @@ function filterAndRender() {
   grid.innerHTML = FILTERED.map(function(c) {
     var spend = Number(c.total_spend) || 0;
     var barPct = Math.round((spend / maxSpend) * 100);
-    var partyClass = c.party === 'R' ? 'party-R' : c.party === 'D' ? 'party-D' : 'party-I';
+    var partyClass = c.party === 'R' ? 'party-R' : c.party === 'D' ? 'party-D' : c.party === 'I' ? 'party-I' : 'party-none';
     var selClass = c.political_entity_id === selectedId ? ' selected' : '';
     return '<div class="cand-card' + selClass + '" data-id="' + c.political_entity_id + '" onclick="selectCandidate(\'' + c.political_entity_id + '\')">' +
       '<div class="cand-card-top">' +
         '<div><div class="cand-name">' + (c.candidate_name || 'Unknown') + '</div>' +
         '<div class="cand-meta">' + (c.state || '') + ' \u00B7 ' + (c.office || 'Other') + (c.district ? ' \u00B7 D-' + c.district : '') + '</div></div>' +
-        '<span class="party-badge ' + partyClass + '">' + (c.party || '?') + '</span>' +
+        '<span class="party-badge ' + partyClass + '">' + (c.party || '\u2013') + '</span>' +
       '</div>' +
       '<div class="cand-stats">' +
         '<div><div class="cand-stat-label">Ad Spend</div><div class="cand-stat-value' + (spend > 0 ? ' green' : '') + '">' + fmtMoney(spend) + '</div></div>' +
@@ -520,14 +521,14 @@ async function selectCandidate(id) {
   if (!c) return;
 
   var panel = document.getElementById('detailPanel');
-  var partyClass = c.party === 'R' ? 'party-R' : c.party === 'D' ? 'party-D' : 'party-I';
+  var partyClass = c.party === 'R' ? 'party-R' : c.party === 'D' ? 'party-D' : c.party === 'I' ? 'party-I' : 'party-none';
   var isFederal = c.office && /senate|house|congress|presidential/i.test(c.office);
 
   panel.innerHTML =
     '<div class="detail-header">' +
-      '<div class="detail-name">' + (c.candidate_name || 'Unknown') + ' <span class="party-badge ' + partyClass + '" style="font-size:0.5rem;vertical-align:middle">' + (c.party || '?') + '</span></div>' +
+      '<div class="detail-name">' + (c.candidate_name || 'Unknown') + ' <span class="party-badge ' + partyClass + '" style="font-size:0.5rem;vertical-align:middle">' + (c.party || '\u2013') + '</span></div>' +
       '<div class="detail-sub">' + (c.state || '') + ' \u00B7 ' + (c.office || 'Other') + (c.district ? ' \u00B7 District ' + c.district : '') + ' \u00B7 ' + (c.cycle || 2026) + ' Cycle</div>' +
-      (c.committee_name_official ? '<div class="detail-sub" style="margin-top:2px;font-style:italic">' + c.committee_name_official + '</div>' : '') +
+      (c.committee_name_official && !/LLC|Inc\b|Corp\b|Shared Advertiser/i.test(c.committee_name_official) ? '<div class="detail-sub" style="margin-top:2px;font-style:italic">' + c.committee_name_official + '</div>' : '') +
     '</div>' +
     '<div class="detail-section">' +
       '<div class="detail-section-title">FCC Filing Summary</div>' +
