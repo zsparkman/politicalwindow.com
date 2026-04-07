@@ -217,7 +217,7 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
   <div class="filter-wrap"><div class="filter-lbl">CANDIDATE</div><select id="f-candidate"><option value="ALL">All Candidates</option></select></div>
   <div class="filter-wrap"><div class="filter-lbl">PARTY</div><select id="f-party"><option value="ALL">All Parties</option><option>R</option><option>D</option><option>I</option></select></div>
   <div class="filter-wrap"><div class="filter-lbl">STATE</div><select id="f-state"><option value="ALL">All States</option></select></div>
-  <div class="filter-wrap"><div class="filter-lbl">OFFICE</div><select id="f-office"><option value="ALL">All Offices</option></select></div>
+
   <div class="filter-wrap"><div class="filter-lbl">DMA</div><select id="f-dma"><option value="ALL">All DMAs</option></select></div>
   <div class="filter-wrap"><div class="filter-lbl">STATION</div><select id="f-station"><option value="ALL">All Stations</option></select></div>
   <div class="filter-wrap"><div class="filter-lbl">RATE CLASS</div><select id="f-rateclass"><option value="ALL">All</option></select></div>
@@ -323,7 +323,6 @@ function buildQueryParams(){
   var p=[];
   var party=document.getElementById('f-party').value;if(party!=='ALL')p.push('party='+encodeURIComponent(party));
   var state=document.getElementById('f-state').value;if(state!=='ALL')p.push('state='+encodeURIComponent(state));
-  var office=document.getElementById('f-office').value;if(office!=='ALL')p.push('office='+encodeURIComponent(office));
   var station=document.getElementById('f-station').value;if(station!=='ALL')p.push('station='+encodeURIComponent(station));
   var dma=document.getElementById('f-dma').value;if(dma!=='ALL')p.push('dma='+encodeURIComponent(dma));
   var daypart=document.getElementById('f-daypart').value;if(daypart!=='ALL')p.push('daypart_code='+encodeURIComponent(daypart));
@@ -336,7 +335,7 @@ function buildQueryParams(){
 function getFiltered(){
   var party=document.getElementById('f-party').value;
   var state=document.getElementById('f-state').value;
-  var office=document.getElementById('f-office').value;
+
   var dma=document.getElementById('f-dma').value;
   var station=document.getElementById('f-station').value;
   var daypart=document.getElementById('f-daypart').value;
@@ -348,7 +347,6 @@ function getFiltered(){
   return ALL_DATA.filter(function(r){
     if(party!=='ALL'&&r.party!==party)return false;
     if(state!=='ALL'&&r.state!==state)return false;
-    if(office!=='ALL'&&r.office!==office)return false;
     if(dma!=='ALL'&&r.dma!==dma)return false;
     if(station!=='ALL'&&r.station!==station)return false;
     if(daypart!=='ALL'&&r.daypart_code!==daypart)return false;
@@ -538,7 +536,6 @@ function buildDropdowns(){
     if(cur!=='ALL'){for(var i=0;i<el.options.length;i++){if(el.options[i].value===cur){el.value=cur;break;}}}
   }
   pop('f-state',[...new Set(data.map(function(r){return r.state;}).filter(Boolean))].sort());
-  pop('f-office',[...new Set(data.map(function(r){return r.office;}).filter(Boolean))].sort());
   pop('f-dma',[...new Set(data.map(function(r){return r.dma;}).filter(Boolean))].sort());
   pop('f-station',[...new Set(data.map(function(r){return r.station;}).filter(Boolean))].sort());
   pop('f-rateclass',[...new Set(data.map(function(r){return r.rate_class;}).filter(Boolean))].sort());
@@ -546,12 +543,12 @@ function buildDropdowns(){
 
 // ── Events ──
 document.getElementById('run-report').addEventListener('click',loadData);
-['f-party','f-state','f-office','f-dma','f-station','f-rateclass','f-daypart','f-window','f-candidate'].forEach(function(id){
+['f-party','f-state','f-dma','f-station','f-rateclass','f-daypart','f-window','f-candidate'].forEach(function(id){
   document.getElementById(id).addEventListener('change',function(){if(ALL_DATA.length)render();});
 });
 ['f-week-from','f-week-to'].forEach(function(id){document.getElementById(id).addEventListener('change',function(){if(ALL_DATA.length)render();});});
 document.getElementById('clear-filters').addEventListener('click',function(){
-  ['f-party','f-state','f-office','f-dma','f-station','f-rateclass','f-daypart','f-candidate'].forEach(function(id){document.getElementById(id).value='ALL';});
+  ['f-party','f-state','f-dma','f-station','f-rateclass','f-daypart','f-candidate'].forEach(function(id){document.getElementById(id).value='ALL';});
   document.getElementById('f-window').value='IN';
   document.getElementById('f-week-from').value='';document.getElementById('f-week-to').value='';
   if(ALL_DATA.length)render();
@@ -596,7 +593,6 @@ function loadFilters(){
         if(cur!=='ALL'){for(var i=0;i<el.options.length;i++){if(el.options[i].value===cur){el.value=cur;break;}}}
       }
       if(j.states&&j.states.length)pop('f-state',j.states);
-      if(j.offices&&j.offices.length)pop('f-office',j.offices);
       if(j.dmas&&j.dmas.length)pop('f-dma',j.dmas);
       if(j.stations&&j.stations.length)pop('f-station',j.stations);
       if(j.dayparts&&j.dayparts.length)pop('f-daypart',j.dayparts);
