@@ -173,18 +173,6 @@ main{max-width:1400px;margin:0 auto;padding:14px 20px 40px;display:flex;flex-dir
 .detail-btn-outline{background:#fff;border:1px solid var(--navy-border);color:var(--text-muted)}
 .detail-btn-outline:hover{border-color:#CBD5E1;color:var(--text)}
 
-/* ── SPEND CHART (simple bar chart via CSS) ── */
-.medium-bars{display:flex;flex-direction:column;gap:5px}
-.medium-row{display:flex;align-items:center;gap:8px}
-.medium-label{font-family:var(--mono);font-size:0.56rem;color:var(--text-muted);width:40px;flex-shrink:0}
-.medium-bar{flex:1;height:14px;background:#F1F5F9;border-radius:3px;overflow:hidden;position:relative}
-.medium-bar-fill{height:100%;border-radius:3px;transition:width 0.4s ease}
-.medium-bar-fill.tv{background:var(--blue)}
-.medium-bar-fill.radio{background:var(--amber)}
-.medium-bar-fill.cable{background:var(--green)}
-.medium-bar-fill.other{background:var(--slate)}
-.medium-amount{font-family:var(--mono);font-size:0.56rem;color:var(--text);font-weight:600;width:70px;text-align:right;flex-shrink:0}
-
 /* ── WEEKLY TREND CHART (CSS bars) ── */
 .weekly-chart{display:flex;align-items:flex-end;gap:2px;height:80px;padding-top:4px}
 .week-bar{flex:1;min-width:4px;background:var(--blue);border-radius:2px 2px 0 0;transition:height 0.3s ease;position:relative;cursor:default}
@@ -198,6 +186,9 @@ main{max-width:1400px;margin:0 auto;padding:14px 20px 40px;display:flex;flex-dir
 .filing-station{font-family:var(--mono);font-size:0.58rem;font-weight:600;color:var(--text);min-width:50px}
 .filing-dates{color:var(--text-muted);font-size:0.58rem;flex:1}
 .filing-amount{font-family:var(--mono);font-size:0.62rem;font-weight:600;color:var(--green)}
+
+/* ── FILING PENDING BADGE ── */
+.filing-pending-badge{display:inline-block;font-family:var(--mono);font-size:0.56rem;font-weight:700;color:var(--amber);background:var(--amber-dim);border:1px solid rgba(217,119,6,0.2);border-radius:4px;padding:3px 10px;letter-spacing:0.04em;margin-top:4px}
 
 /* ── LOADING / EMPTY ── */
 #loading{text-align:center;padding:60px 20px;font-family:var(--mono);font-size:0.7rem;color:var(--text-faint);letter-spacing:0.08em}
@@ -530,6 +521,7 @@ async function selectCandidate(id) {
 
   var panel = document.getElementById('detailPanel');
   var partyClass = c.party === 'R' ? 'party-R' : c.party === 'D' ? 'party-D' : 'party-I';
+  var isFederal = c.office && /senate|house|congress|presidential/i.test(c.office);
 
   panel.innerHTML =
     '<div class="detail-header">' +
@@ -546,41 +538,33 @@ async function selectCandidate(id) {
       '<div class="detail-row"><span class="detail-row-label">First Flight</span><span class="detail-row-value">' + fmtDate(c.first_flight) + '</span></div>' +
       '<div class="detail-row"><span class="detail-row-label">Last Flight</span><span class="detail-row-value">' + fmtDate(c.last_flight) + '</span></div>' +
     '</div>' +
-    '<div class="detail-section" id="mediumSection"><div class="detail-section-title">Spend by Medium</div><div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-faint)">Loading...</div></div>' +
     '<div class="detail-section" id="weeklySection"><div class="detail-section-title">Weekly Ad Spend Trend</div><div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-faint)">Loading...</div></div>' +
     '<div class="detail-section" id="fecSection"><div class="detail-section-title">FEC Financial Data</div><div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-faint)">Loading...</div></div>' +
     '<div class="detail-section" id="filingsSection"><div class="detail-section-title">Recent Filings</div><div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-faint)">Loading...</div></div>' +
     '<div class="detail-actions">' +
-      (c.fec_candidate_id ? '<a href="https://www.fec.gov/data/candidate/' + c.fec_candidate_id + '/" target="_blank" class="detail-btn detail-btn-primary">View FEC Profile</a>' : '') +
+      (c.fec_candidate_id ? '<a href="https://www.fec.gov/data/candidate/' + c.fec_candidate_id + '/" target="_blank" class="detail-btn detail-btn-primary">View FEC Profile</a>' : isFederal ? '<span class="detail-btn detail-btn-outline" style="opacity:0.5;cursor:default">FEC ID Pending</span>' : '') +
       '<a href="/public-file?q=' + encodeURIComponent(c.candidate_name) + '" class="detail-btn detail-btn-outline">View All Filings</a>' +
     '</div>';
 
   // Load spend + filings + FEC in parallel
   loadSpendData(id);
   loadFilingsData(id);
-  if (c.fec_candidate_id) loadFecData(id);
-  else document.getElementById('fecSection').innerHTML = '<div class="detail-section-title">FEC Financial Data</div><div style="font-family:var(--mono);font-size:0.58rem;color:var(--text-faint)">No FEC ID linked</div>';
+  if (c.fec_candidate_id) {
+    loadFecData(id);
+  } else if (isFederal) {
+    document.getElementById('fecSection').innerHTML = '<div class="detail-section-title">FEC Financial Data</div><div style="font-family:var(--mono);font-size:0.58rem;color:var(--text-faint)">FEC ID not yet linked</div>';
+  } else {
+    // State-level candidate — load FollowTheMoney data
+    document.getElementById('fecSection').innerHTML = '<div class="detail-section-title">Campaign Finance</div><div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-faint)">Loading state data...</div>';
+    loadStateFinanceData(id);
+  }
 }
 
 async function loadSpendData(id) {
   try {
     var resp = await fetch(RATES_API + '/api/candidates/tracker/' + id + '/spend', { headers: authHeaders() });
-    if (!resp.ok) { document.getElementById('mediumSection').querySelector('div:last-child').textContent = 'Auth required for spend details'; return; }
+    if (!resp.ok) return;
     var json = await resp.json();
-
-    // Medium breakdown
-    var mediums = json.by_medium || [];
-    var maxMedium = Math.max(1, ...mediums.map(function(m) { return Number(m.medium_spend); }));
-    var mediumHtml = '<div class="detail-section-title">Spend by Medium</div><div class="medium-bars">';
-    mediums.forEach(function(m) {
-      var pct = Math.round((Number(m.medium_spend) / maxMedium) * 100);
-      var cls = (m.medium || '').toLowerCase();
-      if (cls !== 'tv' && cls !== 'radio' && cls !== 'cable') cls = 'other';
-      mediumHtml += '<div class="medium-row"><span class="medium-label">' + (m.medium || 'Other') + '</span><div class="medium-bar"><div class="medium-bar-fill ' + cls + '" style="width:' + pct + '%"></div></div><span class="medium-amount">' + fmtMoney(m.medium_spend) + '</span></div>';
-    });
-    mediumHtml += '</div>';
-    if (mediums.length === 0) mediumHtml = '<div class="detail-section-title">Spend by Medium</div><div style="font-family:var(--mono);font-size:0.58rem;color:var(--text-faint)">No line-item data</div>';
-    document.getElementById('mediumSection').innerHTML = mediumHtml;
 
     // Weekly trend
     var weeks = json.weekly_trend || [];
@@ -642,6 +626,58 @@ async function loadFecData(id) {
   } catch (err) {
     console.warn('FEC load error:', err.message);
   }
+}
+
+async function loadStateFinanceData(id) {
+  try {
+    var resp = await fetch(RATES_API + '/api/candidates/tracker/' + id + '/state-finance', { headers: authHeaders() });
+    if (!resp.ok) {
+      showFilingPending();
+      return;
+    }
+    var json = await resp.json();
+    var section = document.getElementById('fecSection');
+    if (!section) return;
+
+    if (json.status === 'pending' || !json.data) {
+      showFilingPending();
+      return;
+    }
+
+    var d = json.data;
+    var html = '<div class="detail-section-title">Campaign Finance <span style="font-size:0.45rem;color:var(--text-faint);font-weight:400;letter-spacing:0.02em;text-transform:none">(FollowTheMoney.org)</span></div>';
+
+    if (d.total_raised) {
+      html += '<div class="detail-row"><span class="detail-row-label">Total Raised</span><span class="detail-row-value" style="color:var(--green)">' + fmtMoney(d.total_raised) + '</span></div>';
+    }
+    if (d.total_spent) {
+      html += '<div class="detail-row"><span class="detail-row-label">Total Spent</span><span class="detail-row-value" style="color:var(--red)">' + fmtMoney(d.total_spent) + '</span></div>';
+    }
+    if (d.cash_on_hand) {
+      html += '<div class="detail-row"><span class="detail-row-label">Cash on Hand</span><span class="detail-row-value">' + fmtMoney(d.cash_on_hand) + '</span></div>';
+    }
+    if (d.top_contributors && d.top_contributors.length) {
+      html += '<div style="margin-top:6px"><div style="font-family:var(--sans);font-size:0.52rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Top Contributors</div>';
+      d.top_contributors.slice(0, 5).forEach(function(c) {
+        html += '<div style="font-family:var(--sans);font-size:0.62rem;color:var(--text-muted);padding:2px 0">' + c.name + ' <span style="color:var(--text-faint)">' + fmtMoney(c.amount) + '</span></div>';
+      });
+      html += '</div>';
+    }
+    if (d.data_as_of) {
+      html += '<div style="font-family:var(--mono);font-size:0.48rem;color:var(--text-faint);margin-top:6px">Data as of ' + fmtDate(d.data_as_of) + '</div>';
+    }
+
+    section.innerHTML = html;
+  } catch (err) {
+    console.warn('State finance load error:', err.message);
+    showFilingPending();
+  }
+}
+
+function showFilingPending() {
+  var section = document.getElementById('fecSection');
+  if (!section) return;
+  section.innerHTML = '<div class="detail-section-title">Campaign Finance</div><div class="filing-pending-badge">Filing Pending</div><div style="font-family:var(--mono);font-size:0.5rem;color:var(--text-faint);margin-top:4px">2026 state filings not yet available</div>';
 }
 
 function clearDetail() {
