@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JGHV19ZYEQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-JGHV19ZYEQ');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candidate Tracker — PoliticalWindow.com</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+html{font-size:18px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#E2E6ED;
+  --navy-mid:#F8F9FB;
+  --navy-card:#FFFFFF;
+  --navy-border:#D1D9E6;
+  --blue:#1D4ED8;
+  --blue-light:#2563EB;
+  --blue-glow:rgba(29,78,216,0.10);
+  --amber:#D97706;
+  --amber-dim:rgba(217,119,6,0.10);
+  --red:#DC2626;
+  --red-dim:rgba(220,38,38,0.08);
+  --green:#059669;
+  --green-dim:rgba(5,150,105,0.08);
+  --slate:#94A3B8;
+  --slate-dim:rgba(148,163,184,0.12);
+  --dem:#2563EB;
+  --rep:#EF4444;
+  --ind:#8B5CF6;
+  --text:#0F172A;
+  --text-muted:#475569;
+  --text-faint:#94A3B8;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+  --display:'DM Sans',sans-serif;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.10),0 1px 3px rgba(0,0,0,0.06);
+  --shadow-lg:0 8px 24px rgba(0,0,0,0.12),0 2px 6px rgba(0,0,0,0.06);
+}
+body{background:var(--navy);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:clip;
+  background-image:radial-gradient(circle,#C8CDD5 0.6px,transparent 0.6px);background-size:16px 16px;
+}
+a{color:var(--blue);text-decoration:none}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;top:0;left:0;bottom:0;z-index:110;display:flex;flex-direction:row}
+.sidebar-rail{width:62px;background:#fff;border-right:1px solid var(--navy-border);display:flex;flex-direction:column;align-items:center;padding:10px 0 6px;overflow-y:auto;overflow-x:visible;flex-shrink:0;position:relative}
+.sidebar-rail-logo{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#FF642D,#FF8F6B);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--sans);font-size:0.7rem;color:#fff;font-weight:800;letter-spacing:-0.02em;margin-bottom:12px;cursor:pointer}
+.rail-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px 6px;margin:1px 0;cursor:pointer;border-radius:6px;transition:all 0.12s;text-decoration:none;width:54px;border-left:3px solid transparent;border-right:3px solid transparent}
+.rail-item svg{width:20px;height:20px;color:var(--text-faint);flex-shrink:0;transition:color 0.12s}
+.rail-item:hover svg{color:var(--text-muted)}
+.rail-item-label{font-family:var(--sans);font-size:0.48rem;font-weight:600;color:var(--text-faint);letter-spacing:0.02em;transition:color 0.12s}
+.rail-item:hover{background:#F1F5F9}
+.rail-item.active{background:rgba(29,78,216,0.08);border-left-color:var(--blue);box-shadow:inset 3px 0 0 var(--blue)}
+.rail-item.active svg{color:var(--blue)}
+.rail-item.active .rail-item-label{color:var(--blue)}
+.rail-divider{width:36px;height:1px;background:var(--navy-border);margin:6px 0}
+.sidebar-panel{width:180px;background:#fff;border-right:1px solid var(--navy-border);padding:14px 0;overflow-y:auto;transition:width 0.2s ease,opacity 0.15s ease;opacity:1;position:relative}
+.sidebar-panel-header{font-family:var(--sans);font-size:0.7rem;font-weight:700;color:var(--text);padding:0 16px 10px;letter-spacing:-0.01em}
+.sidebar-panel-link{display:block;font-family:var(--sans);font-size:0.68rem;color:var(--text-muted);padding:6px 16px;text-decoration:none;border-left:2px solid transparent;transition:all 0.12s}
+.sidebar-panel-link:hover{color:var(--text);background:rgba(29,78,216,0.03)}
+.sidebar-panel-link.active{color:var(--blue);background:rgba(29,78,216,0.06);border-left-color:var(--blue);font-weight:700}
+.sidebar-panel-section{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-faint);padding:12px 16px 4px;font-weight:600}
+.sidebar-collapse-btn{width:46px;height:36px;margin:auto 8px 14px;background:var(--blue);border:none;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:115;box-shadow:0 2px 8px rgba(29,78,216,0.3);transition:all 0.18s}
+.sidebar-collapse-btn:hover{background:var(--blue-light);box-shadow:0 4px 14px rgba(37,99,235,0.35);transform:scale(1.05)}
+.sidebar-collapse-btn svg{width:18px;height:18px;color:#fff}
+.sidebar.collapsed .sidebar-panel{width:0;opacity:0;border-right:none;overflow:hidden}
+
+/* ── PAGE WRAP ── */
+.page-wrap{margin-left:242px;transition:margin-left 0.2s ease;padding:0 0 40px;min-height:100vh}
+.sidebar.collapsed ~ .page-wrap{margin-left:62px}
+
+/* ── HEADER ── */
+header{background:#1E293B;border-bottom:1px solid #334155;padding:0 20px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;height:48px;position:sticky;top:0;z-index:100}
+.header-left{display:flex;align-items:center;gap:10px}
+.header-meta{font-family:var(--mono);font-size:0.58rem;color:rgba(255,255,255,0.7)}
+.header-page-title{font-family:var(--sans);font-size:0.85rem;font-weight:600;color:rgba(255,255,255,0.85);letter-spacing:0.02em}
+.header-right{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.header-search{max-width:520px;width:100%;justify-self:center;display:flex;align-items:center;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:0 14px;height:34px;transition:border-color 0.15s,box-shadow 0.15s}
+.header-search:focus-within{border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(37,99,235,0.15);background:rgba(255,255,255,0.12)}
+.header-search svg{width:16px;height:16px;color:rgba(255,255,255,0.45);flex-shrink:0}
+.header-search input{border:none;outline:none;background:transparent;font-family:var(--sans);font-size:0.75rem;color:#F1F5F9;width:100%;padding:0 8px}
+.header-search input::placeholder{color:rgba(255,255,255,0.4)}
+
+/* ── MAIN LAYOUT ── */
+main{max-width:1400px;margin:0 auto;padding:14px 20px 40px;display:flex;flex-direction:column;gap:12px}
+
+/* ── KPI STATS ROW ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kpi-card{background:#fff;border:1px solid var(--navy-border);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:2px;transition:border-color 0.15s,box-shadow 0.15s;box-shadow:var(--shadow-sm);border-top:3px solid var(--navy-border)}
+.kpi-card:hover{border-color:#94A3B8;box-shadow:var(--shadow-md)}
+.kpi-card-blue{border-top-color:var(--blue)}
+.kpi-card-red{border-top-color:var(--red)}
+.kpi-card-green{border-top-color:var(--green)}
+.kpi-card-amber{border-top-color:var(--amber)}
+.kpi-label{font-family:var(--sans);font-size:0.55rem;font-weight:500;color:var(--text-muted);display:flex;align-items:center;gap:0.35rem;text-transform:uppercase;letter-spacing:0.06em}
+.kpi-label svg{width:12px;height:12px;opacity:0.4}
+.kpi-value{font-family:var(--sans);font-size:1.85rem;font-weight:800;color:var(--text);line-height:1.1}
+.kpi-sub{font-family:var(--sans);font-size:0.55rem;color:var(--text-faint)}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid var(--navy-border);border-radius:8px;box-shadow:var(--shadow-sm);flex-wrap:wrap}
+.filter-bar-label{font-family:var(--sans);font-size:0.6rem;font-weight:600;letter-spacing:0.06em;color:var(--text-faint);text-transform:uppercase;white-space:nowrap}
+.filter-group{display:flex;gap:4px;flex-wrap:wrap}
+.filter-btn{font-family:var(--sans);font-size:0.6rem;font-weight:500;padding:4px 10px;border-radius:4px;border:1px solid var(--navy-border);background:#fff;color:var(--text-muted);cursor:pointer;transition:all 0.12s;-webkit-tap-highlight-color:transparent}
+.filter-btn:hover{border-color:#CBD5E1;color:var(--text)}
+.filter-btn.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.filter-search{display:flex;align-items:center;gap:6px;background:#F8FAFC;border:1px solid var(--navy-border);border-radius:6px;padding:4px 10px;margin-left:auto;min-width:200px;transition:border-color 0.15s}
+.filter-search:focus-within{border-color:var(--blue);box-shadow:0 0 0 2px rgba(29,78,216,0.1)}
+.filter-search input{background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:0.7rem;width:100%}
+.filter-search input::placeholder{color:var(--text-faint)}
+.filter-select{font-family:var(--sans);font-size:0.62rem;padding:4px 8px;border:1px solid var(--navy-border);border-radius:4px;background:#fff;color:var(--text-muted);cursor:pointer;outline:none}
+.filter-select:focus{border-color:var(--blue)}
+
+/* ── RESULTS INFO ── */
+.results-info{font-family:var(--mono);font-size:0.58rem;color:var(--text-faint);padding:0 2px}
+
+/* ── CANDIDATE GRID ── */
+.content-area{display:grid;grid-template-columns:1fr 370px;gap:14px;align-items:start}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+
+/* ── CANDIDATE CARD ── */
+.cand-card{background:#fff;border:1px solid var(--navy-border);border-radius:8px;padding:14px 16px;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.cand-card:hover{border-color:#94A3B8;box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.cand-card.selected{border-color:var(--blue);box-shadow:0 0 0 2px rgba(29,78,216,0.15),var(--shadow-md)}
+.cand-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.cand-name{font-family:var(--sans);font-size:0.85rem;font-weight:700;color:var(--text);line-height:1.2}
+.cand-meta{font-family:var(--sans);font-size:0.6rem;color:var(--text-muted);margin-top:2px}
+.party-badge{font-family:var(--mono);font-size:0.56rem;font-weight:700;padding:2px 8px;border-radius:3px;flex-shrink:0;letter-spacing:0.04em}
+.party-R{background:rgba(239,68,68,0.08);color:var(--rep);border:1px solid rgba(239,68,68,0.2)}
+.party-D{background:rgba(37,99,235,0.08);color:var(--dem);border:1px solid rgba(37,99,235,0.2)}
+.party-I{background:rgba(139,92,246,0.08);color:var(--ind);border:1px solid rgba(139,92,246,0.2)}
+.cand-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--navy-border)}
+.cand-stat-label{font-family:var(--sans);font-size:0.5rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.06em}
+.cand-stat-value{font-family:var(--mono);font-size:0.72rem;font-weight:600;color:var(--text)}
+.cand-stat-value.green{color:var(--green)}
+.cand-stat-value.red{color:var(--red)}
+.cand-stat-value.amber{color:var(--amber)}
+.spend-bar{height:4px;background:var(--navy-border);border-radius:2px;margin-top:6px;overflow:hidden}
+.spend-bar-fill{height:100%;border-radius:2px;background:var(--blue);transition:width 0.3s ease}
+.cand-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.cand-tag{font-family:var(--mono);font-size:0.5rem;padding:1px 6px;border-radius:2px;font-weight:600}
+.tag-filing{background:var(--blue-glow);color:var(--blue);border:1px solid rgba(29,78,216,0.15)}
+.tag-stations{background:var(--green-dim);color:var(--green);border:1px solid rgba(5,150,105,0.15)}
+
+/* ── DETAIL PANEL ── */
+.detail-panel{background:#fff;border:1px solid var(--navy-border);border-radius:8px;padding:16px;box-shadow:var(--shadow-md);position:sticky;top:62px;max-height:calc(100vh - 76px);overflow-y:auto}
+.detail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem;text-align:center}
+.detail-empty-icon{font-size:2rem;opacity:0.3;margin-bottom:0.5rem}
+.detail-empty-text{font-family:var(--mono);font-size:0.62rem;color:var(--text-faint);letter-spacing:0.06em;line-height:1.8}
+.detail-header{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--navy-border)}
+.detail-name{font-family:var(--sans);font-size:1.3rem;font-weight:800;color:var(--text);line-height:1.15}
+.detail-sub{font-family:var(--sans);font-size:0.62rem;color:var(--text-muted);margin-top:4px}
+.detail-section{margin-bottom:14px}
+.detail-section-title{font-family:var(--sans);font-size:0.55rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-faint);margin-bottom:6px}
+.detail-row{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;font-family:var(--sans);font-size:0.68rem}
+.detail-row-label{color:var(--text-muted)}
+.detail-row-value{font-weight:600;color:var(--text);font-family:var(--mono);font-size:0.65rem}
+.detail-actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.detail-btn{font-family:var(--sans);font-size:0.6rem;font-weight:600;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all 0.12s;display:inline-flex;align-items:center;gap:4px;text-decoration:none;white-space:nowrap}
+.detail-btn-primary{background:var(--blue);border:1px solid var(--blue);color:#fff}
+.detail-btn-primary:hover{background:var(--blue-light)}
+.detail-btn-outline{background:#fff;border:1px solid var(--navy-border);color:var(--text-muted)}
+.detail-btn-outline:hover{border-color:#CBD5E1;color:var(--text)}
+
+/* ── SPEND CHART (simple bar chart via CSS) ── */
+.medium-bars{display:flex;flex-direction:column;gap:5px}
+.medium-row{display:flex;align-items:center;gap:8px}
+.medium-label{font-family:var(--mono);font-size:0.56rem;color:var(--text-muted);width:40px;flex-shrink:0}
+.medium-bar{flex:1;height:14px;background:#F1F5F9;border-radius:3px;overflow:hidden;position:relative}
+.medium-bar-fill{height:100%;border-radius:3px;transition:width 0.4s ease}
+.medium-bar-fill.tv{background:var(--blue)}
+.medium-bar-fill.radio{background:var(--amber)}
+.medium-bar-fill.cable{background:var(--green)}
+.medium-bar-fill.other{background:var(--slate)}
+.medium-amount{font-family:var(--mono);font-size:0.56rem;color:var(--text);font-weight:600;width:70px;text-align:right;flex-shrink:0}
+
+/* ── WEEKLY TREND CHART (CSS bars) ── */
+.weekly-chart{display:flex;align-items:flex-end;gap:2px;height:80px;padding-top:4px}
+.week-bar{flex:1;min-width:4px;background:var(--blue);border-radius:2px 2px 0 0;transition:height 0.3s ease;position:relative;cursor:default}
+.week-bar:hover{opacity:0.8}
+.week-bar-tooltip{display:none;position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:#1E293B;color:#fff;font-family:var(--mono);font-size:0.5rem;padding:3px 6px;border-radius:3px;white-space:nowrap;z-index:10}
+.week-bar:hover .week-bar-tooltip{display:block}
+
+/* ── FILINGS LIST ── */
+.filing-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:4px;background:#F8FAFC;margin-bottom:3px;font-family:var(--sans);font-size:0.65rem}
+.filing-item:hover{background:#F1F5F9}
+.filing-station{font-family:var(--mono);font-size:0.58rem;font-weight:600;color:var(--text);min-width:50px}
+.filing-dates{color:var(--text-muted);font-size:0.58rem;flex:1}
+.filing-amount{font-family:var(--mono);font-size:0.62rem;font-weight:600;color:var(--green)}
+
+/* ── LOADING / EMPTY ── */
+#loading{text-align:center;padding:60px 20px;font-family:var(--mono);font-size:0.7rem;color:var(--text-faint);letter-spacing:0.08em}
+#error-msg{display:none;text-align:center;padding:20px;font-family:var(--mono);font-size:0.65rem;color:var(--red)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .content-area{grid-template-columns:1fr}
+  .detail-panel{position:static;max-height:none}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:640px){
+  .page-wrap{margin-left:62px}
+  .sidebar-panel{display:none}
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .card-grid{grid-template-columns:1fr}
+}
+
+footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;color:#94A3B8;border-top:1px solid var(--navy-border);margin-top:20px}
+</style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-rail">
+    <div class="sidebar-rail-logo" title="PoliticalWindow.com" onclick="location.href='/'">PW</div>
+    <a href="/" class="rail-item" title="Election Intel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span class="rail-item-label">Election Intel</span>
+    </a>
+    <a href="/public-file" class="rail-item" title="Public File">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span class="rail-item-label">Public File</span>
+    </a>
+    <a href="/rates" class="rail-item" title="Rate Analytics">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span class="rail-item-label">Rates</span>
+    </a>
+    <div class="rail-divider"></div>
+    <a href="/explorer" class="rail-item" title="Explorer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span class="rail-item-label">Explorer</span>
+    </a>
+    <a href="/lur" class="rail-item" title="LUR">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span class="rail-item-label">LUR</span>
+    </a>
+    <a href="/admin" class="rail-item" title="Admin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="rail-item-label">Admin</span>
+    </a>
+    <div class="sidebar-collapse-btn" onclick="toggleSidebar()" id="sidebarToggleBtn" title="Collapse panel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/></svg>
+    </div>
+  </div>
+  <div class="sidebar-panel">
+    <div class="sidebar-panel-header">Election Intel</div>
+    <a href="/" class="sidebar-panel-link">Dashboard</a>
+    <a href="/" class="sidebar-panel-link">FCC Window Map</a>
+    <a href="/candidate-tracker" class="sidebar-panel-link active">Candidate Tracker</a>
+    <div class="sidebar-panel-section">Data</div>
+    <a href="/public-file" class="sidebar-panel-link">Filings</a>
+    <a href="/rates" class="sidebar-panel-link">Rate Analytics</a>
+    <a href="/explorer" class="sidebar-panel-link">Rate Explorer</a>
+    <div class="sidebar-panel-section">Reference</div>
+    <a href="/lur" class="sidebar-panel-link">LUR Lookup</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+<header>
+  <div class="header-left">
+    <span class="header-meta" id="data-badge" style="color:rgba(255,255,255,0.5);font-size:0.55rem;letter-spacing:0.03em">&#x25CF; LOADING...</span>
+  </div>
+  <div class="header-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Search candidates..." id="headerSearch">
+  </div>
+  <div class="header-right">
+    <span class="header-page-title">Candidate Tracker</span>
+  </div>
+</header>
+
+<main>
+  <!-- KPI ROW -->
+  <div class="kpi-row">
+    <div class="kpi-card kpi-card-blue">
+      <div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Total Candidates</div>
+      <div class="kpi-value" id="kpiTotal">-</div>
+      <div class="kpi-sub" id="kpiTotalSub">loading...</div>
+    </div>
+    <div class="kpi-card kpi-card-red">
+      <div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Senate Races</div>
+      <div class="kpi-value" id="kpiSenate">-</div>
+      <div class="kpi-sub" id="kpiSenateSub"></div>
+    </div>
+    <div class="kpi-card kpi-card-amber">
+      <div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Governor Races</div>
+      <div class="kpi-value" id="kpiGov">-</div>
+      <div class="kpi-sub" id="kpiGovSub"></div>
+    </div>
+    <div class="kpi-card kpi-card-green">
+      <div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Total Ad Spend</div>
+      <div class="kpi-value" id="kpiSpend">-</div>
+      <div class="kpi-sub" id="kpiSpendSub">across all filings</div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <span class="filter-bar-label">Race:</span>
+    <div class="filter-group" id="raceFilters">
+      <button class="filter-btn active" data-office="all">All</button>
+      <button class="filter-btn" data-office="Senate">Senate</button>
+      <button class="filter-btn" data-office="Governor">Gov</button>
+      <button class="filter-btn" data-office="House">House</button>
+    </div>
+    <span class="filter-bar-label" style="margin-left:8px">Party:</span>
+    <div class="filter-group" id="partyFilters">
+      <button class="filter-btn active" data-party="all">All</button>
+      <button class="filter-btn" data-party="R">R</button>
+      <button class="filter-btn" data-party="D">D</button>
+      <button class="filter-btn" data-party="I">I</button>
+    </div>
+    <span class="filter-bar-label" style="margin-left:8px">State:</span>
+    <select class="filter-select" id="stateFilter"><option value="all">All States</option></select>
+    <div class="filter-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search candidates..." id="searchInput">
+    </div>
+  </div>
+
+  <div class="results-info" id="resultsInfo"></div>
+
+  <!-- MAIN CONTENT -->
+  <div id="loading">LOADING CANDIDATE DATA...</div>
+  <div id="error-msg"></div>
+
+  <div class="content-area" id="contentArea" style="display:none">
+    <div class="card-grid" id="cardGrid"></div>
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-empty">
+        <div class="detail-empty-icon">&#x1F464;</div>
+        <div class="detail-empty-text">SELECT A CANDIDATE<br>TO VIEW SPEND DETAILS<br>&amp; FEC FILINGS</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>&copy; 2026 PoliticalWindow.com &middot; All rights reserved &middot; FCC Political Ad Intelligence</footer>
+
+</div><!-- /page-wrap -->
+
+<script>
+const RATES_API = 'https://rates.politicalwindow.com';
+let ALL_CANDIDATES = [];
+let FILTERED = [];
+let selectedId = null;
+
+// ── FORMAT HELPERS ──
+function fmtMoney(n) {
+  if (n == null || isNaN(n)) return '$0';
+  n = Number(n);
+  if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return '$' + (n / 1e3).toFixed(0) + 'K';
+  return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+function fmtDate(d) {
+  if (!d) return '\u2014';
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function fmtShortDate(d) {
+  if (!d) return '\u2014';
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+// ── AUTH ──
+function getToken() {
+  return localStorage.getItem('pw_token');
+}
+function authHeaders() {
+  var t = getToken();
+  return t ? { 'Authorization': 'Bearer ' + t } : {};
+}
+
+// ── LOAD DATA ──
+async function loadCandidates() {
+  try {
+    var resp = await fetch(RATES_API + '/api/candidates/tracker', { headers: authHeaders() });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var json = await resp.json();
+    ALL_CANDIDATES = json.data || [];
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('contentArea').style.display = '';
+
+    // Populate state filter
+    var states = [...new Set(ALL_CANDIDATES.map(function(c) { return c.state; }).filter(Boolean))].sort();
+    var sel = document.getElementById('stateFilter');
+    states.forEach(function(s) { var o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); });
+
+    // Read URL params for initial filter state
+    applyUrlParams();
+    updateKPIs();
+    filterAndRender();
+
+    // Update badge
+    document.getElementById('data-badge').style.color = '#34D399';
+    document.getElementById('data-badge').textContent = '\u25CF LIVE \u00B7 ' + ALL_CANDIDATES.length + ' entities';
+  } catch (err) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error-msg').style.display = 'block';
+    document.getElementById('error-msg').textContent = 'Failed to load: ' + err.message;
+    document.getElementById('data-badge').style.color = '#FBBF24';
+    document.getElementById('data-badge').textContent = '\u25CF ERROR';
+  }
+}
+
+// ── URL PARAMS ──
+function applyUrlParams() {
+  var params = new URLSearchParams(window.location.search);
+  var office = params.get('office');
+  var party = params.get('party');
+  var state = params.get('state');
+  var search = params.get('search');
+  if (office) {
+    document.querySelectorAll('#raceFilters .filter-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.office === office); });
+  }
+  if (party) {
+    document.querySelectorAll('#partyFilters .filter-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.party === party); });
+  }
+  if (state) document.getElementById('stateFilter').value = state;
+  if (search) document.getElementById('searchInput').value = search;
+}
+function updateUrl() {
+  var office = document.querySelector('#raceFilters .filter-btn.active').dataset.office;
+  var party = document.querySelector('#partyFilters .filter-btn.active').dataset.party;
+  var state = document.getElementById('stateFilter').value;
+  var search = document.getElementById('searchInput').value;
+  var params = new URLSearchParams();
+  if (office !== 'all') params.set('office', office);
+  if (party !== 'all') params.set('party', party);
+  if (state !== 'all') params.set('state', state);
+  if (search) params.set('search', search);
+  var qs = params.toString();
+  history.replaceState(null, '', qs ? '?' + qs : location.pathname);
+}
+
+// ── KPIs ──
+function updateKPIs() {
+  var total = ALL_CANDIDATES.length;
+  var senate = ALL_CANDIDATES.filter(function(c) { return c.office && c.office.toLowerCase().includes('senate'); }).length;
+  var gov = ALL_CANDIDATES.filter(function(c) { return c.office && c.office.toLowerCase().includes('governor'); }).length;
+  var totalSpend = ALL_CANDIDATES.reduce(function(s, c) { return s + Number(c.total_spend || 0); }, 0);
+
+  document.getElementById('kpiTotal').textContent = total;
+  document.getElementById('kpiTotalSub').textContent = 'with FCC filings activity';
+  document.getElementById('kpiSenate').textContent = senate;
+  document.getElementById('kpiSenateSub').textContent = 'candidates';
+  document.getElementById('kpiGov').textContent = gov;
+  document.getElementById('kpiGovSub').textContent = 'candidates';
+  document.getElementById('kpiSpend').textContent = fmtMoney(totalSpend);
+  document.getElementById('kpiSpendSub').textContent = 'gross across ' + ALL_CANDIDATES.filter(function(c) { return Number(c.total_spend) > 0; }).length + ' spenders';
+}
+
+// ── FILTER + RENDER ──
+function filterAndRender() {
+  var office = document.querySelector('#raceFilters .filter-btn.active').dataset.office;
+  var party = document.querySelector('#partyFilters .filter-btn.active').dataset.party;
+  var state = document.getElementById('stateFilter').value;
+  var search = (document.getElementById('searchInput').value || '').toLowerCase();
+
+  FILTERED = ALL_CANDIDATES.filter(function(c) {
+    if (office !== 'all') {
+      var o = (c.office || '').toLowerCase();
+      if (office === 'Senate' && !o.includes('senate')) return false;
+      if (office === 'Governor' && !o.includes('governor')) return false;
+      if (office === 'House' && !o.includes('house')) return false;
+    }
+    if (party !== 'all' && c.party !== party) return false;
+    if (state !== 'all' && c.state !== state) return false;
+    if (search && !(c.candidate_name || '').toLowerCase().includes(search) && !(c.state || '').toLowerCase().includes(search) && !(c.committee_name_official || '').toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  document.getElementById('resultsInfo').textContent = FILTERED.length + ' candidates' + (FILTERED.length !== ALL_CANDIDATES.length ? ' (filtered from ' + ALL_CANDIDATES.length + ')' : '');
+
+  var maxSpend = Math.max(1, ...FILTERED.map(function(c) { return Number(c.total_spend) || 0; }));
+  var grid = document.getElementById('cardGrid');
+  grid.innerHTML = FILTERED.map(function(c) {
+    var spend = Number(c.total_spend) || 0;
+    var barPct = Math.round((spend / maxSpend) * 100);
+    var partyClass = c.party === 'R' ? 'party-R' : c.party === 'D' ? 'party-D' : 'party-I';
+    var selClass = c.political_entity_id === selectedId ? ' selected' : '';
+    return '<div class="cand-card' + selClass + '" data-id="' + c.political_entity_id + '" onclick="selectCandidate(\'' + c.political_entity_id + '\')">' +
+      '<div class="cand-card-top">' +
+        '<div><div class="cand-name">' + (c.candidate_name || 'Unknown') + '</div>' +
+        '<div class="cand-meta">' + (c.state || '') + ' \u00B7 ' + (c.office || 'Other') + (c.district ? ' \u00B7 D-' + c.district : '') + '</div></div>' +
+        '<span class="party-badge ' + partyClass + '">' + (c.party || '?') + '</span>' +
+      '</div>' +
+      '<div class="cand-stats">' +
+        '<div><div class="cand-stat-label">Ad Spend</div><div class="cand-stat-value' + (spend > 0 ? ' green' : '') + '">' + fmtMoney(spend) + '</div></div>' +
+        '<div><div class="cand-stat-label">Filings</div><div class="cand-stat-value">' + (c.filing_count || 0) + '</div></div>' +
+      '</div>' +
+      (spend > 0 ? '<div class="spend-bar"><div class="spend-bar-fill" style="width:' + barPct + '%"></div></div>' : '') +
+      '<div class="cand-tags">' +
+        (c.filing_count > 0 ? '<span class="cand-tag tag-filing">' + c.filing_count + ' filings</span>' : '') +
+        (c.station_count > 0 ? '<span class="cand-tag tag-stations">' + c.station_count + ' stations</span>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  updateUrl();
+}
+
+// ── SELECT CANDIDATE ──
+async function selectCandidate(id) {
+  if (selectedId === id) { selectedId = null; clearDetail(); filterAndRender(); return; }
+  selectedId = id;
+  filterAndRender();
+
+  var c = ALL_CANDIDATES.find(function(x) { return x.political_entity_id === id; });
+  if (!c) return;
+
+  var panel = document.getElementById('detailPanel');
+  var partyClass = c.party === 'R' ? 'party-R' : c.party === 'D' ? 'party-D' : 'party-I';
+
+  panel.innerHTML =
+    '<div class="detail-header">' +
+      '<div class="detail-name">' + (c.candidate_name || 'Unknown') + ' <span class="party-badge ' + partyClass + '" style="font-size:0.5rem;vertical-align:middle">' + (c.party || '?') + '</span></div>' +
+      '<div class="detail-sub">' + (c.state || '') + ' \u00B7 ' + (c.office || 'Other') + (c.district ? ' \u00B7 District ' + c.district : '') + ' \u00B7 ' + (c.cycle || 2026) + ' Cycle</div>' +
+      (c.committee_name_official ? '<div class="detail-sub" style="margin-top:2px;font-style:italic">' + c.committee_name_official + '</div>' : '') +
+    '</div>' +
+    '<div class="detail-section">' +
+      '<div class="detail-section-title">FCC Filing Summary</div>' +
+      '<div class="detail-row"><span class="detail-row-label">Total Spend</span><span class="detail-row-value" style="color:var(--green)">' + fmtMoney(c.total_spend) + '</span></div>' +
+      '<div class="detail-row"><span class="detail-row-label">Filing Count</span><span class="detail-row-value">' + (c.filing_count || 0) + '</span></div>' +
+      '<div class="detail-row"><span class="detail-row-label">Total Spots</span><span class="detail-row-value">' + (c.total_spots || 0).toLocaleString() + '</span></div>' +
+      '<div class="detail-row"><span class="detail-row-label">Stations</span><span class="detail-row-value">' + (c.station_count || 0) + '</span></div>' +
+      '<div class="detail-row"><span class="detail-row-label">First Flight</span><span class="detail-row-value">' + fmtDate(c.first_flight) + '</span></div>' +
+      '<div class="detail-row"><span class="detail-row-label">Last Flight</span><span class="detail-row-value">' + fmtDate(c.last_flight) + '</span></div>' +
+    '</div>' +
+    '<div class="detail-section" id="mediumSection"><div class="detail-section-title">Spend by Medium</div><div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-faint)">Loading...</div></div>' +
+    '<div class="detail-section" id="weeklySection"><div class="detail-section-title">Weekly Ad Spend Trend</div><div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-faint)">Loading...</div></div>' +
+    '<div class="detail-section" id="fecSection"><div class="detail-section-title">FEC Financial Data</div><div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-faint)">Loading...</div></div>' +
+    '<div class="detail-section" id="filingsSection"><div class="detail-section-title">Recent Filings</div><div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-faint)">Loading...</div></div>' +
+    '<div class="detail-actions">' +
+      (c.fec_candidate_id ? '<a href="https://www.fec.gov/data/candidate/' + c.fec_candidate_id + '/" target="_blank" class="detail-btn detail-btn-primary">View FEC Profile</a>' : '') +
+      '<a href="/public-file?q=' + encodeURIComponent(c.candidate_name) + '" class="detail-btn detail-btn-outline">View All Filings</a>' +
+    '</div>';
+
+  // Load spend + filings + FEC in parallel
+  loadSpendData(id);
+  loadFilingsData(id);
+  if (c.fec_candidate_id) loadFecData(id);
+  else document.getElementById('fecSection').innerHTML = '<div class="detail-section-title">FEC Financial Data</div><div style="font-family:var(--mono);font-size:0.58rem;color:var(--text-faint)">No FEC ID linked</div>';
+}
+
+async function loadSpendData(id) {
+  try {
+    var resp = await fetch(RATES_API + '/api/candidates/tracker/' + id + '/spend', { headers: authHeaders() });
+    if (!resp.ok) { document.getElementById('mediumSection').querySelector('div:last-child').textContent = 'Auth required for spend details'; return; }
+    var json = await resp.json();
+
+    // Medium breakdown
+    var mediums = json.by_medium || [];
+    var maxMedium = Math.max(1, ...mediums.map(function(m) { return Number(m.medium_spend); }));
+    var mediumHtml = '<div class="detail-section-title">Spend by Medium</div><div class="medium-bars">';
+    mediums.forEach(function(m) {
+      var pct = Math.round((Number(m.medium_spend) / maxMedium) * 100);
+      var cls = (m.medium || '').toLowerCase();
+      if (cls !== 'tv' && cls !== 'radio' && cls !== 'cable') cls = 'other';
+      mediumHtml += '<div class="medium-row"><span class="medium-label">' + (m.medium || 'Other') + '</span><div class="medium-bar"><div class="medium-bar-fill ' + cls + '" style="width:' + pct + '%"></div></div><span class="medium-amount">' + fmtMoney(m.medium_spend) + '</span></div>';
+    });
+    mediumHtml += '</div>';
+    if (mediums.length === 0) mediumHtml = '<div class="detail-section-title">Spend by Medium</div><div style="font-family:var(--mono);font-size:0.58rem;color:var(--text-faint)">No line-item data</div>';
+    document.getElementById('mediumSection').innerHTML = mediumHtml;
+
+    // Weekly trend
+    var weeks = json.weekly_trend || [];
+    var maxWeek = Math.max(1, ...weeks.map(function(w) { return Number(w.weekly_spend); }));
+    var weekHtml = '<div class="detail-section-title">Weekly Ad Spend Trend</div>';
+    if (weeks.length > 0) {
+      weekHtml += '<div class="weekly-chart">';
+      weeks.forEach(function(w) {
+        var h = Math.max(2, Math.round((Number(w.weekly_spend) / maxWeek) * 70));
+        weekHtml += '<div class="week-bar" style="height:' + h + 'px"><div class="week-bar-tooltip">' + fmtShortDate(w.week_of) + ': ' + fmtMoney(w.weekly_spend) + '</div></div>';
+      });
+      weekHtml += '</div>';
+    } else {
+      weekHtml += '<div style="font-family:var(--mono);font-size:0.58rem;color:var(--text-faint)">No weekly data</div>';
+    }
+    document.getElementById('weeklySection').innerHTML = weekHtml;
+  } catch (err) {
+    console.warn('Spend load error:', err.message);
+  }
+}
+
+async function loadFilingsData(id) {
+  try {
+    var resp = await fetch(RATES_API + '/api/candidates/tracker/' + id + '/filings', { headers: authHeaders() });
+    if (!resp.ok) { document.getElementById('filingsSection').querySelector('div:last-child').textContent = 'Auth required'; return; }
+    var json = await resp.json();
+    var filings = (json.data || []).slice(0, 10);
+    var html = '<div class="detail-section-title">Recent Filings (' + (json.data || []).length + ' total)</div>';
+    if (filings.length > 0) {
+      filings.forEach(function(f) {
+        html += '<div class="filing-item">' +
+          '<span class="filing-station">' + (f.station_call_sign || f.psid || '\u2014') + '</span>' +
+          '<span class="filing-dates">' + fmtShortDate(f.flight_start) + ' \u2013 ' + fmtShortDate(f.flight_end) + '</span>' +
+          '<span class="filing-amount">' + fmtMoney(f.gross_amount) + '</span>' +
+        '</div>';
+      });
+    } else {
+      html += '<div style="font-family:var(--mono);font-size:0.58rem;color:var(--text-faint)">No filings found</div>';
+    }
+    document.getElementById('filingsSection').innerHTML = html;
+  } catch (err) {
+    console.warn('Filings load error:', err.message);
+  }
+}
+
+async function loadFecData(id) {
+  try {
+    var resp = await fetch(RATES_API + '/api/candidates/tracker/' + id + '/fec', { headers: authHeaders() });
+    if (!resp.ok) { document.getElementById('fecSection').querySelector('div:last-child').textContent = 'Auth required'; return; }
+    var json = await resp.json();
+    var d = json.data;
+    if (!d) { document.getElementById('fecSection').querySelector('div:last-child').textContent = 'No FEC data available'; return; }
+    document.getElementById('fecSection').innerHTML =
+      '<div class="detail-section-title">FEC Financial Data</div>' +
+      '<div class="detail-row"><span class="detail-row-label">Total Raised</span><span class="detail-row-value" style="color:var(--green)">' + fmtMoney(d.total_receipts) + '</span></div>' +
+      '<div class="detail-row"><span class="detail-row-label">Total Spent</span><span class="detail-row-value" style="color:var(--red)">' + fmtMoney(d.total_disbursements) + '</span></div>' +
+      '<div class="detail-row"><span class="detail-row-label">Cash on Hand</span><span class="detail-row-value">' + fmtMoney(d.cash_on_hand) + '</span></div>' +
+      '<div class="detail-row"><span class="detail-row-label">Last Report</span><span class="detail-row-value">' + fmtDate(d.last_report_date) + '</span></div>';
+  } catch (err) {
+    console.warn('FEC load error:', err.message);
+  }
+}
+
+function clearDetail() {
+  document.getElementById('detailPanel').innerHTML = '<div class="detail-empty"><div class="detail-empty-icon">&#x1F464;</div><div class="detail-empty-text">SELECT A CANDIDATE<br>TO VIEW SPEND DETAILS<br>&amp; FEC FILINGS</div></div>';
+}
+
+// ── EVENT LISTENERS ──
+document.querySelectorAll('#raceFilters .filter-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#raceFilters .filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    filterAndRender();
+  });
+});
+document.querySelectorAll('#partyFilters .filter-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#partyFilters .filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    filterAndRender();
+  });
+});
+document.getElementById('stateFilter').addEventListener('change', filterAndRender);
+document.getElementById('searchInput').addEventListener('input', filterAndRender);
+document.getElementById('headerSearch').addEventListener('input', function(e) {
+  document.getElementById('searchInput').value = e.target.value;
+  filterAndRender();
+});
+
+// ── SIDEBAR TOGGLE ──
+function toggleSidebar() {
+  var sb = document.getElementById('sidebar');
+  sb.classList.toggle('collapsed');
+  var btn = document.getElementById('sidebarToggleBtn');
+  if (sb.classList.contains('collapsed')) {
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/></svg>';
+    btn.title = 'Expand panel';
+  } else {
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/></svg>';
+    btn.title = 'Collapse panel';
+  }
+}
+
+// ── INIT ──
+loadCandidates();
+</script>
+</body>
+</html>
