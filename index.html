@@ -1619,17 +1619,33 @@ function buildHeatmapColors(dataMap, valueKey, colorStops) {
   return colors;
 }
 
+let _lastHeatmapColors = null;
 function applyHeatmapToMap(colors) {
+  _lastHeatmapColors = colors;
   const matchExpr = ['match', ['get', 'abbr']];
   STATES.forEach(s => { matchExpr.push(s.abbr, colors[s.abbr] || '#E2E8F0'); });
   matchExpr.push('#E2E8F0');
   glMap.setPaintProperty('states-fill', 'fill-color', matchExpr);
+  // Update insets to match heatmap
+  [['AK', insetAK], ['HI', insetHI]].forEach(([abbr, m]) => {
+    if (!m || !m.getLayer('state-fill')) return;
+    m.setPaintProperty('state-fill', 'fill-color', colors[abbr] || '#E2E8F0');
+  });
 }
+
+// Cache computed color maps so switching is instant
+let _colorCache = {};
 
 async function setMapLayer(layer) {
   currentMapLayer = layer;
   document.querySelectorAll('.map-layer-toggles .filter-btn').forEach(b => b.classList.toggle('active', b.dataset.layer === layer));
   if (!glMap || !statesGeoJSON) return;
+
+  // If we already computed colors for this layer, apply instantly
+  if (_colorCache[layer]) {
+    applyHeatmapToMap(_colorCache[layer]);
+    return;
+  }
 
   if (layer === 'density') {
     const maxCands = Math.max(1, ...STATES.map(s => s.cands.reduce((a, rc) => a + rc.list.length, 0)));
@@ -1642,24 +1658,24 @@ async function setMapLayer(layer) {
       else if (ratio > 0.3) colors[s.abbr] = '#3B82F6';
       else colors[s.abbr] = '#93C5FD';
     });
+    _colorCache.density = colors;
     applyHeatmapToMap(colors);
 
   } else if (layer === 'spend') {
-    // Orange monochrome heatmap — total ad spend per state
     const data = await loadSpendByState();
     if (!data) return;
     const colors = buildHeatmapColors(data, 'total_spend', ['#C2410C', '#EA580C', '#FB923C', '#FED7AA']);
-    if (colors) applyHeatmapToMap(colors);
+    if (colors) { _colorCache.spend = colors; applyHeatmapToMap(colors); }
 
   } else if (layer === 'cash') {
-    // Green monochrome heatmap — total cash on hand per state (federal candidates)
     const data = await loadCashByState();
     if (!data) return;
     const colors = buildHeatmapColors(data, 'cash_on_hand', ['#065F46', '#059669', '#34D399', '#A7F3D0']);
-    if (colors) applyHeatmapToMap(colors);
+    if (colors) { _colorCache.cash = colors; applyHeatmapToMap(colors); }
 
   } else {
     // Window timing — restore status-based coloring
+    _lastHeatmapColors = null;
     glMap.setPaintProperty('states-fill', 'fill-color', ['match', ['get', 'status'],
       'window-open',  STATUS_COLORS['window-open'],
       'window-soon',  STATUS_COLORS['window-soon'],
@@ -1667,6 +1683,7 @@ async function setMapLayer(layer) {
       'general-only', STATUS_COLORS['general-only'],
       STATUS_COLORS['inactive']
     ]);
+    updateInsetColors();
   }
 }
 
