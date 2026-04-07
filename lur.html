@@ -9,17 +9,17 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{font-size:18px}
 :root{
-  --navy:#E2E6ED;--navy-mid:#F8F9FB;--navy-card:#FFFFFF;--navy-border:#D1D9E6;
+  --navy:#E2E6ED;--navy-mid:#F8F9FB;--navy-card:#FFFFFF;--navy-border:#C1CBDB;
   --blue:#1D4ED8;--blue-light:#2563EB;--blue-glow:rgba(29,78,216,0.10);
   --amber:#D97706;--amber-dim:rgba(217,119,6,0.10);--red:#DC2626;--red-dim:rgba(220,38,38,0.08);
   --green:#059669;--green-dim:rgba(5,150,105,0.08);
-  --text:#0F172A;--text-muted:#475569;--text-faint:#94A3B8;
+  --text:#0F172A;--text-muted:#475569;--text-faint:#A0AEBF;
   --sans:'DM Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
   --shadow-sm:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.05);
   --shadow-md:0 4px 12px rgba(0,0,0,0.10),0 1px 3px rgba(0,0,0,0.06);
 }
 body{background:var(--navy);color:var(--text);font-family:var(--sans);min-height:100vh;
-  background-image:radial-gradient(circle,#C8CDD5 0.6px,transparent 0.6px);background-size:16px 16px;}
+  background-image:radial-gradient(circle,rgba(180,190,205,0.35) 0.5px,transparent 0.5px);background-size:18px 18px;}
 a{color:var(--blue);text-decoration:none}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-thumb{background:#C8CDD5;border-radius:3px}
@@ -148,12 +148,15 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
     <div class="sidebar-collapse-btn" onclick="toggleSidebar()" id="sidebarToggleBtn" title="Collapse panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/></svg></div>
   </div>
   <div class="sidebar-panel">
-    <div class="sidebar-panel-header">LUR Monitor</div>
-    <a href="/lur" class="sidebar-panel-link active">Rate Variance</a>
-    <a href="/rates" class="sidebar-panel-link">Rate Analytics</a>
-    <div class="sidebar-panel-section">Intelligence</div>
-    <a href="/" class="sidebar-panel-link">Election Intel</a>
+    <div class="sidebar-panel-section">Intel</div>
+    <a href="/" class="sidebar-panel-link">Dashboard</a>
     <a href="/public-file" class="sidebar-panel-link">Filings</a>
+    <a href="/candidate-tracker" class="sidebar-panel-link">Candidate Tracker</a>
+    <div class="sidebar-panel-section">Analysis</div>
+    <a href="/rates" class="sidebar-panel-link">Rate Analytics</a>
+    <a href="/lur" class="sidebar-panel-link active">LUR Monitor</a>
+    <div class="sidebar-panel-section">Reference</div>
+    <a href="/" class="sidebar-panel-link">FCC Window Map</a>
   </div>
 </nav>
 
@@ -232,6 +235,9 @@ function loadDropdowns(){
     (j.stations||[]).sort(function(a,b){return(a.station||'').localeCompare(b.station||'');}).forEach(function(s){
       var o=document.createElement('option');o.value=s.station;o.textContent=s.station+(s.dma?' \u00B7 '+s.dma:'');sel.appendChild(o);
     });
+    // Apply ?station= param
+    var stationParam=new URLSearchParams(window.location.search).get('station');
+    if(stationParam)sel.value=stationParam;
   }).catch(function(){});
   authFetch(API+'/api/lur-entities').then(function(r){return r.json();}).then(function(j){
     var sel=document.getElementById('f-entity');
@@ -240,6 +246,12 @@ function loadDropdowns(){
       var o=document.createElement('option');o.value=e.political_entity_id;
       o.textContent=e.candidate_name+' ('+e.party+'-'+e.state+' '+e.office+')';sel.appendChild(o);
     });
+    // Apply ?entity= param and auto-run
+    var entityParam=new URLSearchParams(window.location.search).get('entity');
+    if(entityParam){sel.value=entityParam;runReport();}
+    // Apply ?state= param
+    var stateParam=new URLSearchParams(window.location.search).get('state');
+    if(stateParam)document.getElementById('f-state').value=stateParam;
   }).catch(function(){});
 }
 

@@ -20,7 +20,7 @@ html{font-size:18px}
   --navy:#E2E6ED;
   --navy-mid:#F8F9FB;
   --navy-card:#FFFFFF;
-  --navy-border:#D1D9E6;
+  --navy-border:#C1CBDB;
   --blue:#1D4ED8;
   --blue-light:#2563EB;
   --blue-glow:rgba(29,78,216,0.10);
@@ -37,7 +37,7 @@ html{font-size:18px}
   --ind:#8B5CF6;
   --text:#0F172A;
   --text-muted:#475569;
-  --text-faint:#94A3B8;
+  --text-faint:#A0AEBF;
   --mono:'IBM Plex Mono',monospace;
   --sans:'DM Sans',sans-serif;
   --display:'DM Sans',sans-serif;
@@ -46,7 +46,7 @@ html{font-size:18px}
   --shadow-lg:0 8px 24px rgba(0,0,0,0.12),0 2px 6px rgba(0,0,0,0.06);
 }
 body{background:var(--navy);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:clip;
-  background-image:radial-gradient(circle,#C8CDD5 0.6px,transparent 0.6px);background-size:16px 16px;
+  background-image:radial-gradient(circle,rgba(180,190,205,0.35) 0.5px,transparent 0.5px);background-size:18px 18px;
 }
 a{color:var(--blue);text-decoration:none}
 ::-webkit-scrollbar{width:5px;height:5px}
@@ -133,6 +133,11 @@ main{max-width:1400px;margin:0 auto;padding:14px 20px 40px;display:flex;flex-dir
 .cand-card{background:#fff;border:1px solid var(--navy-border);border-radius:8px;padding:14px 16px;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
 .cand-card:hover{border-color:#94A3B8;box-shadow:var(--shadow-md);transform:translateY(-1px)}
 .cand-card.selected{border-color:var(--blue);box-shadow:0 0 0 2px rgba(29,78,216,0.15),var(--shadow-md)}
+.cand-card.top-spender{border-left:3px solid var(--amber);box-shadow:var(--shadow-md)}
+.cand-card.top-spender:hover{box-shadow:var(--shadow-lg)}
+.cand-activity{font-family:var(--mono);font-size:0.48rem;font-weight:700;padding:1px 5px;border-radius:2px;letter-spacing:0.03em;display:inline-block;margin-right:3px}
+.cand-activity-recent{color:var(--green);background:var(--green-dim);border:1px solid rgba(5,150,105,0.15)}
+.cand-activity-surge{color:var(--amber);background:var(--amber-dim);border:1px solid rgba(217,119,6,0.15)}
 .cand-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
 .cand-name{font-family:var(--sans);font-size:0.85rem;font-weight:700;color:var(--text);line-height:1.2}
 .cand-meta{font-family:var(--sans);font-size:0.6rem;color:var(--text-muted);margin-top:2px}
@@ -238,15 +243,15 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
     </div>
   </div>
   <div class="sidebar-panel">
-    <div class="sidebar-panel-header">Election Intel</div>
+    <div class="sidebar-panel-section">Intel</div>
     <a href="/" class="sidebar-panel-link">Dashboard</a>
-    <a href="/" class="sidebar-panel-link">FCC Window Map</a>
-    <a href="/candidate-tracker" class="sidebar-panel-link active">Candidate Tracker</a>
-    <div class="sidebar-panel-section">Data</div>
     <a href="/public-file" class="sidebar-panel-link">Filings</a>
+    <a href="/candidate-tracker" class="sidebar-panel-link active">Candidate Tracker</a>
+    <div class="sidebar-panel-section">Analysis</div>
     <a href="/rates" class="sidebar-panel-link">Rate Analytics</a>
-    <div class="sidebar-panel-section">Reference</div>
     <a href="/lur" class="sidebar-panel-link">LUR Monitor</a>
+    <div class="sidebar-panel-section">Reference</div>
+    <a href="/" class="sidebar-panel-link">FCC Window Map</a>
   </div>
 </nav>
 
@@ -475,18 +480,33 @@ function filterAndRender() {
   document.getElementById('resultsInfo').textContent = FILTERED.length + ' candidates' + (FILTERED.length !== ALL_CANDIDATES.length ? ' (filtered from ' + ALL_CANDIDATES.length + ')' : '');
 
   var maxSpend = Math.max(1, ...FILTERED.map(function(c) { return Number(c.total_spend) || 0; }));
+  // Top 10% threshold for highlighting
+  var sortedSpends = FILTERED.map(function(c) { return Number(c.total_spend) || 0; }).filter(function(s) { return s > 0; }).sort(function(a,b) { return b - a; });
+  var top10pct = sortedSpends[Math.max(0, Math.floor(sortedSpends.length * 0.1))] || 0;
+  var now = new Date();
+  var sevenDaysAgo = new Date(now - 7 * 86400000).toISOString();
+
   var grid = document.getElementById('cardGrid');
   grid.innerHTML = FILTERED.map(function(c) {
     var spend = Number(c.total_spend) || 0;
     var barPct = Math.round((spend / maxSpend) * 100);
     var partyClass = c.party === 'R' ? 'party-R' : c.party === 'D' ? 'party-D' : c.party === 'I' ? 'party-I' : 'party-none';
     var selClass = c.political_entity_id === selectedId ? ' selected' : '';
-    return '<div class="cand-card' + selClass + '" data-id="' + c.political_entity_id + '" onclick="selectCandidate(\'' + c.political_entity_id + '\')">' +
+    var isTop = spend >= top10pct && spend > 0;
+
+    // Activity badges
+    var badges = '';
+    var lastFlight = c.last_flight || '';
+    if (lastFlight && lastFlight >= sevenDaysAgo) badges += '<span class="cand-activity cand-activity-recent">RECENT</span>';
+    if (isTop) badges += '<span class="cand-activity cand-activity-surge">TOP SPENDER</span>';
+
+    return '<div class="cand-card' + selClass + (isTop ? ' top-spender' : '') + '" data-id="' + c.political_entity_id + '" onclick="selectCandidate(\'' + c.political_entity_id + '\')">' +
       '<div class="cand-card-top">' +
         '<div><div class="cand-name">' + (c.candidate_name || 'Unknown') + '</div>' +
         '<div class="cand-meta">' + (c.state || '') + ' \u00B7 ' + (c.office || 'Other') + (c.district ? ' \u00B7 D-' + c.district : '') + '</div></div>' +
         '<span class="party-badge ' + partyClass + '">' + (c.party || '\u2013') + '</span>' +
       '</div>' +
+      (badges ? '<div style="margin-bottom:4px">' + badges + '</div>' : '') +
       '<div class="cand-stats">' +
         '<div><div class="cand-stat-label">Ad Spend</div><div class="cand-stat-value' + (spend > 0 ? ' green' : '') + '">' + fmtMoney(spend) + '</div></div>' +
         '<div><div class="cand-stat-label">Filings</div><div class="cand-stat-value">' + (c.filing_count || 0) + '</div></div>' +
@@ -536,6 +556,7 @@ async function selectCandidate(id) {
     '<div class="detail-actions">' +
       (c.fec_candidate_id ? '<a href="https://www.fec.gov/data/candidate/' + c.fec_candidate_id + '/" target="_blank" class="detail-btn detail-btn-primary">View FEC Profile</a>' : isFederal ? '<span class="detail-btn detail-btn-outline" style="opacity:0.5;cursor:default">FEC ID Pending</span>' : '') +
       '<a href="/public-file?q=' + encodeURIComponent(c.candidate_name) + '" class="detail-btn detail-btn-outline">View All Filings</a>' +
+      '<a href="/lur?entity=' + c.political_entity_id + '" class="detail-btn detail-btn-outline">Run LUR Analysis</a>' +
     '</div>';
 
   // Load spend + filings + FEC in parallel

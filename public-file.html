@@ -21,7 +21,7 @@ html{font-size:18px}
   --navy:       #E2E6ED;
   --navy-mid:   #FFFFFF;
   --navy-card:  #FFFFFF;
-  --navy-border:#D1D9E6;
+  --navy-border:#C1CBDB;
   --blue:       #1D4ED8;
   --blue-light: #2563EB;
   --blue-glow:  rgba(29,78,216,0.10);
@@ -38,7 +38,7 @@ html{font-size:18px}
   --ind:        #8B5CF6;
   --text:       #0F172A;
   --text-muted: #475569;
-  --text-faint: #94A3B8;
+  --text-faint: #A0AEBF;
   --mono:       'IBM Plex Mono', monospace;
   --sans:       'DM Sans', sans-serif;
   --display:    'DM Sans', sans-serif;
@@ -47,8 +47,8 @@ html{font-size:18px}
   --shadow-lg:  0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
 }
 body{background:var(--navy);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:clip;
-  background-image:radial-gradient(circle, #D5DAE0 0.6px, transparent 0.6px);
-  background-size:16px 16px;
+  background-image:radial-gradient(circle, rgba(180,190,205,0.35) 0.5px, transparent 0.5px);
+  background-size:18px 18px;
 }
 a{color:var(--blue);text-decoration:none}
 select,input,button{font-family:var(--mono);outline:none}
@@ -227,12 +227,15 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
     </div>
   </div>
   <div class="sidebar-panel">
-    <div class="sidebar-panel-header">Public File</div>
+    <div class="sidebar-panel-section">Intel</div>
+    <a href="/" class="sidebar-panel-link">Dashboard</a>
     <a href="/public-file" class="sidebar-panel-link active">Filings</a>
+    <a href="/candidate-tracker" class="sidebar-panel-link">Candidate Tracker</a>
+    <div class="sidebar-panel-section">Analysis</div>
     <a href="/rates" class="sidebar-panel-link">Rate Analytics</a>
-    <div class="sidebar-panel-section">Intelligence</div>
-    <a href="/" class="sidebar-panel-link">Election Intel</a>
     <a href="/lur" class="sidebar-panel-link">LUR Monitor</a>
+    <div class="sidebar-panel-section">Reference</div>
+    <a href="/" class="sidebar-panel-link">FCC Window Map</a>
   </div>
 </nav>
 
@@ -436,8 +439,11 @@ function buildGroups(rows){
   rows.forEach(function(r){
     var k=currentView==='date'?uploadDateKey(r.upload_date):currentView==='candidate'?candKey(r):currentView==='dma'?(r.dma_name||'Unknown'):(r.callsign||'Unknown');
     var label=currentView==='date'?fmtUploadDate(r.upload_date):k;
-    if(!map[k])map[k]={label:label,sortKey:k,contracts:0,spend:0,parties:new Set(),states:new Set(),dmas:new Set(),stations:new Set(),candidates:new Set(),rows:[]};
-    map[k].contracts++;map[k].spend+=parseFloat(r.gross_total)||0;
+    if(!map[k])map[k]={label:label,sortKey:k,contracts:0,spend:0,parties:new Set(),states:new Set(),dmas:new Set(),stations:new Set(),candidates:new Set(),rows:[],maxContract:0,topContributor:null,topContributorSpend:0};
+    map[k].contracts++;var gt=parseFloat(r.gross_total)||0;map[k].spend+=gt;
+    if(gt>map[k].maxContract)map[k].maxContract=gt;
+    var cn=r.candidate||r.advertiser||'';
+    if(cn&&gt>(map[k].topContributorSpend||0)){map[k].topContributor=cn;map[k].topContributorSpend=gt;}
     if(r.party)map[k].parties.add(r.party);if(r.state)map[k].states.add(r.state);
     if(r.dma_name)map[k].dmas.add(r.dma_name);if(r.callsign)map[k].stations.add(r.callsign);
     if(r.candidate)map[k].candidates.add(r.candidate);
@@ -478,7 +484,7 @@ function renderGrouped(groups){
   document.getElementById('grouped-body').innerHTML=groups.map(function(g,i){
     var barColor=i<3?'#2B6CB0':'#E3E8EF';
     var pills=[...g.parties].map(partyPill).join('');
-    if(currentView==='date'){var cands=g.candidates?g.candidates.size:0;if(cands>0)pills+=pill(cands+' candidate'+(cands!==1?'s':''));[...g.states].sort().forEach(function(s){pills+=pill(s,'#2B6CB0','rgba(43,108,176,0.06)');});pills+=pill(g.stations.size+' STN');}
+    if(currentView==='date'){var cands=g.candidates?g.candidates.size:0;if(cands>0)pills+=pill(cands+' candidate'+(cands!==1?'s':''));if(g.topContributor&&g.topContributorSpend>10000)pills+=pill(g.topContributor.split(' ').pop()+' $'+fmt$(g.topContributorSpend).replace('$',''),'#059669','rgba(5,150,105,0.06)');if(g.maxContract>=100000)pills+=pill('$'+fmt$(g.maxContract).replace('$','')+' contract','#DC2626','rgba(220,38,38,0.06)');[...g.states].sort().forEach(function(s){pills+=pill(s,'#2B6CB0','rgba(43,108,176,0.06)');});pills+=pill(g.stations.size+' STN');}
     if(currentView==='candidate'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#2B6CB0','rgba(43,108,176,0.06)');});pills+=pill(g.dmas.size+' DMA'+(g.dmas.size!==1?'s':''));pills+=pill(g.stations.size+' STN');}
     if(currentView==='dma'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#2B6CB0','rgba(43,108,176,0.06)');});pills+=pill(g.stations.size+' stations');}
     if(currentView==='station'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#2B6CB0','rgba(43,108,176,0.06)');});}

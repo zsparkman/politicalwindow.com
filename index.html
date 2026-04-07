@@ -23,7 +23,7 @@
     --navy:       #E2E6ED;
     --navy-mid:   #F8F9FB;
     --navy-card:  #FFFFFF;
-    --navy-border:#D1D9E6;
+    --navy-border:#C1CBDB;
     --blue:       #1D4ED8;
     --blue-light: #2563EB;
     --blue-glow:  rgba(29,78,216,0.10);
@@ -40,7 +40,7 @@
     --ind:        #8B5CF6;
     --text:       #0F172A;
     --text-muted: #475569;
-    --text-faint: #94A3B8;
+    --text-faint: #A0AEBF;
     --mono:       'IBM Plex Mono', monospace;
     --sans:       'DM Sans', sans-serif;
     --display:    'DM Sans', sans-serif;
@@ -51,8 +51,8 @@
 
   body {
     background:var(--navy); color:var(--text); font-family:var(--sans); min-height:100vh; overflow-x:clip;
-    background-image:radial-gradient(circle, #D5DAE0 0.6px, transparent 0.6px);
-    background-size:16px 16px;
+    background-image:radial-gradient(circle, rgba(180,190,205,0.35) 0.5px, transparent 0.5px);
+    background-size:18px 18px;
   }
 
   /* ── SIDEBAR: Two-tier icon rail ── */
@@ -242,7 +242,7 @@
   /* ── MAP CARD ── */
   .map-card { background:#fff; border:1px solid var(--navy-border); border-radius:8px; padding:14px 14px; overflow:visible; min-width:0; box-shadow:var(--shadow-md); }
   .card-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; gap:0.5rem; }
-  .card-title { font-family:var(--sans); font-size:0.95rem; font-weight:700; color:var(--text); }
+  .card-title { font-family:var(--sans); font-size:0.95rem; font-weight:800; color:var(--text); }
   .card-sub { font-family:var(--sans); font-size:0.6rem; color:var(--text-muted); line-height:1.5; }
 
   /* ── MAPLIBRE MAP ── */
@@ -353,6 +353,10 @@
   .insight-item-meta { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); flex-shrink:0; }
   .insight-item-tag { font-family:var(--mono); font-size:0.5rem; padding:1px 5px; border-radius:2px; font-weight:600; flex-shrink:0; }
   .insight-empty { font-family:var(--mono); font-size:0.62rem; color:var(--text-faint); padding:6px 0; }
+  .change-banner { background:rgba(29,78,216,0.04); border:1px solid rgba(29,78,216,0.12); border-radius:6px; padding:8px 10px; margin-bottom:10px; }
+  .change-line { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); padding:2px 0; display:flex; align-items:center; gap:5px; }
+  .change-line strong { color:var(--text); }
+  .change-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
   .insight-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem; padding-bottom:0.5rem; border-bottom:1px solid var(--navy-border); }
   .insight-header-title { font-family:var(--sans); font-size:0.85rem; font-weight:700; color:var(--text); }
   .insight-header-sub { font-family:var(--mono); font-size:0.52rem; color:var(--text-faint); }
@@ -723,15 +727,15 @@
 
   <!-- Tier 2: Context Panel -->
   <div class="sidebar-panel">
-    <div class="sidebar-panel-header">Election Intel</div>
+    <div class="sidebar-panel-section">Intel</div>
     <a href="/" class="sidebar-panel-link active">Dashboard</a>
-    <a href="/" class="sidebar-panel-link">FCC Window Map</a>
-    <a href="/candidate-tracker" class="sidebar-panel-link">Candidate Tracker</a>
-    <div class="sidebar-panel-section">Data</div>
     <a href="/public-file" class="sidebar-panel-link">Filings</a>
+    <a href="/candidate-tracker" class="sidebar-panel-link">Candidate Tracker</a>
+    <div class="sidebar-panel-section">Analysis</div>
     <a href="/rates" class="sidebar-panel-link">Rate Analytics</a>
-    <div class="sidebar-panel-section">Reference</div>
     <a href="/lur" class="sidebar-panel-link">LUR Monitor</a>
+    <div class="sidebar-panel-section">Reference</div>
+    <a href="/" class="sidebar-panel-link">FCC Window Map</a>
   </div>
 </nav>
 
@@ -893,6 +897,7 @@
             <div class="insight-header-sub">Select a state for full breakdown</div>
           </div>
         </div>
+        <div id="changeBanner"></div>
         <div class="insight-section" id="insightActive">
           <div class="insight-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -2141,6 +2146,7 @@ async function enrichCandidateFinance(abbr, container) {
             }
           } catch (e) { /* silent */ }
         }
+        html += `<a href="/lur?entity=${entity.political_entity_id}" class="cand-finance-item" style="color:var(--blue);text-decoration:none;cursor:pointer" title="Run LUR analysis">LUR</a>`;
         financeEl.innerHTML = html;
       }
     }
@@ -2202,6 +2208,7 @@ function emptyDetail() {
   const p = document.getElementById('detailPanel');
   p.innerHTML = `<div class="no-sel" id="insightPanel">
     <div class="insight-header"><div><div class="insight-header-title">Market Intelligence</div><div class="insight-header-sub">Select a state for full breakdown</div></div></div>
+    <div id="changeBanner"></div>
     <div class="insight-section" id="insightActive"><div class="insight-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Top Active States</div><ul class="insight-list" id="insightActiveList"></ul></div>
     <div class="insight-section" id="insightUpcoming"><div class="insight-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Windows Opening Next 30 Days</div><ul class="insight-list" id="insightUpcomingList"></ul></div>
     <div class="insight-section" id="insightDensity"><div class="insight-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Highest Candidate Density</div><ul class="insight-list" id="insightDensityList"></ul></div>
@@ -2645,21 +2652,39 @@ function updateInsightPanel() {
   if (!activeList || !upcomingList || !densityList) return;
 
   const statusDot = { 'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'var(--blue-light)', 'general-only':'var(--blue-light)', 'inactive':'var(--slate)' };
-  const statusTag = {
-    'window-open':  '<span class="insight-item-tag" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(220,38,38,0.2)">OPEN</span>',
-    'window-soon':  '<span class="insight-item-tag" style="background:var(--amber-dim);color:var(--amber);border:1px solid rgba(217,119,6,0.2)">SOON</span>',
-    'upcoming':     '<span class="insight-item-tag" style="background:var(--blue-glow);color:var(--blue);border:1px solid rgba(29,78,216,0.2)">UPCOMING</span>',
-    'general-only': '<span class="insight-item-tag" style="background:var(--blue-glow);color:var(--blue);border:1px solid rgba(29,78,216,0.15)">GENERAL</span>',
-    'inactive':     '<span class="insight-item-tag" style="background:var(--slate-dim);color:var(--slate);border:1px solid rgba(148,163,184,0.2)">NONE</span>',
-  };
 
-  // Top Active States (window-open first, then window-soon)
-  const active = STATES.filter(s => s.status === 'window-open' || s.status === 'window-soon')
-    .sort((a, b) => (a.status === 'window-open' ? 0 : 1) - (b.status === 'window-open' ? 0 : 1))
-    .slice(0, 5);
+  // Priority tags based on spend data
+  function priorityTag(abbr) {
+    if (!_spendByState) return '';
+    const sp = _spendByState[abbr];
+    if (!sp) return '';
+    if (sp.total_spend > 1000000) return '<span class="insight-item-tag" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(220,38,38,0.2);font-weight:700">HIGH VALUE</span>';
+    if (sp.filing_count > 20) return '<span class="insight-item-tag" style="background:var(--amber-dim);color:var(--amber);border:1px solid rgba(217,119,6,0.2);font-weight:700">SURGING</span>';
+    if (sp.filing_count > 0) return '<span class="insight-item-tag" style="background:var(--blue-glow);color:var(--blue);border:1px solid rgba(29,78,216,0.2)">ACTIVE</span>';
+    return '';
+  }
+
+  function spendMeta(abbr) {
+    if (!_spendByState || !_spendByState[abbr]) return '';
+    return '$' + fmtCompact(_spendByState[abbr].total_spend);
+  }
+
+  // Top Active States — sort by spend velocity when data available
+  let active = STATES.filter(s => s.status === 'window-open' || s.status === 'window-soon');
+  if (_spendByState) {
+    active.sort((a, b) => {
+      const sa = _spendByState[a.abbr] ? _spendByState[a.abbr].total_spend : 0;
+      const sb = _spendByState[b.abbr] ? _spendByState[b.abbr].total_spend : 0;
+      if (sb !== sa) return sb - sa;
+      return (a.status === 'window-open' ? 0 : 1) - (b.status === 'window-open' ? 0 : 1);
+    });
+  } else {
+    active.sort((a, b) => (a.status === 'window-open' ? 0 : 1) - (b.status === 'window-open' ? 0 : 1));
+  }
+  active = active.slice(0, 5);
   activeList.innerHTML = active.length ? active.map(s => {
-    const races = s.races ? s.races.join(', ') : '';
-    return `<li class="insight-item" onclick="pick('${s.abbr}')"><div class="insight-dot" style="background:${statusDot[s.status]}"></div><span class="insight-item-name">${s.name}</span><span class="insight-item-meta">${races}</span>${statusTag[s.status]}</li>`;
+    const sm = spendMeta(s.abbr);
+    return `<li class="insight-item" onclick="pick('${s.abbr}')"><div class="insight-dot" style="background:${statusDot[s.status]}"></div><span class="insight-item-name">${s.name}</span><span class="insight-item-meta">${sm || (s.races ? s.races.join(', ') : '')}</span>${priorityTag(s.abbr)}</li>`;
   }).join('') : '<li class="insight-empty">No active windows</li>';
 
   // Windows opening within next 30 days
@@ -2667,18 +2692,88 @@ function updateInsightPanel() {
     .sort((a, b) => a.dWin - b.dWin)
     .slice(0, 5);
   upcomingList.innerHTML = upcoming.length ? upcoming.map(s => {
-    return `<li class="insight-item" onclick="pick('${s.abbr}')"><div class="insight-dot" style="background:var(--amber)"></div><span class="insight-item-name">${s.name}</span><span class="insight-item-meta">${s.dWin}d</span>${statusTag['window-soon']}</li>`;
+    return `<li class="insight-item" onclick="pick('${s.abbr}')"><div class="insight-dot" style="background:var(--amber)"></div><span class="insight-item-name">${s.name}</span><span class="insight-item-meta">${s.dWin}d</span>${priorityTag(s.abbr) || '<span class="insight-item-tag" style="background:var(--amber-dim);color:var(--amber);border:1px solid rgba(217,119,6,0.2)">SOON</span>'}</li>`;
   }).join('') : '<li class="insight-empty">No windows opening soon</li>';
 
-  // Highest candidate density
-  const density = STATES.filter(s => s.cands.length > 0)
-    .map(s => ({ ...s, totalCands: s.cands.reduce((a, rc) => a + rc.list.length, 0) }))
-    .sort((a, b) => b.totalCands - a.totalCands)
-    .slice(0, 5);
-  densityList.innerHTML = density.length ? density.map(s => {
-    return `<li class="insight-item" onclick="pick('${s.abbr}')"><div class="insight-dot" style="background:${statusDot[s.status]}"></div><span class="insight-item-name">${s.name}</span><span class="insight-item-meta">${s.totalCands} candidates</span></li>`;
-  }).join('') : '<li class="insight-empty">No candidates declared</li>';
+  // Highest spend by state (replaces pure candidate density when spend data available)
+  if (_spendByState) {
+    const spendStates = STATES.filter(s => _spendByState[s.abbr] && _spendByState[s.abbr].total_spend > 0)
+      .sort((a, b) => (_spendByState[b.abbr].total_spend) - (_spendByState[a.abbr].total_spend))
+      .slice(0, 5);
+    densityList.innerHTML = spendStates.length ? spendStates.map(s => {
+      const sp = _spendByState[s.abbr];
+      return `<li class="insight-item" onclick="pick('${s.abbr}')"><div class="insight-dot" style="background:${statusDot[s.status]}"></div><span class="insight-item-name">${s.name}</span><span class="insight-item-meta">$${fmtCompact(sp.total_spend)}</span>${priorityTag(s.abbr)}</li>`;
+    }).join('') : '<li class="insight-empty">No spend data</li>';
+    // Update section title
+    const dt = document.querySelector('#insightDensity .insight-title');
+    if (dt) dt.innerHTML = dt.innerHTML.replace('Highest Candidate Density', 'Highest Ad Spend');
+  } else {
+    const density = STATES.filter(s => s.cands.length > 0)
+      .map(s => ({ ...s, totalCands: s.cands.reduce((a, rc) => a + rc.list.length, 0) }))
+      .sort((a, b) => b.totalCands - a.totalCands)
+      .slice(0, 5);
+    densityList.innerHTML = density.length ? density.map(s => {
+      return `<li class="insight-item" onclick="pick('${s.abbr}')"><div class="insight-dot" style="background:${statusDot[s.status]}"></div><span class="insight-item-name">${s.name}</span><span class="insight-item-meta">${s.totalCands} candidates</span></li>`;
+    }).join('') : '<li class="insight-empty">No candidates declared</li>';
+  }
 }
+
+// ── CHANGE DETECTION ──────────────────────────────────────────────────────────
+function updateChangeBanner() {
+  const banner = document.getElementById('changeBanner');
+  if (!banner) return;
+
+  const lastVisit = localStorage.getItem('pw_last_visit');
+  const now = new Date().toISOString();
+  let lines = [];
+
+  if (_spendByState) {
+    // Total states with activity
+    const activeStates = Object.keys(_spendByState).filter(k => !k.startsWith('_') && _spendByState[k].total_spend > 0).length;
+    if (activeStates > 0) {
+      lines.push(`<div class="change-line"><div class="change-dot" style="background:var(--blue)"></div><strong>${activeStates}</strong> states with ad spend activity</div>`);
+    }
+
+    // Top state by spend
+    let topState = null, topSpend = 0;
+    Object.entries(_spendByState).forEach(([k, v]) => {
+      if (!k.startsWith('_') && v.total_spend > topSpend) { topState = k; topSpend = v.total_spend; }
+    });
+    if (topState) {
+      const st = STATES.find(s => s.abbr === topState);
+      lines.push(`<div class="change-line"><div class="change-dot" style="background:var(--amber)"></div><strong>${st ? st.name : topState}</strong> leads with $${fmtCompact(topSpend)} in ad spend</div>`);
+    }
+
+    // Total filings
+    const totalFilings = Object.values(_spendByState).filter(v => typeof v === 'object' && v.filing_count).reduce((s, v) => s + v.filing_count, 0);
+    if (totalFilings > 0) {
+      lines.push(`<div class="change-line"><div class="change-dot" style="background:var(--green)"></div><strong>${totalFilings.toLocaleString()}</strong> FCC filings tracked this cycle</div>`);
+    }
+  }
+
+  // Window changes
+  const openNow = STATES.filter(s => s.status === 'window-open').length;
+  const soonCount = STATES.filter(s => s.status === 'window-soon').length;
+  if (openNow > 0) {
+    lines.push(`<div class="change-line"><div class="change-dot" style="background:var(--red)"></div><strong>${openNow}</strong> FCC windows open now${soonCount > 0 ? ` · ${soonCount} opening soon` : ''}</div>`);
+  }
+
+  if (lines.length > 0) {
+    banner.innerHTML = `<div class="change-banner">${lines.join('')}</div>`;
+  }
+
+  // Update last visit timestamp
+  localStorage.setItem('pw_last_visit', now);
+}
+
+// Async: fetch spend data and refresh insight panel + change banner
+(async function() {
+  try {
+    await loadSpendByState();
+    updateInsightPanel();
+    updateChangeBanner();
+  } catch (e) { /* silent */ }
+})();
 
 updateKPIStats();
 </script>
