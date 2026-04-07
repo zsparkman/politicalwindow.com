@@ -360,7 +360,10 @@
   /* Candidates */
   .cand-race-block { margin-bottom:0.6rem; }
   .cand-race-label { font-family:var(--mono); font-size:0.54rem; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; border:1px solid; display:inline-block; margin-bottom:0.3rem; }
-  .cand-row { display:flex; align-items:center; gap:0.4rem; padding:5px 7px; border-radius:4px; background:#F8FAFC; margin-bottom:2px; }
+  .cand-row { display:flex; align-items:center; gap:0.4rem; padding:5px 7px; border-radius:4px; background:#F8FAFC; margin-bottom:2px; flex-wrap:wrap; }
+  .cand-finance { display:flex; gap:0.6rem; width:100%; padding:2px 0 0 11px; }
+  .cand-finance-item { font-family:var(--mono); font-size:0.5rem; color:var(--text-faint); }
+  .cand-finance-item strong { color:var(--text-muted); font-weight:600; }
   .pdot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
   .cname { font-family:var(--sans); font-size:0.72rem; font-weight:500; color:var(--text); flex:1; min-width:0; }
   .cnote { font-size:0.57rem; color:var(--text-faint); display:block; }
@@ -834,9 +837,11 @@
               General: <span style="color:var(--blue)">Nov 3, 2026</span><br>
               FCC Gen Window: <span style="color:var(--blue)">Sep 4, 2026</span>
             </div>
-            <div class="map-layer-toggles" style="display:flex;gap:4px">
+            <div class="map-layer-toggles" style="display:flex;gap:4px;flex-wrap:wrap">
               <button class="filter-btn active" data-layer="window" onclick="setMapLayer('window')">Window Timing</button>
               <button class="filter-btn" data-layer="density" onclick="setMapLayer('density')">Candidate Density</button>
+              <button class="filter-btn" data-layer="spend" onclick="setMapLayer('spend')">Total Spend</button>
+              <button class="filter-btn" data-layer="cash" onclick="setMapLayer('cash')">Cash on Hand</button>
             </div>
           </div>
         </div>
@@ -1450,8 +1455,50 @@ function wireMapInteractions() {
     const candsLine = stateCands > 0 ? `<br><span style="color:var(--text)">Candidates: <strong>${stateCands}</strong></span>` : '';
     const racesLine = races ? `<br><span style="font-size:0.56rem;color:var(--text-muted)">${races}</span>` : '';
 
-    tooltip.innerHTML = `<strong style="font-size:0.68rem">${s.name}</strong> <span style="font-size:0.54rem;color:var(--text-faint)">${abbr}</span><br>${statusLabel}<br>Primary: ${primary} · FCC: ${fccOpen}${daysStr ? '<br>' + daysStr : ''}${candsLine}${racesLine}`;
-    tooltip.style.borderLeftColor = STATUS_COLORS[s.status] || 'var(--blue)';
+    // Layer-specific tooltip content
+    let tooltipExtra = '';
+    let borderColor = STATUS_COLORS[s.status] || 'var(--blue)';
+
+    if (currentMapLayer === 'spend' && _spendByState && _spendByState[abbr]) {
+      const sp = _spendByState[abbr];
+      tooltipExtra = `<br><span style="color:#EA580C;font-weight:600">$${fmtCompact(sp.total_spend)}</span> <span style="color:var(--text-muted)">total ad spend</span>`;
+      if (sp.filing_count) tooltipExtra += `<br><span style="font-size:0.54rem;color:var(--text-muted)">${sp.filing_count} filings</span>`;
+      // Per-candidate spend breakdown
+      if (_spendByState['_detail_' + abbr]) {
+        tooltipExtra += '<br><span style="font-size:0.5rem;color:var(--text-faint);letter-spacing:0.04em">BY CANDIDATE</span>';
+        _spendByState['_detail_' + abbr].slice(0, 8).forEach(c => {
+          tooltipExtra += `<br><span style="font-size:0.54rem"><span style="color:var(--text)">${c.name}</span> <span style="color:#EA580C;font-weight:600">$${fmtCompact(c.spend)}</span></span>`;
+        });
+      }
+      borderColor = '#EA580C';
+    } else if (currentMapLayer === 'spend') {
+      tooltipExtra = `<br><span style="color:var(--text-faint)">No ad spend data</span>`;
+      borderColor = '#EA580C';
+    }
+
+    if (currentMapLayer === 'cash' && _cashByState && _cashByState[abbr]) {
+      const ch = _cashByState[abbr];
+      tooltipExtra = `<br><span style="color:#059669;font-weight:600">$${fmtCompact(ch.cash_on_hand)}</span> <span style="color:var(--text-muted)">cash on hand</span>`;
+      if (ch.total_disbursements) tooltipExtra += `<br><span style="font-size:0.54rem;color:var(--text-muted)">$${fmtCompact(ch.total_disbursements)} disbursed</span>`;
+      // Show per-candidate breakdown
+      if (_cashByState['_detail_' + abbr]) {
+        tooltipExtra += '<br><span style="font-size:0.5rem;color:var(--text-faint);letter-spacing:0.04em">BY CANDIDATE</span>';
+        _cashByState['_detail_' + abbr].forEach(c => {
+          tooltipExtra += `<br><span style="font-size:0.54rem"><span style="color:var(--text)">${c.name}</span> <span style="color:#059669;font-weight:600">$${fmtCompact(c.cash)}</span></span>`;
+        });
+      }
+      borderColor = '#059669';
+    } else if (currentMapLayer === 'cash') {
+      tooltipExtra = `<br><span style="color:var(--text-faint)">No FEC data</span>`;
+      borderColor = '#059669';
+    }
+
+    if (currentMapLayer === 'window' || currentMapLayer === 'density') {
+      tooltip.innerHTML = `<strong style="font-size:0.68rem">${s.name}</strong> <span style="font-size:0.54rem;color:var(--text-faint)">${abbr}</span><br>${statusLabel}<br>Primary: ${primary} · FCC: ${fccOpen}${daysStr ? '<br>' + daysStr : ''}${candsLine}${racesLine}`;
+    } else {
+      tooltip.innerHTML = `<strong style="font-size:0.68rem">${s.name}</strong> <span style="font-size:0.54rem;color:var(--text-faint)">${abbr}</span>${tooltipExtra}`;
+    }
+    tooltip.style.borderLeftColor = borderColor;
     tooltip.style.display = 'block';
 
     const rect = document.getElementById('mapContainer').getBoundingClientRect();
@@ -1478,31 +1525,141 @@ function wireMapInteractions() {
   });
 }
 
-// ── MAP: Layer toggle (Window Timing vs Candidate Density) ───────────────────
+// ── MAP: Layer toggle ────────────────────────────────────────────────────────
 let currentMapLayer = 'window';
-function setMapLayer(layer) {
+let _spendByState = null;   // { abbr: { total_spend, filing_count } }
+let _cashByState = null;    // { abbr: { cash_on_hand, total_disbursements } }
+let _spendLoading = false;
+let _cashLoading = false;
+
+async function loadSpendByState() {
+  if (_spendByState || _spendLoading) return _spendByState;
+  _spendLoading = true;
+  try {
+    const resp = await fetch(`${RATES_API}/api/candidates/tracker`);
+    if (!resp.ok) { _spendLoading = false; return null; }
+    const json = await resp.json();
+    const map = {};
+    (json.data || []).forEach(e => {
+      const st = e.state;
+      if (!st) return;
+      if (!map[st]) map[st] = { total_spend: 0, filing_count: 0 };
+      const spend = Number(e.total_spend) || 0;
+      map[st].total_spend += spend;
+      map[st].filing_count += Number(e.filing_count) || 0;
+      // Store per-candidate detail for tooltip
+      if (spend > 0) {
+        const dk = '_detail_' + st;
+        if (!map[dk]) map[dk] = [];
+        map[dk].push({ name: e.candidate_name, spend: spend });
+        map[dk].sort((a, b) => b.spend - a.spend);
+      }
+    });
+    _spendByState = map;
+  } catch (e) { console.warn('[Map] spend load error:', e.message); }
+  _spendLoading = false;
+  return _spendByState;
+}
+
+async function loadCashByState() {
+  if (_cashByState || _cashLoading) return _cashByState;
+  _cashLoading = true;
+  try {
+    const resp = await fetch(`${RATES_API}/api/candidates/tracker`);
+    if (!resp.ok) { _cashLoading = false; return null; }
+    const json = await resp.json();
+    const entities = (json.data || []).filter(e => e.fec_candidate_id);
+    const token = localStorage.getItem('pw_token');
+    const authHdr = token ? { 'Authorization': 'Bearer ' + token } : {};
+    const map = {};
+    // Batch: fetch FEC data for entities with FEC IDs (limit to avoid hammering)
+    const toFetch = entities.slice(0, 50);
+    await Promise.all(toFetch.map(async e => {
+      try {
+        const r = await fetch(`${RATES_API}/api/candidates/tracker/${e.political_entity_id}/fec`, { headers: authHdr });
+        if (!r.ok) return;
+        const j = await r.json();
+        if (!j.data) return;
+        const st = e.state;
+        if (!st) return;
+        if (!map[st]) map[st] = { cash_on_hand: 0, total_disbursements: 0, candidates: 0 };
+        const coh = Number(j.data.cash_on_hand) || 0;
+        map[st].cash_on_hand += coh;
+        map[st].total_disbursements += Number(j.data.total_disbursements) || 0;
+        map[st].candidates++;
+        // Store per-candidate detail for tooltip
+        if (coh > 0) {
+          const dk = '_detail_' + st;
+          if (!map[dk]) map[dk] = [];
+          map[dk].push({ name: e.candidate_name, cash: coh });
+          map[dk].sort((a, b) => b.cash - a.cash);
+        }
+      } catch (e) { /* silent */ }
+    }));
+    _cashByState = map;
+  } catch (e) { console.warn('[Map] cash load error:', e.message); }
+  _cashLoading = false;
+  return _cashByState;
+}
+
+function buildHeatmapColors(dataMap, valueKey, colorStops) {
+  const values = Object.values(dataMap).map(d => d[valueKey] || 0).filter(v => v > 0);
+  if (!values.length) return null;
+  const maxVal = Math.max(...values);
+  const colors = {};
+  STATES.forEach(s => {
+    const val = dataMap[s.abbr] ? (dataMap[s.abbr][valueKey] || 0) : 0;
+    if (val === 0) { colors[s.abbr] = '#E2E8F0'; return; }
+    const ratio = val / maxVal;
+    if (ratio > 0.6) colors[s.abbr] = colorStops[0];
+    else if (ratio > 0.25) colors[s.abbr] = colorStops[1];
+    else if (ratio > 0.08) colors[s.abbr] = colorStops[2];
+    else colors[s.abbr] = colorStops[3];
+  });
+  return colors;
+}
+
+function applyHeatmapToMap(colors) {
+  const matchExpr = ['match', ['get', 'abbr']];
+  STATES.forEach(s => { matchExpr.push(s.abbr, colors[s.abbr] || '#E2E8F0'); });
+  matchExpr.push('#E2E8F0');
+  glMap.setPaintProperty('states-fill', 'fill-color', matchExpr);
+}
+
+async function setMapLayer(layer) {
   currentMapLayer = layer;
   document.querySelectorAll('.map-layer-toggles .filter-btn').forEach(b => b.classList.toggle('active', b.dataset.layer === layer));
   if (!glMap || !statesGeoJSON) return;
 
   if (layer === 'density') {
-    // Color states by candidate count
     const maxCands = Math.max(1, ...STATES.map(s => s.cands.reduce((a, rc) => a + rc.list.length, 0)));
-    const densityColors = {};
+    const colors = {};
     STATES.forEach(s => {
       const c = s.cands.reduce((a, rc) => a + rc.list.length, 0);
       const ratio = c / maxCands;
-      if (c === 0) densityColors[s.abbr] = '#E2E8F0';
-      else if (ratio > 0.6) densityColors[s.abbr] = '#1D4ED8';
-      else if (ratio > 0.3) densityColors[s.abbr] = '#3B82F6';
-      else densityColors[s.abbr] = '#93C5FD';
+      if (c === 0) colors[s.abbr] = '#E2E8F0';
+      else if (ratio > 0.6) colors[s.abbr] = '#1D4ED8';
+      else if (ratio > 0.3) colors[s.abbr] = '#3B82F6';
+      else colors[s.abbr] = '#93C5FD';
     });
-    const matchExpr = ['match', ['get', 'abbr']];
-    STATES.forEach(s => { matchExpr.push(s.abbr, densityColors[s.abbr] || '#E2E8F0'); });
-    matchExpr.push('#E2E8F0');
-    glMap.setPaintProperty('states-fill', 'fill-color', matchExpr);
+    applyHeatmapToMap(colors);
+
+  } else if (layer === 'spend') {
+    // Orange monochrome heatmap — total ad spend per state
+    const data = await loadSpendByState();
+    if (!data) return;
+    const colors = buildHeatmapColors(data, 'total_spend', ['#C2410C', '#EA580C', '#FB923C', '#FED7AA']);
+    if (colors) applyHeatmapToMap(colors);
+
+  } else if (layer === 'cash') {
+    // Green monochrome heatmap — total cash on hand per state (federal candidates)
+    const data = await loadCashByState();
+    if (!data) return;
+    const colors = buildHeatmapColors(data, 'cash_on_hand', ['#065F46', '#059669', '#34D399', '#A7F3D0']);
+    if (colors) applyHeatmapToMap(colors);
+
   } else {
-    // Restore status-based coloring
+    // Window timing — restore status-based coloring
     glMap.setPaintProperty('states-fill', 'fill-color', ['match', ['get', 'status'],
       'window-open',  STATUS_COLORS['window-open'],
       'window-soon',  STATUS_COLORS['window-soon'],
@@ -1817,10 +1974,12 @@ function buildDetailHTML(abbr) {
       rc.list.forEach(c => {
         const pc = PC[c.p] || 'var(--slate)';
         const badge = c.s === 'inc' ? `<span class="cbadge cbadge-inc">INCUMBENT</span>` : `<span class="cbadge cbadge-dec">DECLARED</span>`;
-        candHTML += `<div class="cand-row">
+        const safeN = c.n.replace(/'/g, '&#39;');
+        candHTML += `<div class="cand-row" data-cand-name="${safeN}" data-cand-state="${abbr}">
           <div class="pdot" style="background:${pc}"></div>
           <div class="cname">${c.n}${c.note ? `<span class="cnote">${c.note}</span>` : ''}</div>
-          <span class="cparty" style="color:${pc}">${c.p}</span>${badge}</div>`;
+          <span class="cparty" style="color:${pc}">${c.p}</span>${badge}
+          <div class="cand-finance" data-finance-for="${safeN}"></div></div>`;
       });
       candHTML += `</div>`;
     });
@@ -1922,6 +2081,87 @@ function wireDetailTabs(container) {
   });
 }
 
+// ── CANDIDATE FINANCE ENRICHMENT ──────────────────────────────────────────────
+// Fetches spend + FEC data from candidate tracker API and injects into detail panel
+const _financeCache = {};
+async function enrichCandidateFinance(abbr, container) {
+  try {
+    // Fetch all entities for this state from the tracker API (public, no auth needed)
+    const cacheKey = abbr;
+    if (!_financeCache[cacheKey]) {
+      const resp = await fetch(`${RATES_API}/api/candidates/tracker?state=${abbr}`);
+      if (!resp.ok) return;
+      const json = await resp.json();
+      _financeCache[cacheKey] = json.data || [];
+    }
+    const entities = _financeCache[cacheKey];
+    if (!entities.length) return;
+
+    // Also fetch FEC data for entities that have FEC IDs
+    const token = localStorage.getItem('pw_token');
+    const authHdr = token ? { 'Authorization': 'Bearer ' + token } : {};
+
+    // Build a name→entity lookup (lowercase last name for fuzzy matching)
+    const entityMap = {};
+    entities.forEach(e => {
+      if (!e.candidate_name) return;
+      entityMap[e.candidate_name.toLowerCase()] = e;
+      // Also index by last name for fuzzy match
+      const parts = e.candidate_name.trim().split(/\s+/);
+      if (parts.length > 1) entityMap[parts[parts.length - 1].toLowerCase()] = e;
+    });
+
+    // Find all candidate rows in the container
+    const rows = container.querySelectorAll('.cand-row[data-cand-name]');
+    for (const row of rows) {
+      const name = row.dataset.candName;
+      if (!name) continue;
+      const nameLower = name.toLowerCase();
+
+      // Try exact match, then last name match
+      let entity = entityMap[nameLower];
+      if (!entity) {
+        const parts = name.trim().split(/\s+/);
+        if (parts.length > 1) entity = entityMap[parts[parts.length - 1].toLowerCase()];
+      }
+
+      const financeEl = row.querySelector('.cand-finance');
+      if (!financeEl) continue;
+
+      if (entity && Number(entity.total_spend) > 0) {
+        let html = `<span class="cand-finance-item">Ad Spend: <strong style="color:var(--green)">$${fmtCompact(entity.total_spend)}</strong></span>`;
+
+        // Try to get FEC cash on hand if entity has FEC ID
+        if (entity.fec_candidate_id && token) {
+          try {
+            const fecResp = await fetch(`${RATES_API}/api/candidates/tracker/${entity.political_entity_id}/fec`, { headers: authHdr });
+            if (fecResp.ok) {
+              const fecJson = await fecResp.json();
+              if (fecJson.data && fecJson.data.cash_on_hand) {
+                html += `<span class="cand-finance-item">Cash: <strong>$${fmtCompact(fecJson.data.cash_on_hand)}</strong></span>`;
+              }
+              if (fecJson.data && fecJson.data.total_disbursements) {
+                html += `<span class="cand-finance-item">Spent: <strong style="color:var(--red)">$${fmtCompact(fecJson.data.total_disbursements)}</strong></span>`;
+              }
+            }
+          } catch (e) { /* silent */ }
+        }
+        financeEl.innerHTML = html;
+      }
+    }
+  } catch (err) {
+    console.warn('[Finance] enrichment error:', err.message);
+  }
+}
+
+function fmtCompact(n) {
+  n = Number(n);
+  if (isNaN(n) || n === 0) return '0';
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(0) + 'K';
+  return n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+
 // ── PICK (select state) ────────────────────────────────────────────────────────
 let sel = null;
 
@@ -1950,12 +2190,14 @@ function pick(abbr) {
 
   if (isMobile()) {
     openDrawer(abbr);
+    enrichCandidateFinance(abbr, document.getElementById('drawerContent'));
   } else {
     const p = document.getElementById('detailPanel');
     p.innerHTML = buildDetailHTML(abbr);
     wireDetailTabs(p);
     p.scrollTop = 0;
     checkDetailScroll();
+    enrichCandidateFinance(abbr, p);
   }
   // Filter table to selected state — no page scroll
   drawTable();
