@@ -256,7 +256,7 @@
   .map-inset .maplibregl-ctrl-attrib { display:none !important; }
   .map-inset .maplibregl-ctrl { display:none !important; }
   .map-inset-label { position:absolute; bottom:2px; right:4px; font-family:var(--mono); font-size:0.5rem; color:#1E293B; text-shadow:0 0 4px rgba(255,255,255,0.8); z-index:2; pointer-events:none; letter-spacing:0.05em; font-weight:600; }
-  #insetAK { width:calc(175px * var(--inset-scale)); height:calc(120px * var(--inset-scale)); bottom:6px; left:6px; }
+  #insetAK { width:calc(175px * var(--inset-scale)); height:calc(144px * var(--inset-scale)); bottom:6px; left:6px; }
   #insetHI { width:calc(100px * var(--inset-scale)); height:calc(70px * var(--inset-scale)); bottom:6px; left:calc(12px + 175px * var(--inset-scale)); }
   .map-tooltip {
     position:absolute; pointer-events:none; background:rgba(255,255,255,0.96); backdrop-filter:blur(8px);
@@ -1899,16 +1899,17 @@ function createInsetMaps() {
 
   if (akFeature) {
     const akGeo = { type: 'FeatureCollection', features: [akFeature] };
-    insetAK = createInsetMap('insetAK', [-153, 64], 1.2, akGeo, 'AK');
+    // Use bounds so the full AK shape (incl. Aleutians) fits regardless of container aspect ratio
+    insetAK = createInsetMap('insetAK', { bounds: [[-180, 51], [-129, 72]], fitBoundsOptions: { padding: 4, animate: false } }, akGeo, 'AK');
   }
 
   if (hiFeature) {
     const hiGeo = { type: 'FeatureCollection', features: [hiFeature] };
-    insetHI = createInsetMap('insetHI', [-157.5, 20.5], 2.5, hiGeo, 'HI');
+    insetHI = createInsetMap('insetHI', { center: [-157.5, 20.5], zoom: 2.5 }, hiGeo, 'HI');
   }
 }
 
-function createInsetMap(containerId, center, zoom, geoData, abbr) {
+function createInsetMap(containerId, viewOpts, geoData, abbr) {
   const s = SM[abbr];
   const status = s ? s.status : 'inactive';
   const color = STATUS_COLORS[status];
@@ -1916,10 +1917,9 @@ function createInsetMap(containerId, center, zoom, geoData, abbr) {
   const m = new maplibregl.Map({
     container: containerId,
     style: { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#DBEAFE' } }] },
-    center: center,
-    zoom: zoom,
     interactive: false,
-    attributionControl: false
+    attributionControl: false,
+    ...viewOpts
   });
 
   m.on('load', () => {
