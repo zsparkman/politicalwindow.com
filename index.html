@@ -1204,6 +1204,12 @@ let statesGeoJSON = null;
 let hoveredStateId = null;
 const DISTRICT_CACHE = {};
 
+// Contiguous USA bounding box — used to fit the map view on mobile where
+// the container is too short for the desktop default (center/zoom).
+const CONUS_BOUNDS = [[-125, 24], [-66, 50]];
+const NATIONAL_CENTER = [-96, 38.5];
+const NATIONAL_ZOOM = 3.1;
+
 async function initMap() {
   if (typeof maplibregl === 'undefined') {
     document.getElementById('mapContainer').style.display = 'none';
@@ -1232,11 +1238,9 @@ async function initMap() {
     // Allow layout to settle before initializing MapLibre
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-    glMap = new maplibregl.Map({
+    const glMapOpts = {
       container: 'mapContainer',
       style: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
-      center: [-96, 38.5],
-      zoom: 3.1,
       minZoom: 2,
       maxZoom: 12,
       maxBounds: [[-180, 10], [-50, 75]],
@@ -1244,7 +1248,16 @@ async function initMap() {
       touchZoomRotate: true,
       pitchWithRotate: false,
       attributionControl: false
-    });
+    };
+    if (isMobile()) {
+      // Mobile: fit the contiguous USA so the whole lower 48 is visible within the shorter container
+      glMapOpts.bounds = CONUS_BOUNDS;
+      glMapOpts.fitBoundsOptions = { padding: 8, animate: false };
+    } else {
+      glMapOpts.center = NATIONAL_CENTER;
+      glMapOpts.zoom = NATIONAL_ZOOM;
+    }
+    glMap = new maplibregl.Map(glMapOpts);
 
     glMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     glMap.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
@@ -1773,7 +1786,11 @@ function mapDeselectState() {
   document.getElementById('backToUSA').style.display = 'none';
 
   // Smooth ease back to national view (easeTo avoids flyTo's zoom arc)
-  glMap.easeTo({ center: [-96, 38.5], zoom: 3.1, duration: 1000 });
+  if (isMobile()) {
+    glMap.fitBounds(CONUS_BOUNDS, { padding: 8, duration: 1000 });
+  } else {
+    glMap.easeTo({ center: NATIONAL_CENTER, zoom: NATIONAL_ZOOM, duration: 1000 });
+  }
 
   // After animation completes, clean up layers and re-apply filter
   glMap.once('moveend', () => {
@@ -2261,6 +2278,13 @@ function closeDrawer() {
   document.getElementById('mobileDrawer').classList.remove('open');
   document.getElementById('drawerOverlay').classList.remove('open');
   document.body.style.overflow = '';
+  // Clear state selection so the full card list + national map view are restored
+  if (sel || stateFilter) {
+    sel = null;
+    stateFilter = null;
+    drawTable();
+    mapDeselectState();
+  }
 }
 document.getElementById('drawerClose').addEventListener('click', closeDrawer);
 document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
