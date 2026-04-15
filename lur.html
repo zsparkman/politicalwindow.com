@@ -282,6 +282,39 @@ var TOKEN=localStorage.getItem('pw_token');
 function authFetch(url,opts){var o=opts||{};o.headers=Object.assign({},o.headers,{'Authorization':'Bearer '+(TOKEN||'')});return fetch(url,o);}
 
 var ALL_DATA=[];
+// ── Cable PSID → retail brand display ───────────────────────────────────────
+// Rows from /api/lur, /api/lur-violations, /api/lur-monitor, /api/lur-campaign
+// and /api/lines all carry station_display when the backend resolves the
+// callsign/PSID via station_display_name(). Fall back to the raw code so
+// broadcast stations (KTLA, KXAS) render unchanged.
+var STATION_DISPLAY={};
+function stationLabel(r){
+  if(!r)return'';
+  if(r.station_display)return r.station_display;
+  var code=r.station||r.callsign||'';
+  return STATION_DISPLAY[code]||code;
+}
+function stationLabelFromCode(code){
+  if(!code)return'';
+  return STATION_DISPLAY[code]||code;
+}
+(function loadStationDisplay(){
+  try{
+    fetch(API+'/api/cable-systems?limit=500')
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(j){
+        if(!j||!j.data)return;
+        j.data.forEach(function(cs){
+          if(!cs.psid)return;
+          if(cs.station_display){STATION_DISPLAY[cs.psid]=cs.station_display;return;}
+          var brand=cs.display_brand||cs.operator_name||'';
+          var dma=cs.dma?cs.dma.toLowerCase().replace(/\b\w/g,function(c){return c.toUpperCase();}):'';
+          if(brand&&dma)STATION_DISPLAY[cs.psid]=brand+' ('+dma+')';
+          else if(brand)STATION_DISPLAY[cs.psid]=brand;
+        });
+      }).catch(function(){});
+  }catch(e){}
+})();
 
 // ── Window date logic (same as rates.html) ──
 var GENERAL_WINDOW={open:new Date('2026-09-04'),close:new Date('2026-11-03')};
@@ -369,7 +402,7 @@ function renderMatchups(rows){
   var slots={},slotOrder=[];
   rows.forEach(function(r){
     var k=(r.station||'')+'|||'+(r.description||'')+'|||'+(r.time_period||'')+'|||'+(r.week_of||'');
-    if(!slots[k]){slots[k]={station:r.station,description:r.description,time_period:r.time_period,week_of:r.week_of,state:r.state,rows:[]};slotOrder.push(k);}
+    if(!slots[k]){slots[k]={station:r.station,station_display:r.station_display,description:r.description,time_period:r.time_period,week_of:r.week_of,state:r.state,rows:[]};slotOrder.push(k);}
     slots[k].rows.push(r);
   });
 
@@ -418,7 +451,7 @@ function renderMatchups(rows){
 
     var groupIdx=i;
     html+='<tr><td colspan="13" class="matchup-slot-hdr">'
-      +esc(s.station||'\u2014')+' \u00B7 '+esc(s.description||'\u2014')+' \u00B7 '+esc(s.time_period||'\u2014')+' \u00B7 WK '+esc(fmtWeek(s.week_of))
+      +esc(stationLabel(s)||'\u2014')+' \u00B7 '+esc(s.description||'\u2014')+' \u00B7 '+esc(s.time_period||'\u2014')+' \u00B7 WK '+esc(fmtWeek(s.week_of))
       +winBadge
       +' <span style="color:#94A3B8">('+new Set(s.rows.map(function(r){return r.candidate||r.advertiser||'\u2014';})).size+' buyers)</span>'
       +'<button class="inv-review-btn" data-group-idx="'+groupIdx+'" title="Review invoices">&#10530;</button>'
@@ -438,7 +471,7 @@ function renderMatchups(rows){
       html+='<tr class="'+(isHighlighted?'highlight-row':'')+'">'
         +'<td class="'+pc(r.party)+'">'+esc(cand)+lurTag+overPct+'</td>'
         +'<td class="'+pc(r.party)+'">'+esc(r.party||'\u2014')+'</td>'
-        +'<td class="c-amber">'+esc(r.station||'\u2014')+'</td>'
+        +'<td class="c-amber">'+esc(stationLabel(r)||'\u2014')+'</td>'
         +'<td class="c-muted">'+esc(r.description||'\u2014')+'</td>'
         +'<td class="c-muted">'+esc(r.time_period||'\u2014')+'</td>'
         +'<td>'+fmtWeek(r.week_of)+'</td>'
@@ -529,15 +562,15 @@ function loadData(){
 
 function buildDropdowns(){
   var data=ALL_DATA;
-  function pop(id,vals){
+  function pop(id,vals,fmt){
     var el=document.getElementById(id),first=el.options[0],cur=el.value;
     el.innerHTML='';el.appendChild(first);
-    vals.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o);});
+    vals.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=fmt?fmt(v):v;el.appendChild(o);});
     if(cur!=='ALL'){for(var i=0;i<el.options.length;i++){if(el.options[i].value===cur){el.value=cur;break;}}}
   }
   pop('f-state',[...new Set(data.map(function(r){return r.state;}).filter(Boolean))].sort());
   pop('f-dma',[...new Set(data.map(function(r){return r.dma;}).filter(Boolean))].sort());
-  pop('f-station',[...new Set(data.map(function(r){return r.station;}).filter(Boolean))].sort());
+  pop('f-station',[...new Set(data.map(function(r){return r.station;}).filter(Boolean))].sort(),stationLabelFromCode);
   pop('f-rateclass',[...new Set(data.map(function(r){return r.rate_class;}).filter(Boolean))].sort());
 }
 
@@ -586,15 +619,15 @@ function loadFilters(){
   authFetch(API+'/api/lines/filters')
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(j){
-      function pop(id,vals){
+      function pop(id,vals,fmt){
         var el=document.getElementById(id),first=el.options[0],cur=el.value;
         el.innerHTML='';el.appendChild(first);
-        vals.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o);});
+        vals.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=fmt?fmt(v):v;el.appendChild(o);});
         if(cur!=='ALL'){for(var i=0;i<el.options.length;i++){if(el.options[i].value===cur){el.value=cur;break;}}}
       }
       if(j.states&&j.states.length)pop('f-state',j.states);
       if(j.dmas&&j.dmas.length)pop('f-dma',j.dmas);
-      if(j.stations&&j.stations.length)pop('f-station',j.stations);
+      if(j.stations&&j.stations.length)pop('f-station',j.stations,stationLabelFromCode);
       if(j.dayparts&&j.dayparts.length)pop('f-daypart',j.dayparts);
       if(j.rate_classes&&j.rate_classes.length)pop('f-rateclass',j.rate_classes);
       // Also populate candidates from filters
@@ -659,7 +692,7 @@ function openInvoiceReview(group){
   var winStatus=getWeekWindowStatus(group.state,group.week_of);
 
   // Top bar
-  var topHtml=esc(group.station)+' &middot; '+esc(group.description)+' &middot; WK '+esc(fmtWeek(group.week_of));
+  var topHtml=esc(stationLabel(group))+' &middot; '+esc(group.description)+' &middot; WK '+esc(fmtWeek(group.week_of));
   if(winStatus&&winStatus!=='OOW') topHtml+=' <span class="inv-badge inv-badge-win">'+winStatus+'</span>';
   var uniqueBuyers=new Set(sorted.map(function(r){return r.candidate||r.advertiser||'\u2014';})).size;
   topHtml+=' <span class="inv-badge inv-badge-var">'+uniqueBuyers+' BUYERS &middot; +'+variancePct+'% VARIANCE</span>';

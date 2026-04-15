@@ -379,6 +379,41 @@ var RATES_TOKEN=localStorage.getItem('pw_token');
 function authFetch(url,opts){var o=opts||{};o.headers=Object.assign({},o.headers,{'Authorization':'Bearer '+(RATES_TOKEN||'')});return fetch(url,o);}
 var ALL_DATA=[],SERVER_STATS={},currentView='date',currentSort='spend';
 var rawSort={col:'start_date',dir:'desc'};
+// ── Cable PSID → retail brand display ───────────────────────────────────────
+// Cable rows return the PSID as callsign (e.g. "003777"); the backend
+// resolves it to a friendly label via station_display_name(). Broadcast
+// rows (KTLA, KXAS) pass through unchanged.
+var STATION_DISPLAY={};
+function stationLabel(r){
+  if(!r)return'';
+  if(r.station_display)return r.station_display;
+  var code=r.callsign||r.station||'';
+  return STATION_DISPLAY[code]||code;
+}
+function stationLabelFromCode(code){
+  if(!code)return'';
+  return STATION_DISPLAY[code]||code;
+}
+(function loadStationDisplay(){
+  // Best-effort prefetch of PSID → display label map so station labels are
+  // friendly even on pages that consume endpoints that don't return
+  // station_display directly. Failure is silent — raw codes still render.
+  try{
+    fetch(API+'/api/cable-systems?limit=500')
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(j){
+        if(!j||!j.data)return;
+        j.data.forEach(function(cs){
+          if(!cs.psid)return;
+          if(cs.station_display){STATION_DISPLAY[cs.psid]=cs.station_display;return;}
+          var brand=cs.display_brand||cs.operator_name||'';
+          var dma=cs.dma?cs.dma.toLowerCase().replace(/\b\w/g,function(c){return c.toUpperCase();}):'';
+          if(brand&&dma)STATION_DISPLAY[cs.psid]=brand+' ('+dma+')';
+          else if(brand)STATION_DISPLAY[cs.psid]=brand;
+        });
+      }).catch(function(){});
+  }catch(e){}
+})();
 
 function fmt$(n){if(!n&&n!==0)return'\u2014';var v=parseFloat(n);if(isNaN(v))return'\u2014';if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';if(v>=1000)return'$'+(v/1000).toFixed(0)+'K';return'$'+v.toFixed(0);}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -405,7 +440,7 @@ function getFiltered(){
     if(dma!=='ALL'&&r.dma_name!==dma)return false;
     if(station!=='ALL'&&r.callsign!==station)return false;
     if(win!=='ALL'){if(win==='IN'){if(r.window_status!=='General'&&r.window_status!=='Primary')return false;}else{if(r.window_status!==win)return false;}}
-    if(search){var s=search;if(!(  (r.candidate||'').toLowerCase().includes(s)||(r.advertiser||'').toLowerCase().includes(s)||(r.callsign||'').toLowerCase().includes(s)||(r.dma_name||'').toLowerCase().includes(s)||(r.state||'').toLowerCase().includes(s)||(r.party||'').toLowerCase().includes(s)||(r.office_type||'').toLowerCase().includes(s)||(r.order_number||'').toLowerCase().includes(s)||(r.window_status||'').toLowerCase().includes(s)))return false;}
+    if(search){var s=search;if(!(  (r.candidate||'').toLowerCase().includes(s)||(r.advertiser||'').toLowerCase().includes(s)||(r.callsign||'').toLowerCase().includes(s)||(stationLabel(r)||'').toLowerCase().includes(s)||(r.dma_name||'').toLowerCase().includes(s)||(r.state||'').toLowerCase().includes(s)||(r.party||'').toLowerCase().includes(s)||(r.office_type||'').toLowerCase().includes(s)||(r.order_number||'').toLowerCase().includes(s)||(r.window_status||'').toLowerCase().includes(s)))return false;}
     return true;
   });
 }
@@ -442,7 +477,9 @@ function buildGroups(rows){
   var map={};
   rows.forEach(function(r){
     var k=currentView==='date'?uploadDateKey(r.upload_date):currentView==='candidate'?candKey(r):currentView==='dma'?(r.dma_name||'Unknown'):(r.callsign||'Unknown');
-    var label=currentView==='date'?fmtUploadDate(r.upload_date):k;
+    // Station-view label resolves PSIDs to friendly brand+DMA display; all
+    // other views use the raw group key as the label.
+    var label=currentView==='date'?fmtUploadDate(r.upload_date):currentView==='station'?(stationLabel(r)||k):k;
     if(!map[k])map[k]={label:label,sortKey:k,contracts:0,spend:0,parties:new Set(),states:new Set(),dmas:new Set(),stations:new Set(),candidates:new Set(),rows:[],maxContract:0,topContributor:null,topContributorSpend:0};
     map[k].contracts++;var gt=parseFloat(r.gross_total)||0;map[k].spend+=gt;
     if(gt>map[k].maxContract)map[k].maxContract=gt;
@@ -472,7 +509,7 @@ function detailRow(r){
     '<td class="c-muted">'+esc(r.office_type||'\u2014')+'</td>'+
     '<td class="c-blue">'+esc(r.state||'\u2014')+'</td>'+
     '<td class="c-muted" title="'+esc(r.dma_name||'')+'">'+esc(r.dma_name||'\u2014')+'</td>'+
-    '<td class="c-amber">'+esc(r.callsign||'\u2014')+'</td>'+
+    '<td class="c-amber">'+esc(stationLabel(r)||'\u2014')+'</td>'+
     '<td class="c-muted">'+esc(r.order_number||'\u2014')+'</td>'+
     '<td class="c-muted">'+esc(fmtDates(r))+'</td>'+
     '<td class="c-muted">'+fmtUploadDateShort(r.upload_date)+'</td>'+
@@ -599,9 +636,17 @@ authFetch(API+'/api/rates?limit=5000')
     var dmas=Array.from(new Set(ALL_DATA.map(function(r){return r.dma_name;}).filter(Boolean))).sort();
     var dmaEl=document.getElementById('f-dma');
     dmas.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;dmaEl.appendChild(o);});
-    var stations=Array.from(new Set(ALL_DATA.map(function(r){return r.callsign;}).filter(Boolean))).sort();
+    // Capture station_display per callsign as we index, so PSID rows show
+    // their retail-brand label in the filter dropdown while the option value
+    // stays the raw code (filter compare at getFiltered() checks r.callsign).
+    var stationSet={};
+    ALL_DATA.forEach(function(r){
+      if(!r.callsign)return;
+      if(!stationSet[r.callsign])stationSet[r.callsign]=stationLabel(r)||r.callsign;
+    });
+    var stations=Object.keys(stationSet).sort(function(a,b){return stationSet[a].localeCompare(stationSet[b]);});
     var stationEl=document.getElementById('f-station');
-    stations.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;stationEl.appendChild(o);});
+    stations.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=stationSet[v];stationEl.appendChild(o);});
     // Apply ?q= search param from global search bar
     var qParam=new URLSearchParams(window.location.search).get('q');
     if(qParam){document.getElementById('f-search').value=qParam;}

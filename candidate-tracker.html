@@ -626,7 +626,7 @@ async function loadFilingsData(id) {
     if (filings.length > 0) {
       filings.forEach(function(f) {
         html += '<div class="filing-item">' +
-          '<span class="filing-station">' + (f.station_call_sign || f.psid || '\u2014') + '</span>' +
+          '<span class="filing-station">' + (f.station_display || f.station_call_sign || f.psid || '\u2014') + '</span>' +
           '<span class="filing-dates">' + fmtShortDate(f.flight_start) + ' \u2013 ' + fmtShortDate(f.flight_end) + '</span>' +
           '<span class="filing-amount">' + fmtMoney(f.gross_amount) + '</span>' +
         '</div>';

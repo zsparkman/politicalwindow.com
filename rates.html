@@ -541,6 +541,40 @@ var API='https://rates.politicalwindow.com';
 var RATES_TOKEN=localStorage.getItem('pw_token');
 function authFetch(url,opts){var o=opts||{};o.headers=Object.assign({},o.headers,{'Authorization':'Bearer '+(RATES_TOKEN||'')});return fetch(url,o);}
 var ALL_DATA=[];
+// Cable PSID → friendly display label ("Spectrum (Los Angeles)", etc.)
+// Loaded once on page init from /api/cable-systems. Used by stationLabel()
+// for cases where an API response only carries the raw station/psid code
+// (dropdowns, post-load derivations). API /api/lines responses already
+// include station_display per row via station_display_name() SQL func.
+var STATION_DISPLAY={};
+function stationLabel(row){
+  if(!row)return'';
+  if(row.station_display)return row.station_display;
+  var code=row.station||row.callsign||'';
+  return STATION_DISPLAY[code]||code;
+}
+function stationLabelFromCode(code){
+  if(!code)return'';
+  return STATION_DISPLAY[code]||code;
+}
+(function loadStationDisplay(){
+  fetch(API+'/api/cable-systems?limit=500')
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(j){
+      if(!j||!j.data)return;
+      j.data.forEach(function(cs){
+        if(!cs.psid)return;
+        // Prefer server-side station_display; otherwise build client-side
+        // from display_brand + DMA (title-cased). This lets the friendly
+        // label render even when the deployed API predates station_display.
+        if(cs.station_display){STATION_DISPLAY[cs.psid]=cs.station_display;return;}
+        var brand=cs.display_brand||cs.operator_name||'';
+        var dma=cs.dma?cs.dma.toLowerCase().replace(/\b\w/g,function(c){return c.toUpperCase();}):'';
+        if(brand&&dma)STATION_DISPLAY[cs.psid]=brand+' ('+dma+')';
+        else if(brand)STATION_DISPLAY[cs.psid]=brand;
+      });
+    }).catch(function(){});
+})();
 var currentView='pivot';
 var pivotGroupBy='candidate';
 var pivotSortBy='spend';
@@ -638,6 +672,7 @@ function getFiltered(){
       return(r.candidate||'').toLowerCase().includes(search)||
              (r.advertiser||'').toLowerCase().includes(search)||
              (r.station||'').toLowerCase().includes(search)||
+             (r.station_display||'').toLowerCase().includes(search)||
              (r.description||'').toLowerCase().includes(search)||
              (r.buyer||'').toLowerCase().includes(search)||
              (r.salesperson||'').toLowerCase().includes(search);
@@ -662,7 +697,10 @@ function buildPivot(rows){
   var map={};
   rows.forEach(function(r){
     var raw=r[key]||'Unknown';
-    if(!map[raw])map[raw]={label:raw,spend:0,units:0,lines:0,rates:[],orders:new Set(),rows:[],parties:new Set()};
+    // When grouping by station, show the friendly label (Spectrum (Los Angeles))
+    // while keying internally by the raw station/PSID so aggregation stays stable.
+    var label=(key==='station'&&r.station_display)?r.station_display:raw;
+    if(!map[raw])map[raw]={label:label,spend:0,units:0,lines:0,rates:[],orders:new Set(),rows:[],parties:new Set()};
     var g=map[raw];
     g.spend+=parseFloat(r.line_total)||0;
     g.units+=parseInt(r.units)||0;
@@ -696,7 +734,7 @@ function renderPivotTable(groups){
     var isPinned=pinSet.has(g.label);
     var subRows=g.rows.slice(0,cap).map(function(r){
       return'<tr>'+
-        '<td class="c-amber">'+esc(r.station||'\u2014')+'</td>'+
+        '<td class="c-amber">'+esc(stationLabel(r)||'\u2014')+'</td>'+
         '<td class="c-muted">'+esc(r.dma||'\u2014')+'</td>'+
         '<td>'+esc(r.description||'\u2014')+'</td>'+
         '<td class="c-muted">'+esc(r.daypart||'\u2014')+'</td>'+
@@ -1241,7 +1279,7 @@ function renderMatchups(rows){
   var slots={},slotOrder=[];
   rows.forEach(function(r){
     var k=(r.station||'')+'|||'+(r.description||'')+'|||'+(r.time_period||'')+'|||'+(r.week_of||'');
-    if(!slots[k]){slots[k]={station:r.station,description:r.description,time_period:r.time_period,week_of:r.week_of,rows:[]};slotOrder.push(k);}
+    if(!slots[k]){slots[k]={station:r.station,station_display:r.station_display,description:r.description,time_period:r.time_period,week_of:r.week_of,rows:[]};slotOrder.push(k);}
     slots[k].rows.push(r);
   });
   // Keep only slots with 2+ distinct candidates/advertisers paying different rates
@@ -1269,7 +1307,7 @@ function renderMatchups(rows){
   for(var i=0;i<cap;i++){
     var s=matchups[i];
     html+='<tr><td colspan="11" class="matchup-slot-hdr">'
-      +esc(s.station||'\u2014')+' \u00B7 '+esc(s.description||'\u2014')+' \u00B7 '+esc(s.time_period||'\u2014')+' \u00B7 WK '+esc(fmtWeek(s.week_of))
+      +esc(stationLabel(s)||'\u2014')+' \u00B7 '+esc(s.description||'\u2014')+' \u00B7 '+esc(s.time_period||'\u2014')+' \u00B7 WK '+esc(fmtWeek(s.week_of))
       +' <span style="color:#94A3B8">('+s.rows.length+' buyers)</span></td></tr>';
     s.rows.sort(function(a,b){var ar=parseFloat(a.rate)||0,br=parseFloat(b.rate)||0;return br-ar;});
     s.rows.forEach(function(r){
@@ -1277,7 +1315,7 @@ function renderMatchups(rows){
       html+='<tr>'
         +'<td class="'+pc(r.party)+'">'+esc(cand)+'</td>'
         +'<td class="'+pc(r.party)+'">'+esc(r.party||'\u2014')+'</td>'
-        +'<td class="c-amber">'+esc(r.station||'\u2014')+'</td>'
+        +'<td class="c-amber">'+esc(stationLabel(r)||'\u2014')+'</td>'
         +'<td class="c-muted">'+esc(r.description||'\u2014')+'</td>'
         +'<td class="c-muted">'+esc(r.time_period||'\u2014')+'</td>'
         +'<td>'+fmtWeek(r.week_of)+'</td>'
@@ -1515,7 +1553,7 @@ function loadFilters(){
       if(j.states&&j.states.length)pop('f-state',j.states);
       if(j.offices&&j.offices.length)pop('f-office',j.offices);
       if(j.dmas&&j.dmas.length)pop('f-dma',j.dmas);
-      if(j.stations&&j.stations.length)pop('f-station',j.stations);
+      if(j.stations&&j.stations.length)pop('f-station',j.stations,stationLabelFromCode);
       if(j.dayparts&&j.dayparts.length)pop('f-daypart',j.dayparts);
     }).catch(function(e){console.warn('Failed to load filter options:',e.message);});
 }

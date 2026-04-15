@@ -76,7 +76,7 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 | `groupByPartySorted(list)` | Groups candidates by party + sorts each by spend desc |
 | `lookupCuratedMeta(abbr,name)` | Gets incumbent/note from CANDS by name (fuzzy last-name) |
 | `getDistrictGlowColor(abbr)` | Picks glow color from current overlay: heatmap cache if set, else STATUS_COLORS for the state |
-| `highlightActiveDistricts(abbr)` | Adds/updates bright fill + faint outer halo (2 layers) on active CDs; colors track the active map overlay |
+| `highlightActiveDistricts(abbr)` | Adds/updates bright fill + faint outer halo + crisp hover border (3 layers) on active CDs; colors track the active map overlay, hover delta matches the state-fill hover treatment |
 | `highlightSelectedDistrict(abbr,cd)` | Adds blue fill to selected CD + fits bounds |
 | `clearCandDistrictHighlight()` | Removes active glow layers + selected fill |
 | `applyCandMapHighlight(abbr)` | Reapplies highlights after districts load/reload |
@@ -115,6 +115,42 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 3. Do not add localStorage, sessionStorage, cookies, or any client-side persistence
 4. Both mobile drawer and desktop panel must render any new UI sections added
 5. Do not change API_BASE or RATES_API values
+
+## Station display convention (cable PSID → retail brand)
+Cable systems are ingested by ratewindow-api against their FCC PSID
+(a numeric string like `003777`), not a broadcast callsign. To keep the
+UI human-readable, every page that renders a station column uses the
+same three-piece pattern (see `rates.html`, `public-file.html`,
+`lur.html`, `explorer.html`; also `candidate-tracker.html` for a
+simplified inline version):
+
+1. **`stationLabel(row)`** — preferred on every render site. Returns
+   `row.station_display` when the backend provided it (all the relevant
+   ratewindow-api endpoints now select
+   `station_display_name(...) AS station_display`), otherwise falls back
+   to the PSID → label map (`STATION_DISPLAY`) populated from
+   `/api/cable-systems`, and finally to the raw `row.callsign` /
+   `row.station`. Broadcast callsigns (`KTLA`, `KXAS`, `WPVI`) pass
+   through unchanged.
+2. **`stationLabelFromCode(code)`** — same lookup without a row,
+   used for dropdown option labels (where only the callsign is known).
+3. **`STATION_DISPLAY` map + `loadStationDisplay()` IIFE** — runs at
+   page load, calls `/api/cable-systems?limit=500`, and populates the
+   map. If the deployed API hasn't yet returned a `station_display`
+   field, the loader builds it client-side from `display_brand + dma`
+   (title-cased) so the rollout works independently of Railway deploy
+   timing.
+
+**Filter-dropdown convention:** the option's `value` stays the raw
+callsign/PSID (so the existing filter compare keeps matching), while
+the option's `textContent` uses `stationLabelFromCode(v)`. Don't change
+the field function in `updateOptionStates` — it intentionally returns
+the raw code so the dropdown value and the filter field agree.
+
+**Display format:** `"<Brand> (<DMA>)"` — e.g. `Spectrum (Los Angeles)`,
+`Comcast (Houston)`. This was Option B from the 2026-04-15 rollout;
+multiple PSIDs in the same DMA intentionally collapse to the same
+label. Comcast uses its legal name, not Xfinity.
 
 ## Current State (Apr 2026)
 - Rate Intel section live for TX and CA tiles
@@ -193,8 +229,8 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
   KPIs, and the ✓ COMPLETE chip):
   - `--status-open:     #991B1B` (window-open / runoff-window)
   - `--status-soon:     #B45309` (window-soon / runoff-upcoming)
-  - `--status-upcoming: #6D28D9` (refined violet)
-  - `--status-general:  #1E3A8A` (deep navy)
+  - `--status-upcoming: #1D4ED8` (unified blue — see "Upcoming + General Only merge" below)
+  - `--status-general:  #1D4ED8` (same unified blue; var name retained so status-line branches compile)
   - `--status-none:     #94A3B8` (slate)
   `STATUS_COLORS`, `WC`, `SL`, `SPILL`, map-tooltip `statusLabel`, insights
   `statusDot`, `.tile-*`, `.dot-*` legend dots, and the new
@@ -202,6 +238,26 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
   these vars. The governor pill (`.tag-governor` / `.slicer-governor` /
   `.spill-purple`) stays on its own `#7C3AED` — "Governor" is a race type,
   not a window-timing status.
+- **Upcoming + General Only merged into single "Upcoming" category (4/15).**
+  After iterating on the `--status-upcoming` hue (violet → teal → blue), the
+  user requested the two primary-complete-but-waiting phases be visually
+  collapsed into one category called "Upcoming" in unified blue `#1D4ED8`.
+  Both `--status-upcoming` and `--status-general` CSS vars now point at the
+  same blue (the vars are retained so internal status-value branches still
+  compile). Both `STATUS_COLORS['upcoming']` and `STATUS_COLORS['general-only']`
+  also resolve to `#1D4ED8`, so the map fill/border match expressions,
+  `WC`, and `statusDot` insights all render the same color for either
+  status. User-facing labels were also unified: `SL` shows `○ UPCOMING` for
+  both statuses, the hover tooltip `statusLabel` reads `UPCOMING`, the
+  `SPILL` map reads `○ UPCOMING` for both, and the state-detail status
+  line for post-primary states reads `✓ PRIMARY COMPLETE · UPCOMING`. The
+  legend row for "General Only" was removed entirely — only the single
+  "Upcoming" (`dot-purple`) row remains. `SO` sort now gives both statuses
+  rank 2 (inactive shifted from 4→3). The internal `general-only` status
+  value is still produced by `classifyStatus` for states past their primary
+  date and is still consumed by `isPrimaryComplete()` + the `✓ COMPLETE`
+  spill-green chip rendering — that chip is a functional completion
+  indicator and deliberately stays green (not blue).
 - Candidate tracker page sorts by `total_spend` DESC by default (matches above)
 - **Back to Map button (Follow-up #2)** is now absolutely positioned inside
   `#mapContainer` in the top-left corner (previously inline in

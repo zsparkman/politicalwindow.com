@@ -271,6 +271,39 @@ function toggleSidebar() {
 }
 
 var API='https://rates.politicalwindow.com',ALL_DATA=[],currentView='advertiser',currentSort='spend',groupIndexMap={};
+// ── Cable PSID → retail brand display ───────────────────────────────────────
+// Resolves FCC PSIDs (cable systems) to friendly brand labels like
+// "Spectrum (Los Angeles)". Broadcast callsigns (KTLA, KXAS) fall through
+// unchanged. Rows from /api/rates carry station_display directly; the
+// prefetched STATION_DISPLAY map is a safety net for codes that don't.
+var STATION_DISPLAY={};
+function stationLabel(r){
+  if(!r)return'';
+  if(r.station_display)return r.station_display;
+  var code=r.callsign||r.station||'';
+  return STATION_DISPLAY[code]||code;
+}
+function stationLabelFromCode(code){
+  if(!code)return'';
+  return STATION_DISPLAY[code]||code;
+}
+(function loadStationDisplay(){
+  try{
+    fetch(API+'/api/cable-systems?limit=500')
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(j){
+        if(!j||!j.data)return;
+        j.data.forEach(function(cs){
+          if(!cs.psid)return;
+          if(cs.station_display){STATION_DISPLAY[cs.psid]=cs.station_display;return;}
+          var brand=cs.display_brand||cs.operator_name||'';
+          var dma=cs.dma?cs.dma.toLowerCase().replace(/\b\w/g,function(c){return c.toUpperCase();}):'';
+          if(brand&&dma)STATION_DISPLAY[cs.psid]=brand+' ('+dma+')';
+          else if(brand)STATION_DISPLAY[cs.psid]=brand;
+        });
+      }).catch(function(){});
+  }catch(e){}
+})();
 function fmt$(n){if(!n&&n!==0)return'--';var v=parseFloat(n);if(isNaN(v))return'--';if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';if(v>=1000)return'$'+(v/1000).toFixed(0)+'K';return'$'+v.toFixed(0);}
 function fmtR(n){return n?'$'+parseFloat(n).toLocaleString():'--';}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -284,7 +317,7 @@ function getFiltered(){
     if(state!=='ALL'&&r.state!==state)return false;
     if(dma!=='ALL'&&r.dma_name!==dma)return false;
     if(adv!=='ALL'&&r.advertiser!==adv)return false;
-    if(search)return(r.advertiser||'').toLowerCase().includes(search)||(r.callsign||'').toLowerCase().includes(search)||(r.dma_name||'').toLowerCase().includes(search)||(r.candidate_name||'').toLowerCase().includes(search);
+    if(search)return(r.advertiser||'').toLowerCase().includes(search)||(r.callsign||'').toLowerCase().includes(search)||(stationLabel(r)||'').toLowerCase().includes(search)||(r.dma_name||'').toLowerCase().includes(search)||(r.candidate_name||'').toLowerCase().includes(search);
     return true;
   });
 }
@@ -299,7 +332,10 @@ function buildGroups(rows){
   var key=currentView==='advertiser'?'advertiser':currentView==='dma'?'dma_name':'callsign',map={};
   rows.forEach(function(r){
     var k=r[key]||'Unknown';
-    if(!map[k])map[k]={label:k,contracts:0,spend:0,rates:[],parties:new Set(),states:new Set(),dmas:new Set(),stations:new Set(),rows:[]};
+    // Station-view group label uses friendly brand+DMA label (when known);
+    // other views use the raw key as the label.
+    var label=(currentView==='station')?(stationLabel(r)||k):k;
+    if(!map[k])map[k]={label:label,contracts:0,spend:0,rates:[],parties:new Set(),states:new Set(),dmas:new Set(),stations:new Set(),rows:[]};
     map[k].contracts++;map[k].spend+=parseFloat(r.gross_total)||0;
     if(r.unit_rate)map[k].rates.push(parseFloat(r.unit_rate));
     if(r.party)map[k].parties.add(r.party);if(r.state)map[k].states.add(r.state);if(r.dma_name)map[k].dmas.add(r.dma_name);if(r.callsign)map[k].stations.add(r.callsign);
@@ -320,7 +356,7 @@ function renderGrouped(groups){
     if(currentView==='station'){[...g.states].sort().forEach(function(s){pills+=pill(s,'#2B6CB0','rgba(43,108,176,0.06)');});}
     var detailRows=g.rows.map(function(r){
       var fccLink=r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:var(--blue);font-size:0.56rem">PDF &#8599;</a>':'--';
-      return'<tr><td class="'+pc(r.party)+'" style="max-width:160px;overflow:hidden;text-overflow:ellipsis">'+esc(r.advertiser||r.candidate_name||'--')+'</td><td class="'+pc(r.party)+'">'+esc(r.party||'--')+'</td><td style="color:#2B6CB0">'+esc(r.state||'--')+'</td><td style="color:var(--amber)">'+esc(r.callsign||'--')+'</td><td class="c-muted">'+esc(r.dma_name||'--')+'</td><td class="c-muted">'+(r.start_date?r.start_date.slice(5,10):'--')+(r.end_date?'\u2192'+r.end_date.slice(5,10):'')+'</td><td class="c-bright">'+fmtR(r.unit_rate)+'</td><td class="c-muted" style="text-align:right">'+(r.spots_count||'--')+'</td><td class="c-green">'+fmt$(r.gross_total)+'</td><td class="c-muted">'+esc(r.office_type||'--')+'</td><td>'+fccLink+'</td></tr>';
+      return'<tr><td class="'+pc(r.party)+'" style="max-width:160px;overflow:hidden;text-overflow:ellipsis">'+esc(r.advertiser||r.candidate_name||'--')+'</td><td class="'+pc(r.party)+'">'+esc(r.party||'--')+'</td><td style="color:#2B6CB0">'+esc(r.state||'--')+'</td><td style="color:var(--amber)">'+esc(stationLabel(r)||'--')+'</td><td class="c-muted">'+esc(r.dma_name||'--')+'</td><td class="c-muted">'+(r.start_date?r.start_date.slice(5,10):'--')+(r.end_date?'\u2192'+r.end_date.slice(5,10):'')+'</td><td class="c-bright">'+fmtR(r.unit_rate)+'</td><td class="c-muted" style="text-align:right">'+(r.spots_count||'--')+'</td><td class="c-green">'+fmt$(r.gross_total)+'</td><td class="c-muted">'+esc(r.office_type||'--')+'</td><td>'+fccLink+'</td></tr>';
     }).join('');
     return'<div class="group-row"><div class="group-main" onclick="toggleDetail('+i+')"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div class="g-bar" style="background:'+barColor+'"></div><div style="min-width:0"><div class="g-name">'+esc(g.label)+'</div><div class="g-pills">'+pills+'</div></div></div><div class="g-num"><div class="g-num-val">'+g.contracts+'</div><div class="g-num-lbl">CONTRACTS</div></div><div class="g-num"><div class="g-num-val g-spend">'+fmt$(g.spend)+'</div><div class="g-num-lbl">GROSS SPEND</div></div><div class="g-num"><div class="g-num-val g-rate">'+(avgRate?fmtR(avgRate):'--')+'</div><div class="g-num-lbl">AVG RATE</div></div><div class="g-arrow" id="arrow-'+i+'">&#9660;</div></div><div class="detail-wrap" id="detail-'+i+'"><div class="detail-title">CONTRACT DETAIL \u2014 '+g.rows.length+' RECORDS</div><table><thead><tr><th>ADVERTISER</th><th>PARTY</th><th>STATE</th><th>STATION</th><th>DMA</th><th>DATES</th><th>RATE</th><th>SPOTS</th><th>TOTAL</th><th>OFFICE</th><th>DOC</th></tr></thead><tbody>'+detailRows+'</tbody></table></div></div>';
   }).join('');
@@ -329,7 +365,7 @@ function renderRaw(rows){
   document.getElementById('raw-header').textContent=rows.length+' RECORDS';
   document.getElementById('raw-body').innerHTML=rows.map(function(r){
     var fccLink=r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:var(--blue);font-size:0.56rem">PDF &#8599;</a>':'--';
-    return'<tr><td class="'+pc(r.party)+'" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">'+esc(r.advertiser||r.candidate_name||'--')+'</td><td class="'+pc(r.party)+'">'+esc(r.party||'--')+'</td><td style="color:#2B6CB0">'+esc(r.state||'--')+'</td><td class="c-muted">'+esc(r.office_type||'--')+'</td><td style="color:var(--amber)">'+esc(r.callsign||'--')+'</td><td class="c-muted">'+esc(r.dma_name||'--')+'</td><td class="c-muted">'+(r.start_date?r.start_date.slice(0,10):'--')+'</td><td class="c-muted">'+(r.end_date?r.end_date.slice(0,10):'--')+'</td><td class="c-bright" style="text-align:right">'+fmtR(r.unit_rate)+'</td><td class="c-muted" style="text-align:right">'+(r.spots_count||'--')+'</td><td class="c-green">'+fmt$(r.gross_total)+'</td><td class="c-muted">'+esc(r.agency_name||'--')+'</td><td>'+fccLink+'</td></tr>';
+    return'<tr><td class="'+pc(r.party)+'" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">'+esc(r.advertiser||r.candidate_name||'--')+'</td><td class="'+pc(r.party)+'">'+esc(r.party||'--')+'</td><td style="color:#2B6CB0">'+esc(r.state||'--')+'</td><td class="c-muted">'+esc(r.office_type||'--')+'</td><td style="color:var(--amber)">'+esc(stationLabel(r)||'--')+'</td><td class="c-muted">'+esc(r.dma_name||'--')+'</td><td class="c-muted">'+(r.start_date?r.start_date.slice(0,10):'--')+'</td><td class="c-muted">'+(r.end_date?r.end_date.slice(0,10):'--')+'</td><td class="c-bright" style="text-align:right">'+fmtR(r.unit_rate)+'</td><td class="c-muted" style="text-align:right">'+(r.spots_count||'--')+'</td><td class="c-green">'+fmt$(r.gross_total)+'</td><td class="c-muted">'+esc(r.agency_name||'--')+'</td><td>'+fccLink+'</td></tr>';
   }).join('');
 }
 function render(){

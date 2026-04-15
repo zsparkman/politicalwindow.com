@@ -4,6 +4,342 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-04-15 — Merge "General Only" + "Upcoming" into single blue category
+
+**Spec.** User request: *"let's just combine 'General Only' and 'Upcoming'
+into one category called 'Upcoming' and make all of those states blue."*
+
+**Context.** Earlier the same day, `--status-upcoming` had been swapped
+from violet `#6D28D9` → teal `#0F766E` after the violet collided with the
+governor pill hue. User then asked whether teal was the most balanced
+choice; the honest answer was no — teal compressed the cool half of the
+palette against navy (`--status-general: #1E3A8A`) and slate
+(`--status-none: #94A3B8`), and it broke the warming ramp of
+red→amber→(cool). Rather than iterate on a third hue, the user decided
+to collapse the two primary-complete-but-waiting phases into one visual
+category and pick blue.
+
+**Semantic vs. visual collapse.** The internal `general-only` status
+value is still produced by `classifyStatus()` (line ~1271) for states
+whose primary date is past, and it's still consumed by:
+
+- `isPrimaryComplete()` — drives whether the Candidates tab shows
+  post-primary nominees vs. in-primary top-3
+- The `✓ COMPLETE` spill-green chip on the state table/cards — a
+  functional indicator that stays green, independent of the status hue
+
+So the status value stays bifurcated in JS. What unifies is the *color*
+and the *label* that the user sees.
+
+**Changes (all in `index.html`).**
+
+1. **CSS variables** (lines 47–48). Both `--status-upcoming` and
+   `--status-general` now resolve to `#1D4ED8` (the same hex as the
+   generic `--blue`). The `--status-general` var name is retained so
+   the ~30 call sites referencing it keep compiling.
+2. **Tile backgrounds** (lines 333–334). `.tile-upcoming` and
+   `.tile-general-only` backgrounds both set to `rgba(29,78,216,0.10)`.
+3. **Status spills** (lines 539–540). `.spill-status-upcoming` and
+   `.spill-status-general` backgrounds and borders both set to
+   `rgba(29,78,216,0.08)` / `rgba(29,78,216,0.22)`.
+4. **Legend** (line 938). Removed the `General Only` legend row
+   entirely; only the unified `Upcoming` (`dot-purple`) row remains.
+   The `.dot-green` CSS rule at line 240 is now unused by the legend —
+   left in place since it resolves via `--status-general` and could
+   still be referenced elsewhere in the future.
+5. **STATUS_COLORS JS** (lines 1327, 1330). Both `'upcoming'` and
+   `'general-only'` entries now resolve to `#1D4ED8`. This drives
+   the MapLibre state-fill match expression, so every state in either
+   phase paints the same blue on the map.
+6. **Hover tooltip label** (line 1611). `'general-only'` status label
+   changed from `GENERAL ONLY` to `UPCOMING`.
+7. **SL (state-detail status line)** (lines 2301, 2303). `'upcoming'`
+   shortened from `○ PRIMARY UPCOMING` to `○ UPCOMING`; `'general-only'`
+   changed from `◇ GENERAL WINDOW ONLY` to `○ UPCOMING`. Same glyph,
+   same label — visually indistinguishable.
+8. **State detail post-primary override** (line 3042). The override
+   branch that shows `✓ PRIMARY COMPLETE · GENERAL WINDOW` for
+   general-only states with a primary date now reads `✓ PRIMARY
+   COMPLETE · UPCOMING`.
+9. **SO sort function** (line 3256). Previously ranked
+   `upcoming:2, general-only:3, inactive:4` (inactive shifted); now
+   ranks both at 2, with `inactive` moving from 4 → 3. The table's
+   sort order no longer distinguishes the two visually-merged phases.
+10. **SPILL map** (line 3267). `'general-only'` spill changed from
+    `◇ GEN ONLY` to `○ UPCOMING` (still using `spill-status-general`
+    class, which now shares the same blue paint as `spill-status-upcoming`).
+
+**What deliberately did NOT change.**
+
+- `classifyStatus()` still emits `'general-only'` as a distinct value.
+- `isPrimaryComplete()` still branches on `'general-only'`.
+- The `✓ COMPLETE` spill-green chip rendering on the state table
+  (lines 3331, 3369) still uses the generic `.spill-green` class with
+  the generic `--green`. That chip indicates primary completion
+  regardless of map overlay and is functionally separate from the
+  window-timing palette.
+- `WC` (line 2310) still maps `'general-only' → 'var(--status-general)'`
+  — it works because both vars now point at the same blue.
+- `statusDot` in the insight panel (line 3654) similarly resolves via
+  the shared var.
+- The `.dot-purple` class name (line 239) is now slightly misleading
+  (it paints blue) but is left as-is to avoid churning every
+  `legend-dot dot-purple` call site for a cosmetic rename.
+
+**Verification checklist.**
+
+- [ ] Grep for `GEN ONLY`, `GENERAL ONLY`, `GENERAL WINDOW ONLY`,
+  `PRIMARY UPCOMING` — should return zero label hits in `index.html`
+  (the `general-only` status *value* should still appear).
+- [ ] Load the map and visually confirm CA/NY/NJ/etc. (upcoming) and
+  VA/NJ (general-only post-primary) all paint the same blue.
+- [ ] Click a post-primary state and verify the detail header reads
+  `✓ PRIMARY COMPLETE · UPCOMING` in blue.
+- [ ] Verify the table column status shows `○ UPCOMING` for both
+  phases (unless primary is complete, in which case `✓ COMPLETE`
+  green chip still overrides).
+- [ ] Legend bar shows 4 items instead of 5: Window Open, Opens <30d,
+  Upcoming, None.
+
+---
+
+## 2026-04-15 — Congressional district hover matches state hover
+
+**Spec:** user asked for the hover effect on active congressional districts
+to visually match the hover effect on states in the full-map view. The
+state hover had a distinctive three-piece "tighten up" feel the district
+hover was missing.
+
+**Analysis.** Before this pass, state hover (in `addStatesLayer`) had three
+coordinated paint-expression deltas:
+
+1. **Fill opacity**: 0.45 → 0.6 on `feature-state.hover`
+2. **Outer blurred glow**: `line-width` 0 → 4, `line-blur` 4,
+   `line-opacity` 0 → 0.35 — colored via the same `STATUS_COLORS` match
+   the fill uses
+3. **Crisp border snap**: `line-color` `rgba(148,163,184,0.5)` → `#64748B`,
+   `line-width` 0.6 → 1.5, `line-opacity` 1
+
+Active-district hover (in `highlightActiveDistricts`) had only pieces 1
+and 2, with the following mismatch:
+
+- Fill hover opacity was 0.72 (vs state's 0.6)
+- Glow was wider + softer: `line-width` 5 → 8, `line-blur` 8,
+  `line-opacity` 0.28 → 0.45
+- **No crisp border snap at all** — only the always-on dashed
+  `districts-line` base layer
+
+The missing border snap was the biggest piece. State hover reads as
+"tight and interactive" because of that crisp slate-500 outline
+appearing out of nowhere; the district hover just brightened and felt
+soft by comparison.
+
+**Change.** `highlightActiveDistricts(abbr)` is now a three-layer
+treatment. The baseline (what active districts look like *before* hover)
+intentionally stays visible — this is the signal that a district has an
+active race — but the hover *delta* on every piece now matches the state
+hover exactly:
+
+- **`districts-active-fill`** — hover opacity pulled from 0.72 to 0.6
+  so it snaps to the same value state-fill does on hover. Baseline
+  stays 0.55 (brighter than the state baseline of 0.45, because active
+  districts should read as lit before hover).
+- **`districts-active-glow-outer`** — tightened to match the state
+  glow's dimensions: `line-blur` 8 → 4, `line-width` 5/8 → 2/4,
+  `line-opacity` 0.28/0.45 → 0.20/0.35. Baseline keeps a restrained
+  always-on glow so the district isn't invisible before hover, but the
+  on-hover value (4 / 0.35) is identical to the state glow's on-hover
+  value.
+- **`districts-active-border`** (NEW) — a third paint layer that
+  mirrors the `states-border` hover snap piece-for-piece. Invisible at
+  rest (`rgba(100,116,139,0)` at `line-width` 0), snaps to `#64748B` at
+  `line-width` 1.5 on `cand-hover`. Rendered on top of the glow and
+  filtered to the same active-district set, so the hover border
+  visually "tightens" the shape the same way state hover does.
+
+**Baseline vs delta (why both can match).** "Match the state hover" had
+two plausible readings: (a) make districts look identical to states
+even at rest, losing the always-lit signal; or (b) transplant the state
+hover *character* onto the district baseline while keeping active
+districts visible before hover. Went with (b). The hover-state values
+of all three paint expressions are now literally identical to the
+state hover values; only the rest-state of fill + glow stays elevated
+to preserve the designed activity signal.
+
+**Teardown.** `districts-active-border` is added to both `hideDistricts`
+and `clearCandDistrictHighlight` so state deselect / district fade-out
+properly remove the new layer alongside the other two.
+
+**No changes to event wiring.** The existing
+`mousemove`/`mouseleave`/click handlers on `districts-active-fill`
+still drive the `cand-hover` feature-state, which all three paint
+layers read from. The new border layer is filter-only; no new event
+listener needed.
+
+---
+
+## 2026-04-15 — Cable PSID → retail brand display across all pages
+
+**Spec:** user asked to (a) ingest all invoices for cable PSID `003777`
+(Charter/Spectrum Los Angeles — same operator as already-seeded `020452`)
+and (b) surface cable systems everywhere on the site with their retail
+brand (Spectrum, Comcast, Cox, etc.) instead of the raw FCC PSID number.
+
+**Display format.** User chose Option B: `"<Brand> (<DMA>)"`. Example:
+PSID `003777` now renders as `Spectrum (Los Angeles)`. Multiple PSIDs in
+the same DMA (all four LA Spectrum PSIDs: 020452 / 014104 / 008079 /
+003777) intentionally collapse to the same label — the user accepted this
+tradeoff. Comcast stays on its legal name (not Xfinity) per user choice.
+
+**Backend (ratewindow-api).**
+- `seed-cable-systems.js` — added PSID `003777` (Charter LA) and a
+  `display_brand` field on every row (`Charter Communications` →
+  `Spectrum`, `Comcast` → `Comcast`, `Cox Communications` → `Cox`). Both
+  the INSERT and `ON CONFLICT DO UPDATE` branches now propagate
+  `display_brand` so re-running is idempotent.
+- `migrate-cable-display.js` (NEW) — adds `cable_systems.display_brand`
+  column (idempotent via `ADD COLUMN IF NOT EXISTS`), backfills it via
+  `CASE operator_name ILIKE ...`, and creates a `station_display_name(p_callsign)`
+  SQL function (`LANGUAGE sql STABLE`) used by every endpoint that
+  returns a station/callsign column. The function accepts *any* callsign:
+  cable PSIDs resolve to `display_brand || ' (' || INITCAP(LOWER(dma)) || ')'`
+  while broadcast callsigns (KTLA, KXAS, WPVI) fall through `COALESCE` and
+  render as-is. One helper, one source of truth, no per-endpoint JOIN
+  boilerplate.
+- `index.js` — 10+ endpoints now SELECT `station_display_name(...) AS
+  station_display` alongside their existing callsign/station/psid column:
+  `/api/rates`, `/api/benchmarks`, `/api/lur`, `/api/invoices` (cable rows
+  use `COALESCE(station_call_sign, psid)` since cable rows have NULL in
+  the former), `/api/lines`, `/api/cable-systems` (also exposes
+  `display_brand`), `/api/lur-options`, `/api/lur-violations`,
+  `/api/lur-monitor`, `/api/lur-campaign`, `/api/lur-slots`,
+  `/api/entities/:id` (nested `invoices` array), and
+  `/api/candidates/tracker/:id/filings`.
+- Backfill: ran `backfill.js --source cable --psid 003777` on Railway —
+  24 files discovered across 4 folders (Villaraigosa Governor / Becerra
+  Governor / Steyer Governor / Cornachio Court of Appeals Judge),
+  18 parsed successfully, 6 failed on transient FCC 503s (the documented
+  ~3% failure rate). Re-run `reset-failed.js` then `backfill.js --source
+  cable --psid 003777` to retry the tail.
+
+**Frontend (this repo).** All five HTML pages that render a station
+column now use the same resolution pattern:
+
+1. **`stationLabel(row)`** — returns `row.station_display` if the backend
+   provided it, else falls back to the PSID → label map (`STATION_DISPLAY`)
+   built from `/api/cable-systems`, else returns the raw code. Broadcast
+   callsigns pass through unchanged.
+2. **`stationLabelFromCode(code)`** — same lookup without a row, used for
+   dropdown option labels where we only have the code.
+3. **`STATION_DISPLAY` map** — an IIFE fetches `/api/cable-systems?limit=500`
+   at page load and populates the map with `psid → station_display`. If
+   the deployed API doesn't yet return `station_display`, the loader
+   builds it client-side from `display_brand + dma` (title-cased) — so
+   the rollout works even during the moment the GitHub-Pages push is
+   already live but the Railway redeploy hasn't finished.
+
+Files touched (each in a matching place — `var ALL_DATA=[]` site for the
+helpers; detail-row / renderRaw / renderMatchups / dropdown population
+for the call sites):
+
+- `rates.html` — `stationLabel(r)` in the line-item `<td class="c-amber">`
+  cell, the `renderMatchups` slot header and row cell, the search filter,
+  and `buildPivot()` when the pivot key is `station`. Dropdown `pop()`
+  signature extended with an optional `fmt` callback; `f-station` uses
+  `stationLabelFromCode` so PSIDs display as their brand label while the
+  option value stays the raw code (filter compare at `getFiltered()`
+  continues to match `r.station`).
+- `public-file.html` — `stationLabel(r)` in `detailRow()` (which powers
+  both the grouped detail tables and the raw view), the `f-search`
+  text match, and the `station` view's `buildGroups()` label so each
+  station-grouped row shows the friendly name. The station dropdown now
+  derives its option text from `stationLabel` while keeping raw callsigns
+  as option values so the existing filter compare still matches. The
+  field function in `updateOptionStates` intentionally still returns raw
+  `r.callsign` — otherwise the option value would diverge from the filter
+  compare.
+- `lur.html` — `stationLabel` in `renderMatchups` (slot header carries
+  `station_display` forward into the `slots` map), the row cell, the
+  invoice-review modal top bar (`inv-topbar-left`), and both dropdown
+  `pop()` sites (the one in `buildDropdowns()` that runs against
+  `ALL_DATA`, plus the one in `loadFilters()` that runs against
+  `/api/lines/filters`).
+- `explorer.html` — `stationLabel` in the grouped detail row, the raw
+  view row, the search filter, and the `station` view's `buildGroups()`
+  group label.
+- `candidate-tracker.html` — the filings list now reads
+  `f.station_display || f.station_call_sign || f.psid || '—'` so cable
+  filings (where `station_call_sign IS NULL`) show the brand label while
+  broadcast filings continue to show the callsign.
+- `index.html` — **no edits needed**. The main SPA hits
+  `/api/candidates/tracker` for state detail panels, which returns
+  entity-spend rollups (not station rows), so no station string ever
+  reaches the rendering path.
+
+**Deploy order.** The migration + seed were run on Railway first (so
+`display_brand` exists before any endpoint selects it), then the
+`index.js` edits can be pushed at any time. The frontend loader's
+client-side fallback means `politicalwindow.com` pushes are also safe to
+deploy independently — there is no ordering constraint between the two
+repos once the DB migration is in place.
+
+**Verification.** `migrate-cable-display.js` ends with a spot-check
+SELECT that prints every cable system's resolved display name plus a
+broadcast-passthrough sanity check (`KTLA → KTLA`, `KXAS → KXAS`,
+`WPVI → WPVI`). Output confirmed on Railway:
+- `003777 → Spectrum (Los Angeles)`
+- `015288 → Comcast (San Francisco-Oak-San Jose)`
+- `020168 → Cox (San Diego)`
+- `016356 → Spectrum (Dallas-Ft. Worth)`
+- `016680 → Comcast (Houston)`
+- `013707 → Spectrum (Austin)`
+- broadcast passthrough: all three callsigns returned unchanged.
+
+---
+
+## 2026-04-15 — Window Timing: upcoming swapped from violet to teal
+
+**Spec:** user followed up on the Follow-up #2 palette fix — the refined
+violet (`#6D28D9`) assigned to `upcoming` states on the Window Timing overlay
+was still too purple. Replace it with a non-purple hue.
+
+**Change.** `--status-upcoming` is now `#0F766E` (teal-700). This cascades
+automatically through every status-timing surface because the earlier
+Follow-up #2 fix already decoupled the `--status-*` palette from the
+generic `--red`/`--amber`/`--blue`/`--green` vars:
+
+- `:root --status-upcoming` (line ~47): `#6D28D9` → `#0F766E`
+- `.tile-upcoming` tint (line ~333): `rgba(109,40,217,0.10)` →
+  `rgba(15,118,110,0.10)` — border + color still use the var
+- `.spill-status-upcoming` (line ~539): `rgba(109,40,217,0.08)` +
+  `rgba(109,40,217,0.22)` border → `rgba(15,118,110,0.08)` +
+  `rgba(15,118,110,0.22)`
+- `STATUS_COLORS.upcoming` JS (line ~1327): `#6D28D9` → `#0F766E`
+
+No change needed for `SL`, `WC`, `SPILL`, map tooltip `statusLabel`, or the
+insights `statusDot`, because each of those already referenced
+`var(--status-upcoming)` or the JS `STATUS_COLORS` map instead of a
+hardcoded hex. Same for `.dot-purple` (legend dot) — it reads from the CSS
+var so it recolors automatically with this single edit.
+
+**Not changed.**
+- `.ballot-measure-title` color (line ~560, `#6D28D9`) stays violet — it's
+  a ballot-measure accent, not a window-timing status.
+- `.spill-purple` (line ~530, `#7C3AED`) and `.tag-governor` /
+  `.slicer-governor` stay on the governor violet — "Governor" is a race
+  type, not a window-timing status, and the existing CLAUDE.md convention
+  keeps them on their own hue.
+- Generic `--red` / `--amber` / `--blue` / `--green` vars are untouched and
+  still back buttons, KPIs, and the ✓ COMPLETE chip.
+
+**Why teal.** The existing Window Timing palette is red (`--status-open`),
+amber (`--status-soon`), navy (`--status-general`), slate (`--status-none`).
+Teal fits between the warm (red/amber) and cool (navy/slate) halves without
+colliding with the governor violet, reads as professional on a dark
+basemap, and keeps clear separation from the other four phases at a glance.
+
+---
+
 ## 2026-04-15 — Follow-up #2 fixes (map click, overlay-matched glow, palette)
 
 **Spec:** user feedback on Follow-up #2 implementation — three issues:
