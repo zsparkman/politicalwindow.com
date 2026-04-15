@@ -76,7 +76,8 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 | `groupByPartySorted(list)` | Groups candidates by party + sorts each by spend desc |
 | `lookupCuratedMeta(abbr,name)` | Gets incumbent/note from CANDS by name (fuzzy last-name) |
 | `getDistrictGlowColor(abbr)` | Picks glow color from current overlay: heatmap cache if set, else STATUS_COLORS for the state |
-| `highlightActiveDistricts(abbr)` | Adds/updates bright fill + faint outer halo + crisp hover border (3 layers) on active CDs; colors track the active map overlay, hover delta matches the state-fill hover treatment |
+| `getHouseDistrictInfo(abbr,num)` | Returns `{incumbent, challengers, all}` for one CD, read from CANDS (FEC-sourced). Drives the district-hover tooltip; handles at-large states (AK/DE/ND/SD/VT/WY) by matching any district |
+| `highlightActiveDistricts(abbr)` | Adds/updates bright fill + faint outer halo + crisp hover border (3 layers) on active CDs; colors track the active map overlay, hover delta matches the state-fill hover treatment. **4/15: "active" now means every district in the loaded GeoJSON, not just tracker-backed — every House seat is up every 2 years** |
 | `highlightSelectedDistrict(abbr,cd)` | Adds blue fill to selected CD + fits bounds |
 | `clearCandDistrictHighlight()` | Removes active glow layers + selected fill |
 | `applyCandMapHighlight(abbr)` | Reapplies highlights after districts load/reload |
@@ -97,7 +98,7 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
   Each value now carries `pWindow`, `rWindow`, `dWin`, `dPrim`, `dRun`, `dRunW`, `status`.
   Possible status values: `window-open`, `window-soon`, `upcoming`,
   `runoff-window`, `runoff-upcoming`, `general-only`, `inactive`.
-- `CANDS` — curated candidates by state `{ TX: [{race, list:[{n,p,s,note}]}] }` — used for incumbent flag + notes + no-spend fallback
+- `CANDS` — candidates by state `{ TX: [{race, list:[{n,p,s,note,d}]}] }` — sourced from `/api/candidates` which is populated by the FEC scraper (daily cron) + curated manual rows. The `d` field holds the House district number (undefined for Senate/Governor); preserved 4/15 so `getHouseDistrictInfo` and `renderHouseOffice` can bucket per-CD without waiting on tracker-API enrichment.
 - `BALLOT` — ballot measures by state (loaded from API via `loadLiveData()`)
 - `POLLS` — polls by state → race (loaded from API via `loadLiveData()`)
 - `glMap` — MapLibre GL JS map instance (null if CDN failed)
@@ -221,17 +222,15 @@ label. Comcast uses its legal name, not Xfinity.
     a dedicated point-feature source (`districts-labels-src`) with one
     centroid per unique `district_number`, so Hawaii shows a single "1"/"2"
     label on the largest island instead of duplicating across every atoll.
-- **Window Timing palette refined (Follow-up #2, 4/15).** Replaced the
-  earlier saturated red/amber/violet/light-blue/slate ("box of crayons")
-  with a deeper Bloomberg-terminal-appropriate set. New CSS variables in
-  `:root` keep the status palette decoupled from the generic
-  `--red`/`--amber`/`--blue`/`--green` vars (which still back buttons,
-  KPIs, and the ✓ COMPLETE chip):
-  - `--status-open:     #991B1B` (window-open / runoff-window)
-  - `--status-soon:     #B45309` (window-soon / runoff-upcoming)
-  - `--status-upcoming: #1D4ED8` (unified blue — see "Upcoming + General Only merge" below)
-  - `--status-general:  #1D4ED8` (same unified blue; var name retained so status-line branches compile)
-  - `--status-none:     #94A3B8` (slate)
+- **Window Timing palette refined (Follow-up #2, 4/15) — two rounds of iteration.**
+  Started the day deep (red/amber/violet/navy/slate) to replace the earlier
+  "box of crayons" set, then bumped brightness by one step after user
+  feedback that the new set read as too dull. Current production values:
+  - `--status-open:     #B8221E` (window-open / runoff-window — bumped from #991B1B)
+  - `--status-soon:     #D1680F` (window-soon / runoff-upcoming — bumped from #B45309)
+  - `--status-upcoming: #2563EB` (unified blue — bumped from #1D4ED8; earlier same day merged "general-only" into this, see "Upcoming + General Only merge" below)
+  - `--status-general:  #2563EB` (same unified blue; var name retained so status-line branches compile)
+  - `--status-none:     #8B95A5` (inactive — slightly warmer slate, bumped from #94A3B8)
   `STATUS_COLORS`, `WC`, `SL`, `SPILL`, map-tooltip `statusLabel`, insights
   `statusDot`, `.tile-*`, `.dot-*` legend dots, and the new
   `.spill-status-open/soon/upcoming/general/none` classes all reference
@@ -266,3 +265,32 @@ label. Comcast uses its legal name, not Xfinity.
   shadow + backdrop blur so it stays legible over the dark basemap and any
   glowing district fills. `id="backToUSA"` unchanged; `mapSelectState` /
   `mapDeselectState` still toggle its `style.display`.
+- **House coverage = all 435 districts (4/15).** Every House seat is up
+  every 2 years, so every district should have a hover tooltip and show at
+  least an incumbent. Previously the frontend treated "active districts"
+  as the subset backed by tracker-API spend records — which hid ~60% of
+  districts because tracker data is sparse. Now:
+  - `highlightActiveDistricts(abbr)` builds its "active" set from the
+    full loaded GeoJSON (`DISTRICT_CACHE[abbr].features`) instead of
+    `getCandidatesFor(abbr, 'House')`. Every CD in the selected state
+    lights up on selection.
+  - `renderHouseOffice` now runs tracker entities through
+    `mergeCuratedIntoEntities('House', ...)` so the district list reflects
+    the full FEC-sourced candidate set, not just tracker-backed spend
+    rows. Districts with no tracker spend still appear with `no spend reported`.
+  - `mergeCuratedIntoEntities` now preserves the House district number
+    (was hardcoded `district: null`); reads `c.d` from CANDS and resolves
+    at-large states (`DISTRICT_COUNTS[abbr] === 1`) to `'AL'`.
+  - `loadLiveData` CANDS transformation now carries `d: c.district`
+    through from the `/api/candidates` response (was dropped before).
+  - New helper `getHouseDistrictInfo(abbr, num)` → `{incumbent, challengers, all}`
+    for one CD. Handles at-large states by matching anything when
+    `DISTRICT_COUNTS[abbr] === 1`.
+  - New district-level `mousemove` tooltip on `districts-active-fill`.
+    Shows `STATE-CD` label, incumbent (name + party + INCUMBENT tag),
+    and up to 3 challengers with a `+N more` tail. Reuses `#mapTooltip`
+    and picks a border color from `STATUS_COLORS[state.status]`.
+  Data source: FEC scraper in `../politicalwindow-api/scraper.js` runs
+  daily at 6 AM ET and populates the `candidates` table with ~1,688 House
+  rows across all 51 states (50 + DC), 426 marked as incumbents. See
+  `CHANGES.md` for the audit (total House, by party, at-large coverage).

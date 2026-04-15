@@ -41,12 +41,16 @@
        still differentiate clearly but read as professional/terminal. Used
        by STATUS_COLORS in JS and by the .tile-*, .spill-status-*, .dot-*
        status classes below. Generic --red/--amber/--blue/--green remain
-       available for non-status UI (KPIs, buttons, chips). */
-    --status-open:     #991B1B; /* window-open / runoff-window  (was #DC2626) */
-    --status-soon:     #B45309; /* window-soon / runoff-upcoming (was #D97706) */
-    --status-upcoming: #1D4ED8; /* upcoming — unified blue (4/15: merged 'general-only' into 'upcoming' at user request; was teal #0F766E, was violet #6D28D9) */
-    --status-general:  #1D4ED8; /* general-only — unified blue, kept var name so detail-panel branches still compile (was #1E3A8A deep navy, was #60A5FA) */
-    --status-none:     #94A3B8; /* inactive — slate (unchanged) */
+       available for non-status UI (KPIs, buttons, chips).
+       4/15 brightness pass: bumped all four hues one step toward the
+       generic palette after user feedback that the terminal-deep set
+       read as "dull". Still well short of the old box-of-crayons
+       saturation but with enough life to read clearly at small sizes. */
+    --status-open:     #B8221E; /* window-open / runoff-window (4/15 brightness bump from #991B1B) */
+    --status-soon:     #D1680F; /* window-soon / runoff-upcoming (4/15 brightness bump from #B45309) */
+    --status-upcoming: #2563EB; /* upcoming — unified blue (4/15 brightness bump from #1D4ED8; merged 'general-only' into 'upcoming' earlier same day; was teal #0F766E, was violet #6D28D9) */
+    --status-general:  #2563EB; /* general-only — same unified blue, kept var name so detail-panel branches still compile (was #1E3A8A deep navy, was #60A5FA) */
+    --status-none:     #8B95A5; /* inactive — slightly warmer slate (4/15 bump from #94A3B8) */
     --dem:        #2563EB;
     --rep:        #EF4444;
     --ind:        #8B5CF6;
@@ -328,10 +332,10 @@
   /* Status tile backgrounds use the refined --status-* palette with a
      soft ~10% tint so each phase is legible at small sizes without being
      garish. Border inherits the full-strength status color. */
-  .tile-window-open  { background:rgba(153,27,27,0.10);  border-color:var(--status-open);     color:var(--status-open); }
-  .tile-window-soon  { background:rgba(180,83,9,0.10);   border-color:var(--status-soon);     color:var(--status-soon); }
-  .tile-upcoming     { background:rgba(29,78,216,0.10); border-color:var(--status-upcoming); color:var(--status-upcoming); }
-  .tile-general-only { background:rgba(29,78,216,0.10); border-color:var(--status-general);  color:var(--status-general); }
+  .tile-window-open  { background:rgba(184,34,30,0.12);  border-color:var(--status-open);     color:var(--status-open); }
+  .tile-window-soon  { background:rgba(209,104,15,0.12); border-color:var(--status-soon);     color:var(--status-soon); }
+  .tile-upcoming     { background:rgba(37,99,235,0.12);  border-color:var(--status-upcoming); color:var(--status-upcoming); }
+  .tile-general-only { background:rgba(37,99,235,0.12);  border-color:var(--status-general);  color:var(--status-general); }
   .tile-inactive     { background:#F1F5F9; color:var(--text-faint); border-color:#E2E8F0; }
   .tile.tile-dimmed  { opacity:0.2; pointer-events:none; cursor:default; }
 
@@ -534,10 +538,10 @@
   /* Status spills — Follow-up #2. Used by the SPILL map (table status
      column, state cards) so the window-timing palette stays decoupled
      from the generic .spill-red/.spill-amber/.spill-green classes. */
-  .spill-status-open      { background:rgba(153,27,27,0.08);  color:var(--status-open);     border:1px solid rgba(153,27,27,0.20); }
-  .spill-status-soon      { background:rgba(180,83,9,0.08);   color:var(--status-soon);     border:1px solid rgba(180,83,9,0.20); }
-  .spill-status-upcoming  { background:rgba(29,78,216,0.08); color:var(--status-upcoming); border:1px solid rgba(29,78,216,0.22); }
-  .spill-status-general   { background:rgba(29,78,216,0.08); color:var(--status-general);  border:1px solid rgba(29,78,216,0.22); }
+  .spill-status-open      { background:rgba(184,34,30,0.10);  color:var(--status-open);     border:1px solid rgba(184,34,30,0.22); }
+  .spill-status-soon      { background:rgba(209,104,15,0.10); color:var(--status-soon);     border:1px solid rgba(209,104,15,0.22); }
+  .spill-status-upcoming  { background:rgba(37,99,235,0.10);  color:var(--status-upcoming); border:1px solid rgba(37,99,235,0.24); }
+  .spill-status-general   { background:rgba(37,99,235,0.10);  color:var(--status-general);  border:1px solid rgba(37,99,235,0.24); }
   .spill-status-none      { background:#F1F5F9;               color:var(--status-none);     border:1px solid #E2E8F0; }
   .itag { font-size:0.52rem; padding:1px 5px; border-radius:2px; border:1px solid; white-space:nowrap; font-weight:600; }
   .dbadge { font-size:0.54rem; display:block; margin-top:2px; }
@@ -1321,13 +1325,13 @@ const FIPS = {
 // terminal" rather than "box of crayons", while still keeping enough
 // hue separation to differentiate each phase at a glance.
 const STATUS_COLORS = {
-  'window-open':     '#991B1B',
-  'window-soon':     '#B45309',
-  'upcoming':        '#1D4ED8',
-  'runoff-window':   '#991B1B',
-  'runoff-upcoming': '#B45309',
-  'general-only':    '#1D4ED8',
-  'inactive':        '#94A3B8'
+  'window-open':     '#B8221E',
+  'window-soon':     '#D1680F',
+  'upcoming':        '#2563EB',
+  'runoff-window':   '#B8221E',
+  'runoff-upcoming': '#D1680F',
+  'general-only':    '#2563EB',
+  'inactive':        '#8B95A5'
 };
 
 const DISTRICT_COUNTS = {
@@ -1741,6 +1745,45 @@ function wireMapInteractions() {
     }
     _hoveredDistrictId = f.id;
     glMap.setFeatureState({ source: 'districts', id: _hoveredDistrictId }, { 'cand-hover': true });
+
+    // District-level tooltip (2026-04-15): show state+CD, incumbent, and
+    // challenger count drawn from CANDS (FEC-sourced). This runs on top of
+    // the states-fill hover handler; MapLibre fires both for overlapping
+    // layers, and the later-added districts-active-fill wins visually
+    // because its mousemove runs after states-fill in the same frame.
+    const abbr = _currentStateAbbr;
+    if (!abbr) return;
+    const num = f.properties.district_number;
+    const isAtLarge = DISTRICT_COUNTS[abbr] === 1;
+    const label = (num === 0 || isAtLarge) ? `${abbr}-AL` : `${abbr}-${num}`;
+    const info = getHouseDistrictInfo(abbr, num);
+    const partyColor = (p) => p === 'R' ? 'var(--rep)' : p === 'D' ? 'var(--dem)' : 'var(--ind)';
+    let incHTML;
+    if (info.incumbent) {
+      const i = info.incumbent;
+      incHTML = `<span style="color:${partyColor(i.p)};font-weight:700">${i.p}</span> <span style="color:var(--text);font-weight:600">${i.n}</span> <span style="font-size:0.52rem;color:var(--text-faint);letter-spacing:0.04em">INCUMBENT</span>`;
+    } else {
+      incHTML = `<span style="color:var(--text-faint)">No incumbent on file</span>`;
+    }
+    // Up to 3 challengers inline, with +N more if there are leftovers.
+    let challengersHTML = '';
+    if (info.challengers.length) {
+      const shown = info.challengers.slice(0, 3);
+      const rest = info.challengers.length - shown.length;
+      challengersHTML = '<br><span style="font-size:0.52rem;color:var(--text-faint);letter-spacing:0.04em">CHALLENGERS</span>'
+        + shown.map(c => `<br><span style="font-size:0.58rem"><span style="color:${partyColor(c.p)};font-weight:700">${c.p}</span> <span style="color:var(--text)">${c.n}</span></span>`).join('')
+        + (rest > 0 ? `<br><span style="font-size:0.54rem;color:var(--text-muted)">+${rest} more</span>` : '');
+    }
+    const borderColor = STATUS_COLORS[(SM[abbr] || {}).status] || 'var(--blue)';
+    tooltip.innerHTML = `<strong style="font-size:0.68rem">${label}</strong> <span style="font-size:0.54rem;color:var(--text-faint)">HOUSE</span><br>${incHTML}${challengersHTML}`;
+    tooltip.style.borderLeftColor = borderColor;
+    tooltip.style.display = 'block';
+    const rect = document.getElementById('mapContainer').getBoundingClientRect();
+    const x = e.point.x;
+    const y = e.point.y;
+    const tRight = x + 16 + 220 > rect.width;
+    tooltip.style.left = tRight ? (x - 230) + 'px' : (x + 16) + 'px';
+    tooltip.style.top = (y - 10) + 'px';
   });
 
   glMap.on('mouseleave', 'districts-active-fill', () => {
@@ -1748,6 +1791,10 @@ function wireMapInteractions() {
       glMap.setFeatureState({ source: 'districts', id: _hoveredDistrictId }, { 'cand-hover': false });
       _hoveredDistrictId = null;
     }
+    // Tooltip hide is handled by the states-fill mouseleave; when leaving a
+    // district we usually land back on the bare state (which will repaint).
+    // But if the pointer exits the map entirely, states-fill fires too, so
+    // we don't need a second tooltip.style.display = 'none' here.
   });
 }
 
@@ -2426,6 +2473,29 @@ function getCandidatesFor(abbr, office, district) {
   return entities;
 }
 
+// Look up the incumbent + declared challengers for one House district from
+// CANDS (FEC-sourced). Returns { incumbent, challengers, all } where each
+// entry is { n, p, s }. Added 2026-04-15 to drive the district-level hover
+// tooltip: every district is supposed to show at least an incumbent even
+// before the tracker API pulls in spend data.
+function getHouseDistrictInfo(abbr, districtNum) {
+  const races = CANDS[abbr] || [];
+  const house = races.find(r => r.race === 'House');
+  if (!house || !house.list) return { incumbent: null, challengers: [], all: [] };
+  const target = parseInt(districtNum, 10);
+  const isAtLarge = DISTRICT_COUNTS[abbr] === 1;
+  const all = house.list.filter(c => {
+    // AL states: match anything since there's only one district.
+    if (isAtLarge) return true;
+    if (c.d == null) return false;
+    const n = parseInt(c.d, 10);
+    return n === target;
+  });
+  const incumbent = all.find(c => c.s === 'inc') || null;
+  const challengers = all.filter(c => c.s !== 'inc');
+  return { incumbent, challengers, all };
+}
+
 // Group candidate list by party, sort each group by spend desc.
 function groupByPartySorted(candidates) {
   const out = { D: [], R: [], I: [] };
@@ -2631,14 +2701,23 @@ function mergeCuratedIntoEntities(abbr, office, entities) {
       const key = (c.n || '').toLowerCase();
       if (seen.has(key)) return;
       seen.add(key);
+      // Preserve House district from CANDS so renderHouseOffice can bucket
+      // curated-only candidates into the correct CD. Atlarge states surface
+      // as 'AL'; everything else is the numeric district as a string.
+      let district = null;
+      if (office === 'House' && c.d != null) {
+        const n = parseInt(c.d, 10);
+        if (Number.isFinite(n)) district = (DISTRICT_COUNTS[abbr] === 1) ? 'AL' : String(n);
+      }
       out.push({
         name: c.n,
         party: (c.p === 'D' || c.p === 'R') ? c.p : 'I',
         office,
-        district: null,
+        district,
         spend: 0,
         fec_id: null,
         entity_id: null,
+        incumbent: c.s === 'inc',
       });
     });
   });
@@ -2647,7 +2726,11 @@ function mergeCuratedIntoEntities(abbr, office, entities) {
 
 function renderHouseOffice(abbr, s, st) {
   const primComplete = isPrimaryComplete(s);
-  const entities = getCandidatesFor(abbr, 'House');
+  // Merge tracker entities with curated CANDS so every district with any
+  // FEC-filed candidate shows up, not just those with tracker-API spend
+  // records. Every House seat is up every 2 years — the district list
+  // should reflect the full 435 even before tracker enrichment arrives.
+  const entities = mergeCuratedIntoEntities(abbr, 'House', getCandidatesFor(abbr, 'House'));
   const isAtLarge = DISTRICT_COUNTS[abbr] === 1;
 
   // Bucket entities by district. Only true at-large states (AK/DE/ND/SD/VT/WY)
@@ -2813,8 +2896,17 @@ function getDistrictGlowColor(abbr) {
 function highlightActiveDistricts(abbr) {
   if (!glMap || !DISTRICT_CACHE[abbr]) return;
   if (!glMap.getSource('districts')) return;
+  // 2026-04-15: every House seat is up every 2 years, so every district in
+  // the loaded GeoJSON is "active" in the constitutional sense. Previous
+  // implementation filtered by tracker-API entities only (via
+  // getCandidatesFor), which hid ~60% of districts because tracker spend
+  // data is sparse. Now the set is derived from the loaded feature
+  // collection so all 435 districts in the selected state light up.
   const active = new Set();
-  getCandidatesFor(abbr, 'House').forEach(c => { if (c.district) active.add(String(parseInt(c.district, 10) || 0)); });
+  (DISTRICT_CACHE[abbr].features || []).forEach(f => {
+    const n = f.properties && f.properties.district_number;
+    if (n != null) active.add(String(n));
+  });
   const filter = ['in', ['to-string', ['get', 'district_number']], ['literal', [...active]]];
   const beforeId = glMap.getLayer('districts-label-pt') ? 'districts-label-pt' : undefined;
   const glowColor = getDistrictGlowColor(abbr);
@@ -3466,8 +3558,11 @@ async function loadLiveData() {
     }));
 
     // Update CANDS from API candidates
-    // Transform flat API format → {STATE: [{race, list:[{n,p,s,note}]}]} format
-    const rawCands = candsJson.data; // { TX: [{race, party, name, status, notes}] }
+    // Transform flat API format → {STATE: [{race, list:[{n,p,s,note,d}]}]} format
+    // `d` = district (House only) — preserved 4/15 so the district-hover tooltip
+    // + renderHouseOffice can look up incumbents + challengers per CD without
+    // waiting on tracker-API enrichment.
+    const rawCands = candsJson.data; // { TX: [{race, district, party, name, status, notes}] }
     CANDS = {};
     for (const [abbr, list] of Object.entries(rawCands)) {
       const byRace = {};
@@ -3478,6 +3573,7 @@ async function loadLiveData() {
           p: c.party,
           s: c.incumbent ? 'inc' : (c.status === 'exploring' ? 'exp' : 'dec'),
           note: c.notes || undefined,
+          d: c.district != null ? c.district : undefined,
         });
       }
       CANDS[abbr] = Object.entries(byRace).map(([race, list]) => ({ race, list }));

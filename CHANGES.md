@@ -4,6 +4,142 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-04-15 — All 435 House districts + brighter palette
+
+**Spec.** User directive: *"this is the us house of reps. every seat is up
+every 2 years so you should have 'hover over' and candidate listing with
+at least incumbent if not declared competitor for every single district
+on the map. use the FEC API and get all of this info reflected on the
+map. and make colors a bit less dull."*
+
+**Backend status (audited first — nothing to change).** The FEC pipeline
+was already wired end-to-end before this session:
+
+- `../politicalwindow-api/scraper.js` pulls from `api.open.fec.gov/v1/candidates/`
+  for every `(state, office='H')` pair whose state has `'House'` in its
+  `states.races` array.
+- `seed.js` already includes all 51 jurisdictions (50 states + DC) with
+  `'House'` in every `races` array — confirmed via regex audit.
+- `FEC_API_KEY` is set as a Railway env var; daily cron at 6 AM ET has
+  been populating the `candidates` table for weeks.
+- Live audit against `https://api.politicalwindow.com/api/candidates`:
+  - Total House candidates: **1,688**
+  - Incumbents on file: **426** (roughly matches the 435 seat count;
+    9 diff is unfilled open seats / retirements not yet backfilled)
+  - Party breakdown: D 948, R 678, I 62
+  - 51/51 states have at least some House rows
+  - CA: 52 districts populated, 50 with an incumbent on file
+  - TX-1 spot-check: Moran (R-inc) + 2 D challengers ✓
+  - WY-AL spot-check: Hageman (R-inc) + 3 R challengers ✓
+
+So the "missing districts" problem was entirely a **frontend** issue: the
+UI was filtering the map highlight + candidates tab to only districts
+backed by tracker-API spend records, which is a much sparser dataset than
+the FEC candidate filings. The fix is in `index.html` only; no backend
+code, seed, or DB writes touched.
+
+**Frontend changes (all in `index.html`).**
+
+1. **`loadLiveData` CANDS transformation preserves district.** The
+   transform at line ~3476 was dropping `district` on the floor when
+   converting `/api/candidates` rows into the frontend `CANDS` shape.
+   Now pushes `d: c.district` so `getHouseDistrictInfo` and
+   `mergeCuratedIntoEntities` can read it. Senate/Governor rows still
+   come through with `d: undefined`.
+
+2. **`mergeCuratedIntoEntities` preserves House district.** Line 2638
+   previously hardcoded `district: null` for all curated pushes. Now:
+   - For `office === 'House'`, it reads `c.d` from the CANDS entry,
+     parses to an int, and resolves to `'AL'` when the state is at-large
+     (`DISTRICT_COUNTS[abbr] === 1`), otherwise the numeric string.
+   - Also now passes through `incumbent: c.s === 'inc'` so downstream
+     renderers can still flag incumbency on curated-only entries.
+
+3. **`renderHouseOffice` merges tracker + CANDS.** Previously took
+   `getCandidatesFor(abbr, 'House')` (tracker-only) and bucketed by
+   district. Now wraps that in `mergeCuratedIntoEntities(abbr, 'House', ...)`
+   so every district with any FEC-filed candidate appears in the
+   district list, even with no tracker spend recorded. CANDS-only
+   entries carry `spend: 0` and surface as `no spend reported` in the
+   district row (existing fallback path).
+
+4. **`highlightActiveDistricts` lights up every district.** Previously
+   built the active set from tracker entities via `getCandidatesFor`.
+   Now iterates the loaded GeoJSON feature collection:
+   ```javascript
+   const active = new Set();
+   (DISTRICT_CACHE[abbr].features || []).forEach(f => {
+     const n = f.properties && f.properties.district_number;
+     if (n != null) active.add(String(n));
+   });
+   ```
+   Every district in the selected state paints the bright overlay
+   on selection.
+
+5. **New helper `getHouseDistrictInfo(abbr, districtNum)`.** Returns
+   `{incumbent, challengers, all}` for one CD, reading from CANDS.
+   - Looks up `CANDS[abbr]`'s House race list
+   - Filters by `d === target` (parseInt both sides)
+   - Handles at-large states: `DISTRICT_COUNTS[abbr] === 1` matches any
+     entry regardless of its district number (the data sometimes stores
+     at-large as 0, sometimes as 1, and the FEC sometimes emits both)
+   - Picks the first `s === 'inc'` as the incumbent, rest as challengers
+
+6. **New district-level mousemove tooltip.** Added to
+   `wireMapInteractions` alongside the existing district hover feature-state
+   toggle. Reuses the `#mapTooltip` element. Content:
+   - `STATE-CD` header (or `STATE-AL` for at-large)
+   - `HOUSE` label (small, faint)
+   - Incumbent line: party code (colored via `--dem`/`--rep`/`--ind`),
+     name, `INCUMBENT` chip — or "No incumbent on file" in faint text
+   - Up to 3 challenger rows with party color + name
+   - `+N more` tail if there are more than 3 challengers
+   - Border-left color from `STATUS_COLORS[state.status]`
+   - Positioning logic matches the state-level tooltip (flips to the
+     left edge when it would overflow the map container)
+
+7. **Palette brightness pass.** User said "a bit less dull" — bumped all
+   four status hues one step toward the generic palette (which is still
+   one step back from the original "box of crayons" set). Affected:
+   - `--status-open`: `#991B1B` → `#B8221E` (+saturation, +lightness)
+   - `--status-soon`: `#B45309` → `#D1680F` (brighter amber)
+   - `--status-upcoming`: `#1D4ED8` → `#2563EB` (brighter blue)
+   - `--status-general`: `#1D4ED8` → `#2563EB` (kept synced with upcoming)
+   - `--status-none`: `#94A3B8` → `#8B95A5` (slightly warmer slate)
+   All dependent rgba tile backgrounds, spill backgrounds, and the
+   `STATUS_COLORS` JS object were updated in lockstep so the MapLibre
+   `match` expressions, insight-panel status dots, and detail-panel
+   accents all shift together. Generic `--red`/`--amber`/`--blue`/`--green`
+   still back the KPIs, buttons, and `✓ COMPLETE` chip — unchanged.
+
+**Verification done.**
+
+- Inline `<script>` blocks parse cleanly via `new Function(...)`:
+  ```
+  Inline scripts found: 2
+  All inline scripts parse OK
+  ```
+- Live API spot-checks (TX-1, CA-12, WY-AL) return correct
+  `{incumbent, challengers, all}` shapes via the new helper logic
+  simulated against real `/api/candidates` data.
+- CA coverage: 52/52 districts present, 50 with incumbent on file
+  (remaining 2 are open seats).
+
+**Verification still needed (manual, in-browser).**
+
+- [ ] Load the production page, select a state, and confirm every
+  district lights up (not just the 1–3 that used to).
+- [ ] Hover over a district and verify tooltip shows `STATE-CD` +
+  incumbent + challenger list.
+- [ ] Click a district and verify drill-in still works (the click
+  handler was untouched but the layer filter changed, so worth
+  double-checking).
+- [ ] Verify at-large states (AK, DE, ND, SD, VT, WY) still render
+  one district with the `AL` label (not duplicated per polygon).
+- [ ] Eyeball the new palette — less dull but still terminal.
+
+---
+
 ## 2026-04-15 — Merge "General Only" + "Upcoming" into single blue category
 
 **Spec.** User request: *"let's just combine 'General Only' and 'Upcoming'
