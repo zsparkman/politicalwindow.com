@@ -2692,8 +2692,35 @@ function renderStatewideOffice(abbr, s, st) {
 // used when no tracker entity with the same name exists for that office.
 function mergeCuratedIntoEntities(abbr, office, entities) {
   const s = SM[abbr]; if (!s) return entities.slice();
-  const out = entities.slice();
-  const seen = new Set(entities.map(e => (e.name || '').toLowerCase()));
+
+  // Build a name → district map from CANDS (FEC-sourced, authoritative
+  // on district) and backfill it onto any tracker entity whose upstream
+  // feed left district=null. Without this, a House tracker entity with
+  // a null district (happens whenever ratewindow-api's candidate feed
+  // omits CD) would shadow its correctly-districted CANDS twin via the
+  // `seen` dedupe below and land the candidate in the stripped
+  // unknown-district bucket. Atlarge states collapse to 'AL'.
+  const isAtLarge = DISTRICT_COUNTS[abbr] === 1;
+  const houseDistByName = {};
+  if (office === 'House') {
+    (s.cands || []).forEach(rc => {
+      if ((rc.race || '').toLowerCase() !== 'house') return;
+      rc.list.forEach(c => {
+        if (!c.n || c.d == null) return;
+        const n = parseInt(c.d, 10);
+        if (!Number.isFinite(n)) return;
+        houseDistByName[c.n.toLowerCase()] = isAtLarge ? 'AL' : String(n);
+      });
+    });
+  }
+  const patched = entities.map(e => {
+    if (office !== 'House' || e.district) return e;
+    const d = houseDistByName[(e.name || '').toLowerCase()];
+    return d ? { ...e, district: d } : e;
+  });
+
+  const out = patched.slice();
+  const seen = new Set(patched.map(e => (e.name || '').toLowerCase()));
   const races = (s.cands || []).filter(rc => {
     const r = (rc.race || '').toLowerCase();
     if (office === 'Senate')   return r.includes('senate');
@@ -2739,12 +2766,19 @@ function renderHouseOffice(abbr, s, st) {
   const isAtLarge = DISTRICT_COUNTS[abbr] === 1;
 
   // Bucket entities by district. Only true at-large states (AK/DE/ND/SD/VT/WY)
-  // may fall back to 'AL'; entities without a valid district in multi-district
-  // states are bucketed under 'unknown' so they don't pollute the AL label.
+  // may fall back to 'AL'. In multi-district states, any entity that still
+  // lacks a district after `mergeCuratedIntoEntities` backfill is dropped
+  // (formerly bucketed under 'unknown' and rendered as `${abbr}-??`). We
+  // prefer hiding a handful of unplaced tracker-only spend rows over
+  // polluting the district list with a ?? bucket the user can't reason
+  // about.
   const districtMap = {};
   entities.forEach(c => {
     let d = c.district;
-    if (!d) d = isAtLarge ? 'AL' : 'unknown';
+    if (!d) {
+      if (isAtLarge) d = 'AL';
+      else return;
+    }
     if (!districtMap[d]) districtMap[d] = { district: d, cands: [], totalSpend: 0 };
     districtMap[d].cands.push(c);
     districtMap[d].totalSpend += c.spend;
@@ -2796,7 +2830,7 @@ function renderHouseOffice(abbr, s, st) {
         const spendStr  = d.totalSpend > 0
           ? `$${fmtCompact(d.totalSpend)}`
           : `<span style="color:var(--text-faint)">no spend reported</span>`;
-        const rowLabel  = d.district === 'unknown' ? `${abbr}-??` : `${abbr}-${d.district}`;
+        const rowLabel  = `${abbr}-${d.district}`;
         html += `<div class="cand-district-row" data-district="${d.district}">
           <div class="cand-district-code">${rowLabel}</div>
           <div class="cand-district-meta">${candCount} candidate${candCount !== 1 ? 's' : ''}</div>
@@ -2822,12 +2856,20 @@ function wireCandidatesPane(container, abbr) {
       const off = slicer.dataset.office;
       const st = ensureCandTabState(abbr);
       if (st.office !== off) {
+        // If the user is drilled into a specific House district and
+        // switches to Senate/Governor, the previous view's camera is
+        // still zoomed to the CD. Refit to state bounds so the new
+        // slicer's context (full state) matches what the map shows.
+        const wasDrilledIntoDistrict = st.office === 'House' && st.district;
         st.office = off;
         st.expanded = { D: false, R: false, I: false };
         st.district = null;
         rerenderCandidatesPane(container, abbr);
         if (off === 'House') highlightActiveDistricts(abbr);
         else clearCandDistrictHighlight();
+        if (wasDrilledIntoDistrict && off !== 'House') {
+          fitStateBounds(abbr);
+        }
       }
       return;
     }
@@ -3045,6 +3087,27 @@ function clearCandDistrictHighlight() {
   ].forEach(id => {
     if (glMap.getLayer(id)) glMap.removeLayer(id);
   });
+}
+
+// Refit the map to a state's full bounds without tearing down district
+// layers. Used when a user is drilled into a specific CD in the Candidates
+// tab and switches the slicer to Senate/Governor — we want to return to
+// state view without deselecting the state.
+function fitStateBounds(abbr) {
+  if (!glMap || !statesGeoJSON) return;
+  const feature = statesGeoJSON.features.find(f => f.properties.abbr === abbr);
+  if (!feature) return;
+  const coords = feature.geometry.type === 'MultiPolygon'
+    ? feature.geometry.coordinates.flat(2)
+    : feature.geometry.coordinates.flat(1);
+  const lngs = coords.map(c => c[0]);
+  const lats = coords.map(c => c[1]);
+  try {
+    glMap.fitBounds(
+      [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+      { padding: 60, duration: 700 }
+    );
+  } catch (e) { /* fitBounds guard */ }
 }
 
 // Called from mapSelectState → moveend after districts load, and from enrichment

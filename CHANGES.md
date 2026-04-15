@@ -4,6 +4,80 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-04-15 — Drop `??` district buckets + refit-on-slicer-change
+
+**Context.** Two small UX fixes bundled in the same user thread.
+
+### 1. Remove `{STATE}-??` buckets from the House district list
+
+**Symptom.** CA Governor's candidate tab showed a `CA-??` row in the
+House district list. Clicking through revealed real candidates
+(`Saikat Chakrabarti`, `Kevin Kiley`) who should have been under their
+proper CDs (CA-11 and CA-03 per FEC IDs H6CA11219 / H2CA03157). Same
+issue was latent across every multi-district state — any House
+candidate whose tracker-API feed returned `district: null` ended up
+in a `??` bucket.
+
+**Root cause.** Two steps:
+1. `ratewindow-api`'s `/api/candidates/tracker?state=CA` sometimes
+   returns House entities with `district: null`. That's a data quality
+   issue upstream — the committee-linking code there doesn't always
+   resolve the CD. Our own FEC scraper in `politicalwindow-api` does
+   resolve it correctly, so `CANDS` (loaded from `/api/candidates`)
+   has the authoritative district.
+2. `mergeCuratedIntoEntities(abbr, 'House', …)` deduped the two
+   sources by `name.toLowerCase()`, with tracker winning. When the
+   tracker entity had `district: null`, the correctly-districted CANDS
+   twin got dropped on the floor, and `renderHouseOffice` then bucketed
+   the null-district tracker entity into a `'unknown'` district that
+   renders as `${abbr}-??`.
+
+**Fix.**
+- `mergeCuratedIntoEntities` (index.html ~2693): before the existing
+  dedupe loop, build a `name → district` map from `CANDS` (only for
+  `office === 'House'`) and backfill missing districts onto tracker
+  entities. Atlarge states collapse to `'AL'`; multi-district states
+  get the numeric CD as a string. This preserves tracker spend totals
+  while recovering the district.
+- `renderHouseOffice` (index.html ~2732): after backfill, any House
+  entity still lacking a district in a multi-district state is
+  dropped from the district list entirely (instead of being bucketed
+  into `'unknown'`). At-large states keep their `'AL'` fallback —
+  they're the only legit single-bucket case.
+- `rowLabel` in the district list (~index.html:2799) no longer has
+  the `d.district === 'unknown' ? '${abbr}-??' : ...` branch. Dead
+  code removed.
+
+**Validation.** Open CA, Candidates tab → House slicer:
+- Before: district list shows `CA-01 … CA-52 … CA-??`.
+- After: district list shows `CA-01 … CA-52` with no `??` row.
+- `Saikat Chakrabarti` now appears under CA-11; `Kevin Kiley` under CA-03.
+
+### 2. Refit to state bounds when leaving a drilled-in House CD
+
+**Symptom.** When the user drills into a House district (map zooms in
+to the CD), then switches the Candidates slicer to Senate or Governor,
+the map stayed zoomed to the CD — giving a confusing mismatch between
+the candidate list (statewide) and the map viewport (one district).
+
+**Fix.**
+- New helper `fitStateBounds(abbr)` (~index.html:3072) that refits the
+  map to a state's full bounds using the same logic `mapSelectState`
+  uses, but without touching feature-state or tearing down district
+  layers.
+- Slicer click handler in `wireCandidatesPane` (~index.html:2853) now
+  checks if the user was drilled into a House district
+  (`st.office === 'House' && st.district`) and, if the new slicer is
+  Senate/Governor, calls `fitStateBounds(abbr)` after resetting state.
+
+**Not touched.** The explicit "‹ All Districts" back button (inside
+the House pane) still leaves the map at its current district zoom —
+that's a deliberate breadcrumb-style back-to-district-list action, not
+a context switch away from House. If the user eventually wants that
+to zoom out too, we can revisit.
+
+---
+
 ## 2026-04-15 — All 435 House districts + brighter palette
 
 **Spec.** User directive: *"this is the us house of reps. every seat is up
