@@ -58,7 +58,25 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 | `mapDeselectState()` | Returns map to national view, removes districts |
 | `loadDistricts(abbr)` | Async — fetches congressional district GeoJSON per state |
 | `showDistricts(abbr)` | Renders district boundaries on map |
-| `hideDistricts()` | Removes district layers from map |
+| `hideDistricts()` | Removes district layers from map (incl. cand-tab highlights) |
+| `renderCandidatesPane(abbr)` | Renders the Candidates-tab slicer layout for a state |
+| `renderStatewideOffice(abbr,s,st)` | Renders Senate/Governor party-grouped candidates |
+| `renderHouseOffice(abbr,s,st)` | Renders House district list / drilled-in CD view |
+| `renderPartyGroup(...)` | Renders one party group (D/R/I) with top-3 or expanded |
+| `renderCuratedFallback(abbr,office)` | Shows curated CANDS before tracker data loads |
+| `wireCandidatesPane(c,abbr)` | Delegated event wiring for slicer/See More/CD clicks |
+| `rerenderCandidatesPane(c,abbr)` | Replaces pane innerHTML after state change or data load |
+| `getRacesForState(s)` | Returns \['Senate','Governor','House'\] present for a state |
+| `isPrimaryComplete(s)` | True if status='general-only' or primary date in the past |
+| `getCandidatesFor(abbr,office,district?)` | Tracker entities for a given slice |
+| `normalizeEntity(e)` | Shapes a tracker record → {name,party,office,district,spend,...} |
+| `groupByPartySorted(list)` | Groups candidates by party + sorts each by spend desc |
+| `lookupCuratedMeta(abbr,name)` | Gets incumbent/note from CANDS by name (fuzzy last-name) |
+| `highlightActiveDistricts(abbr)` | Adds green fill layer to active-race CDs on map |
+| `highlightSelectedDistrict(abbr,cd)` | Adds blue fill to selected CD + fits bounds |
+| `clearCandDistrictHighlight()` | Removes active/selected fill layers |
+| `applyCandMapHighlight(abbr)` | Reapplies highlights after districts load/reload |
+| `enrichCandidateFinance(abbr,c)` | Async: caches tracker entities, triggers re-render |
 
 ## Design System
 - **Aesthetic:** Bloomberg Terminal — dark navy, monospace data, amber accents
@@ -69,12 +87,14 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 
 ## Data Structures (populated at runtime from API)
 - `SM` — state metadata map keyed by state abbr `{ TX: {...}, CA: {...} }`
-- `CANDS` — candidates by state `{ TX: [{race, list:[{n,p,s,note}]}] }`
+- `CANDS` — curated candidates by state `{ TX: [{race, list:[{n,p,s,note}]}] }` — used for incumbent flag + notes
 - `BALLOT` — ballot measures by state (loaded from API via `loadLiveData()`)
 - `POLLS` — polls by state → race (loaded from API via `loadLiveData()`)
 - `glMap` — MapLibre GL JS map instance (null if CDN failed)
 - `statesGeoJSON` — US states GeoJSON with injected `abbr`/`status` properties
 - `DISTRICT_CACHE` — cached congressional district GeoJSON per state abbr
+- `_financeCache` — cached tracker-API entities per state abbr (name/party/office/district/total_spend); populated by `enrichCandidateFinance`, consumed by `renderCandidatesPane`
+- `candTabState` — per-state UI state for the Candidates tab: `{ office, expanded:{D,R,I}, district }` — preserved across re-entry into a state
 
 ## Rules
 1. `index.html` stays a single self-contained file — no external JS or CSS files
@@ -83,7 +103,7 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 4. Both mobile drawer and desktop panel must render any new UI sections added
 5. Do not change API_BASE or RATES_API values
 
-## Current State (Mar 2026)
+## Current State (Apr 2026)
 - Rate Intel section live for TX and CA tiles
 - Ballot measures populated from API (empty until seeded)
 - FCC General Window: Sep 4–Nov 3, 2026
@@ -91,3 +111,14 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 - MapLibre geographic map replaces tile-grid cartogram (with tile-grid fallback)
 - State zoom + congressional district boundaries on state selection
 - Polling data displayed in detail panel tabs
+- **Candidates tab (4.14.26)** — slicer-based layout:
+  - Color-coded office slicers (Senate/Governor/House) filter the pane
+  - Senate/Governor: candidates grouped by party, top-3-with-spend + "See More"
+    → "See All Candidates" links to `/candidate-tracker?office=X&party=Y&state=Z`
+  - House: district list (tap to drill in) with green highlight on active CDs
+    and blue fill on the selected CD via map feature-state layers
+  - Post-primary states (`status='general-only'` or `dPrim<=0`) show nominees
+    + any indies-with-spend; in-primary states show top 3 per party
+  - Tracker-API entities (via `_financeCache`) are merged with curated `CANDS`
+    for incumbent/note metadata. Curated-fallback renders while data loads.
+- Candidate tracker page sorts by `total_spend` DESC by default (matches above)

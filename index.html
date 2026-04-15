@@ -374,6 +374,82 @@
   .cbadge-dec { background:#F1F5F9; color:var(--text-muted); border:1px solid var(--navy-border); }
   .cparty { font-family:var(--mono); font-size:0.56rem; flex-shrink:0; }
 
+  /* ── CANDIDATES TAB · Slicer / Party Groups / Districts (4.14.26) ──
+     Office slicers act as primary filter; candidates grouped by party below.
+     Color scheme: Senate = blue, Governor = purple, House = green. */
+  .cand-slicer-bar {
+    display:flex; gap:5px; flex-wrap:wrap; margin-bottom:0.7rem;
+    padding-bottom:0.55rem; border-bottom:1px solid var(--navy-border);
+  }
+  .cand-slicer {
+    font-family:var(--mono); font-size:0.56rem; letter-spacing:0.07em;
+    padding:6px 11px; border-radius:3px; cursor:pointer;
+    background:#F8FAFC; border:1px solid var(--navy-border);
+    color:var(--text-muted); font-weight:700; text-transform:uppercase;
+    transition:all 0.12s; -webkit-tap-highlight-color:transparent;
+  }
+  .cand-slicer:hover { background:#fff; border-color:#CBD5E1; color:var(--text); }
+  .cand-slicer.slicer-senate.active   { border-color:#93C5FD; background:rgba(37,99,235,0.10);  color:#2563EB; box-shadow:0 0 0 1px rgba(37,99,235,0.25); }
+  .cand-slicer.slicer-governor.active { border-color:#C4B5FD; background:rgba(124,58,237,0.10); color:#7C3AED; box-shadow:0 0 0 1px rgba(124,58,237,0.25); }
+  .cand-slicer.slicer-house.active    { border-color:#86EFAC; background:rgba(5,150,105,0.10);  color:#059669; box-shadow:0 0 0 1px rgba(5,150,105,0.25); }
+
+  .party-group { margin-bottom:0.65rem; }
+  .party-group-label {
+    font-family:var(--mono); font-size:0.54rem; letter-spacing:0.08em;
+    text-transform:uppercase; font-weight:700;
+    padding:3px 7px; border-radius:2px; display:inline-block; margin-bottom:0.35rem;
+  }
+  .party-group-D .party-group-label { background:rgba(37,99,235,0.06);  color:var(--dem); border:1px solid rgba(37,99,235,0.20); }
+  .party-group-R .party-group-label { background:rgba(239,68,68,0.06);  color:var(--rep); border:1px solid rgba(239,68,68,0.20); }
+  .party-group-I .party-group-label { background:rgba(139,92,246,0.06); color:var(--ind); border:1px solid rgba(139,92,246,0.20); }
+
+  .cand-action-btn {
+    font-family:var(--mono); font-size:0.55rem; letter-spacing:0.06em;
+    padding:5px 10px; border-radius:3px; cursor:pointer;
+    background:#F1F5F9; border:1px solid var(--navy-border);
+    color:var(--text-muted); margin:4px 0 6px 0; font-weight:600;
+    transition:all 0.12s; -webkit-tap-highlight-color:transparent;
+    text-transform:uppercase; display:inline-block; text-decoration:none;
+  }
+  .cand-action-btn:hover { background:#fff; border-color:var(--blue); color:var(--blue); }
+  .cand-see-all { background:rgba(43,108,176,0.06); border-color:rgba(43,108,176,0.25); color:var(--blue); }
+  .cand-see-all:hover { background:var(--blue); color:#fff; border-color:var(--blue); }
+
+  /* Candidates tab · House district list */
+  .cand-district-header {
+    font-family:var(--mono); font-size:0.54rem; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--text-faint); margin-bottom:0.35rem;
+  }
+  .cand-district-list { display:flex; flex-direction:column; gap:3px; margin-bottom:0.55rem; }
+  .cand-district-row {
+    display:flex; align-items:center; gap:0.5rem;
+    padding:6px 10px; border-radius:4px; background:#F8FAFC;
+    border:1px solid transparent; cursor:pointer; transition:all 0.12s;
+  }
+  .cand-district-row:hover { background:#fff; border-color:var(--navy-border); box-shadow:var(--shadow-sm); }
+  .cand-district-row.active { background:rgba(5,150,105,0.08); border-color:#86EFAC; }
+  .cand-district-code { font-family:var(--mono); font-size:0.68rem; font-weight:700; color:var(--text); flex-shrink:0; min-width:46px; }
+  .cand-district-meta { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); flex:1; min-width:0; }
+  .cand-district-spend { font-family:var(--mono); font-size:0.56rem; color:var(--green); font-weight:700; flex-shrink:0; }
+  .cand-district-empty { font-family:var(--mono); font-size:0.6rem; color:var(--text-faint); padding:8px 9px; text-align:center; border:1px dashed var(--navy-border); border-radius:4px; margin-bottom:0.5rem; }
+  .cand-district-back {
+    font-family:var(--mono); font-size:0.54rem; letter-spacing:0.06em;
+    color:var(--text-muted); cursor:pointer; background:transparent;
+    border:none; padding:0 0 4px 0; margin-bottom:0.35rem;
+    text-transform:uppercase; display:inline-flex; align-items:center; gap:0.3rem;
+  }
+  .cand-district-back:hover { color:var(--blue); }
+  .cand-district-current {
+    font-family:var(--mono); font-size:0.64rem; font-weight:700; letter-spacing:0.05em;
+    color:#059669; padding:5px 9px; background:rgba(5,150,105,0.08);
+    border:1px solid #86EFAC; border-radius:3px;
+    display:inline-block; margin-bottom:0.55rem;
+  }
+  .cand-loading-note {
+    font-family:var(--mono); font-size:0.54rem; color:var(--text-faint);
+    margin-top:0.4rem; font-style:italic;
+  }
+
   /* ── TABLE ── */
   .table-card { background:#fff; border:1px solid var(--navy-border); border-radius:8px; overflow:hidden; box-shadow:var(--shadow-md); }
   .table-toolbar {
@@ -1750,6 +1826,9 @@ function mapSelectState(abbr) {
     await districtPromise;
     showDistricts(abbr);
     showDistrictLoading(false);
+    // Re-apply Candidates-tab highlights once districts are in place.
+    // Safe to call even if House slicer isn't active (it no-ops).
+    applyCandMapHighlight(abbr);
   });
 }
 
@@ -1770,6 +1849,10 @@ function showDistrictLoading(show) {
 function mapDeselectState() {
   if (!glMap || !statesGeoJSON) return;
   showDistrictLoading(false);
+
+  // Clear any active Candidates-tab highlights on the district source before
+  // the source is torn down in hideDistricts().
+  clearCandDistrictHighlight();
 
   // Fade out district layers before removing them
   if (glMap.getLayer('districts-line')) glMap.setPaintProperty('districts-line', 'line-opacity', 0);
@@ -1884,7 +1967,8 @@ function showDistricts(abbr) {
 
 function hideDistricts() {
   if (!glMap) return;
-  ['districts-label', 'districts-line'].forEach(id => {
+  // Remove Candidates-tab highlight layers first (they share the districts source).
+  ['districts-selected-fill', 'districts-active-fill', 'districts-label', 'districts-line'].forEach(id => {
     if (glMap.getLayer(id)) glMap.removeLayer(id);
   });
   if (glMap.getSource('districts')) glMap.removeSource('districts');
@@ -1991,6 +2075,449 @@ const SL = {
 };
 const WC = { 'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'var(--blue)', 'general-only':'var(--blue-light)', 'inactive':'var(--slate)' };
 
+// ── CANDIDATES TAB · Slicer-based layout (4.14.26) ─────────────────────────
+// Design:
+//   • Color-coded office slicers (Senate/Governor/House) act as filters.
+//   • For statewide offices, candidates are grouped by party.
+//     - In-primary states:  top 3 per party by ad spend + See More → See All Candidates
+//     - Post-primary states: nominees + any independents with spend + See All Candidates
+//   • For House, a district list appears first; clicking a district drills in and
+//     highlights that CD on the map. Same party-group UX as statewide races.
+// Data source: tracker API entities (via _financeCache) for spend/party/district,
+//   merged with curated CANDS for incumbent-status + notes.
+// See: Candidates Tab Improved Layout spec (4.14.26).
+
+// Shared cache of tracker-API entities per state. Populated by
+// enrichCandidateFinance (declared further below) and consumed by
+// renderCandidatesPane. Declared up here so the renderers see a defined
+// binding even before the first enrichment call.
+const _financeCache = {};
+
+// Per-state UI state for the Candidates tab. Preserved across detail re-opens
+// so a user returning to a state sees the same slicer/district selection.
+const candTabState = {};
+
+function ensureCandTabState(abbr) {
+  if (!candTabState[abbr]) {
+    const s = SM[abbr];
+    const races = getRacesForState(s);
+    candTabState[abbr] = {
+      office: races[0] || null,
+      expanded: { D: false, R: false, I: false },
+      district: null,
+    };
+  }
+  return candTabState[abbr];
+}
+
+// Which of Senate/Governor/House apply to this state.
+// Derived from state metadata and (as fallback) curated candidate races.
+function getRacesForState(s) {
+  if (!s) return [];
+  const present = new Set();
+  (s.races || []).forEach(r => {
+    if (r === 'Senate' || r === 'Governor' || r === 'House') present.add(r);
+  });
+  (s.cands || []).forEach(rc => {
+    const r = (rc.race || '').toLowerCase();
+    if (r.includes('senate'))        present.add('Senate');
+    else if (r.includes('governor')) present.add('Governor');
+    else if (r.includes('house'))    present.add('House');
+  });
+  return ['Senate', 'Governor', 'House'].filter(r => present.has(r));
+}
+
+// Primary complete? true for 'general-only' status or when primary date is in the past.
+function isPrimaryComplete(s) {
+  if (!s) return false;
+  if (s.status === 'general-only') return true;
+  if (s.dPrim !== null && s.dPrim <= 0) return true;
+  return false;
+}
+
+// Normalize one tracker-API entity to the shape used by the renderer.
+function normalizeEntity(e) {
+  const officeRaw = (e.office || '').toLowerCase();
+  let office = null;
+  if      (officeRaw.includes('senate'))   office = 'Senate';
+  else if (officeRaw.includes('governor')) office = 'Governor';
+  else if (officeRaw.includes('house') || officeRaw.includes('congress') || officeRaw.includes('rep.')) office = 'House';
+  const rawP = (e.party || '').toUpperCase().charAt(0);
+  const party = (rawP === 'D' || rawP === 'R') ? rawP : 'I';
+  return {
+    name:      e.candidate_name || 'Unknown',
+    party,
+    office,
+    district:  (e.district != null && e.district !== '') ? String(e.district) : null,
+    spend:     Number(e.total_spend) || 0,
+    fec_id:    e.fec_candidate_id || null,
+    entity_id: e.political_entity_id || null,
+  };
+}
+
+// Look up curated metadata (incumbent flag / note) from CANDS by candidate name.
+// Falls back to last-name fuzzy match if exact match fails.
+function lookupCuratedMeta(abbr, name) {
+  const races = CANDS[abbr] || [];
+  const nameLower = (name || '').toLowerCase();
+  const parts = (name || '').trim().split(/\s+/);
+  const lastE = parts.length > 1 ? parts[parts.length - 1].toLowerCase() : nameLower;
+  for (const rc of races) {
+    for (const c of rc.list) {
+      if (c.n.toLowerCase() === nameLower) return { status: c.s, note: c.note || null };
+      const cp = c.n.trim().split(/\s+/);
+      if (cp.length > 1 && cp[cp.length - 1].toLowerCase() === lastE) {
+        return { status: c.s, note: c.note || null };
+      }
+    }
+  }
+  return { status: 'dec', note: null };
+}
+
+// Return tracker entities for a state + office (optionally filtered by House district).
+function getCandidatesFor(abbr, office, district) {
+  const entities = (_financeCache[abbr] || []).map(normalizeEntity).filter(n => n.office === office);
+  if (office === 'House' && district) return entities.filter(n => n.district === district);
+  return entities;
+}
+
+// Group candidate list by party, sort each group by spend desc.
+function groupByPartySorted(candidates) {
+  const out = { D: [], R: [], I: [] };
+  candidates.forEach(c => {
+    const p = (c.party === 'D' || c.party === 'R') ? c.party : 'I';
+    out[p].push(c);
+  });
+  Object.keys(out).forEach(p => out[p].sort((a, b) => b.spend - a.spend));
+  return out;
+}
+
+// Render a single candidate row with curated metadata + spend.
+function renderCandRowHTML(abbr, cand) {
+  const meta    = lookupCuratedMeta(abbr, cand.name);
+  const pc      = PC[cand.party] || 'var(--slate)';
+  const badge   = meta.status === 'inc'
+    ? `<span class="cbadge cbadge-inc">INCUMBENT</span>`
+    : `<span class="cbadge cbadge-dec">DECLARED</span>`;
+  const noteHTML  = meta.note ? `<span class="cnote">${meta.note}</span>` : '';
+  const spendHTML = cand.spend > 0
+    ? `<span class="cand-finance-item">Ad Spend: <strong style="color:var(--green)">$${fmtCompact(cand.spend)}</strong></span>`
+    : '';
+  const lurHTML = cand.spend > 0
+    ? `<a href="/lur?candidate=${encodeURIComponent(cand.name)}" class="cand-finance-item" style="color:var(--blue);text-decoration:none" title="Run LUR analysis">LUR</a>`
+    : '';
+  const safeN = cand.name.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+  return `<div class="cand-row" data-cand-name="${safeN}" data-cand-state="${abbr}">
+    <div class="pdot" style="background:${pc}"></div>
+    <div class="cname">${cand.name}${noteHTML}</div>
+    <span class="cparty" style="color:${pc}">${cand.party}</span>${badge}
+    <div class="cand-finance">${spendHTML}${lurHTML}</div>
+  </div>`;
+}
+
+// Render one party group (Democratic/Republican/Independent).
+// Applies the "top 3 with spend" rule for in-primary states; post-primary shows
+// all candidates with reported spend (treated as nominees + active indies).
+function renderPartyGroup(abbr, office, partyCode, list, primComplete, expanded) {
+  const partyName = { D: 'Democratic', R: 'Republican', I: 'Independent' }[partyCode];
+  const withSpend = list.filter(c => c.spend > 0);
+  let shown;
+  let showSeeMore = false;
+  if (primComplete) {
+    shown = withSpend.length ? withSpend : list.slice(0, 1);
+  } else if (expanded) {
+    shown = withSpend;
+  } else {
+    shown = withSpend.slice(0, 3);
+    if (withSpend.length > 3) showSeeMore = true;
+  }
+  if (!shown.length) return '';
+  const rowsHTML = shown.map(c => renderCandRowHTML(abbr, c)).join('');
+  let actionHTML = '';
+  if (showSeeMore) {
+    const more = withSpend.length - 3;
+    actionHTML = `<button class="cand-action-btn cand-see-more" data-party="${partyCode}" data-action="see-more">See More (+${more}) ▼</button>`;
+  } else if ((primComplete || expanded) && withSpend.length > 0) {
+    const url = `/candidate-tracker?office=${encodeURIComponent(office)}&party=${partyCode}&state=${abbr}`;
+    actionHTML = `<a class="cand-action-btn cand-see-all" href="${url}" target="_blank" rel="noopener">See All Candidates →</a>`;
+  }
+  return `<div class="party-group party-group-${partyCode}">
+    <div class="party-group-label">${partyName}</div>
+    ${rowsHTML}
+    ${actionHTML}
+  </div>`;
+}
+
+// Fallback rendering when tracker data hasn't loaded yet — show curated CANDS
+// grouped by party with no spend numbers.
+function renderCuratedFallback(abbr, office) {
+  const s = SM[abbr]; if (!s) return '';
+  const races = (s.cands || []).filter(rc => {
+    const r = (rc.race || '').toLowerCase();
+    if (office === 'Senate')   return r.includes('senate');
+    if (office === 'Governor') return r === 'governor';
+    if (office === 'House')    return r === 'house';
+    return false;
+  });
+  if (!races.length) return '';
+  const all = races.flatMap(rc => rc.list).map(c => ({
+    name: c.n, party: c.p, office, district: null, spend: 0, fec_id: null, entity_id: null,
+  }));
+  const grouped = groupByPartySorted(all);
+  let html = '';
+  ['D','R','I'].forEach(p => {
+    if (!grouped[p].length) return;
+    const rowsHTML = grouped[p].map(c => renderCandRowHTML(abbr, c)).join('');
+    const partyName = { D: 'Democratic', R: 'Republican', I: 'Independent' }[p];
+    html += `<div class="party-group party-group-${p}">
+      <div class="party-group-label">${partyName}</div>
+      ${rowsHTML}
+    </div>`;
+  });
+  if (html) html += `<div class="cand-loading-note">Loading reported ad spend…</div>`;
+  return html;
+}
+
+// Main renderer — returns HTML for the Candidates tab content area.
+function renderCandidatesPane(abbr) {
+  const s = SM[abbr]; if (!s) return '';
+  const races = getRacesForState(s);
+  if (races.length === 0) {
+    return `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No major federal races on file for ${s.abbr}</div>`;
+  }
+  const st = ensureCandTabState(abbr);
+  if (!races.includes(st.office)) { st.office = races[0]; st.district = null; }
+
+  const slicerHTML = races.map(r => {
+    const active = r === st.office ? 'active' : '';
+    const cls = r === 'Senate' ? 'slicer-senate' : r === 'Governor' ? 'slicer-governor' : 'slicer-house';
+    return `<button class="cand-slicer ${cls} ${active}" data-office="${r}">${r}</button>`;
+  }).join('');
+
+  const contentHTML = (st.office === 'House')
+    ? renderHouseOffice(abbr, s, st)
+    : renderStatewideOffice(abbr, s, st);
+
+  return `<div class="cand-slicer-bar">${slicerHTML}</div>
+          <div class="cand-pane-content">${contentHTML}</div>`;
+}
+
+function renderStatewideOffice(abbr, s, st) {
+  const primComplete = isPrimaryComplete(s);
+  const entities = getCandidatesFor(abbr, st.office);
+  if (!entities.length) {
+    const fallback = renderCuratedFallback(abbr, st.office);
+    if (fallback) return fallback;
+    return `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No ${st.office} candidates on file yet for ${abbr}</div>
+            <a class="cand-action-btn cand-see-all" href="/candidate-tracker?office=${encodeURIComponent(st.office)}&state=${abbr}" target="_blank" rel="noopener">See All Candidates →</a>`;
+  }
+  const grouped = groupByPartySorted(entities);
+  let html = '';
+  ['D','R','I'].forEach(p => {
+    const group = renderPartyGroup(abbr, st.office, p, grouped[p], primComplete, st.expanded[p]);
+    if (group) html += group;
+  });
+  if (!html) {
+    return `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No ${st.office} candidates with reported spend for ${abbr}</div>
+            <a class="cand-action-btn cand-see-all" href="/candidate-tracker?office=${encodeURIComponent(st.office)}&state=${abbr}" target="_blank" rel="noopener">See All Candidates →</a>`;
+  }
+  return html;
+}
+
+function renderHouseOffice(abbr, s, st) {
+  const primComplete = isPrimaryComplete(s);
+  const entities = getCandidatesFor(abbr, 'House');
+
+  // Bucket entities by district
+  const districtMap = {};
+  entities.forEach(c => {
+    const d = c.district || 'AL';
+    if (!districtMap[d]) districtMap[d] = { district: d, cands: [], totalSpend: 0 };
+    districtMap[d].cands.push(c);
+    districtMap[d].totalSpend += c.spend;
+  });
+  const districts = Object.values(districtMap).sort((a, b) => {
+    if (st.district && a.district === st.district) return -1;
+    if (st.district && b.district === st.district) return 1;
+    return b.totalSpend - a.totalSpend;
+  });
+
+  let html = '';
+
+  if (st.district) {
+    html += `<button class="cand-district-back" data-action="clear-district">‹ ALL DISTRICTS</button>`;
+    html += `<div class="cand-district-current">${abbr}-${st.district}</div>`;
+    const entries = (districtMap[st.district] || { cands: [] }).cands;
+    const grouped = groupByPartySorted(entries);
+    let groupsHTML = '';
+    ['D','R','I'].forEach(p => {
+      const g = renderPartyGroup(abbr, 'House', p, grouped[p], primComplete, st.expanded[p]);
+      if (g) groupsHTML += g;
+    });
+    if (!groupsHTML) {
+      groupsHTML = `<div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-faint)">No candidates with reported spend for ${abbr}-${st.district}</div>
+                    <a class="cand-action-btn cand-see-all" href="/candidate-tracker?office=House&state=${abbr}" target="_blank" rel="noopener">See All Candidates →</a>`;
+    }
+    html += groupsHTML;
+  } else {
+    if (districts.length === 0) {
+      html += `<div class="cand-district-empty">No House districts with reported spend for ${abbr}</div>`;
+      const fb = renderCuratedFallback(abbr, 'House');
+      if (fb) html += fb;
+    } else {
+      html += `<div class="cand-district-header">Active House Races · Tap a district to view candidates</div>`;
+      html += `<div class="cand-district-list">`;
+      districts.forEach(d => {
+        const candCount = d.cands.length;
+        const spendStr  = d.totalSpend > 0 ? `$${fmtCompact(d.totalSpend)}` : '—';
+        html += `<div class="cand-district-row" data-district="${d.district}">
+          <div class="cand-district-code">${abbr}-${d.district}</div>
+          <div class="cand-district-meta">${candCount} candidate${candCount !== 1 ? 's' : ''} with spend</div>
+          <div class="cand-district-spend">${spendStr}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+    html += `<a class="cand-action-btn cand-see-all" href="/candidate-tracker?office=House&state=${abbr}" target="_blank" rel="noopener">See All House Candidates →</a>`;
+  }
+  return html;
+}
+
+// Delegated event wiring for slicer / See More / district interactions.
+// Attached once to the container; survives inner-HTML re-renders of the pane.
+function wireCandidatesPane(container, abbr) {
+  const pane = container.querySelector('[data-pane="candidates"]');
+  if (!pane || pane._candWired) return;
+  pane._candWired = true;
+  pane.addEventListener('click', (ev) => {
+    const slicer = ev.target.closest('.cand-slicer');
+    if (slicer) {
+      const off = slicer.dataset.office;
+      const st = ensureCandTabState(abbr);
+      if (st.office !== off) {
+        st.office = off;
+        st.expanded = { D: false, R: false, I: false };
+        st.district = null;
+        rerenderCandidatesPane(container, abbr);
+        if (off === 'House') highlightActiveDistricts(abbr);
+        else clearCandDistrictHighlight();
+      }
+      return;
+    }
+    const seeMore = ev.target.closest('.cand-see-more');
+    if (seeMore) {
+      const party = seeMore.dataset.party;
+      const st = ensureCandTabState(abbr);
+      if (party) {
+        st.expanded[party] = true;
+        rerenderCandidatesPane(container, abbr);
+      }
+      return;
+    }
+    const districtRow = ev.target.closest('.cand-district-row');
+    if (districtRow) {
+      const d = districtRow.dataset.district;
+      const st = ensureCandTabState(abbr);
+      st.district = d;
+      st.expanded = { D: false, R: false, I: false };
+      rerenderCandidatesPane(container, abbr);
+      highlightSelectedDistrict(abbr, d);
+      return;
+    }
+    const back = ev.target.closest('[data-action="clear-district"]');
+    if (back) {
+      const st = ensureCandTabState(abbr);
+      st.district = null;
+      st.expanded = { D: false, R: false, I: false };
+      rerenderCandidatesPane(container, abbr);
+      // Drop the selected-district blue fill, keep the active-race green fill
+      if (glMap && glMap.getLayer('districts-selected-fill')) {
+        glMap.removeLayer('districts-selected-fill');
+      }
+      highlightActiveDistricts(abbr);
+      return;
+    }
+  });
+}
+
+// Replace pane inner HTML without tearing down its event listener.
+function rerenderCandidatesPane(container, abbr) {
+  const pane = container.querySelector('[data-pane="candidates"]');
+  if (!pane) return;
+  pane.innerHTML = `<div class="dlabel">Declared Candidates</div>${renderCandidatesPane(abbr)}`;
+}
+
+// ── Map district highlights tied to the Candidates tab ─────────────────────
+// Adds translucent fill layers on top of the existing districts source to show
+// (a) districts with active races, and (b) the currently selected CD.
+function highlightActiveDistricts(abbr) {
+  if (!glMap || !DISTRICT_CACHE[abbr]) return;
+  if (!glMap.getSource('districts')) return;
+  const active = new Set();
+  getCandidatesFor(abbr, 'House').forEach(c => { if (c.district) active.add(String(parseInt(c.district, 10) || 0)); });
+  const filter = ['in', ['to-string', ['get', 'district_number']], ['literal', [...active]]];
+  if (glMap.getLayer('districts-active-fill')) {
+    glMap.setFilter('districts-active-fill', filter);
+  } else {
+    const beforeId = glMap.getLayer('districts-label') ? 'districts-label' : undefined;
+    glMap.addLayer({
+      id: 'districts-active-fill',
+      type: 'fill',
+      source: 'districts',
+      paint: { 'fill-color': 'rgba(5,150,105,0.55)', 'fill-opacity': 0.22 },
+      filter,
+    }, beforeId);
+  }
+}
+
+function highlightSelectedDistrict(abbr, districtCode) {
+  if (!glMap) return;
+  if (!glMap.getSource('districts')) return;
+  const num = parseInt(districtCode, 10) || 0;
+  const filter = ['==', ['get', 'district_number'], num];
+  if (glMap.getLayer('districts-selected-fill')) {
+    glMap.setFilter('districts-selected-fill', filter);
+  } else {
+    const beforeId = glMap.getLayer('districts-label') ? 'districts-label' : undefined;
+    glMap.addLayer({
+      id: 'districts-selected-fill',
+      type: 'fill',
+      source: 'districts',
+      paint: { 'fill-color': 'rgba(43,108,176,0.65)', 'fill-opacity': 0.45 },
+      filter,
+    }, beforeId);
+  }
+  const feat = (DISTRICT_CACHE[abbr]?.features || []).find(f => f.properties.district_number === num);
+  if (feat && feat.geometry) {
+    try {
+      const coords = feat.geometry.type === 'MultiPolygon'
+        ? feat.geometry.coordinates.flat(2)
+        : feat.geometry.coordinates.flat(1);
+      const lngs = coords.map(c => c[0]);
+      const lats = coords.map(c => c[1]);
+      glMap.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: 40, duration: 700 });
+    } catch (e) { /* fitBounds guard */ }
+  }
+}
+
+function clearCandDistrictHighlight() {
+  if (!glMap) return;
+  ['districts-active-fill', 'districts-selected-fill'].forEach(id => {
+    if (glMap.getLayer(id)) glMap.removeLayer(id);
+  });
+}
+
+// Called from mapSelectState → moveend after districts load, and from enrichment
+// post-fetch, to re-apply highlights based on the current candTabState.
+function applyCandMapHighlight(abbr) {
+  const st = candTabState[abbr];
+  if (!st) return;
+  if (st.office === 'House') {
+    highlightActiveDistricts(abbr);
+    if (st.district) highlightSelectedDistrict(abbr, st.district);
+  }
+}
+
 function buildDetailHTML(abbr) {
   const s = SM[abbr]; if (!s) return '';
   let barPct = 0;
@@ -1999,27 +2526,10 @@ function buildDetailHTML(abbr) {
   const wc = WC[s.status] || 'var(--blue)';
   const raceTags = s.races.map(r => `<span class="race-tag tag-${r.toLowerCase().replace(/[^a-z]/g,'')}">${r}</span>`).join('');
 
-  // ── Candidates tab content ──
-  let candHTML = '';
-  if (s.cands.length === 0) {
-    candHTML = `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No major candidates on file yet</div>`;
-  } else {
-    s.cands.forEach(rc => {
-      const rb = {Senate:'tag-senate',Governor:'tag-governor',House:'tag-house'}[rc.race] || 'tag-house';
-      candHTML += `<div class="cand-race-block"><span class="cand-race-label ${rb}">${rc.race}</span>`;
-      rc.list.forEach(c => {
-        const pc = PC[c.p] || 'var(--slate)';
-        const badge = c.s === 'inc' ? `<span class="cbadge cbadge-inc">INCUMBENT</span>` : `<span class="cbadge cbadge-dec">DECLARED</span>`;
-        const safeN = c.n.replace(/'/g, '&#39;');
-        candHTML += `<div class="cand-row" data-cand-name="${safeN}" data-cand-state="${abbr}">
-          <div class="pdot" style="background:${pc}"></div>
-          <div class="cname">${c.n}${c.note ? `<span class="cnote">${c.note}</span>` : ''}</div>
-          <span class="cparty" style="color:${pc}">${c.p}</span>${badge}
-          <div class="cand-finance" data-finance-for="${safeN}"></div></div>`;
-      });
-      candHTML += `</div>`;
-    });
-  }
+  // ── Candidates tab content ─────────────────────────────────────────────
+  // Delegates to renderCandidatesPane which applies the slicer-based layout
+  // (see Candidates Tab Improved Layout spec, 4.14.26).
+  const candHTML = renderCandidatesPane(abbr);
 
   // ── Issues tab content ──
   let issuesHTML = '';
@@ -2118,74 +2628,26 @@ function wireDetailTabs(container) {
 }
 
 // ── CANDIDATE FINANCE ENRICHMENT ──────────────────────────────────────────────
-// Fetches spend + FEC data from candidate tracker API and injects into detail panel
-const _financeCache = {};
+// Fetches tracker-API entities (name/party/office/district/spend) for a state,
+// caches them in _financeCache, then re-renders the Candidates tab with the
+// slicer-based layout. The re-render is authoritative — it replaces the initial
+// curated-CANDS placeholder with the full entity-driven list and sorts by spend.
+// (4.14.26) Previous version patched individual rows; now we rebuild the pane
+// so party grouping + "top 3 with spend" + See More logic can run over the
+// full candidate set.
 async function enrichCandidateFinance(abbr, container) {
   try {
-    // Fetch all entities for this state from the tracker API (public, no auth needed)
-    const cacheKey = abbr;
-    if (!_financeCache[cacheKey]) {
+    if (!_financeCache[abbr]) {
       const resp = await fetch(`${RATES_API}/api/candidates/tracker?state=${abbr}`);
       if (!resp.ok) return;
       const json = await resp.json();
-      _financeCache[cacheKey] = json.data || [];
+      _financeCache[abbr] = json.data || [];
     }
-    const entities = _financeCache[cacheKey];
-    if (!entities.length) return;
-
-    // Also fetch FEC data for entities that have FEC IDs
-    const token = localStorage.getItem('pw_token');
-    const authHdr = token ? { 'Authorization': 'Bearer ' + token } : {};
-
-    // Build a name→entity lookup (lowercase last name for fuzzy matching)
-    const entityMap = {};
-    entities.forEach(e => {
-      if (!e.candidate_name) return;
-      entityMap[e.candidate_name.toLowerCase()] = e;
-      // Also index by last name for fuzzy match
-      const parts = e.candidate_name.trim().split(/\s+/);
-      if (parts.length > 1) entityMap[parts[parts.length - 1].toLowerCase()] = e;
-    });
-
-    // Find all candidate rows in the container
-    const rows = container.querySelectorAll('.cand-row[data-cand-name]');
-    for (const row of rows) {
-      const name = row.dataset.candName;
-      if (!name) continue;
-      const nameLower = name.toLowerCase();
-
-      // Try exact match, then last name match
-      let entity = entityMap[nameLower];
-      if (!entity) {
-        const parts = name.trim().split(/\s+/);
-        if (parts.length > 1) entity = entityMap[parts[parts.length - 1].toLowerCase()];
-      }
-
-      const financeEl = row.querySelector('.cand-finance');
-      if (!financeEl) continue;
-
-      if (entity && Number(entity.total_spend) > 0) {
-        let html = `<span class="cand-finance-item">Ad Spend: <strong style="color:var(--green)">$${fmtCompact(entity.total_spend)}</strong></span>`;
-
-        // Try to get FEC cash on hand if entity has FEC ID
-        if (entity.fec_candidate_id && token) {
-          try {
-            const fecResp = await fetch(`${RATES_API}/api/candidates/tracker/${entity.political_entity_id}/fec`, { headers: authHdr });
-            if (fecResp.ok) {
-              const fecJson = await fecResp.json();
-              if (fecJson.data && fecJson.data.cash_on_hand) {
-                html += `<span class="cand-finance-item">Cash: <strong>$${fmtCompact(fecJson.data.cash_on_hand)}</strong></span>`;
-              }
-              if (fecJson.data && fecJson.data.total_disbursements) {
-                html += `<span class="cand-finance-item">Spent: <strong style="color:var(--red)">$${fmtCompact(fecJson.data.total_disbursements)}</strong></span>`;
-              }
-            }
-          } catch (e) { /* silent */ }
-        }
-        html += `<a href="/lur?candidate=${encodeURIComponent(entity.candidate_name)}" class="cand-finance-item" style="color:var(--blue);text-decoration:none;cursor:pointer" title="Run LUR analysis">LUR</a>`;
-        financeEl.innerHTML = html;
-      }
-    }
+    // Rebuild the Candidates tab content now that entities are loaded.
+    rerenderCandidatesPane(container, abbr);
+    // If the House slicer is currently active, re-apply map highlights
+    // (districts may still be loading when we first enter a state).
+    applyCandMapHighlight(abbr);
   } catch (err) {
     console.warn('[Finance] enrichment error:', err.message);
   }
@@ -2227,11 +2689,14 @@ function pick(abbr) {
 
   if (isMobile()) {
     openDrawer(abbr);
-    enrichCandidateFinance(abbr, document.getElementById('drawerContent'));
+    const dc = document.getElementById('drawerContent');
+    wireCandidatesPane(dc, abbr);
+    enrichCandidateFinance(abbr, dc);
   } else {
     const p = document.getElementById('detailPanel');
     p.innerHTML = buildDetailHTML(abbr);
     wireDetailTabs(p);
+    wireCandidatesPane(p, abbr);
     p.scrollTop = 0;
     checkDetailScroll();
     enrichCandidateFinance(abbr, p);

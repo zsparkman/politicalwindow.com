@@ -482,6 +482,16 @@ function filterAndRender() {
     return true;
   });
 
+  // Sort by total ad spend DESC so top spenders render first — matches the
+  // "candidates with spend" emphasis of the home-page Candidates tab (4.14.26).
+  // Within equal-spend groups fall back to alphabetical for stable ordering.
+  FILTERED.sort(function(a, b) {
+    var sa = Number(a.total_spend) || 0;
+    var sb = Number(b.total_spend) || 0;
+    if (sb !== sa) return sb - sa;
+    return (a.candidate_name || '').localeCompare(b.candidate_name || '');
+  });
+
   document.getElementById('resultsInfo').textContent = FILTERED.length + ' candidates' + (FILTERED.length !== ALL_CANDIDATES.length ? ' (filtered from ' + ALL_CANDIDATES.length + ')' : '');
 
   var maxSpend = Math.max(1, ...FILTERED.map(function(c) { return Number(c.total_spend) || 0; }));
