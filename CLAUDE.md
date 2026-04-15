@@ -62,21 +62,27 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 | `renderCandidatesPane(abbr)` | Renders the Candidates-tab slicer layout for a state |
 | `renderStatewideOffice(abbr,s,st)` | Renders Senate/Governor party-grouped candidates |
 | `renderHouseOffice(abbr,s,st)` | Renders House district list / drilled-in CD view |
-| `renderPartyGroup(...)` | Renders one party group (D/R/I) with top-3 or expanded |
+| `renderPartyGroup(abbr,office,p,list,primComplete,expanded,runoffPhase)` | Renders one party group (D/R/I) with top-3 + no-spend fallback |
 | `renderCuratedFallback(abbr,office)` | Shows curated CANDS before tracker data loads |
+| `renderSeeAllLink(abbr,office,district?)` | Small gray underlined "See All Candidates" bottom link |
+| `mergeCuratedIntoEntities(abbr,office,entities)` | Union of tracker entities + curated CANDS (used as no-spend fallback source) |
 | `wireCandidatesPane(c,abbr)` | Delegated event wiring for slicer/See More/CD clicks |
 | `rerenderCandidatesPane(c,abbr)` | Replaces pane innerHTML after state change or data load |
 | `getRacesForState(s)` | Returns \['Senate','Governor','House'\] present for a state |
-| `isPrimaryComplete(s)` | True if status='general-only' or primary date in the past |
+| `isPrimaryComplete(s)` | True if general-only OR primary past AND NOT in a runoff phase |
+| `isRunoffPhase(s)` | True when status is runoff-window or runoff-upcoming |
 | `getCandidatesFor(abbr,office,district?)` | Tracker entities for a given slice |
 | `normalizeEntity(e)` | Shapes a tracker record → {name,party,office,district,spend,...} |
 | `groupByPartySorted(list)` | Groups candidates by party + sorts each by spend desc |
 | `lookupCuratedMeta(abbr,name)` | Gets incumbent/note from CANDS by name (fuzzy last-name) |
-| `highlightActiveDistricts(abbr)` | Adds green fill layer to active-race CDs on map |
+| `highlightActiveDistricts(abbr)` | Adds glow layers (fill + outer halo + inner rim) to active CDs |
 | `highlightSelectedDistrict(abbr,cd)` | Adds blue fill to selected CD + fits bounds |
-| `clearCandDistrictHighlight()` | Removes active/selected fill layers |
+| `clearCandDistrictHighlight()` | Removes active glow layers + selected fill |
 | `applyCandMapHighlight(abbr)` | Reapplies highlights after districts load/reload |
 | `enrichCandidateFinance(abbr,c)` | Async: caches tracker entities, triggers re-render |
+| `buildDistrictLabelPoints(geo)` | Collapses districts GeoJSON → one centroid Point per district_number |
+| `collectOuterRings(geometry)` | Returns outer rings of Polygon or MultiPolygon |
+| `ringBBox(ring)` | Bounding box of a ring (used to pick the largest for label placement) |
 
 ## Design System
 - **Aesthetic:** Bloomberg Terminal — dark navy, monospace data, amber accents
@@ -86,8 +92,11 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 - **Mobile breakpoint:** 640px — detail panel replaced by bottom drawer
 
 ## Data Structures (populated at runtime from API)
-- `SM` — state metadata map keyed by state abbr `{ TX: {...}, CA: {...} }`
-- `CANDS` — curated candidates by state `{ TX: [{race, list:[{n,p,s,note}]}] }` — used for incumbent flag + notes
+- `SM` — state metadata map keyed by state abbr `{ TX: {...}, CA: {...} }`.
+  Each value now carries `pWindow`, `rWindow`, `dWin`, `dPrim`, `dRun`, `dRunW`, `status`.
+  Possible status values: `window-open`, `window-soon`, `upcoming`,
+  `runoff-window`, `runoff-upcoming`, `general-only`, `inactive`.
+- `CANDS` — curated candidates by state `{ TX: [{race, list:[{n,p,s,note}]}] }` — used for incumbent flag + notes + no-spend fallback
 - `BALLOT` — ballot measures by state (loaded from API via `loadLiveData()`)
 - `POLLS` — polls by state → race (loaded from API via `loadLiveData()`)
 - `glMap` — MapLibre GL JS map instance (null if CDN failed)
@@ -95,6 +104,9 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 - `DISTRICT_CACHE` — cached congressional district GeoJSON per state abbr
 - `_financeCache` — cached tracker-API entities per state abbr (name/party/office/district/total_spend); populated by `enrichCandidateFinance`, consumed by `renderCandidatesPane`
 - `candTabState` — per-state UI state for the Candidates tab: `{ office, expanded:{D,R,I}, district }` — preserved across re-entry into a state
+- `_currentStateAbbr` — abbr of the zoomed-to state (null when national view); used by the once-wired district click handler
+- `_hoveredDistrictId` — feature id of the district currently under the cursor; drives the `cand-hover` feature-state that brightens the active-district glow
+- `DISTRICT_COUNTS` — static map of state abbr → number of congressional districts; the only source of truth for "is this state at-large?" (AK/DE/ND/SD/VT/WY)
 
 ## Rules
 1. `index.html` stays a single self-contained file — no external JS or CSS files
@@ -111,14 +123,42 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 - MapLibre geographic map replaces tile-grid cartogram (with tile-grid fallback)
 - State zoom + congressional district boundaries on state selection
 - Polling data displayed in detail panel tabs
-- **Candidates tab (4.14.26)** — slicer-based layout:
+- **Candidates tab (4.14.26, incl. Follow-up #1)** — slicer-based layout:
+  - Detail panel: `.detail-header` (status line + state name + abbr) is
+    followed by a sticky `.detail-tabs` row. **Overview** is tab 1 (default)
+    and contains the race tags, primary/runoff dates, and FCC window bars
+    (primary + runoff + general). Candidates/Issues/Polling are tabs 2/3/4.
   - Color-coded office slicers (Senate/Governor/House) filter the pane
   - Senate/Governor: candidates grouped by party, top-3-with-spend + "See More"
-    → "See All Candidates" links to `/candidate-tracker?office=X&party=Y&state=Z`
-  - House: district list (tap to drill in) with green highlight on active CDs
-    and blue fill on the selected CD via map feature-state layers
-  - Post-primary states (`status='general-only'` or `dPrim<=0`) show nominees
-    + any indies-with-spend; in-primary states show top 3 per party
-  - Tracker-API entities (via `_financeCache`) are merged with curated `CANDS`
-    for incumbent/note metadata. Curated-fallback renders while data loads.
+    → single small gray underlined "See All Candidates" link at the bottom
+    of the candidates list (right aligned) linking to
+    `/candidate-tracker?office=X&party=Y&state=Z`
+  - When tracker spend is missing for a race, the renderer falls back to
+    `mergeCuratedIntoEntities` so each party still shows ≥2 curated
+    candidates in primary/runoff phases (or one nominee post-primary).
+  - House: district list (tap to drill in) with a real **green glow** on
+    active CDs — outer blurred halo + inner rim + soft fill, three layers
+    keyed to `cand-hover` feature-state so hovering brightens the glow.
+    Clicking an active district anywhere on the map drills into that CD
+    (same effect as clicking its row). Selected CD gets a blue fill overlay.
+  - **Runoff-phase states** (`status='runoff-window'` or `'runoff-upcoming'`)
+    are treated as still in-primary for candidate-list purposes and show
+    the runoff finalists per party. Status chip + map color + FCC Runoff
+    Window bar reflect the LUR status for the 45 days before the runoff.
+  - Post-primary states (`status='general-only'`) show nominees + any
+    indies-with-spend; in-primary/runoff states show top 3 per party.
+  - **At-large fix:** only the six true single-district states
+    (AK/DE/ND/SD/VT/WY) are labeled `AL`. Multi-district states no longer
+    fall back to `district_number = 0`.
+  - **Labels:** Alaska suppresses CD labels entirely. All other states use
+    a dedicated point-feature source (`districts-labels-src`) with one
+    centroid per unique `district_number`, so Hawaii shows a single "1"/"2"
+    label on the largest island instead of duplicating across every atoll.
+- **Upcoming state color = governor purple** (`#7C3AED`) — propagated
+  through STATUS_COLORS, WC, SL, SPILL, the MapLibre fill-color matches,
+  tooltip color table, insights status dots, `.tile-upcoming`,
+  `.spill-purple`, and the status-bar legend (new `.dot-purple`).
 - Candidate tracker page sorts by `total_spend` DESC by default (matches above)
+- **Back to Map button** is now inside `.map-layer-toggles` alongside the
+  layer toggles (Window Timing / Candidate Density / Total Spend / Cash
+  on Hand), renamed from "Back to USA".

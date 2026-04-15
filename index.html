@@ -218,11 +218,12 @@
   .legend { display:flex; align-items:center; gap:0.9rem; flex-wrap:wrap; }
   .legend-item { display:flex; align-items:center; gap:0.3rem; font-size:0.65rem; font-family:var(--sans); color:var(--text-muted); white-space:nowrap; }
   .legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-  .dot-red   { background:var(--red); }
-  .dot-amber { background:var(--amber); }
-  .dot-blue  { background:var(--blue-light); }
-  .dot-green { background:var(--blue-light); }
-  .dot-slate { background:var(--slate); }
+  .dot-red    { background:var(--red); }
+  .dot-amber  { background:var(--amber); }
+  .dot-blue   { background:var(--blue-light); }
+  .dot-purple { background:#7C3AED; }
+  .dot-green  { background:var(--blue-light); }
+  .dot-slate  { background:var(--slate); }
   .filter-group { display:flex; align-items:center; gap:0.4rem; margin-left:auto; flex-wrap:wrap; }
   .filter-btn {
     font-family:var(--sans); font-size:0.6rem; font-weight:500;
@@ -276,11 +277,11 @@
 
   .back-to-usa {
     display:inline-flex; align-items:center; gap:0.3rem;
-    font-family:var(--sans); font-size:0.65rem; font-weight:500;
+    font-family:var(--sans); font-size:0.62rem; font-weight:600;
     color:var(--blue); background:#fff;
-    border:1px solid var(--navy-border); border-radius:6px;
-    padding:5px 12px 5px 8px; cursor:pointer; margin-bottom:0.5rem;
-    transition:all 0.15s; letter-spacing:0.03em; box-shadow:var(--shadow-sm);
+    border:1px solid var(--navy-border); border-radius:4px;
+    padding:4px 9px 4px 6px; cursor:pointer; margin:0;
+    transition:all 0.15s; letter-spacing:0.03em;
   }
   .back-to-usa:hover { border-color:var(--blue); background:#F8FAFC; }
 
@@ -305,7 +306,7 @@
   .tile.selected { border-color:var(--text); box-shadow:0 0 0 2px rgba(0,0,0,0.12); transform:scale(1.08); z-index:10; }
   .tile-window-open  { background:rgba(220,38,38,0.1);   border-color:var(--red);   color:var(--red); }
   .tile-window-soon  { background:rgba(217,119,6,0.1);  border-color:var(--amber);  color:var(--amber); }
-  .tile-upcoming     { background:rgba(59,130,246,0.1);  border-color:var(--blue-light); color:var(--blue); }
+  .tile-upcoming     { background:rgba(124,58,237,0.12); border-color:#7C3AED;       color:#7C3AED; }
   .tile-general-only { background:var(--blue-glow);  border-color:#93C5FD;       color:var(--blue); }
   .tile-inactive     { background:#F1F5F9; color:var(--text-faint); border-color:#E2E8F0; }
   .tile.tile-dimmed  { opacity:0.2; pointer-events:none; cursor:default; }
@@ -414,6 +415,16 @@
   .cand-action-btn:hover { background:#fff; border-color:var(--blue); color:var(--blue); }
   .cand-see-all { background:rgba(43,108,176,0.06); border-color:rgba(43,108,176,0.25); color:var(--blue); }
   .cand-see-all:hover { background:var(--blue); color:#fff; border-color:var(--blue); }
+  /* Follow-up #1: "See All Candidates" as small gray underlined right-aligned link */
+  .cand-see-all-wrap {
+    display:flex; justify-content:flex-end; margin:0.5rem 0 0.15rem 0;
+  }
+  .cand-see-all-link {
+    font-family:var(--sans); font-size:0.6rem; color:var(--text-muted);
+    text-decoration:underline; text-underline-offset:2px;
+    transition:color 0.12s; cursor:pointer;
+  }
+  .cand-see-all-link:hover { color:var(--blue); }
 
   /* Candidates tab · House district list */
   .cand-district-header {
@@ -432,18 +443,22 @@
   .cand-district-meta { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); flex:1; min-width:0; }
   .cand-district-spend { font-family:var(--mono); font-size:0.56rem; color:var(--green); font-weight:700; flex-shrink:0; }
   .cand-district-empty { font-family:var(--mono); font-size:0.6rem; color:var(--text-faint); padding:8px 9px; text-align:center; border:1px dashed var(--navy-border); border-radius:4px; margin-bottom:0.5rem; }
+  /* Row wrapper forces the back button onto its own line, fully above the
+     CD name (Follow-up #1: resolves overlap with .cand-district-current). */
+  .cand-district-back-row { display:block; margin-bottom:0.4rem; }
   .cand-district-back {
     font-family:var(--mono); font-size:0.54rem; letter-spacing:0.06em;
     color:var(--text-muted); cursor:pointer; background:transparent;
-    border:none; padding:0 0 4px 0; margin-bottom:0.35rem;
+    border:none; padding:4px 8px 4px 6px; border-radius:3px;
     text-transform:uppercase; display:inline-flex; align-items:center; gap:0.3rem;
   }
-  .cand-district-back:hover { color:var(--blue); }
+  .cand-district-back:hover { color:var(--blue); background:rgba(43,108,176,0.06); }
   .cand-district-current {
+    display:block; clear:both;
     font-family:var(--mono); font-size:0.64rem; font-weight:700; letter-spacing:0.05em;
     color:#059669; padding:5px 9px; background:rgba(5,150,105,0.08);
     border:1px solid #86EFAC; border-radius:3px;
-    display:inline-block; margin-bottom:0.55rem;
+    margin-bottom:0.55rem; width:fit-content;
   }
   .cand-loading-note {
     font-family:var(--mono); font-size:0.54rem; color:var(--text-faint);
@@ -486,7 +501,7 @@
   .spill { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:4px; font-family:var(--sans); font-size:0.56rem; letter-spacing:0.02em; font-weight:600; white-space:nowrap; }
   .spill-red   { background:rgba(220,38,38,0.06);   color:var(--red);      border:1px solid rgba(220,38,38,0.15); }
   .spill-amber { background:rgba(217,119,6,0.06);  color:var(--amber);     border:1px solid rgba(217,119,6,0.15); }
-  .spill-purple{ background:rgba(59,130,246,0.06);  color:var(--blue);      border:1px solid rgba(59,130,246,0.15); }
+  .spill-purple{ background:rgba(124,58,237,0.08);  color:#7C3AED;          border:1px solid rgba(124,58,237,0.22); }
   .spill-blue  { background:var(--blue-glow);  color:var(--blue);  border:1px solid rgba(59,130,246,0.15); }
   .spill-green { background:rgba(5,150,105,0.06);  color:var(--green);  border:1px solid rgba(5,150,105,0.15); }
   .spill-slate { background:#F1F5F9;  color:var(--slate);       border:1px solid #E2E8F0; }
@@ -531,8 +546,13 @@
   /* legend item */
   .legend-ballot { color:#8B5CF6; }
   /* ── DETAIL TABS ── */
+  .detail-header {
+    padding-bottom:0.5rem; margin-bottom:0.5rem;
+    border-bottom:1px solid var(--navy-border);
+  }
   .detail-tabs {
     display:flex; gap:0; margin-bottom:0.6rem; border-bottom:1px solid var(--navy-border);
+    position:sticky; top:0; background:#fff; z-index:2;
   }
   .detail-tab {
     font-family:var(--sans); font-size:0.68rem; font-weight:500;
@@ -880,7 +900,7 @@
     <div class="legend">
       <div class="legend-item"><div class="legend-dot dot-red pulse"></div>Window Open</div>
       <div class="legend-item"><div class="legend-dot dot-amber"></div>Opens &lt;30d</div>
-      <div class="legend-item"><div class="legend-dot dot-blue"></div>Upcoming</div>
+      <div class="legend-item"><div class="legend-dot dot-purple"></div>Upcoming</div>
       <div class="legend-item"><div class="legend-dot dot-green"></div>General Only</div>
       <div class="legend-item"><div class="legend-dot dot-slate"></div>None</div>
     </div>
@@ -914,7 +934,11 @@
               General: <span style="color:var(--blue)">Nov 3, 2026</span><br>
               FCC Gen Window: <span style="color:var(--blue)">Sep 4, 2026</span>
             </div>
-            <div class="map-layer-toggles" style="display:flex;gap:4px;flex-wrap:wrap">
+            <div class="map-layer-toggles" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+              <button class="back-to-usa" id="backToUSA" style="display:none" onclick="mapBackToUSA()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                Back to Map
+              </button>
               <button class="filter-btn active" data-layer="window" onclick="setMapLayer('window')">Window Timing</button>
               <button class="filter-btn" data-layer="density" onclick="setMapLayer('density')">Candidate Density</button>
               <button class="filter-btn" data-layer="spend" onclick="setMapLayer('spend')">Total Spend</button>
@@ -922,10 +946,6 @@
             </div>
           </div>
         </div>
-        <button class="back-to-usa" id="backToUSA" style="display:none" onclick="mapBackToUSA()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          Back to USA
-        </button>
         <div class="map-scroll">
           <div id="mapContainer">
             <div class="map-loading" id="mapLoading">
@@ -1199,15 +1219,25 @@ function buildStates() {
     const pDate   = s.primary ? new Date(s.primary) : null;
     const rDate   = s.runoff  ? new Date(s.runoff)  : null;
     const pWindow = fccPrimWin(pDate);
+    const rWindow = fccPrimWin(rDate);   // 45-day LUR window before runoff
     const dWin    = daysTo(pWindow);
     const dPrim   = daysTo(pDate);
+    const dRunW   = daysTo(rWindow);
+    const dRun    = daysTo(rDate);
     let status;
+    // Primary-cycle window
     if (pWindow && TODAY >= pWindow && pDate && TODAY <= pDate) status = 'window-open';
     else if (pWindow && dWin !== null && dWin > 0 && dWin <= 30) status = 'window-soon';
     else if (pDate && dPrim !== null && dPrim > 0)               status = 'upcoming';
+    // Runoff-cycle window: after primary completes, if a runoff is still ahead,
+    // the state remains in-window until the runoff passes (LUR keeps applying
+    // inside the 45 days before the runoff election).
+    else if (rWindow && rDate && dPrim !== null && dPrim <= 0 && dRun !== null && dRun >= 0) {
+      status = (TODAY >= rWindow) ? 'runoff-window' : 'runoff-upcoming';
+    }
     else if (pDate && dPrim !== null && dPrim <= 0) status = 'general-only';
     else status = 'inactive';
-    return { ...s, pDate, rDate, pWindow, dWin, dPrim, status, cands: CANDS[s.abbr] || [] };
+    return { ...s, pDate, rDate, pWindow, rWindow, dWin, dPrim, dRun, dRunW, status, cands: CANDS[s.abbr] || [] };
   });
 }
 let STATES = buildStates();
@@ -1253,11 +1283,13 @@ const FIPS = {
 };
 
 const STATUS_COLORS = {
-  'window-open':  '#DC2626',
-  'window-soon':  '#D97706',
-  'upcoming':     '#2563EB',
-  'general-only': '#60A5FA',
-  'inactive':     '#94A3B8'
+  'window-open':     '#DC2626',
+  'window-soon':     '#D97706',
+  'upcoming':        '#7C3AED',
+  'runoff-window':   '#DC2626',
+  'runoff-upcoming': '#D97706',
+  'general-only':    '#60A5FA',
+  'inactive':        '#94A3B8'
 };
 
 const DISTRICT_COUNTS = {
@@ -1392,10 +1424,12 @@ function addStatesLayer() {
     source: 'states',
     paint: {
       'fill-color': ['match', ['get', 'status'],
-        'window-open',  STATUS_COLORS['window-open'],
-        'window-soon',  STATUS_COLORS['window-soon'],
-        'upcoming',     STATUS_COLORS['upcoming'],
-        'general-only', STATUS_COLORS['general-only'],
+        'window-open',     STATUS_COLORS['window-open'],
+        'window-soon',     STATUS_COLORS['window-soon'],
+        'upcoming',        STATUS_COLORS['upcoming'],
+        'runoff-window',   STATUS_COLORS['runoff-window'],
+        'runoff-upcoming', STATUS_COLORS['runoff-upcoming'],
+        'general-only',    STATUS_COLORS['general-only'],
         STATUS_COLORS['inactive']
       ],
       'fill-opacity': [
@@ -1415,10 +1449,12 @@ function addStatesLayer() {
     source: 'states',
     paint: {
       'line-color': ['match', ['get', 'status'],
-        'window-open',  STATUS_COLORS['window-open'],
-        'window-soon',  STATUS_COLORS['window-soon'],
-        'upcoming',     STATUS_COLORS['upcoming'],
-        'general-only', STATUS_COLORS['general-only'],
+        'window-open',     STATUS_COLORS['window-open'],
+        'window-soon',     STATUS_COLORS['window-soon'],
+        'upcoming',        STATUS_COLORS['upcoming'],
+        'runoff-window',   STATUS_COLORS['runoff-window'],
+        'runoff-upcoming', STATUS_COLORS['runoff-upcoming'],
+        'general-only',    STATUS_COLORS['general-only'],
         STATUS_COLORS['inactive']
       ],
       'line-width': [
@@ -1529,9 +1565,11 @@ function wireMapInteractions() {
 
     // Position tooltip
     const statusLabel = {
-      'window-open': '<span style="color:var(--red);font-weight:600">WINDOW OPEN</span>',
+      'window-open': '<span style="color:var(--red);font-weight:600">PRIMARY WINDOW OPEN</span>',
       'window-soon': '<span style="color:var(--amber);font-weight:600">OPENS SOON</span>',
-      'upcoming': '<span style="color:var(--blue);font-weight:600">UPCOMING</span>',
+      'upcoming': '<span style="color:#7C3AED;font-weight:600">UPCOMING</span>',
+      'runoff-window': '<span style="color:var(--red);font-weight:600">RUNOFF WINDOW OPEN</span>',
+      'runoff-upcoming': '<span style="color:var(--amber);font-weight:600">RUNOFF WINDOW SOON</span>',
       'general-only': '<span style="color:var(--blue-light);font-weight:600">GENERAL ONLY</span>',
       'inactive': '<span style="color:var(--slate)">NO WINDOW</span>'
     }[s.status] || '';
@@ -1614,10 +1652,65 @@ function wireMapInteractions() {
     if (!e.features.length) return;
     pick(e.features[0].properties.abbr);
   });
+
+  // ── District-level interactions (Follow-up #1 task 8) ──
+  // Click any glowing (active-race) district to drill in — same outcome as
+  // clicking its row in the candidate list. Hover brightens the glow via
+  // the `cand-hover` feature-state.
+  glMap.on('click', 'districts-active-fill', (e) => {
+    if (!e.features.length) return;
+    const abbr = _currentStateAbbr;
+    if (!abbr) return;
+    const feat = e.features[0];
+    const num = feat.properties.district_number;
+    const districtKey = num === 0 ? 'AL' : String(num);
+    const st = ensureCandTabState(abbr);
+    st.office = 'House';
+    st.district = districtKey;
+    st.expanded = { D: false, R: false, I: false };
+    // Refresh the detail panel so the drill-in shows in the list
+    const panel = isMobile()
+      ? document.getElementById('drawerContent')
+      : document.getElementById('detailPanel');
+    if (panel) {
+      // Make sure the Candidates tab is active — clicking on the map should
+      // surface the candidate list even if the user was on another tab.
+      const candTab = panel.querySelector('.detail-tab[data-tab="candidates"]');
+      if (candTab && !candTab.classList.contains('tab-active')) candTab.click();
+      rerenderCandidatesPane(panel, abbr);
+    }
+    highlightSelectedDistrict(abbr, districtKey);
+    // Stop propagation to the states-fill layer beneath
+    if (e.originalEvent) e.originalEvent.cancelBubble = true;
+  });
+
+  glMap.on('mousemove', 'districts-active-fill', (e) => {
+    if (!e.features.length) return;
+    canvas.style.cursor = 'pointer';
+    const f = e.features[0];
+    if (_hoveredDistrictId !== null && _hoveredDistrictId !== f.id) {
+      glMap.setFeatureState({ source: 'districts', id: _hoveredDistrictId }, { 'cand-hover': false });
+    }
+    _hoveredDistrictId = f.id;
+    glMap.setFeatureState({ source: 'districts', id: _hoveredDistrictId }, { 'cand-hover': true });
+  });
+
+  glMap.on('mouseleave', 'districts-active-fill', () => {
+    if (_hoveredDistrictId !== null) {
+      glMap.setFeatureState({ source: 'districts', id: _hoveredDistrictId }, { 'cand-hover': false });
+      _hoveredDistrictId = null;
+    }
+  });
 }
 
 // ── MAP: Layer toggle ────────────────────────────────────────────────────────
 let currentMapLayer = 'window';
+// Track the currently zoomed-to state abbr so the district-layer click handler
+// (wired once in wireMapInteractions) knows which state context it's acting on.
+let _currentStateAbbr = null;
+// Feature id of the district currently under the cursor — used to toggle the
+// `cand-hover` feature-state so the glow brightens on hover.
+let _hoveredDistrictId = null;
 let _spendByState = null;   // { abbr: { total_spend, filing_count } }
 let _cashByState = null;    // { abbr: { cash_on_hand, total_disbursements } }
 let _spendLoading = false;
@@ -1768,10 +1861,12 @@ async function setMapLayer(layer) {
     // Window timing — restore status-based coloring
     _lastHeatmapColors = null;
     glMap.setPaintProperty('states-fill', 'fill-color', ['match', ['get', 'status'],
-      'window-open',  STATUS_COLORS['window-open'],
-      'window-soon',  STATUS_COLORS['window-soon'],
-      'upcoming',     STATUS_COLORS['upcoming'],
-      'general-only', STATUS_COLORS['general-only'],
+      'window-open',     STATUS_COLORS['window-open'],
+      'window-soon',     STATUS_COLORS['window-soon'],
+      'upcoming',        STATUS_COLORS['upcoming'],
+      'runoff-window',   STATUS_COLORS['runoff-window'],
+      'runoff-upcoming', STATUS_COLORS['runoff-upcoming'],
+      'general-only',    STATUS_COLORS['general-only'],
       STATUS_COLORS['inactive']
     ]);
     updateInsetColors();
@@ -1781,6 +1876,7 @@ async function setMapLayer(layer) {
 // ── MAP: State zoom + district loading ────────────────────────────────────────
 function mapSelectState(abbr) {
   if (!glMap || !statesGeoJSON) return;
+  _currentStateAbbr = abbr;
 
   // Clear previous selection
   statesGeoJSON.features.forEach(f => {
@@ -1848,6 +1944,8 @@ function showDistrictLoading(show) {
 
 function mapDeselectState() {
   if (!glMap || !statesGeoJSON) return;
+  _currentStateAbbr = null;
+  _hoveredDistrictId = null;
   showDistrictLoading(false);
 
   // Clear any active Candidates-tab highlights on the district source before
@@ -1856,7 +1954,7 @@ function mapDeselectState() {
 
   // Fade out district layers before removing them
   if (glMap.getLayer('districts-line')) glMap.setPaintProperty('districts-line', 'line-opacity', 0);
-  if (glMap.getLayer('districts-label')) glMap.setPaintProperty('districts-label', 'text-opacity', 0);
+  if (glMap.getLayer('districts-label-pt')) glMap.setPaintProperty('districts-label-pt', 'text-opacity', 0);
 
   // Clear all feature states before animating
   statesGeoJSON.features.forEach(f => {
@@ -1901,11 +1999,13 @@ async function loadDistricts(abbr) {
     const geo = await resp.json();
 
     if (geo.features) {
+      const isAtLarge = DISTRICT_COUNTS[abbr] === 1;
       geo.features.forEach((f, i) => {
         const p = f.properties;
         const num = parseInt(p.CDFIPS ? p.CDFIPS.slice(-2) : i + 1, 10);
-        f.properties.district_code = `${abbr}-${num || 'AL'}`;
-        f.properties.district_number = num || 0;
+        const label = isAtLarge ? 'AL' : String(num || (i + 1));
+        f.properties.district_code = `${abbr}-${label}`;
+        f.properties.district_number = isAtLarge ? 0 : (num || (i + 1));
         f.properties.state_abbr = abbr;
         f.properties.representative = p.LAST_NAME || '';
         f.properties.party = p.PARTY || '';
@@ -1940,38 +2040,111 @@ function showDistricts(abbr) {
     }
   });
 
-  glMap.addLayer({
-    id: 'districts-label',
-    type: 'symbol',
-    source: 'districts',
-    layout: {
-      'text-field': ['case', ['==', ['get', 'district_number'], 0], 'AL', ['to-string', ['get', 'district_number']]],
-      'text-size': 12,
-      'text-font': ['Open Sans Bold'],
-      'text-allow-overlap': false
-    },
-    paint: {
-      'text-color': 'rgba(51,65,85,0.7)',
-      'text-halo-color': 'rgba(255,255,255,0.8)',
-      'text-halo-width': 1.5,
-      'text-opacity': 0
+  // Follow-up #1:
+  //   • Alaska — suppress district labels entirely (the state is at-large,
+  //     and the underlying data sometimes returns multiple mislabeled polys).
+  //   • Hawaii (and any multi-polygon state) — render labels from a dedicated
+  //     point-feature source built by collapsing MultiPolygon sub-geometries
+  //     to a single centroid per district_number, so each CD gets one label.
+  if (abbr !== 'AK') {
+    const labelPoints = buildDistrictLabelPoints(data);
+    if (labelPoints.features.length) {
+      glMap.addSource('districts-labels-src', { type: 'geojson', data: labelPoints });
+      glMap.addLayer({
+        id: 'districts-label-pt',
+        type: 'symbol',
+        source: 'districts-labels-src',
+        layout: {
+          'text-field': ['get', 'label'],
+          'text-size': 12,
+          'text-font': ['Open Sans Bold'],
+          'text-allow-overlap': false,
+          'text-ignore-placement': false,
+        },
+        paint: {
+          'text-color': 'rgba(51,65,85,0.78)',
+          'text-halo-color': 'rgba(255,255,255,0.85)',
+          'text-halo-width': 1.5,
+          'text-opacity': 0
+        }
+      });
     }
-  });
+  }
 
   // Fade in district layers
   requestAnimationFrame(() => {
     glMap.setPaintProperty('districts-line', 'line-opacity', 1);
-    glMap.setPaintProperty('districts-label', 'text-opacity', 1);
+    if (glMap.getLayer('districts-label-pt')) {
+      glMap.setPaintProperty('districts-label-pt', 'text-opacity', 1);
+    }
   });
+}
+
+// Collapse a district GeoJSON into one label point per district_number.
+// For MultiPolygon features we pick the centroid of the largest ring (by
+// bbox area) so Hawaii doesn't get repeated "1"/"2" labels on every island.
+function buildDistrictLabelPoints(geo) {
+  const byNum = {};
+  (geo.features || []).forEach(f => {
+    const num = f.properties.district_number;
+    if (num == null) return;
+    const rings = collectOuterRings(f.geometry);
+    if (!rings.length) return;
+    let best = null, bestArea = -1;
+    rings.forEach(r => {
+      const b = ringBBox(r);
+      const area = Math.max(0, (b.maxX - b.minX) * (b.maxY - b.minY));
+      if (area > bestArea) { bestArea = area; best = b; }
+    });
+    if (!best) return;
+    const center = [(best.minX + best.maxX) / 2, (best.minY + best.maxY) / 2];
+    // Keep the LARGEST ring's centroid across all features that share this number
+    const existing = byNum[num];
+    if (!existing || existing.area < bestArea) {
+      byNum[num] = { center, area: bestArea, label: num === 0 ? 'AL' : String(num) };
+    }
+  });
+  return {
+    type: 'FeatureCollection',
+    features: Object.values(byNum).map(v => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: v.center },
+      properties: { label: v.label },
+    })),
+  };
+}
+
+function collectOuterRings(geometry) {
+  if (!geometry) return [];
+  if (geometry.type === 'Polygon')       return [geometry.coordinates[0] || []];
+  if (geometry.type === 'MultiPolygon')  return geometry.coordinates.map(poly => poly[0] || []);
+  return [];
+}
+function ringBBox(ring) {
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  for (const [x,y] of ring) {
+    if (x<minX) minX=x; if (y<minY) minY=y;
+    if (x>maxX) maxX=x; if (y>maxY) maxY=y;
+  }
+  return { minX, minY, maxX, maxY };
 }
 
 function hideDistricts() {
   if (!glMap) return;
   // Remove Candidates-tab highlight layers first (they share the districts source).
-  ['districts-selected-fill', 'districts-active-fill', 'districts-label', 'districts-line'].forEach(id => {
+  [
+    'districts-selected-fill',
+    'districts-active-fill',
+    'districts-active-glow-outer',
+    'districts-active-glow-inner',
+    'districts-label',
+    'districts-label-pt',
+    'districts-line',
+  ].forEach(id => {
     if (glMap.getLayer(id)) glMap.removeLayer(id);
   });
   if (glMap.getSource('districts')) glMap.removeSource('districts');
+  if (glMap.getSource('districts-labels-src')) glMap.removeSource('districts-labels-src');
 }
 
 // ── INSET MAPS (Alaska + Hawaii) ──────────────────────────────────────────────
@@ -2067,13 +2240,19 @@ function setInsetVisibility(visible) {
 // ── SHARED DETAIL HTML BUILDER ─────────────────────────────────────────────────
 const PC = { D:'var(--dem)', R:'var(--rep)', I:'var(--ind)' };
 const SL = {
-  'window-open':  `<span style="color:var(--red)">● PRIMARY WINDOW OPEN</span>`,
-  'window-soon':  `<span style="color:var(--amber)">◐ WINDOW OPENS SOON</span>`,
-  'upcoming':     `<span style="color:var(--blue)">○ PRIMARY UPCOMING</span>`,
-  'general-only': `<span style="color:var(--blue-light)">◇ GENERAL WINDOW ONLY</span>`,
-  'inactive':     `<span style="color:var(--slate)">— NO MAJOR FEDERAL RACE</span>`,
+  'window-open':     `<span style="color:var(--red)">● PRIMARY WINDOW OPEN</span>`,
+  'window-soon':     `<span style="color:var(--amber)">◐ WINDOW OPENS SOON</span>`,
+  'upcoming':        `<span style="color:#7C3AED">○ PRIMARY UPCOMING</span>`,
+  'runoff-window':   `<span style="color:var(--red)">● RUNOFF WINDOW OPEN</span>`,
+  'runoff-upcoming': `<span style="color:var(--amber)">◐ RUNOFF WINDOW SOON</span>`,
+  'general-only':    `<span style="color:var(--blue-light)">◇ GENERAL WINDOW ONLY</span>`,
+  'inactive':        `<span style="color:var(--slate)">— NO MAJOR FEDERAL RACE</span>`,
 };
-const WC = { 'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'var(--blue)', 'general-only':'var(--blue-light)', 'inactive':'var(--slate)' };
+const WC = {
+  'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'#7C3AED',
+  'runoff-window':'var(--red)', 'runoff-upcoming':'var(--amber)',
+  'general-only':'var(--blue-light)', 'inactive':'var(--slate)'
+};
 
 // ── CANDIDATES TAB · Slicer-based layout (4.14.26) ─────────────────────────
 // Design:
@@ -2128,11 +2307,21 @@ function getRacesForState(s) {
 }
 
 // Primary complete? true for 'general-only' status or when primary date is in the past.
+// States with a pending runoff are NOT treated as primary-complete — the party is
+// still choosing its nominee, so the slicer should keep showing runoff finalists
+// (and fall back to "top 2 per party in runoff" when spend data is missing).
 function isPrimaryComplete(s) {
   if (!s) return false;
+  if (s.status === 'runoff-window' || s.status === 'runoff-upcoming') return false;
   if (s.status === 'general-only') return true;
   if (s.dPrim !== null && s.dPrim <= 0) return true;
   return false;
+}
+
+// State currently in a runoff phase? Used to decide how to treat candidates
+// that didn't advance past the primary.
+function isRunoffPhase(s) {
+  return !!s && (s.status === 'runoff-window' || s.status === 'runoff-upcoming');
 }
 
 // Normalize one tracker-API entity to the shape used by the renderer.
@@ -2216,36 +2405,58 @@ function renderCandRowHTML(abbr, cand) {
 }
 
 // Render one party group (Democratic/Republican/Independent).
-// Applies the "top 3 with spend" rule for in-primary states; post-primary shows
-// all candidates with reported spend (treated as nominees + active indies).
-function renderPartyGroup(abbr, office, partyCode, list, primComplete, expanded) {
+// Rules (per spec + Follow-up #1):
+//   • In-primary states: top 3 by spend + See More. If no spend recorded, fall
+//     back to 2+ curated candidates from that party.
+//   • Runoff phase: same as primary (show the two finalists).
+//   • Post-primary: show all candidates with reported spend (nominees + active
+//     indies). If no spend recorded, fall back to 1 curated nominee.
+function renderPartyGroup(abbr, office, partyCode, list, primComplete, expanded, runoffPhase) {
   const partyName = { D: 'Democratic', R: 'Republican', I: 'Independent' }[partyCode];
   const withSpend = list.filter(c => c.spend > 0);
   let shown;
   let showSeeMore = false;
   if (primComplete) {
+    // Post-primary: prefer entries with spend; fall back to 1 curated (treated as nominee).
     shown = withSpend.length ? withSpend : list.slice(0, 1);
   } else if (expanded) {
-    shown = withSpend;
+    shown = withSpend.length ? withSpend : list.slice(0, Math.max(2, list.length));
   } else {
-    shown = withSpend.slice(0, 3);
-    if (withSpend.length > 3) showSeeMore = true;
+    // In-primary or runoff phase: top 3 with spend, fall back to 2+ from curated.
+    if (withSpend.length) {
+      shown = withSpend.slice(0, 3);
+      if (withSpend.length > 3) showSeeMore = true;
+    } else {
+      const minShow = runoffPhase ? 2 : 2;
+      shown = list.slice(0, Math.max(minShow, Math.min(list.length, 3)));
+      if (list.length > shown.length) showSeeMore = true;
+    }
   }
   if (!shown.length) return '';
   const rowsHTML = shown.map(c => renderCandRowHTML(abbr, c)).join('');
   let actionHTML = '';
   if (showSeeMore) {
-    const more = withSpend.length - 3;
-    actionHTML = `<button class="cand-action-btn cand-see-more" data-party="${partyCode}" data-action="see-more">See More (+${more}) ▼</button>`;
-  } else if ((primComplete || expanded) && withSpend.length > 0) {
-    const url = `/candidate-tracker?office=${encodeURIComponent(office)}&party=${partyCode}&state=${abbr}`;
-    actionHTML = `<a class="cand-action-btn cand-see-all" href="${url}" target="_blank" rel="noopener">See All Candidates →</a>`;
+    const total = withSpend.length ? withSpend.length : list.length;
+    const more = total - shown.length;
+    if (more > 0) {
+      actionHTML = `<button class="cand-action-btn cand-see-more" data-party="${partyCode}" data-action="see-more">See More (+${more}) ▼</button>`;
+    }
   }
   return `<div class="party-group party-group-${partyCode}">
     <div class="party-group-label">${partyName}</div>
     ${rowsHTML}
     ${actionHTML}
   </div>`;
+}
+
+// Small gray underlined "See All Candidates" link — right-aligned at bottom of
+// the candidates list. Returns HTML for a single link bound to a specific
+// office/state (optionally scoped to a House district).
+function renderSeeAllLink(abbr, office, district) {
+  const parts = [`office=${encodeURIComponent(office)}`, `state=${abbr}`];
+  if (district) parts.push(`district=${encodeURIComponent(district)}`);
+  const url = `/candidate-tracker?${parts.join('&')}`;
+  return `<div class="cand-see-all-wrap"><a class="cand-see-all-link" href="${url}" target="_blank" rel="noopener">See All Candidates</a></div>`;
 }
 
 // Fallback rendering when tracker data hasn't loaded yet — show curated CANDS
@@ -2304,34 +2515,77 @@ function renderCandidatesPane(abbr) {
 
 function renderStatewideOffice(abbr, s, st) {
   const primComplete = isPrimaryComplete(s);
-  const entities = getCandidatesFor(abbr, st.office);
-  if (!entities.length) {
-    const fallback = renderCuratedFallback(abbr, st.office);
-    if (fallback) return fallback;
+  const runoffPhase  = isRunoffPhase(s);
+  const entities     = getCandidatesFor(abbr, st.office);
+
+  // Merge curated candidates (from CANDS) into the party groups so that
+  // when there's no recorded spend we still show 2+ candidates per party.
+  const merged = mergeCuratedIntoEntities(abbr, st.office, entities);
+  if (!merged.length) {
     return `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No ${st.office} candidates on file yet for ${abbr}</div>
-            <a class="cand-action-btn cand-see-all" href="/candidate-tracker?office=${encodeURIComponent(st.office)}&state=${abbr}" target="_blank" rel="noopener">See All Candidates →</a>`;
+            ${renderSeeAllLink(abbr, st.office)}`;
   }
-  const grouped = groupByPartySorted(entities);
+  const grouped = groupByPartySorted(merged);
   let html = '';
   ['D','R','I'].forEach(p => {
-    const group = renderPartyGroup(abbr, st.office, p, grouped[p], primComplete, st.expanded[p]);
+    const group = renderPartyGroup(abbr, st.office, p, grouped[p], primComplete, st.expanded[p], runoffPhase);
     if (group) html += group;
   });
   if (!html) {
     return `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No ${st.office} candidates with reported spend for ${abbr}</div>
-            <a class="cand-action-btn cand-see-all" href="/candidate-tracker?office=${encodeURIComponent(st.office)}&state=${abbr}" target="_blank" rel="noopener">See All Candidates →</a>`;
+            ${renderSeeAllLink(abbr, st.office)}`;
   }
+  // Single small gray See All link at the bottom of the candidates list
+  html += renderSeeAllLink(abbr, st.office);
   return html;
+}
+
+// Merge tracker-API entities with curated CANDS for a given office so every
+// declared party has at least one candidate even when spend is unreported.
+// Tracker entities win (they carry spend + district); curated adds are only
+// used when no tracker entity with the same name exists for that office.
+function mergeCuratedIntoEntities(abbr, office, entities) {
+  const s = SM[abbr]; if (!s) return entities.slice();
+  const out = entities.slice();
+  const seen = new Set(entities.map(e => (e.name || '').toLowerCase()));
+  const races = (s.cands || []).filter(rc => {
+    const r = (rc.race || '').toLowerCase();
+    if (office === 'Senate')   return r.includes('senate');
+    if (office === 'Governor') return r === 'governor';
+    if (office === 'House')    return r === 'house';
+    return false;
+  });
+  races.forEach(rc => {
+    rc.list.forEach(c => {
+      const key = (c.n || '').toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      out.push({
+        name: c.n,
+        party: (c.p === 'D' || c.p === 'R') ? c.p : 'I',
+        office,
+        district: null,
+        spend: 0,
+        fec_id: null,
+        entity_id: null,
+      });
+    });
+  });
+  return out;
 }
 
 function renderHouseOffice(abbr, s, st) {
   const primComplete = isPrimaryComplete(s);
   const entities = getCandidatesFor(abbr, 'House');
+  const isAtLarge = DISTRICT_COUNTS[abbr] === 1;
 
-  // Bucket entities by district
+  // Bucket entities by district. Only true at-large states (AK/DE/ND/SD/VT/WY)
+  // may fall back to 'AL'; entities without a valid district in multi-district
+  // states are bucketed under 'unknown' so they don't pollute the AL label.
   const districtMap = {};
   entities.forEach(c => {
-    const d = c.district || 'AL';
+    let d = c.district;
+    if (!d) d = isAtLarge ? 'AL' : 'unknown';
     if (!districtMap[d]) districtMap[d] = { district: d, cands: [], totalSpend: 0 };
     districtMap[d].cands.push(c);
     districtMap[d].totalSpend += c.spend;
@@ -2344,21 +2598,29 @@ function renderHouseOffice(abbr, s, st) {
 
   let html = '';
 
+  const runoffPhase = isRunoffPhase(s);
+
   if (st.district) {
-    html += `<button class="cand-district-back" data-action="clear-district">‹ ALL DISTRICTS</button>`;
+    // Return button placed on its own row, fully above the CD name
+    html += `<div class="cand-district-back-row">
+      <button class="cand-district-back" data-action="clear-district">‹ All Districts</button>
+    </div>`;
     html += `<div class="cand-district-current">${abbr}-${st.district}</div>`;
     const entries = (districtMap[st.district] || { cands: [] }).cands;
+    // Curated CANDS are per-state, not per-district, so we don't pull them
+    // into a specific CD drill-in — if the tracker has no candidates for
+    // this district we show an empty message and the See All link.
     const grouped = groupByPartySorted(entries);
     let groupsHTML = '';
     ['D','R','I'].forEach(p => {
-      const g = renderPartyGroup(abbr, 'House', p, grouped[p], primComplete, st.expanded[p]);
+      const g = renderPartyGroup(abbr, 'House', p, grouped[p], primComplete, st.expanded[p], runoffPhase);
       if (g) groupsHTML += g;
     });
     if (!groupsHTML) {
-      groupsHTML = `<div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-faint)">No candidates with reported spend for ${abbr}-${st.district}</div>
-                    <a class="cand-action-btn cand-see-all" href="/candidate-tracker?office=House&state=${abbr}" target="_blank" rel="noopener">See All Candidates →</a>`;
+      groupsHTML = `<div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-faint)">No candidates with reported spend for ${abbr}-${st.district}</div>`;
     }
     html += groupsHTML;
+    html += renderSeeAllLink(abbr, 'House', st.district);
   } else {
     if (districts.length === 0) {
       html += `<div class="cand-district-empty">No House districts with reported spend for ${abbr}</div>`;
@@ -2370,15 +2632,16 @@ function renderHouseOffice(abbr, s, st) {
       districts.forEach(d => {
         const candCount = d.cands.length;
         const spendStr  = d.totalSpend > 0 ? `$${fmtCompact(d.totalSpend)}` : '—';
+        const rowLabel  = d.district === 'unknown' ? `${abbr}-??` : `${abbr}-${d.district}`;
         html += `<div class="cand-district-row" data-district="${d.district}">
-          <div class="cand-district-code">${abbr}-${d.district}</div>
+          <div class="cand-district-code">${rowLabel}</div>
           <div class="cand-district-meta">${candCount} candidate${candCount !== 1 ? 's' : ''} with spend</div>
           <div class="cand-district-spend">${spendStr}</div>
         </div>`;
       });
       html += `</div>`;
     }
-    html += `<a class="cand-action-btn cand-see-all" href="/candidate-tracker?office=House&state=${abbr}" target="_blank" rel="noopener">See All House Candidates →</a>`;
+    html += renderSeeAllLink(abbr, 'House');
   }
   return html;
 }
@@ -2448,23 +2711,70 @@ function rerenderCandidatesPane(container, abbr) {
 }
 
 // ── Map district highlights tied to the Candidates tab ─────────────────────
-// Adds translucent fill layers on top of the existing districts source to show
-// (a) districts with active races, and (b) the currently selected CD.
+// Active-race districts are drawn with a true glow: a bright outer line halo
+// (blurred, wide) + a second crisp inner line + a soft fill. Hovering a glow
+// district boosts the halo brightness via feature-state `cand-hover`.
 function highlightActiveDistricts(abbr) {
   if (!glMap || !DISTRICT_CACHE[abbr]) return;
   if (!glMap.getSource('districts')) return;
   const active = new Set();
   getCandidatesFor(abbr, 'House').forEach(c => { if (c.district) active.add(String(parseInt(c.district, 10) || 0)); });
   const filter = ['in', ['to-string', ['get', 'district_number']], ['literal', [...active]]];
+  const beforeId = glMap.getLayer('districts-label-pt') ? 'districts-label-pt' : undefined;
+  const glowColor = '#10B981';
+
+  // Soft translucent fill
   if (glMap.getLayer('districts-active-fill')) {
     glMap.setFilter('districts-active-fill', filter);
   } else {
-    const beforeId = glMap.getLayer('districts-label') ? 'districts-label' : undefined;
     glMap.addLayer({
       id: 'districts-active-fill',
       type: 'fill',
       source: 'districts',
-      paint: { 'fill-color': 'rgba(5,150,105,0.55)', 'fill-opacity': 0.22 },
+      paint: { 'fill-color': glowColor, 'fill-opacity': 0.18 },
+      filter,
+    }, beforeId);
+  }
+
+  // Outer blurred halo — this creates the actual "glow" effect
+  if (glMap.getLayer('districts-active-glow-outer')) {
+    glMap.setFilter('districts-active-glow-outer', filter);
+  } else {
+    glMap.addLayer({
+      id: 'districts-active-glow-outer',
+      type: 'line',
+      source: 'districts',
+      paint: {
+        'line-color': glowColor,
+        'line-width': [
+          'case',
+          ['boolean', ['feature-state', 'cand-hover'], false], 16,
+          10,
+        ],
+        'line-blur': 10,
+        'line-opacity': [
+          'case',
+          ['boolean', ['feature-state', 'cand-hover'], false], 0.95,
+          0.65,
+        ],
+      },
+      filter,
+    }, beforeId);
+  }
+
+  // Bright inner rim — keeps the district boundary legible at the center of the glow
+  if (glMap.getLayer('districts-active-glow-inner')) {
+    glMap.setFilter('districts-active-glow-inner', filter);
+  } else {
+    glMap.addLayer({
+      id: 'districts-active-glow-inner',
+      type: 'line',
+      source: 'districts',
+      paint: {
+        'line-color': '#6EE7B7',
+        'line-width': 1.75,
+        'line-opacity': 0.95,
+      },
       filter,
     }, beforeId);
   }
@@ -2478,7 +2788,7 @@ function highlightSelectedDistrict(abbr, districtCode) {
   if (glMap.getLayer('districts-selected-fill')) {
     glMap.setFilter('districts-selected-fill', filter);
   } else {
-    const beforeId = glMap.getLayer('districts-label') ? 'districts-label' : undefined;
+    const beforeId = glMap.getLayer('districts-label-pt') ? 'districts-label-pt' : undefined;
     glMap.addLayer({
       id: 'districts-selected-fill',
       type: 'fill',
@@ -2502,7 +2812,12 @@ function highlightSelectedDistrict(abbr, districtCode) {
 
 function clearCandDistrictHighlight() {
   if (!glMap) return;
-  ['districts-active-fill', 'districts-selected-fill'].forEach(id => {
+  [
+    'districts-active-fill',
+    'districts-active-glow-outer',
+    'districts-active-glow-inner',
+    'districts-selected-fill',
+  ].forEach(id => {
     if (glMap.getLayer(id)) glMap.removeLayer(id);
   });
 }
@@ -2554,25 +2869,8 @@ function buildDetailHTML(abbr) {
   // ── Primary window note ──
   const primNote = s.dPrim !== null && s.dPrim > 0 ? `${s.dPrim}d away` : s.dPrim !== null && s.dPrim <= 0 ? 'Completed' : '';
 
-  return `<div class="fade-in">
-    <div style="font-family:var(--mono);font-size:0.57rem;letter-spacing:0.08em;margin-bottom:0.3rem">${s.status==='general-only'&&s.pDate?`<span style="color:var(--blue-light)">✓ PRIMARY COMPLETE · GENERAL WINDOW</span>`:SL[s.status]||''}</div>
-    <div class="detail-state-name">${s.name}</div>
-    <div class="detail-state-abbr">${s.abbr} · 2026 ELECTION CYCLE</div>
-    <div class="dsec" style="margin-bottom:0.6rem;padding-bottom:0.6rem"><div class="race-tags">${raceTags}</div></div>
-    <div class="dsec" style="margin-bottom:0.6rem;padding-bottom:0.6rem"><div class="drow">
-      <div>
-        <div class="dlabel">Primary Date</div>
-        <div class="dval ${s.dPrim!==null&&s.dPrim<0?'muted':''}">${fmtS(s.pDate)}</div>
-        ${primNote?`<div class="wbar-note" ${s.dPrim<=0?'style="color:var(--text-faint)"':''}>${primNote}</div>`:''}
-      </div>
-      <div>
-        <div class="dlabel">Runoff Date</div>
-        <div class="dval ${s.rDate?'':'muted'}">${fmtS(s.rDate)}</div>
-      </div>
-    </div></div>
-    <div class="dsec" style="margin-bottom:0.5rem;padding-bottom:0.5rem">
-      <div class="dlabel">FCC Primary Window · LUR Applies</div>
-      ${s.dPrim!==null&&s.dPrim<=0?`
+  // Primary-window section HTML (shared between overview pane and legacy callers)
+  const primaryWindowHTML = s.dPrim!==null&&s.dPrim<=0?`
       <div class="dval muted">${fmtS(s.pWindow)} → ${fmtS(s.pDate)}</div>
       <div class="wbar"><div class="wbar-fill" style="width:100%;background:var(--slate);opacity:0.25"></div></div>
       <div class="wbar-note" style="color:var(--text-faint)">Primary window closed · ${Math.abs(s.dPrim)}d ago</div>
@@ -2580,22 +2878,75 @@ function buildDetailHTML(abbr) {
       <div class="dval" style="color:${wc}">${fmtS(s.pWindow)} → ${fmtS(s.pDate)}</div>
       <div class="wbar"><div class="wbar-fill" style="width:${barPct}%;background:${wc}"></div></div>
       <div class="wbar-note">${s.status==='window-open'?`${Math.round(barPct)}% elapsed · LUR APPLIES NOW`:s.status==='window-soon'?`Opens in ${s.dWin}d · ${fmtL(s.pWindow)}`:s.pWindow?`Opens ${fmtL(s.pWindow)}`:'No primary window this cycle'}</div>
-      `}
-    </div>
-    <div class="dsec" style="margin-bottom:0.6rem;padding-bottom:0;">
-      <div class="dlabel">FCC General Window · All Federal Candidates</div>
-      <div class="dval green">Sep 4, 2026 → Nov 3, 2026</div>
-      <div class="wbar"><div class="wbar-fill" style="width:${genPct}%;background:var(--green)"></div></div>
-      <div class="wbar-note">${TODAY>=GENERAL_WINDOW?`${Math.round(genPct)}% elapsed`:`Opens in ${daysTo(GENERAL_WINDOW)}d · Sep 4, 2026`}</div>
+      `;
+
+  // Runoff window section (only rendered if the state actually has a runoff)
+  let runoffWindowHTML = '';
+  if (s.rDate && s.rWindow) {
+    const rBarPct = Math.max(0, Math.min(100, ((TODAY - s.rWindow) / (s.rDate - s.rWindow)) * 100));
+    const inRunoff = s.status === 'runoff-window';
+    const runoffColor = inRunoff ? 'var(--red)' : (s.status === 'runoff-upcoming' ? 'var(--amber)' : 'var(--slate)');
+    let rNote;
+    if (s.dRun !== null && s.dRun < 0) rNote = `Runoff window closed · ${Math.abs(s.dRun)}d ago`;
+    else if (inRunoff) rNote = `${Math.round(rBarPct)}% elapsed · LUR APPLIES NOW`;
+    else if (s.status === 'runoff-upcoming' && s.dRunW !== null) rNote = `Opens in ${s.dRunW}d · ${fmtL(s.rWindow)}`;
+    else rNote = `Opens ${fmtL(s.rWindow)}`;
+    const closedStyle = s.dRun !== null && s.dRun < 0 ? 'color:var(--text-faint)' : '';
+    runoffWindowHTML = `<div class="dsec" style="margin-bottom:0.5rem;padding-bottom:0.5rem">
+      <div class="dlabel">FCC Runoff Window · LUR Applies</div>
+      <div class="dval" style="color:${runoffColor};${closedStyle}">${fmtS(s.rWindow)} → ${fmtS(s.rDate)}</div>
+      <div class="wbar"><div class="wbar-fill" style="width:${s.dRun!==null&&s.dRun<0?100:rBarPct}%;background:${runoffColor};${s.dRun!==null&&s.dRun<0?'opacity:0.25':''}"></div></div>
+      <div class="wbar-note" style="${closedStyle}">${rNote}</div>
+    </div>`;
+  }
+
+  // Status line: include runoff phrasing where applicable
+  let statusLineHTML = SL[s.status] || '';
+  if (s.status==='general-only'&&s.pDate) {
+    statusLineHTML = `<span style="color:var(--blue-light)">✓ PRIMARY COMPLETE · GENERAL WINDOW</span>`;
+  }
+
+  return `<div class="fade-in">
+    <div class="detail-header">
+      <div style="font-family:var(--mono);font-size:0.57rem;letter-spacing:0.08em;margin-bottom:0.3rem">${statusLineHTML}</div>
+      <div class="detail-state-name">${s.name}</div>
+      <div class="detail-state-abbr">${s.abbr} · 2026 ELECTION CYCLE</div>
     </div>
 
     <div class="detail-tabs">
-      <button class="detail-tab tab-active" data-tab="candidates">Candidates</button>
+      <button class="detail-tab tab-active" data-tab="overview">Overview</button>
+      <button class="detail-tab" data-tab="candidates">Candidates</button>
       <button class="detail-tab" data-tab="issues">Issues</button>
       <button class="detail-tab" data-tab="polling">Polling</button>
     </div>
 
-    <div class="detail-tab-pane pane-active" data-pane="candidates">
+    <div class="detail-tab-pane pane-active" data-pane="overview">
+      <div class="dsec" style="margin-bottom:0.6rem;padding-bottom:0.6rem"><div class="race-tags">${raceTags}</div></div>
+      <div class="dsec" style="margin-bottom:0.6rem;padding-bottom:0.6rem"><div class="drow">
+        <div>
+          <div class="dlabel">Primary Date</div>
+          <div class="dval ${s.dPrim!==null&&s.dPrim<0?'muted':''}">${fmtS(s.pDate)}</div>
+          ${primNote?`<div class="wbar-note" ${s.dPrim<=0?'style="color:var(--text-faint)"':''}>${primNote}</div>`:''}
+        </div>
+        <div>
+          <div class="dlabel">Runoff Date</div>
+          <div class="dval ${s.rDate?'':'muted'}">${fmtS(s.rDate)}</div>
+        </div>
+      </div></div>
+      <div class="dsec" style="margin-bottom:0.5rem;padding-bottom:0.5rem">
+        <div class="dlabel">FCC Primary Window · LUR Applies</div>
+        ${primaryWindowHTML}
+      </div>
+      ${runoffWindowHTML}
+      <div class="dsec" style="margin-bottom:0.6rem;padding-bottom:0;">
+        <div class="dlabel">FCC General Window · All Federal Candidates</div>
+        <div class="dval green">Sep 4, 2026 → Nov 3, 2026</div>
+        <div class="wbar"><div class="wbar-fill" style="width:${genPct}%;background:var(--green)"></div></div>
+        <div class="wbar-note">${TODAY>=GENERAL_WINDOW?`${Math.round(genPct)}% elapsed`:`Opens in ${daysTo(GENERAL_WINDOW)}d · Sep 4, 2026`}</div>
+      </div>
+    </div>
+
+    <div class="detail-tab-pane" data-pane="candidates">
       <div class="dlabel">Declared Candidates</div>
       ${candHTML}
     </div>
@@ -2766,14 +3117,15 @@ const COLS = [
   { k:'cands',  l:'Key Candidates', sort:false, cls:'col-cands' },
 ];
 let sk = 'dWin', sd = 1, q = '', rf = 'all', stateFilter = null;
-const SO = s => ({'window-open':0,'window-soon':1,'upcoming':2,'general-only':3,'inactive':4}[s]??5);
+const SO = s => ({'window-open':0,'runoff-window':0,'window-soon':1,'runoff-upcoming':1,'upcoming':2,'general-only':3,'inactive':4}[s]??5);
 const SPILL = {
-  'window-open':  `<span class="spill spill-red">● OPEN</span>`,
-  'window-soon':  `<span class="spill spill-amber">◐ SOON</span>`,
-  'upcoming':     `<span class="spill spill-purple">○ UPCOMING</span>`,
-
-  'general-only': `<span class="spill spill-green">◇ GEN ONLY</span>`,
-  'inactive':     `<span class="spill spill-slate">— NONE</span>`,
+  'window-open':     `<span class="spill spill-red">● OPEN</span>`,
+  'window-soon':     `<span class="spill spill-amber">◐ SOON</span>`,
+  'upcoming':        `<span class="spill spill-purple">○ UPCOMING</span>`,
+  'runoff-window':   `<span class="spill spill-red">● RUNOFF</span>`,
+  'runoff-upcoming': `<span class="spill spill-amber">◐ RUNOFF SOON</span>`,
+  'general-only':    `<span class="spill spill-green">◇ GEN ONLY</span>`,
+  'inactive':        `<span class="spill spill-slate">— NONE</span>`,
 };
 
 function buildHead() {
@@ -3159,7 +3511,7 @@ function updateInsightPanel() {
   const densityList = document.getElementById('insightDensityList');
   if (!activeList || !upcomingList || !densityList) return;
 
-  const statusDot = { 'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'var(--blue-light)', 'general-only':'var(--blue-light)', 'inactive':'var(--slate)' };
+  const statusDot = { 'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'#7C3AED', 'general-only':'var(--blue-light)', 'inactive':'var(--slate)' };
 
   // Priority tags based on spend data
   function priorityTag(abbr) {
