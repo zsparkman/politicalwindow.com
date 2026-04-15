@@ -1518,7 +1518,20 @@ document.getElementById('c-sortby').addEventListener('change',function(){pivotSo
 ['f-week-from','f-week-to'].forEach(function(id){
   document.getElementById(id).addEventListener('change',render);
 });
-document.getElementById('f-search').addEventListener('input',render);
+// The header search (#globalSearch) and the filter-row search (#f-search)
+// are kept as two inputs so either position works, but they target the same
+// client-side filter. Either input drives render() and writes its value
+// through to the other input so the UI stays in sync.
+// Before 4/15, #globalSearch was orphaned — it existed in the header markup
+// but had no event listener, so typing into it did nothing.
+document.getElementById('f-search').addEventListener('input',function(){
+  document.getElementById('globalSearch').value=this.value;
+  render();
+});
+document.getElementById('globalSearch').addEventListener('input',function(){
+  document.getElementById('f-search').value=this.value;
+  render();
+});
 document.getElementById('lines-wrap').addEventListener('click',function(e){
   var row=e.target.closest('.grp-hdr-row');
   if(!row)return;
@@ -1531,6 +1544,7 @@ document.getElementById('clear-filters').addEventListener('click',function(){
   document.getElementById('f-week-from').value='';
   document.getElementById('f-week-to').value='';
   document.getElementById('f-search').value='';
+  document.getElementById('globalSearch').value='';
   colFilters={};closeColFilter();
   clearPins();
 });
