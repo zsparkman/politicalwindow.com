@@ -75,7 +75,8 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 | `normalizeEntity(e)` | Shapes a tracker record → {name,party,office,district,spend,...} |
 | `groupByPartySorted(list)` | Groups candidates by party + sorts each by spend desc |
 | `lookupCuratedMeta(abbr,name)` | Gets incumbent/note from CANDS by name (fuzzy last-name) |
-| `highlightActiveDistricts(abbr)` | Adds bright fill + faint outer halo (2 layers) to active CDs |
+| `getDistrictGlowColor(abbr)` | Picks glow color from current overlay: heatmap cache if set, else STATUS_COLORS for the state |
+| `highlightActiveDistricts(abbr)` | Adds/updates bright fill + faint outer halo (2 layers) on active CDs; colors track the active map overlay |
 | `highlightSelectedDistrict(abbr,cd)` | Adds blue fill to selected CD + fits bounds |
 | `clearCandDistrictHighlight()` | Removes active glow layers + selected fill |
 | `applyCandMapHighlight(abbr)` | Reapplies highlights after districts load/reload |
@@ -148,14 +149,23 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
     when `totalSpend === 0`. Empty-state copy corrected from "No House
     districts with reported spend for X" → "No active House races on
     file for X".
-  - House: district list (tap to drill in) with a **bright green surface
-    fill + faint outer halo** on active CDs (Follow-up #2 — simplified from
-    the previous 3-layer outline-glow). Two layers: `districts-active-fill`
-    (0.55 → 0.72 on hover) and `districts-active-glow-outer` (blurred line,
-    0.28 → 0.45 on hover). Hovering brightens both via `cand-hover`
-    feature-state. Clicking an active district anywhere on the map drills
-    into that CD (same effect as clicking its row), auto-switching the
-    Candidates tab to House. Selected CD gets a blue fill overlay.
+  - House: district list (tap to drill in) with a **bright overlay-matched
+    surface fill + faint outer halo** on active CDs (Follow-up #2 — two
+    layers, simplified from the previous 3-layer outline-glow). The glow
+    color now tracks the **active map overlay** via `getDistrictGlowColor`:
+    under Window Timing it picks `STATUS_COLORS[s.status]`, under Density /
+    Spend / Cash it picks `_lastHeatmapColors[abbr]`. Layers:
+    `districts-active-fill` (0.55 → 0.72 opacity on hover) and
+    `districts-active-glow-outer` (blurred line, 0.28 → 0.45 on hover).
+    Hovering brightens both via `cand-hover` feature-state.
+    `setMapLayer` calls `applyCandMapHighlight(_currentStateAbbr)` after
+    any overlay switch so the glow recolors in place (paint-property
+    update, no layer rebuild). Clicking an active district anywhere on
+    the map drills into that CD (same effect as clicking its row), auto-
+    switching the Candidates tab to House. The `states-fill` click handler
+    early-exits when the same point hits `districts-active-fill` so MapLibre
+    doesn't double-fire and toggle the state off. Selected CD gets a blue
+    fill overlay.
   - **Districts illuminate on state selection** (Follow-up #2). Active
     House districts light up from the moment a state with House races is
     selected — no longer gated on the user picking the House slicer.
@@ -175,10 +185,23 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
     a dedicated point-feature source (`districts-labels-src`) with one
     centroid per unique `district_number`, so Hawaii shows a single "1"/"2"
     label on the largest island instead of duplicating across every atoll.
-- **Upcoming state color = governor purple** (`#7C3AED`) — propagated
-  through STATUS_COLORS, WC, SL, SPILL, the MapLibre fill-color matches,
-  tooltip color table, insights status dots, `.tile-upcoming`,
-  `.spill-purple`, and the status-bar legend (new `.dot-purple`).
+- **Window Timing palette refined (Follow-up #2, 4/15).** Replaced the
+  earlier saturated red/amber/violet/light-blue/slate ("box of crayons")
+  with a deeper Bloomberg-terminal-appropriate set. New CSS variables in
+  `:root` keep the status palette decoupled from the generic
+  `--red`/`--amber`/`--blue`/`--green` vars (which still back buttons,
+  KPIs, and the ✓ COMPLETE chip):
+  - `--status-open:     #991B1B` (window-open / runoff-window)
+  - `--status-soon:     #B45309` (window-soon / runoff-upcoming)
+  - `--status-upcoming: #6D28D9` (refined violet)
+  - `--status-general:  #1E3A8A` (deep navy)
+  - `--status-none:     #94A3B8` (slate)
+  `STATUS_COLORS`, `WC`, `SL`, `SPILL`, map-tooltip `statusLabel`, insights
+  `statusDot`, `.tile-*`, `.dot-*` legend dots, and the new
+  `.spill-status-open/soon/upcoming/general/none` classes all reference
+  these vars. The governor pill (`.tag-governor` / `.slicer-governor` /
+  `.spill-purple`) stays on its own `#7C3AED` — "Governor" is a race type,
+  not a window-timing status.
 - Candidate tracker page sorts by `total_spend` DESC by default (matches above)
 - **Back to Map button (Follow-up #2)** is now absolutely positioned inside
   `#mapContainer` in the top-left corner (previously inline in

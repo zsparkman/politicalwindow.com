@@ -35,6 +35,18 @@
     --green-dim:  rgba(5,150,105,0.08);
     --slate:      #94A3B8;
     --slate-dim:  rgba(148,163,184,0.12);
+    /* Window-timing status palette — Follow-up #2 refinement (was bright
+       red/amber/violet/light-blue/slate, "box of crayons"). These are
+       deeper, lower-saturation versions in the same hue family so phases
+       still differentiate clearly but read as professional/terminal. Used
+       by STATUS_COLORS in JS and by the .tile-*, .spill-status-*, .dot-*
+       status classes below. Generic --red/--amber/--blue/--green remain
+       available for non-status UI (KPIs, buttons, chips). */
+    --status-open:     #991B1B; /* window-open / runoff-window  (was #DC2626) */
+    --status-soon:     #B45309; /* window-soon / runoff-upcoming (was #D97706) */
+    --status-upcoming: #6D28D9; /* primary upcoming — refined violet (was #7C3AED) */
+    --status-general:  #1E3A8A; /* general-only — deep navy (was #60A5FA) */
+    --status-none:     #94A3B8; /* inactive — slate (unchanged) */
     --dem:        #2563EB;
     --rep:        #EF4444;
     --ind:        #8B5CF6;
@@ -218,12 +230,15 @@
   .legend { display:flex; align-items:center; gap:0.9rem; flex-wrap:wrap; }
   .legend-item { display:flex; align-items:center; gap:0.3rem; font-size:0.65rem; font-family:var(--sans); color:var(--text-muted); white-space:nowrap; }
   .legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-  .dot-red    { background:var(--red); }
-  .dot-amber  { background:var(--amber); }
+  /* Legend dots — status-coupled variants use the --status-* palette so
+     the map legend stays visually in sync with the window-timing overlay.
+     .dot-blue / .dot-green keep their generic colors for non-status use. */
+  .dot-red    { background:var(--status-open); }
+  .dot-amber  { background:var(--status-soon); }
   .dot-blue   { background:var(--blue-light); }
-  .dot-purple { background:#7C3AED; }
-  .dot-green  { background:var(--blue-light); }
-  .dot-slate  { background:var(--slate); }
+  .dot-purple { background:var(--status-upcoming); }
+  .dot-green  { background:var(--status-general); }
+  .dot-slate  { background:var(--status-none); }
   .filter-group { display:flex; align-items:center; gap:0.4rem; margin-left:auto; flex-wrap:wrap; }
   .filter-btn {
     font-family:var(--sans); font-size:0.6rem; font-weight:500;
@@ -310,10 +325,13 @@
   .tile:hover  { transform:scale(1.15); z-index:10; border-color:var(--text-muted); overflow:visible; }
   .tile:active { transform:scale(0.95); }
   .tile.selected { border-color:var(--text); box-shadow:0 0 0 2px rgba(0,0,0,0.12); transform:scale(1.08); z-index:10; }
-  .tile-window-open  { background:rgba(220,38,38,0.1);   border-color:var(--red);   color:var(--red); }
-  .tile-window-soon  { background:rgba(217,119,6,0.1);  border-color:var(--amber);  color:var(--amber); }
-  .tile-upcoming     { background:rgba(124,58,237,0.12); border-color:#7C3AED;       color:#7C3AED; }
-  .tile-general-only { background:var(--blue-glow);  border-color:#93C5FD;       color:var(--blue); }
+  /* Status tile backgrounds use the refined --status-* palette with a
+     soft ~10% tint so each phase is legible at small sizes without being
+     garish. Border inherits the full-strength status color. */
+  .tile-window-open  { background:rgba(153,27,27,0.10);  border-color:var(--status-open);     color:var(--status-open); }
+  .tile-window-soon  { background:rgba(180,83,9,0.10);   border-color:var(--status-soon);     color:var(--status-soon); }
+  .tile-upcoming     { background:rgba(109,40,217,0.10); border-color:var(--status-upcoming); color:var(--status-upcoming); }
+  .tile-general-only { background:rgba(30,58,138,0.08);  border-color:var(--status-general);  color:var(--status-general); }
   .tile-inactive     { background:#F1F5F9; color:var(--text-faint); border-color:#E2E8F0; }
   .tile.tile-dimmed  { opacity:0.2; pointer-events:none; cursor:default; }
 
@@ -505,12 +523,22 @@
   .sbox { width:26px; height:19px; background:#F1F5F9; border:1px solid var(--navy-border); border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:0.52rem; color:var(--text-muted); font-weight:600; flex-shrink:0; }
   .sname { font-weight:600; color:var(--text); font-size:0.72rem; font-family:var(--sans); }
   .spill { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:4px; font-family:var(--sans); font-size:0.56rem; letter-spacing:0.02em; font-weight:600; white-space:nowrap; }
+  /* Generic color spills — kept for non-status uses like the ✓ COMPLETE
+     indicator that reuses .spill-green. */
   .spill-red   { background:rgba(220,38,38,0.06);   color:var(--red);      border:1px solid rgba(220,38,38,0.15); }
   .spill-amber { background:rgba(217,119,6,0.06);  color:var(--amber);     border:1px solid rgba(217,119,6,0.15); }
   .spill-purple{ background:rgba(124,58,237,0.08);  color:#7C3AED;          border:1px solid rgba(124,58,237,0.22); }
   .spill-blue  { background:var(--blue-glow);  color:var(--blue);  border:1px solid rgba(59,130,246,0.15); }
   .spill-green { background:rgba(5,150,105,0.06);  color:var(--green);  border:1px solid rgba(5,150,105,0.15); }
   .spill-slate { background:#F1F5F9;  color:var(--slate);       border:1px solid #E2E8F0; }
+  /* Status spills — Follow-up #2. Used by the SPILL map (table status
+     column, state cards) so the window-timing palette stays decoupled
+     from the generic .spill-red/.spill-amber/.spill-green classes. */
+  .spill-status-open      { background:rgba(153,27,27,0.08);  color:var(--status-open);     border:1px solid rgba(153,27,27,0.20); }
+  .spill-status-soon      { background:rgba(180,83,9,0.08);   color:var(--status-soon);     border:1px solid rgba(180,83,9,0.20); }
+  .spill-status-upcoming  { background:rgba(109,40,217,0.08); color:var(--status-upcoming); border:1px solid rgba(109,40,217,0.22); }
+  .spill-status-general   { background:rgba(30,58,138,0.08);  color:var(--status-general);  border:1px solid rgba(30,58,138,0.22); }
+  .spill-status-none      { background:#F1F5F9;               color:var(--status-none);     border:1px solid #E2E8F0; }
   .itag { font-size:0.52rem; padding:1px 5px; border-radius:2px; border:1px solid; white-space:nowrap; font-weight:600; }
   .dbadge { font-size:0.54rem; display:block; margin-top:2px; }
   .cand-mini { display:flex; flex-direction:column; gap:2px; }
@@ -1288,13 +1316,18 @@ const FIPS = {
   '54':'WV','55':'WI','56':'WY'
 };
 
+// Refined window-timing palette (Follow-up #2). Matches the --status-*
+// CSS variables declared above. Deeper, lower-saturation hues than the
+// prior #DC2626/#D97706/#7C3AED/#60A5FA set — reads as "professional
+// terminal" rather than "box of crayons", while still keeping enough
+// hue separation to differentiate each phase at a glance.
 const STATUS_COLORS = {
-  'window-open':     '#DC2626',
-  'window-soon':     '#D97706',
-  'upcoming':        '#7C3AED',
-  'runoff-window':   '#DC2626',
-  'runoff-upcoming': '#D97706',
-  'general-only':    '#60A5FA',
+  'window-open':     '#991B1B',
+  'window-soon':     '#B45309',
+  'upcoming':        '#6D28D9',
+  'runoff-window':   '#991B1B',
+  'runoff-upcoming': '#B45309',
+  'general-only':    '#1E3A8A',
   'inactive':        '#94A3B8'
 };
 
@@ -1569,15 +1602,15 @@ function wireMapInteractions() {
     hoveredStateId = f.id;
     glMap.setFeatureState({ source: 'states', id: hoveredStateId }, { hover: true });
 
-    // Position tooltip
+    // Position tooltip — status colors tied to --status-* palette.
     const statusLabel = {
-      'window-open': '<span style="color:var(--red);font-weight:600">PRIMARY WINDOW OPEN</span>',
-      'window-soon': '<span style="color:var(--amber);font-weight:600">OPENS SOON</span>',
-      'upcoming': '<span style="color:#7C3AED;font-weight:600">UPCOMING</span>',
-      'runoff-window': '<span style="color:var(--red);font-weight:600">RUNOFF WINDOW OPEN</span>',
-      'runoff-upcoming': '<span style="color:var(--amber);font-weight:600">RUNOFF WINDOW SOON</span>',
-      'general-only': '<span style="color:var(--blue-light);font-weight:600">GENERAL ONLY</span>',
-      'inactive': '<span style="color:var(--slate)">NO WINDOW</span>'
+      'window-open': '<span style="color:var(--status-open);font-weight:600">PRIMARY WINDOW OPEN</span>',
+      'window-soon': '<span style="color:var(--status-soon);font-weight:600">OPENS SOON</span>',
+      'upcoming': '<span style="color:var(--status-upcoming);font-weight:600">UPCOMING</span>',
+      'runoff-window': '<span style="color:var(--status-open);font-weight:600">RUNOFF WINDOW OPEN</span>',
+      'runoff-upcoming': '<span style="color:var(--status-soon);font-weight:600">RUNOFF WINDOW SOON</span>',
+      'general-only': '<span style="color:var(--status-general);font-weight:600">GENERAL ONLY</span>',
+      'inactive': '<span style="color:var(--status-none)">NO WINDOW</span>'
     }[s.status] || '';
 
     const races = s.races ? s.races.join(' · ') : '';
@@ -1656,6 +1689,16 @@ function wireMapInteractions() {
 
   glMap.on('click', 'states-fill', (e) => {
     if (!e.features.length) return;
+    // MapLibre dispatches click events to each layer independently — setting
+    // cancelBubble on the district handler does NOT stop this handler from
+    // firing. When the clicked point hits an active-race district we defer
+    // entirely to the district drill-in handler; otherwise clicking inside
+    // the (already-selected) state would toggle it back to the national
+    // view and bounce the map out.
+    if (glMap.getLayer('districts-active-fill')) {
+      const hits = glMap.queryRenderedFeatures(e.point, { layers: ['districts-active-fill'] });
+      if (hits.length) return;
+    }
     pick(e.features[0].properties.abbr);
   });
 
@@ -1877,6 +1920,11 @@ async function setMapLayer(layer) {
     ]);
     updateInsetColors();
   }
+  // Follow-up #2: the active-district glow inherits the state's overlay
+  // color, so an overlay switch while a state is zoomed-in needs to repaint
+  // the glow layers. `applyCandMapHighlight` no-ops when no state is
+  // selected or the state has no House races.
+  if (_currentStateAbbr) applyCandMapHighlight(_currentStateAbbr);
 }
 
 // ── MAP: State zoom + district loading ────────────────────────────────────────
@@ -2244,19 +2292,22 @@ function setInsetVisibility(visible) {
 
 // ── SHARED DETAIL HTML BUILDER ─────────────────────────────────────────────────
 const PC = { D:'var(--dem)', R:'var(--rep)', I:'var(--ind)' };
+// Status-line labels (top of detail panel). Colors point at the --status-*
+// palette so a palette tweak in one place cascades here.
 const SL = {
-  'window-open':     `<span style="color:var(--red)">● PRIMARY WINDOW OPEN</span>`,
-  'window-soon':     `<span style="color:var(--amber)">◐ WINDOW OPENS SOON</span>`,
-  'upcoming':        `<span style="color:#7C3AED">○ PRIMARY UPCOMING</span>`,
-  'runoff-window':   `<span style="color:var(--red)">● RUNOFF WINDOW OPEN</span>`,
-  'runoff-upcoming': `<span style="color:var(--amber)">◐ RUNOFF WINDOW SOON</span>`,
-  'general-only':    `<span style="color:var(--blue-light)">◇ GENERAL WINDOW ONLY</span>`,
-  'inactive':        `<span style="color:var(--slate)">— NO MAJOR FEDERAL RACE</span>`,
+  'window-open':     `<span style="color:var(--status-open)">● PRIMARY WINDOW OPEN</span>`,
+  'window-soon':     `<span style="color:var(--status-soon)">◐ WINDOW OPENS SOON</span>`,
+  'upcoming':        `<span style="color:var(--status-upcoming)">○ PRIMARY UPCOMING</span>`,
+  'runoff-window':   `<span style="color:var(--status-open)">● RUNOFF WINDOW OPEN</span>`,
+  'runoff-upcoming': `<span style="color:var(--status-soon)">◐ RUNOFF WINDOW SOON</span>`,
+  'general-only':    `<span style="color:var(--status-general)">◇ GENERAL WINDOW ONLY</span>`,
+  'inactive':        `<span style="color:var(--status-none)">— NO MAJOR FEDERAL RACE</span>`,
 };
+// Status → CSS color expression used by various detail-panel accents.
 const WC = {
-  'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'#7C3AED',
-  'runoff-window':'var(--red)', 'runoff-upcoming':'var(--amber)',
-  'general-only':'var(--blue-light)', 'inactive':'var(--slate)'
+  'window-open':'var(--status-open)', 'window-soon':'var(--status-soon)', 'upcoming':'var(--status-upcoming)',
+  'runoff-window':'var(--status-open)', 'runoff-upcoming':'var(--status-soon)',
+  'general-only':'var(--status-general)', 'inactive':'var(--status-none)'
 };
 
 // ── CANDIDATES TAB · Slicer-based layout (4.14.26) ─────────────────────────
@@ -2742,6 +2793,23 @@ function rerenderCandidatesPane(container, abbr) {
 // `cand-hover` feature-state (see wireMapInteractions). Prior implementation
 // stacked fill + wide outer halo + crisp inner rim and ended up outlining
 // the district rather than lighting it up.
+//
+// Follow-up #2 (revision): the glow no longer uses a hardcoded green —
+// it inherits the state's current overlay color (Window Timing status color
+// or heatmap color for Density / Spend / Cash). `setMapLayer` re-invokes
+// `applyCandMapHighlight` after a layer switch so this paint property is
+// repainted in place without re-adding layers.
+function getDistrictGlowColor(abbr) {
+  // Heatmap overlays (density / spend / cash) store per-state colors here.
+  if (_lastHeatmapColors && _lastHeatmapColors[abbr]) {
+    return _lastHeatmapColors[abbr];
+  }
+  // Window-timing overlay: derive from the state's status.
+  const s = SM[abbr];
+  if (s && STATUS_COLORS[s.status]) return STATUS_COLORS[s.status];
+  return '#475569'; // slate-600 fallback
+}
+
 function highlightActiveDistricts(abbr) {
   if (!glMap || !DISTRICT_CACHE[abbr]) return;
   if (!glMap.getSource('districts')) return;
@@ -2749,12 +2817,15 @@ function highlightActiveDistricts(abbr) {
   getCandidatesFor(abbr, 'House').forEach(c => { if (c.district) active.add(String(parseInt(c.district, 10) || 0)); });
   const filter = ['in', ['to-string', ['get', 'district_number']], ['literal', [...active]]];
   const beforeId = glMap.getLayer('districts-label-pt') ? 'districts-label-pt' : undefined;
-  const glowColor = '#10B981';
+  const glowColor = getDistrictGlowColor(abbr);
 
   // Bright uniform fill across the whole district surface. Brightens further
-  // when the cand-hover feature-state is on (hover / keyboard focus).
+  // when the cand-hover feature-state is on (hover / keyboard focus). On
+  // subsequent calls we repaint in place so overlay switches recolor the
+  // glow without a layer rebuild.
   if (glMap.getLayer('districts-active-fill')) {
     glMap.setFilter('districts-active-fill', filter);
+    glMap.setPaintProperty('districts-active-fill', 'fill-color', glowColor);
   } else {
     glMap.addLayer({
       id: 'districts-active-fill',
@@ -2777,6 +2848,7 @@ function highlightActiveDistricts(abbr) {
   // dominant visual, not the outline.
   if (glMap.getLayer('districts-active-glow-outer')) {
     glMap.setFilter('districts-active-glow-outer', filter);
+    glMap.setPaintProperty('districts-active-glow-outer', 'line-color', glowColor);
   } else {
     glMap.addLayer({
       id: 'districts-active-glow-outer',
@@ -2913,7 +2985,7 @@ function buildDetailHTML(abbr) {
   if (s.rDate && s.rWindow) {
     const rBarPct = Math.max(0, Math.min(100, ((TODAY - s.rWindow) / (s.rDate - s.rWindow)) * 100));
     const inRunoff = s.status === 'runoff-window';
-    const runoffColor = inRunoff ? 'var(--red)' : (s.status === 'runoff-upcoming' ? 'var(--amber)' : 'var(--slate)');
+    const runoffColor = inRunoff ? 'var(--status-open)' : (s.status === 'runoff-upcoming' ? 'var(--status-soon)' : 'var(--status-none)');
     let rNote;
     if (s.dRun !== null && s.dRun < 0) rNote = `Runoff window closed · ${Math.abs(s.dRun)}d ago`;
     else if (inRunoff) rNote = `${Math.round(rBarPct)}% elapsed · LUR APPLIES NOW`;
@@ -2931,7 +3003,7 @@ function buildDetailHTML(abbr) {
   // Status line: include runoff phrasing where applicable
   let statusLineHTML = SL[s.status] || '';
   if (s.status==='general-only'&&s.pDate) {
-    statusLineHTML = `<span style="color:var(--blue-light)">✓ PRIMARY COMPLETE · GENERAL WINDOW</span>`;
+    statusLineHTML = `<span style="color:var(--status-general)">✓ PRIMARY COMPLETE · GENERAL WINDOW</span>`;
   }
 
   return `<div class="fade-in">
@@ -3146,14 +3218,18 @@ const COLS = [
 ];
 let sk = 'dWin', sd = 1, q = '', rf = 'all', stateFilter = null;
 const SO = s => ({'window-open':0,'runoff-window':0,'window-soon':1,'runoff-upcoming':1,'upcoming':2,'general-only':3,'inactive':4}[s]??5);
+// Status spills — Follow-up #2: switched from generic .spill-red/.spill-amber/
+// .spill-purple/.spill-green/.spill-slate to dedicated .spill-status-* classes
+// so the refined window-timing palette doesn't collide with the generic color
+// spills that other UI (like the ✓ COMPLETE chip) still uses.
 const SPILL = {
-  'window-open':     `<span class="spill spill-red">● OPEN</span>`,
-  'window-soon':     `<span class="spill spill-amber">◐ SOON</span>`,
-  'upcoming':        `<span class="spill spill-purple">○ UPCOMING</span>`,
-  'runoff-window':   `<span class="spill spill-red">● RUNOFF</span>`,
-  'runoff-upcoming': `<span class="spill spill-amber">◐ RUNOFF SOON</span>`,
-  'general-only':    `<span class="spill spill-green">◇ GEN ONLY</span>`,
-  'inactive':        `<span class="spill spill-slate">— NONE</span>`,
+  'window-open':     `<span class="spill spill-status-open">● OPEN</span>`,
+  'window-soon':     `<span class="spill spill-status-soon">◐ SOON</span>`,
+  'upcoming':        `<span class="spill spill-status-upcoming">○ UPCOMING</span>`,
+  'runoff-window':   `<span class="spill spill-status-open">● RUNOFF</span>`,
+  'runoff-upcoming': `<span class="spill spill-status-soon">◐ RUNOFF SOON</span>`,
+  'general-only':    `<span class="spill spill-status-general">◇ GEN ONLY</span>`,
+  'inactive':        `<span class="spill spill-status-none">— NONE</span>`,
 };
 
 function buildHead() {
@@ -3218,7 +3294,7 @@ function drawTable() {
       <td><div class="td-state"><div class="sbox">${s.abbr}</div><div class="sname">${s.name}</div></div></td>
       <td>${s.status==='general-only'&&s.pDate?`<span class="spill spill-green">✓ COMPLETE</span>`:SPILL[s.status]||''}</td>
       <td style="color:var(--text)">${fmtS(s.pDate)}</td>
-      <td style="color:var(--text)">${fmtS(s.pWindow)}${s.status==='window-open'?'<span class="dbadge pulse" style="color:var(--red)">● NOW</span>':s.status==='window-soon'?`<span class="dbadge" style="color:var(--amber)">in ${s.dWin}d</span>`:''}</td>
+      <td style="color:var(--text)">${fmtS(s.pWindow)}${s.status==='window-open'?'<span class="dbadge pulse" style="color:var(--status-open)">● NOW</span>':s.status==='window-soon'?`<span class="dbadge" style="color:var(--status-soon)">in ${s.dWin}d</span>`:''}</td>
       <td style="color:var(--text)">${s.dWin===null?'—':s.dWin<=0?`<span style="color:var(--text-faint)">Past</span>`:s.dWin}</td>
       <td class="col-runoff" style="color:${s.rDate?'var(--text)':'var(--text-faint)'}">${fmtS(s.rDate)}</td>
       <td class="col-races"><div style="display:flex;flex-wrap:wrap;gap:3px">${rtags}</div></td>
@@ -3539,7 +3615,7 @@ function updateInsightPanel() {
   const densityList = document.getElementById('insightDensityList');
   if (!activeList || !upcomingList || !densityList) return;
 
-  const statusDot = { 'window-open':'var(--red)', 'window-soon':'var(--amber)', 'upcoming':'#7C3AED', 'general-only':'var(--blue-light)', 'inactive':'var(--slate)' };
+  const statusDot = { 'window-open':'var(--status-open)', 'window-soon':'var(--status-soon)', 'upcoming':'var(--status-upcoming)', 'general-only':'var(--status-general)', 'inactive':'var(--status-none)' };
 
   // Priority tags based on spend data
   function priorityTag(abbr) {
@@ -3643,7 +3719,7 @@ function updateChangeBanner() {
   const openNow = STATES.filter(s => s.status === 'window-open').length;
   const soonCount = STATES.filter(s => s.status === 'window-soon').length;
   if (openNow > 0) {
-    lines.push(`<div class="change-line"><div class="change-dot" style="background:var(--red)"></div><strong>${openNow}</strong> FCC windows open now${soonCount > 0 ? ` · ${soonCount} opening soon` : ''}</div>`);
+    lines.push(`<div class="change-line"><div class="change-dot" style="background:var(--status-open)"></div><strong>${openNow}</strong> FCC windows open now${soonCount > 0 ? ` · ${soonCount} opening soon` : ''}</div>`);
   }
 
   if (lines.length > 0) {

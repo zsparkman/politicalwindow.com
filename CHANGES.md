@@ -4,6 +4,101 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-04-15 — Follow-up #2 fixes (map click, overlay-matched glow, palette)
+
+**Spec:** user feedback on Follow-up #2 implementation — three issues:
+1. Clicking a congressional district bounced back to the national view
+   instead of drilling in.
+2. Glow color was hardcoded green; should inherit the state's color on the
+   currently active map overlay (Window Timing / Density / Spend / Cash).
+3. The Window Timing palette read like a "box of crayons" — needed to feel
+   professional while still differentiating each phase.
+
+### District click no longer bounces out
+
+1. **Cause.** MapLibre dispatches click events to each subscribed layer
+   independently, so the `states-fill` click handler (registered in
+   `wireMapInteractions`) kept firing even when the user clicked a district.
+   `e.originalEvent.cancelBubble = true` inside the district handler had no
+   effect on MapLibre's own dispatch. Since the state was already selected,
+   the state-level click toggled it off and `mapDeselectState` bounced the
+   view back to the national map.
+2. **Fix.** `states-fill` click handler now calls
+   `glMap.queryRenderedFeatures(e.point, { layers: ['districts-active-fill'] })`
+   first. If any active-race district was hit at the same point, it returns
+   early and lets the district-layer handler handle the drill-in alone.
+   One extra rendered-feature query per state click — negligible cost.
+
+### Glow color follows active overlay
+
+3. **`getDistrictGlowColor(abbr)` (new helper).** Picks the glow color from
+   the current overlay context: if `_lastHeatmapColors[abbr]` is populated
+   (Density / Spend / Cash overlays apply per-state colors here via
+   `applyHeatmapToMap`), use it; otherwise fall back to
+   `STATUS_COLORS[SM[abbr].status]` (Window Timing overlay); final fallback
+   `#475569` (slate-600).
+4. **`highlightActiveDistricts` — paint updates in place.** Previously the
+   function only called `setFilter` on subsequent invocations (once the
+   layers existed). Now it also calls `setPaintProperty('districts-active-
+   fill', 'fill-color', glowColor)` and the equivalent `line-color` on
+   `districts-active-glow-outer`. Without this, switching overlays while a
+   state was zoomed-in left the glow painted in the old color.
+5. **`setMapLayer` triggers a repaint.** After the state fill-color match
+   expression (or the heatmap) is applied, `setMapLayer` now calls
+   `applyCandMapHighlight(_currentStateAbbr)` to recolor the glow layers.
+   The call no-ops when no state is zoomed in or when the selected state
+   has no House races, so it's safe to invoke unconditionally.
+
+### Refined Window Timing palette
+
+6. **New `--status-*` CSS variables in `:root`.** Adds a dedicated,
+   status-coupled color family separate from the generic
+   `--red`/`--amber`/`--blue`/`--green`/`--slate` (which other UI like
+   buttons, KPIs, ✓ COMPLETE spills still uses):
+   - `--status-open:     #991B1B` (was `#DC2626` — red-700)
+   - `--status-soon:     #B45309` (was `#D97706` — amber-700)
+   - `--status-upcoming: #6D28D9` (was `#7C3AED` — violet-700)
+   - `--status-general:  #1E3A8A` (was `#60A5FA` — deep navy)
+   - `--status-none:     #94A3B8` (unchanged — slate)
+7. **`STATUS_COLORS` JS object** updated to the same hex values. This
+   cascades through the MapLibre `fill-color` match expressions in
+   `addStatesLayer`, the alternate-layer match in `setMapLayer`, the
+   `applyHeatmapToMap` fallback (when window-timing is active),
+   `updateInsetColors`, and anywhere else that reads `STATUS_COLORS[status]`.
+8. **`SL` (status-line label) + `WC` (window-color accent) + `SPILL`
+   (table status cell) + insights `statusDot` + map-tooltip `statusLabel`**
+   all switched from hardcoded hex or generic `var(--red)` etc. to
+   `var(--status-open)` / `var(--status-soon)` / `var(--status-upcoming)` /
+   `var(--status-general)` / `var(--status-none)`.
+9. **`.tile-window-open` / `.tile-window-soon` / `.tile-upcoming` /
+   `.tile-general-only`** now use the `--status-*` variables for both
+   border + text, and 10% rgba tints in their background.
+10. **New `.spill-status-open` / `.spill-status-soon` /
+    `.spill-status-upcoming` / `.spill-status-general` / `.spill-status-none`
+    classes.** Added alongside (not replacing) the existing `.spill-red` /
+    `.spill-amber` / `.spill-purple` / `.spill-green` / `.spill-slate` so
+    the COMPLETE indicator at `../index.html:3219` and `:3257` (which reuses
+    `.spill-green` for a "primary completed" chip) keeps its green. The
+    `SPILL` map now points at the new `.spill-status-*` classes.
+11. **Legend dots.** `.dot-red`/`.dot-amber`/`.dot-purple`/`.dot-green`/
+    `.dot-slate` now pull from `--status-*`. `.dot-blue` untouched — it's
+    a generic accent used outside the status legend.
+12. **Governor pill / slicer left alone.** `.tag-governor`,
+    `.cand-slicer.slicer-governor`, and `.spill-purple` still use
+    `#7C3AED`. Governor is a *race-type* identifier, not a window-timing
+    status. Decoupling it here lets the status palette evolve
+    independently without dragging the race-type colors along.
+
+### Files touched
+
+- `politicalwindow.com/index.html` — click handler, glow helper, palette,
+  paint-property updates, CSS vars + classes
+- `politicalwindow.com/CHANGES.md` — this entry
+- `politicalwindow.com/CLAUDE.md` — Current State updated for palette +
+  glow-color behavior
+
+---
+
 ## 2026-04-14 — Candidates tab · Follow-up #2 (spec 4/11/26 11:20pm)
 
 **Spec:** `../Candidates Tab Improved Layout 4.14.26.rtf` (Follow-up #2 section)
