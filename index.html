@@ -275,13 +275,19 @@
   }
   .map-breadcrumb button:hover { text-decoration:underline; }
 
+  /* Follow-up #2: Back to Map is anchored inside #mapContainer top-left so it
+     floats over the map canvas (was previously inline inside .map-layer-toggles).
+     Uses a translucent white card + shadow so it stays legible over the dark
+     basemap and any glowing district fills underneath. */
   .back-to-usa {
-    display:inline-flex; align-items:center; gap:0.3rem;
+    position:absolute; top:10px; left:10px; z-index:20;
+    display:inline-flex; align-items:center; gap:0.35rem;
     font-family:var(--sans); font-size:0.62rem; font-weight:600;
-    color:var(--blue); background:#fff;
+    color:var(--blue); background:rgba(255,255,255,0.96); backdrop-filter:blur(6px);
     border:1px solid var(--navy-border); border-radius:4px;
-    padding:4px 9px 4px 6px; cursor:pointer; margin:0;
+    padding:5px 10px 5px 7px; cursor:pointer; margin:0;
     transition:all 0.15s; letter-spacing:0.03em;
+    box-shadow:0 2px 6px rgba(15,23,42,0.12);
   }
   .back-to-usa:hover { border-color:var(--blue); background:#F8FAFC; }
 
@@ -935,10 +941,6 @@
               FCC Gen Window: <span style="color:var(--blue)">Sep 4, 2026</span>
             </div>
             <div class="map-layer-toggles" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
-              <button class="back-to-usa" id="backToUSA" style="display:none" onclick="mapBackToUSA()">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                Back to Map
-              </button>
               <button class="filter-btn active" data-layer="window" onclick="setMapLayer('window')">Window Timing</button>
               <button class="filter-btn" data-layer="density" onclick="setMapLayer('density')">Candidate Density</button>
               <button class="filter-btn" data-layer="spend" onclick="setMapLayer('spend')">Total Spend</button>
@@ -948,6 +950,10 @@
         </div>
         <div class="map-scroll">
           <div id="mapContainer">
+            <button class="back-to-usa" id="backToUSA" style="display:none" onclick="mapBackToUSA()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              Back to Map
+            </button>
             <div class="map-loading" id="mapLoading">
               <div class="map-loading-spinner"></div>
               <div class="map-loading-text">Loading map data…</div>
@@ -2136,7 +2142,6 @@ function hideDistricts() {
     'districts-selected-fill',
     'districts-active-fill',
     'districts-active-glow-outer',
-    'districts-active-glow-inner',
     'districts-label',
     'districts-label-pt',
     'districts-line',
@@ -2405,39 +2410,54 @@ function renderCandRowHTML(abbr, cand) {
 }
 
 // Render one party group (Democratic/Republican/Independent).
-// Rules (per spec + Follow-up #1):
-//   • In-primary states: top 3 by spend + See More. If no spend recorded, fall
-//     back to 2+ curated candidates from that party.
+// Rules (per spec + Follow-up #1 + Follow-up #2):
+//   • In-primary states: top 3 by spend + See More. If fewer than 2 with spend,
+//     pad from no-spend entries (curated or tracker) up to a 2-candidate floor
+//     so every declared party still shows a minimum of 2 candidates.
 //   • Runoff phase: same as primary (show the two finalists).
 //   • Post-primary: show all candidates with reported spend (nominees + active
-//     indies). If no spend recorded, fall back to 1 curated nominee.
+//     indies). If none with spend, fall back to 1 curated/tracker nominee.
+//   • Follow-up #2: districts with active races always display a minimum of
+//     one candidate per party regardless of spend (unless truly none
+//     declared) — the renderer no longer filters out no-spend entries when
+//     with-spend coverage is thin.
 function renderPartyGroup(abbr, office, partyCode, list, primComplete, expanded, runoffPhase) {
   const partyName = { D: 'Democratic', R: 'Republican', I: 'Independent' }[partyCode];
-  const withSpend = list.filter(c => c.spend > 0);
+  // Sort: spend-desc first, then no-spend in list order. groupByPartySorted
+  // already produced spend-desc, but we re-sort defensively so the fallback
+  // entries land at the tail regardless of caller.
+  const sorted    = list.slice().sort((a, b) => (b.spend || 0) - (a.spend || 0));
+  const withSpend = sorted.filter(c => c.spend > 0);
+  const noSpend   = sorted.filter(c => !(c.spend > 0));
   let shown;
   let showSeeMore = false;
   if (primComplete) {
-    // Post-primary: prefer entries with spend; fall back to 1 curated (treated as nominee).
-    shown = withSpend.length ? withSpend : list.slice(0, 1);
+    // Post-primary: prefer entries with spend; fall back to 1 nominee.
+    shown = withSpend.length ? withSpend : sorted.slice(0, 1);
   } else if (expanded) {
-    shown = withSpend.length ? withSpend : list.slice(0, Math.max(2, list.length));
+    shown = sorted.slice();
   } else {
-    // In-primary or runoff phase: top 3 with spend, fall back to 2+ from curated.
-    if (withSpend.length) {
-      shown = withSpend.slice(0, 3);
-      if (withSpend.length > 3) showSeeMore = true;
+    // In-primary or runoff phase: show the top 3 by spend, but guarantee a
+    // minimum of 2 entries per party by padding from the no-spend pool when
+    // with-spend coverage is thin (Follow-up #2: min-1-per-party-per-race,
+    // bumped to 2 to match Follow-up #1 for primary/runoff states).
+    const MIN_FLOOR = 2;
+    const base = withSpend.slice(0, 3);
+    if (base.length < MIN_FLOOR) {
+      const need = MIN_FLOOR - base.length;
+      shown = base.concat(noSpend.slice(0, need));
     } else {
-      const minShow = runoffPhase ? 2 : 2;
-      shown = list.slice(0, Math.max(minShow, Math.min(list.length, 3)));
-      if (list.length > shown.length) showSeeMore = true;
+      shown = base;
     }
+    // See More covers whatever is still unshown (both spend + no-spend).
+    const total = sorted.length;
+    if (total > shown.length) showSeeMore = true;
   }
   if (!shown.length) return '';
   const rowsHTML = shown.map(c => renderCandRowHTML(abbr, c)).join('');
   let actionHTML = '';
   if (showSeeMore) {
-    const total = withSpend.length ? withSpend.length : list.length;
-    const more = total - shown.length;
+    const more = sorted.length - shown.length;
     if (more > 0) {
       actionHTML = `<button class="cand-action-btn cand-see-more" data-party="${partyCode}" data-action="see-more">See More (+${more}) ▼</button>`;
     }
@@ -2623,7 +2643,7 @@ function renderHouseOffice(abbr, s, st) {
     html += renderSeeAllLink(abbr, 'House', st.district);
   } else {
     if (districts.length === 0) {
-      html += `<div class="cand-district-empty">No House districts with reported spend for ${abbr}</div>`;
+      html += `<div class="cand-district-empty">No active House races on file for ${abbr}</div>`;
       const fb = renderCuratedFallback(abbr, 'House');
       if (fb) html += fb;
     } else {
@@ -2631,11 +2651,16 @@ function renderHouseOffice(abbr, s, st) {
       html += `<div class="cand-district-list">`;
       districts.forEach(d => {
         const candCount = d.cands.length;
-        const spendStr  = d.totalSpend > 0 ? `$${fmtCompact(d.totalSpend)}` : '—';
+        // Follow-up #2: show "no spend reported" explicitly instead of "—"
+        // so districts that are active but have no recorded spend still read
+        // as present in the list (rather than looking stale/empty).
+        const spendStr  = d.totalSpend > 0
+          ? `$${fmtCompact(d.totalSpend)}`
+          : `<span style="color:var(--text-faint)">no spend reported</span>`;
         const rowLabel  = d.district === 'unknown' ? `${abbr}-??` : `${abbr}-${d.district}`;
         html += `<div class="cand-district-row" data-district="${d.district}">
           <div class="cand-district-code">${rowLabel}</div>
-          <div class="cand-district-meta">${candCount} candidate${candCount !== 1 ? 's' : ''} with spend</div>
+          <div class="cand-district-meta">${candCount} candidate${candCount !== 1 ? 's' : ''}</div>
           <div class="cand-district-spend">${spendStr}</div>
         </div>`;
       });
@@ -2711,9 +2736,12 @@ function rerenderCandidatesPane(container, abbr) {
 }
 
 // ── Map district highlights tied to the Candidates tab ─────────────────────
-// Active-race districts are drawn with a true glow: a bright outer line halo
-// (blurred, wide) + a second crisp inner line + a soft fill. Hovering a glow
-// district boosts the halo brightness via feature-state `cand-hover`.
+// Follow-up #2: active-race districts read as "lit up" — two layers, not
+// three. A bright uniform surface fill carries the weight; a faint blurred
+// outer halo gives a soft glow. Hovering a district brightens both via the
+// `cand-hover` feature-state (see wireMapInteractions). Prior implementation
+// stacked fill + wide outer halo + crisp inner rim and ended up outlining
+// the district rather than lighting it up.
 function highlightActiveDistricts(abbr) {
   if (!glMap || !DISTRICT_CACHE[abbr]) return;
   if (!glMap.getSource('districts')) return;
@@ -2723,7 +2751,8 @@ function highlightActiveDistricts(abbr) {
   const beforeId = glMap.getLayer('districts-label-pt') ? 'districts-label-pt' : undefined;
   const glowColor = '#10B981';
 
-  // Soft translucent fill
+  // Bright uniform fill across the whole district surface. Brightens further
+  // when the cand-hover feature-state is on (hover / keyboard focus).
   if (glMap.getLayer('districts-active-fill')) {
     glMap.setFilter('districts-active-fill', filter);
   } else {
@@ -2731,12 +2760,21 @@ function highlightActiveDistricts(abbr) {
       id: 'districts-active-fill',
       type: 'fill',
       source: 'districts',
-      paint: { 'fill-color': glowColor, 'fill-opacity': 0.18 },
+      paint: {
+        'fill-color': glowColor,
+        'fill-opacity': [
+          'case',
+          ['boolean', ['feature-state', 'cand-hover'], false], 0.72,
+          0.55,
+        ],
+      },
       filter,
     }, beforeId);
   }
 
-  // Outer blurred halo — this creates the actual "glow" effect
+  // Faint outer glow — blurred line just wide enough to read as a halo
+  // around each district, but intentionally restrained so the fill is the
+  // dominant visual, not the outline.
   if (glMap.getLayer('districts-active-glow-outer')) {
     glMap.setFilter('districts-active-glow-outer', filter);
   } else {
@@ -2748,32 +2786,15 @@ function highlightActiveDistricts(abbr) {
         'line-color': glowColor,
         'line-width': [
           'case',
-          ['boolean', ['feature-state', 'cand-hover'], false], 16,
-          10,
+          ['boolean', ['feature-state', 'cand-hover'], false], 8,
+          5,
         ],
-        'line-blur': 10,
+        'line-blur': 8,
         'line-opacity': [
           'case',
-          ['boolean', ['feature-state', 'cand-hover'], false], 0.95,
-          0.65,
+          ['boolean', ['feature-state', 'cand-hover'], false], 0.45,
+          0.28,
         ],
-      },
-      filter,
-    }, beforeId);
-  }
-
-  // Bright inner rim — keeps the district boundary legible at the center of the glow
-  if (glMap.getLayer('districts-active-glow-inner')) {
-    glMap.setFilter('districts-active-glow-inner', filter);
-  } else {
-    glMap.addLayer({
-      id: 'districts-active-glow-inner',
-      type: 'line',
-      source: 'districts',
-      paint: {
-        'line-color': '#6EE7B7',
-        'line-width': 1.75,
-        'line-opacity': 0.95,
       },
       filter,
     }, beforeId);
@@ -2815,7 +2836,6 @@ function clearCandDistrictHighlight() {
   [
     'districts-active-fill',
     'districts-active-glow-outer',
-    'districts-active-glow-inner',
     'districts-selected-fill',
   ].forEach(id => {
     if (glMap.getLayer(id)) glMap.removeLayer(id);
@@ -2823,13 +2843,21 @@ function clearCandDistrictHighlight() {
 }
 
 // Called from mapSelectState → moveend after districts load, and from enrichment
-// post-fetch, to re-apply highlights based on the current candTabState.
+// post-fetch. Follow-up #2: active House districts are now illuminated from the
+// moment a state with House races is selected, regardless of which slicer the
+// user currently has picked in the Candidates tab. Clicking a lit district then
+// drills into the House view (see wireMapInteractions district click handler).
+// The selected-district blue overlay still only applies when the user is
+// actually viewing House + has drilled into a specific CD.
 function applyCandMapHighlight(abbr) {
+  const s = SM[abbr];
+  if (!s) return;
+  const races = getRacesForState(s);
+  if (!races.includes('House')) return;
+  highlightActiveDistricts(abbr);
   const st = candTabState[abbr];
-  if (!st) return;
-  if (st.office === 'House') {
-    highlightActiveDistricts(abbr);
-    if (st.district) highlightSelectedDistrict(abbr, st.district);
+  if (st && st.office === 'House' && st.district) {
+    highlightSelectedDistrict(abbr, st.district);
   }
 }
 

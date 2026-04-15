@@ -75,7 +75,7 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 | `normalizeEntity(e)` | Shapes a tracker record → {name,party,office,district,spend,...} |
 | `groupByPartySorted(list)` | Groups candidates by party + sorts each by spend desc |
 | `lookupCuratedMeta(abbr,name)` | Gets incumbent/note from CANDS by name (fuzzy last-name) |
-| `highlightActiveDistricts(abbr)` | Adds glow layers (fill + outer halo + inner rim) to active CDs |
+| `highlightActiveDistricts(abbr)` | Adds bright fill + faint outer halo (2 layers) to active CDs |
 | `highlightSelectedDistrict(abbr,cd)` | Adds blue fill to selected CD + fits bounds |
 | `clearCandDistrictHighlight()` | Removes active glow layers + selected fill |
 | `applyCandMapHighlight(abbr)` | Reapplies highlights after districts load/reload |
@@ -123,7 +123,7 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
 - MapLibre geographic map replaces tile-grid cartogram (with tile-grid fallback)
 - State zoom + congressional district boundaries on state selection
 - Polling data displayed in detail panel tabs
-- **Candidates tab (4.14.26, incl. Follow-up #1)** — slicer-based layout:
+- **Candidates tab (4.14.26, incl. Follow-up #1 + Follow-up #2)** — slicer-based layout:
   - Detail panel: `.detail-header` (status line + state name + abbr) is
     followed by a sticky `.detail-tabs` row. **Overview** is tab 1 (default)
     and contains the race tags, primary/runoff dates, and FCC window bars
@@ -136,11 +136,32 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
   - When tracker spend is missing for a race, the renderer falls back to
     `mergeCuratedIntoEntities` so each party still shows ≥2 curated
     candidates in primary/runoff phases (or one nominee post-primary).
-  - House: district list (tap to drill in) with a real **green glow** on
-    active CDs — outer blurred halo + inner rim + soft fill, three layers
-    keyed to `cand-hover` feature-state so hovering brightens the glow.
-    Clicking an active district anywhere on the map drills into that CD
-    (same effect as clicking its row). Selected CD gets a blue fill overlay.
+  - **Min-1-per-party-per-race floor (Follow-up #2).** `renderPartyGroup`
+    in-primary/runoff branch now pads `withSpend.slice(0,3)` from the
+    no-spend pool up to `MIN_FLOOR = 2` per party, so each declared party
+    shows at least 2 candidates regardless of spend (unless truly none are
+    declared). See More (+N) now counts unshown entries across the full
+    spend+no-spend list. Post-primary branch unchanged.
+  - **District-row label fix (Follow-up #2).** House district-list rows
+    now show `N candidate(s)` instead of the misleading `N candidates
+    with spend`, and render `no spend reported` (faint) instead of `—`
+    when `totalSpend === 0`. Empty-state copy corrected from "No House
+    districts with reported spend for X" → "No active House races on
+    file for X".
+  - House: district list (tap to drill in) with a **bright green surface
+    fill + faint outer halo** on active CDs (Follow-up #2 — simplified from
+    the previous 3-layer outline-glow). Two layers: `districts-active-fill`
+    (0.55 → 0.72 on hover) and `districts-active-glow-outer` (blurred line,
+    0.28 → 0.45 on hover). Hovering brightens both via `cand-hover`
+    feature-state. Clicking an active district anywhere on the map drills
+    into that CD (same effect as clicking its row), auto-switching the
+    Candidates tab to House. Selected CD gets a blue fill overlay.
+  - **Districts illuminate on state selection** (Follow-up #2). Active
+    House districts light up from the moment a state with House races is
+    selected — no longer gated on the user picking the House slicer.
+    `applyCandMapHighlight` checks `getRacesForState(s).includes('House')`
+    instead of `st.office === 'House'`; the selected-district blue overlay
+    is the only behavior still gated on drill-in.
   - **Runoff-phase states** (`status='runoff-window'` or `'runoff-upcoming'`)
     are treated as still in-primary for candidate-list purposes and show
     the runoff finalists per party. Status chip + map color + FCC Runoff
@@ -159,6 +180,10 @@ const GENERAL   = new Date(2026,10,3);   // Nov 3, 2026
   tooltip color table, insights status dots, `.tile-upcoming`,
   `.spill-purple`, and the status-bar legend (new `.dot-purple`).
 - Candidate tracker page sorts by `total_spend` DESC by default (matches above)
-- **Back to Map button** is now inside `.map-layer-toggles` alongside the
-  layer toggles (Window Timing / Candidate Density / Total Spend / Cash
-  on Hand), renamed from "Back to USA".
+- **Back to Map button (Follow-up #2)** is now absolutely positioned inside
+  `#mapContainer` in the top-left corner (previously inline in
+  `.map-layer-toggles` alongside Window Timing / Candidate Density / Total
+  Spend / Cash on Hand). Renders as a translucent white pill with a drop
+  shadow + backdrop blur so it stays legible over the dark basemap and any
+  glowing district fills. `id="backToUSA"` unchanged; `mapSelectState` /
+  `mapDeselectState` still toggle its `style.display`.

@@ -4,6 +4,120 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-04-14 — Candidates tab · Follow-up #2 (spec 4/11/26 11:20pm)
+
+**Spec:** `../Candidates Tab Improved Layout 4.14.26.rtf` (Follow-up #2 section)
+
+Five-item punch-list from the user's 11:20pm review. Scopes the district-level
+illumination redesign, surfaces House districts on state selection without
+requiring the House slicer, guarantees a min-1-per-party floor on active-race
+district views, and moves the Back to Map affordance onto the map panel itself.
+
+### Min-1-candidate-per-party-per-race floor
+
+1. **`renderPartyGroup` rewrite (in-primary / runoff branch).** Previously the
+   renderer filtered to `withSpend = list.filter(c => c.spend > 0)` and, if
+   any with-spend entry existed, *only* showed with-spend candidates (top 3).
+   No-spend entries were only surfaced as a fallback when the party had
+   **zero** with-spend candidates. Under Follow-up #2 the active-race rule is
+   explicit: minimum one candidate per party per race, regardless of spend,
+   unless truly none are declared.
+
+   New behavior:
+   - `sorted  = list sorted by spend desc` — defensive re-sort so the caller
+     can't invert the no-spend tail
+   - `withSpend` + `noSpend` split for clarity
+   - In-primary / runoff: `base = withSpend.slice(0, 3)`; if `base.length < 2`
+     we pad from `noSpend.slice(0, 2 - base.length)` so each party hits a
+     `MIN_FLOOR = 2`
+   - "See More (+N)" now counts unshown entries across the combined `sorted`
+     list (spend + no-spend), so no-spend candidates aren't orphaned under a
+     party that has 1–2 with-spend entries
+   - Post-primary branch unchanged (still prefers with-spend; falls back to
+     `sorted.slice(0,1)` for the nominee)
+   - Expanded branch simplified to `sorted.slice()` — See More now reveals
+     the full list including no-spend entries
+2. **District-list row label corrected.** `renderHouseOffice` previously
+   labeled each row `N candidates with spend`, but the `districtMap` bucket
+   contains **all** tracker entities (not filtered by spend), so the count
+   included no-spend candidates too. Label is now just `N candidate(s)`, and
+   the spend column renders `no spend reported` (faint) instead of `—` when
+   `totalSpend === 0` — so districts that are *active but unspent* still
+   read as present in the list instead of looking stale.
+3. **Empty-state copy corrected.** `No House districts with reported spend
+   for ${abbr}` → `No active House races on file for ${abbr}`. Same reason:
+   the district-list is not gated on spend.
+
+### District illumination — bright fill + faint glow
+
+4. **`highlightActiveDistricts` simplified from 3 layers to 2.** The
+   Follow-up #1 implementation stacked three layers (soft 0.18-opacity fill
+   + wide blurred halo width 10→16 + crisp 1.75px `#6EE7B7` inner rim). The
+   visual result was a district *outline* glowing — the surface stayed mostly
+   grey. Follow-up #2 asks for the district surface itself to read as "lit
+   up", much brighter, with a faint halo.
+
+   - `districts-active-fill` — now bright uniform fill with `fill-opacity`
+     driven by `cand-hover` feature-state: **0.55 idle → 0.72 on hover**
+     (was 0.18 flat). Color still `#10B981`.
+   - `districts-active-glow-outer` — faint halo. `line-blur: 8`, width
+     `5 → 8 on hover`, opacity `0.28 → 0.45 on hover`. Was `line-blur: 10`,
+     width `10 → 16`, opacity `0.65 → 0.95`.
+   - `districts-active-glow-inner` — **removed**. The bright fill already
+     carries the district boundary; the `#6EE7B7` rim was redundant.
+   - `clearCandDistrictHighlight` + `hideDistricts` cleanup arrays pruned to
+     remove references to `districts-active-glow-inner`.
+
+### Districts illuminate on state selection
+
+5. **`applyCandMapHighlight` no longer gated on `st.office === 'House'`.**
+   The spec is explicit: "House districts should be illuminated from the
+   moment the state is selected, which upon clicking zooms in to the house
+   section of the candidate tab." Previously the highlight layers were only
+   added when the user had picked the House slicer in the Candidates tab —
+   first entry into a state showed a dim map until the user clicked House.
+   New logic:
+   - Look up the state metadata and `getRacesForState(s)`; bail early if
+     the state has no House races at all
+   - Always call `highlightActiveDistricts(abbr)` for House states
+   - Only apply the `highlightSelectedDistrict` blue overlay when the user
+     *has* drilled into a specific CD (`st.office === 'House' && st.district`)
+   - Call sites unchanged — `mapSelectState.once('moveend')` still fires
+     it after districts are loaded, and `enrichCandidateFinance` still fires
+     it once tracker data is cached (so districts light up as soon as the
+     API responds on first entry).
+   - The existing map-click handler on `districts-active-fill` already drills
+     into House + switches to the Candidates tab, so "click an illuminated
+     district → zoom in to house section" is already wired (Follow-up #1
+     item 8) and now unconditionally reachable.
+
+### Back to Map · anchored to map panel top-left
+
+6. **Button lifted out of `.map-layer-toggles`, absolutely positioned inside
+   `#mapContainer`.** Follow-up #1 moved it *into* the layer-toggles row
+   alongside Window Timing / Candidate Density / Total Spend / Cash on Hand.
+   Follow-up #2 asks for it to live inside the map panel itself, top-left.
+   - Removed the `<button class="back-to-usa">` from inside
+     `.map-layer-toggles` in the `.map-card` header
+   - Added it as a direct child of `#mapContainer`, which is already
+     `position:relative`, so `position:absolute; top:10px; left:10px` anchors
+     it to the top-left of the rendered MapLibre canvas
+   - Restyled: translucent white (`rgba(255,255,255,0.96)` + `backdrop-filter:
+     blur(6px)`) + drop shadow so it stays legible over the dark basemap
+     and over glowing district fills
+   - `z-index:20` keeps it above the map canvas and tooltip
+   - `onclick="mapBackToUSA()"` unchanged; `id="backToUSA"` unchanged so the
+     `style.display = 'inline-flex'` toggle in `mapSelectState` and the
+     `style.display = 'none'` toggle in `mapDeselectState` still work
+
+### Files touched
+
+- `politicalwindow.com/index.html` — all of the above
+- `politicalwindow.com/CHANGES.md` — this entry
+- `politicalwindow.com/CLAUDE.md` — Current State + Key Functions update
+
+---
+
 ## 2026-04-14 — Candidates tab · Follow-up #1 (spec 4/11/26 9:50pm)
 
 **Spec:** `../Candidates Tab Improved Layout 4.14.26.rtf` (Follow-up #1 section)
