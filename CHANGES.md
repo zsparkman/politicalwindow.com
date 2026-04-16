@@ -4,6 +4,35 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-04-16 — Favicon on every page + sidebar size consistency
+
+**Symptom.** User flagged two UI gaps:
+1. The browser-tab favicon only rendered on `/` — every other page
+   (`/public-file`, `/candidate-tracker`, `/rates`, `/lur`, `/explorer`,
+   `/admin`) showed the browser default icon.
+2. The left sidebar rendered taller on `/` than on subpages. The
+   `.sidebar-panel-link` rule on `index.html` used `font-size:0.72rem`,
+   `padding:7px 16px 7px 18px`, `border-left:3px solid transparent` —
+   every other page used the more compact `0.68rem`, `6px 16px`,
+   `2px` border. Result: same nav items rendered ~3px taller per row
+   on the home page and drew noticeably bolder.
+
+**Fixes.**
+1. **Favicon.** Copied the inline SVG `data:image/svg+xml,...` favicon
+   `<link>` (the orange-gradient `PW` glyph matching `.sidebar-rail-logo`)
+   from `index.html` into every other page (`public-file.html`,
+   `candidate-tracker.html`, `rates.html`, `lur.html`, `explorer.html`,
+   `admin.html`). The data-URI approach preserves the single-file SPA
+   constraint — no separate `.ico`/`.png` ships.
+2. **Sidebar link size.** Changed `index.html` `.sidebar-panel-link` to
+   match the 5 subpages (`font-size:0.68rem; padding:6px 16px;
+   border-left:2px solid transparent;`). Chose to shrink index rather
+   than grow the subpages because 5 pages already use the compact style.
+
+**Verification.** `grep -l 'rel="icon"' *.html` returns all 7 pages.
+
+---
+
 ## 2026-04-16 — Consistent candidate party/office on /public-file (backend fix)
 
 **Symptom.** On `/public-file`, the Contract Detail table showed the
