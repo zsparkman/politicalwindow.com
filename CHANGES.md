@@ -4,6 +4,69 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-04-16 — Consistent candidate party/office on /public-file (backend fix)
+
+**Symptom.** On `/public-file`, the Contract Detail table showed the
+PARTY column inconsistently for the same candidate across sibling rows.
+Example from the user screenshot (Apr 9 2026, Spectrum LA, CA Governor):
+
+- Antonio Villaraigosa — 1 row with `D`, 4 rows with `—`
+- Becerra — 2 rows, both with `—` (though the group header pill still
+  showed `Becerra $119K` with a D-colored pill context because party was
+  inferred from *at least one* sibling row during group assembly, which
+  only amplified the per-row inconsistency)
+
+Because the PARTY column is color-coded (`pc(r.party)` → `party-D` /
+`party-R` / `party-I`), the effect was visually jarring — the same
+candidate name would render blue, then neutral gray, then blue again
+down a single table.
+
+**Root cause.** The fix is entirely backend. This changelog entry
+exists because the rendering site is on the frontend (`public-file.html`
+line 508: `<td class="'+pc(r.party)+'">'+esc(r.party||'—')+'</td>`) and
+frontend engineers inspecting the bug would start here.
+
+`ratewindow-api`'s `/api/rates` endpoint (`index.js` lines ~150-175)
+resolved the *candidate name* through a `political_entities` join —
+`COALESCE(pe.candidate_name, ri.candidate_name) AS candidate` — but
+selected `ri.party` and `ri.office_type` raw. Claude's PDF extraction
+frequently misses the party field on a given invoice (especially on
+non-federal races like Governor, where FEC lookup is skipped), so
+`rate_intel.party` is NULL on many rows even when the canonical entity
+record has party filled in.
+
+**Fix (in `ratewindow-api`).** `/api/rates` and `/api/lines` now
+COALESCE party and office through `political_entities` first:
+
+```sql
+COALESCE(pe.party,  ri.party)       AS party
+COALESCE(pe.office, ri.office_type) AS office_type
+```
+
+`/api/lines` uses a two-hop chain (`pe.* → pe2.* → rl.*`) because it
+joins the entity both directly via `rl.political_entity_id` and through
+`advertiser_aliases`.
+
+The `/api/rates` party/office filter predicates also moved to the
+resolved value so `?party=D` returns rows where the resolved party is D
+(not just rows where Claude happened to extract it), matching the
+displayed column.
+
+A new one-time script `backfill-entity-party.js` propagates the most
+common non-null `rate_intel.party` / `rate_intel.office_type` up into
+`political_entities` where those columns are still NULL — needed for
+candidates like Becerra whose canonical entity was auto-created from a
+Claude extraction that didn't include party. See the ratewindow-api
+CLAUDE.md "Candidate-Detail Consistency Rule" section for the invariant
+future endpoints must follow.
+
+**Frontend.** No frontend code changed. `public-file.html` renders
+whatever the API returns; the color-coding, group-header party pills,
+and candidate slicers now all agree because the API now returns a
+single party value per (candidate, row) pair.
+
+---
+
 ## 2026-04-15 — Drop `??` district buckets + refit-on-slicer-change
 
 **Context.** Two small UX fixes bundled in the same user thread.
