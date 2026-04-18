@@ -1,0 +1,196 @@
+Recommended build path
+Phase 1
+
+MapLibre GL JS + accurate US state polygons + on-demand congressional district loading by selected state
+
+This gets you:
+
+a true geographic USA map
+smooth click-to-zoom on any state
+district boundaries only when needed
+lower complexity than a full tile pipeline
+a clean upgrade path later
+Phase 2
+
+Promote states and districts into self-hosted vector tiles
+
+This gets you:
+
+faster rendering at scale
+cleaner zoom behavior
+easier support for more overlays later
+better long-term cost control
+Exact stack I recommend
+Front end
+MapLibre GL JS for map rendering
+React / Next.js if your site already uses React
+Turf.js for bounds and spatial helpers
+TypeScript for layer/data safety
+Data
+States GeoJSON for national view
+Congressional districts GeoJSON by state for drill-down
+Election/FCC metadata in your app API keyed by:
+state_fips
+state_abbr
+district_code or a stable district identifier
+Styling
+Dark custom basemap or minimal no-label basemap
+State fill color by FCC/election status
+District outlines appear only after zoom/select
+Right-side detail panel stays outside the map canvas
+User experience spec
+1. National view
+
+The user lands on:
+
+full geographically accurate USA map
+states colored by status:
+window open
+opens <30d
+upcoming
+general only
+none
+hover tooltip with:
+state name
+next primary
+FCC open date
+races on ballot
+2. State selection
+
+When the user clicks Georgia:
+
+map animates to Georgia bounds
+national labels fade down
+Georgia gets a stronger active outline
+district boundaries fade in
+right rail updates with Georgia election info
+breadcrumb appears: USA / Georgia
+3. District view
+
+Inside Georgia:
+
+congressional districts are visible
+hover shows district number and summary
+click on district updates panel with:
+district name
+incumbent
+declared candidates
+FCC status
+relevant dates
+4. Back navigation
+Back to USA control
+state filter persists unless cleared
+race filters remain active
+Georgia close-up behavior
+
+For Georgia specifically, I’d structure the zoom state like this:
+
+Map view
+Georgia fills most of the viewport
+surrounding states remain dimly visible for orientation
+district boundaries are thin but clear
+metro Atlanta districts have slightly thicker outline at higher zoom
+district labels appear only when there is room
+Panel content
+state summary at top
+race chips: Senate / Governor / House
+district count summary
+selected district detail below
+optional “show declared candidates” toggle
+Overlay controls
+FCC windows
+House competitiveness
+incumbency
+declared candidates
+media market overlay later, if needed
+Data structure I recommend
+State feature properties
+{
+  "state_abbr": "GA",
+  "state_name": "Georgia",
+  "state_fips": "13",
+  "fcc_status": "opens_soon",
+  "primary_date": "2026-05-18",
+  "runoff_date": "2026-07-20"
+}
+District feature properties
+{
+  "geoid": "1301",
+  "state_abbr": "GA",
+  "district_code": "GA-01",
+  "district_number": 1,
+  "incumbent": "Example Name",
+  "party": "R",
+  "fcc_status": "upcoming"
+}
+API shape
+GET /api/map/states
+GET /api/map/states/GA/districts
+GET /api/elections/state/GA
+GET /api/elections/district/GA-01
+Layer model
+Always loaded
+US states fill layer
+US states outline layer
+Loaded on state select
+selected state highlight layer
+selected state districts fill layer
+selected state districts line layer
+district label layer
+Optional later
+county overlay
+media market overlay
+candidate density markers
+ad-spend heat layer
+Performance approach
+
+For phase 1:
+
+load states immediately
+lazy-load districts only for the selected state
+cache district data client-side after first load
+simplify geometries enough for web rendering
+use separate hover/selected feature state instead of reloading layers
+
+That keeps the experience fast without needing a full tile pipeline on day one.
+
+What not to do
+
+I would avoid:
+
+loading all congressional districts for the entire US up front
+rendering giant raw GeoJSON blobs without simplification
+mixing too many labels into the national view
+using a generic consumer map aesthetic that clashes with your current dark product UI
+Build sequence
+Sprint 1
+integrate MapLibre
+replace tile-grid map with real US map
+render states with your existing status colors
+wire hover and right panel updates
+Sprint 2
+add state click zoom
+load Georgia districts on select
+render district boundaries and hover states
+add breadcrumb and back-to-USA control
+Sprint 3
+connect district panel data
+add filters for Senate / Gov / House
+refine animation and map styling
+test responsive behavior
+Sprint 4
+optimize geometries
+add caching
+prep vector tile migration if needed
+My recommendation for your actual first release
+
+Build this first:
+
+full US geographic map
+state status coloring
+click-to-zoom
+district outlines for selected state
+right rail updates for state and district
+Georgia as the first polished example state
+
+Then extend the same pattern to every state.

@@ -1,0 +1,28 @@
+Please refactor the current US election map component.
+
+Tasks:
+
+* Improve national map styling to match a premium dark dashboard.
+* Refine state fill colors and borders for better contrast and hover/selected feedback.
+* Add click-to-zoom on state selection using fitBounds with padding.
+* Load congressional districts only for the selected state.
+* After zoom completes, reveal district boundaries and district hover interaction.
+* Add “Back to USA” behavior.
+* Sync hover/selection state with the right-side panel.
+* Optimize for Georgia as the first detailed state drill-down.
+* Structure code so district overlays can be reused for all states later.
+
+Priorities:
+
+1. smooth interaction
+2. clean visual hierarchy
+3. no full-US district preload
+4. maintain existing FCC status coloring
+5. make the map feel native to the product, not like an off-the-shelf map
+
+Please return:
+
+* the code changes
+* any needed API/data changes
+* any recommended style token changes
+* a note on remaining work to scale from Georgia to all states
