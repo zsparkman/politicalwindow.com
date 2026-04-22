@@ -68,6 +68,30 @@
     --shadow-sm:  0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
     --shadow-md:  0 4px 12px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
     --shadow-lg:  0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
+    /* ── Themable surface / chrome / link tokens (added on top of #230 baseline) ── */
+    /* Surfaces */
+    --surface:        #FFFFFF;
+    --surface-alt:    #F8FAFC;
+    --surface-faint:  #F1F5F9;
+    --surface-table:  #FAFBFC;
+    /* Borders */
+    --border:         #E2E8F0;
+    --border-strong:  #CBD5E1;
+    --border-faint:   #E3E8EF;
+    /* Text shades not already covered by --text/--text-muted/--text-faint */
+    --text-mute2:     #64748B;
+    /* Header chrome (the dark navy strip across the top of every page) */
+    --header-bg:      #1E293B;
+    --header-border:  #334155;
+    --header-fg:      #F1F5F9;
+    --header-fg-muted:rgba(255,255,255,0.7);
+    /* Brand orange gradient used by the sidebar rail logo */
+    --brand-grad-start: #FF642D;
+    --brand-grad-end:   #FF8F6B;
+    /* Link / chart blue (lives alongside existing --blue / --blue-light) */
+    --link:           #2B6CB0;
+    --blue-soft:      #93C5FD;
+
   }
 
   body {
@@ -88,7 +112,7 @@
     overflow-y:auto; overflow-x:visible; flex-shrink:0;
   }
   .sidebar-rail-logo {
-    width:36px; height:36px; border-radius:8px; background:linear-gradient(135deg,#FF642D,#FF8F6B);
+    width:36px; height:36px; border-radius:8px; background:linear-gradient(135deg,var(--brand-grad-start),var(--brand-grad-end));
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
     font-family:var(--sans); font-size:0.7rem; color:#fff; font-weight:800; letter-spacing:-0.02em;
     margin-bottom:12px; cursor:pointer;
@@ -124,7 +148,7 @@
     color:var(--text-muted); text-decoration:none; transition:all 0.12s;
     border-left:2px solid transparent;
   }
-  .sidebar-panel-link:hover { color:var(--text); background:#F8FAFC; }
+  .sidebar-panel-link:hover { color:var(--text); background:var(--surface-alt); }
   .sidebar-panel-link.active { color:var(--blue); background:rgba(29,78,216,0.06); border-left-color:var(--blue); font-weight:700; }
   .sidebar-panel-section {
     font-family:var(--mono); font-size:0.5rem; letter-spacing:0.1em; text-transform:uppercase;
@@ -145,7 +169,7 @@
 
   /* ── HEADER ── */
   header {
-    background:#1E293B; border-bottom:1px solid #334155;
+    background:var(--header-bg); border-bottom:1px solid var(--header-border);
     padding:0 20px; display:grid; grid-template-columns:auto 1fr auto;
     align-items:center; gap:16px; height:48px; position:sticky; top:0; z-index:100;
   }
@@ -163,7 +187,7 @@
   .header-search svg { width:16px; height:16px; color:rgba(255,255,255,0.45); flex-shrink:0; }
   .header-search input {
     border:none; outline:none; background:transparent; font-family:var(--sans); font-size:0.75rem;
-    color:#F1F5F9; width:100%; padding:0 8px;
+    color:var(--header-fg); width:100%; padding:0 8px;
   }
   .header-search input::placeholder { color:rgba(255,255,255,0.4); }
   .header-right { display:flex; align-items:center; gap:8px; justify-content:flex-end; }
@@ -207,7 +231,7 @@
     transition:border-color 0.15s, box-shadow 0.15s; box-shadow:var(--shadow-sm);
     border-top:3px solid var(--navy-border);
   }
-  .kpi-card:hover { border-color:#94A3B8; box-shadow:var(--shadow-md); }
+  .kpi-card:hover { border-color:var(--slate); box-shadow:var(--shadow-md); }
   .kpi-card.kpi-card-red { border-top-color:var(--red); }
   .kpi-card.kpi-card-amber { border-top-color:var(--amber); }
   .kpi-card.kpi-card-blue { border-top-color:var(--blue); }
@@ -275,7 +299,7 @@
   .maplibregl-ctrl-group { background:rgba(255,255,255,0.92) !important; border:1px solid var(--navy-border) !important; backdrop-filter:blur(6px); box-shadow:var(--shadow-sm); }
   .maplibregl-ctrl-group button { background-color:transparent !important; }
   .maplibregl-ctrl-group button:hover span { background-color:var(--blue) !important; }
-  .maplibregl-ctrl-group button span { background-color:#64748B !important; transition:background-color 0.2s; }
+  .maplibregl-ctrl-group button span { background-color:var(--text-mute2) !important; transition:background-color 0.2s; }
   .map-inset { position:absolute; z-index:10; border:1px solid var(--navy-border); border-radius:4px; overflow:hidden; background:#fff; cursor:pointer; transition:border-color 0.2s, box-shadow 0.2s; box-shadow:var(--shadow-sm); }
   .map-inset:hover { border-color:var(--blue); box-shadow:var(--shadow-md); }
   .map-inset .maplibregl-ctrl-attrib { display:none !important; }
@@ -313,7 +337,7 @@
     transition:all 0.15s; letter-spacing:0.03em;
     box-shadow:0 2px 6px rgba(15,23,42,0.12);
   }
-  .back-to-usa:hover { border-color:var(--blue); background:#F8FAFC; }
+  .back-to-usa:hover { border-color:var(--blue); background:var(--surface-alt); }
 
   /* Map scroll wrapper — enables horizontal scroll on mobile */
   .map-scroll { overflow:visible; padding:6px; width:100%; position:relative; }
@@ -341,7 +365,7 @@
   .tile-window-soon  { background:rgba(209,104,15,0.12); border-color:var(--status-soon);     color:var(--status-soon); }
   .tile-upcoming     { background:rgba(37,99,235,0.12);  border-color:var(--status-upcoming); color:var(--status-upcoming); }
   .tile-general-only { background:rgba(37,99,235,0.12);  border-color:var(--status-general);  color:var(--status-general); }
-  .tile-inactive     { background:#F1F5F9; color:var(--text-faint); border-color:#E2E8F0; }
+  .tile-inactive     { background:var(--surface-faint); color:var(--text-faint); border-color:#E2E8F0; }
   .tile.tile-dimmed  { opacity:0.2; pointer-events:none; cursor:default; }
 
   /* ── DETAIL PANEL ── */
@@ -363,7 +387,7 @@
   .race-tag { font-family:var(--mono); font-size:0.56rem; padding:2px 6px; border-radius:2px; border:1px solid; }
   .tag-senate   { border-color:#93C5FD; color:#2563EB; background:rgba(37,99,235,0.06); }
   .tag-governor { border-color:#C4B5FD; color:#7C3AED; background:rgba(124,58,237,0.06); }
-  .tag-house    { border-color:#86EFAC; color:#059669; background:rgba(5,150,105,0.06); }
+  .tag-house    { border-color:#86EFAC; color:var(--green); background:rgba(5,150,105,0.06); }
   .wbar { margin-top:0.4rem; height:5px; background:var(--navy-border); border-radius:3px; overflow:hidden; }
   .wbar-fill { height:100%; border-radius:3px; }
   .wbar-note { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); margin-top:3px; }
@@ -376,7 +400,7 @@
   .insight-list { list-style:none; padding:0; margin:0; }
   .insight-item {
     display:flex; align-items:center; gap:0.5rem; padding:7px 10px; margin-bottom:3px;
-    border-radius:6px; background:#F8FAFC; border:1px solid transparent;
+    border-radius:6px; background:var(--surface-alt); border:1px solid transparent;
     cursor:pointer; transition:all 0.12s; font-family:var(--sans); font-size:0.72rem;
   }
   .insight-item:hover { border-color:var(--navy-border); background:#fff; box-shadow:var(--shadow-sm); }
@@ -396,7 +420,7 @@
   /* Candidates */
   .cand-race-block { margin-bottom:0.6rem; }
   .cand-race-label { font-family:var(--mono); font-size:0.54rem; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; border:1px solid; display:inline-block; margin-bottom:0.3rem; }
-  .cand-row { display:flex; align-items:center; gap:0.4rem; padding:5px 7px; border-radius:4px; background:#F8FAFC; margin-bottom:2px; flex-wrap:wrap; }
+  .cand-row { display:flex; align-items:center; gap:0.4rem; padding:5px 7px; border-radius:4px; background:var(--surface-alt); margin-bottom:2px; flex-wrap:wrap; }
   .cand-finance { display:flex; gap:0.6rem; width:100%; padding:2px 0 0 11px; }
   .cand-finance-item { font-family:var(--mono); font-size:0.5rem; color:var(--text-faint); }
   .cand-finance-item strong { color:var(--text-muted); font-weight:600; }
@@ -405,7 +429,7 @@
   .cnote { font-size:0.57rem; color:var(--text-faint); display:block; }
   .cbadge { font-family:var(--mono); font-size:0.52rem; padding:1px 5px; border-radius:2px; flex-shrink:0; white-space:nowrap; }
   .cbadge-inc { background:rgba(217,119,6,0.08); color:var(--amber); border:1px solid rgba(217,119,6,0.2); }
-  .cbadge-dec { background:#F1F5F9; color:var(--text-muted); border:1px solid var(--navy-border); }
+  .cbadge-dec { background:var(--surface-faint); color:var(--text-muted); border:1px solid var(--navy-border); }
   .cparty { font-family:var(--mono); font-size:0.56rem; flex-shrink:0; }
 
   /* ── CANDIDATES TAB · Slicer / Party Groups / Districts (4.14.26) ──
@@ -418,14 +442,14 @@
   .cand-slicer {
     font-family:var(--mono); font-size:0.56rem; letter-spacing:0.07em;
     padding:6px 11px; border-radius:3px; cursor:pointer;
-    background:#F8FAFC; border:1px solid var(--navy-border);
+    background:var(--surface-alt); border:1px solid var(--navy-border);
     color:var(--text-muted); font-weight:700; text-transform:uppercase;
     transition:all 0.12s; -webkit-tap-highlight-color:transparent;
   }
   .cand-slicer:hover { background:#fff; border-color:#CBD5E1; color:var(--text); }
   .cand-slicer.slicer-senate.active   { border-color:#93C5FD; background:rgba(37,99,235,0.10);  color:#2563EB; box-shadow:0 0 0 1px rgba(37,99,235,0.25); }
   .cand-slicer.slicer-governor.active { border-color:#C4B5FD; background:rgba(124,58,237,0.10); color:#7C3AED; box-shadow:0 0 0 1px rgba(124,58,237,0.25); }
-  .cand-slicer.slicer-house.active    { border-color:#86EFAC; background:rgba(5,150,105,0.10);  color:#059669; box-shadow:0 0 0 1px rgba(5,150,105,0.25); }
+  .cand-slicer.slicer-house.active    { border-color:#86EFAC; background:rgba(5,150,105,0.10);  color:var(--green); box-shadow:0 0 0 1px rgba(5,150,105,0.25); }
 
   .party-group { margin-bottom:0.65rem; }
   .party-group-label {
@@ -440,7 +464,7 @@
   .cand-action-btn {
     font-family:var(--mono); font-size:0.55rem; letter-spacing:0.06em;
     padding:5px 10px; border-radius:3px; cursor:pointer;
-    background:#F1F5F9; border:1px solid var(--navy-border);
+    background:var(--surface-faint); border:1px solid var(--navy-border);
     color:var(--text-muted); margin:4px 0 6px 0; font-weight:600;
     transition:all 0.12s; -webkit-tap-highlight-color:transparent;
     text-transform:uppercase; display:inline-block; text-decoration:none;
@@ -467,7 +491,7 @@
   .cand-district-list { display:flex; flex-direction:column; gap:3px; margin-bottom:0.55rem; }
   .cand-district-row {
     display:flex; align-items:center; gap:0.5rem;
-    padding:6px 10px; border-radius:4px; background:#F8FAFC;
+    padding:6px 10px; border-radius:4px; background:var(--surface-alt);
     border:1px solid transparent; cursor:pointer; transition:all 0.12s;
   }
   .cand-district-row:hover { background:#fff; border-color:var(--navy-border); box-shadow:var(--shadow-sm); }
@@ -489,7 +513,7 @@
   .cand-district-current {
     display:block; clear:both;
     font-family:var(--mono); font-size:0.64rem; font-weight:700; letter-spacing:0.05em;
-    color:#059669; padding:5px 9px; background:rgba(5,150,105,0.08);
+    color:var(--green); padding:5px 9px; background:rgba(5,150,105,0.08);
     border:1px solid #86EFAC; border-radius:3px;
     margin-bottom:0.55rem; width:fit-content;
   }
@@ -505,7 +529,7 @@
     border-bottom:1px solid var(--navy-border); flex-wrap:wrap;
   }
   .search-wrap {
-    display:flex; align-items:center; gap:0.4rem; background:#F8FAFC;
+    display:flex; align-items:center; gap:0.4rem; background:var(--surface-alt);
     border:1px solid var(--navy-border); border-radius:6px; padding:5px 10px; flex:1; min-width:120px;
     transition:border-color 0.15s;
   }
@@ -519,17 +543,17 @@
   thead th {
     font-family:var(--sans); font-size:0.6rem; font-weight:600; letter-spacing:0.03em;
     color:var(--text-muted); padding:8px 12px; text-align:left; border-bottom:1px solid var(--navy-border);
-    cursor:pointer; white-space:nowrap; user-select:none; transition:color 0.12s; background:#FAFBFC;
+    cursor:pointer; white-space:nowrap; user-select:none; transition:color 0.12s; background:var(--surface-table);
   }
   thead th:hover { color:var(--text); }
   thead th.sort-active { color:var(--blue); }
   tbody tr { border-bottom:1px solid #F1F5F9; cursor:pointer; transition:background 0.08s; }
-  tbody tr:hover { background:#F8FAFC; }
+  tbody tr:hover { background:var(--surface-alt); }
   tbody tr.row-selected { background:rgba(43,108,176,0.04); }
   tbody tr:last-child { border-bottom:none; }
   td { padding:6px 12px; font-family:var(--sans); font-size:0.68rem; vertical-align:middle; }
   .td-state { display:flex; align-items:center; gap:0.45rem; }
-  .sbox { width:26px; height:19px; background:#F1F5F9; border:1px solid var(--navy-border); border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:0.52rem; color:var(--text-muted); font-weight:600; flex-shrink:0; }
+  .sbox { width:26px; height:19px; background:var(--surface-faint); border:1px solid var(--navy-border); border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:0.52rem; color:var(--text-muted); font-weight:600; flex-shrink:0; }
   .sname { font-weight:600; color:var(--text); font-size:0.72rem; font-family:var(--sans); }
   .spill { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:4px; font-family:var(--sans); font-size:0.56rem; letter-spacing:0.02em; font-weight:600; white-space:nowrap; }
   /* Generic color spills — kept for non-status uses like the ✓ COMPLETE
@@ -539,7 +563,7 @@
   .spill-purple{ background:rgba(124,58,237,0.08);  color:#7C3AED;          border:1px solid rgba(124,58,237,0.22); }
   .spill-blue  { background:var(--blue-glow);  color:var(--blue);  border:1px solid rgba(59,130,246,0.15); }
   .spill-green { background:rgba(5,150,105,0.06);  color:var(--green);  border:1px solid rgba(5,150,105,0.15); }
-  .spill-slate { background:#F1F5F9;  color:var(--slate);       border:1px solid #E2E8F0; }
+  .spill-slate { background:var(--surface-faint);  color:var(--slate);       border:1px solid var(--border); }
   /* Status spills — Follow-up #2. Used by the SPILL map (table status
      column, state cards) so the window-timing palette stays decoupled
      from the generic .spill-red/.spill-amber/.spill-green classes. */
@@ -547,7 +571,7 @@
   .spill-status-soon      { background:rgba(209,104,15,0.10); color:var(--status-soon);     border:1px solid rgba(209,104,15,0.22); }
   .spill-status-upcoming  { background:rgba(37,99,235,0.10);  color:var(--status-upcoming); border:1px solid rgba(37,99,235,0.24); }
   .spill-status-general   { background:rgba(37,99,235,0.10);  color:var(--status-general);  border:1px solid rgba(37,99,235,0.24); }
-  .spill-status-none      { background:#F1F5F9;               color:var(--status-none);     border:1px solid #E2E8F0; }
+  .spill-status-none      { background:var(--surface-faint);               color:var(--status-none);     border:1px solid var(--border); }
   .itag { font-size:0.52rem; padding:1px 5px; border-radius:2px; border:1px solid; white-space:nowrap; font-weight:600; }
   .dbadge { font-size:0.54rem; display:block; margin-top:2px; }
   .cand-mini { display:flex; flex-direction:column; gap:2px; }
@@ -573,12 +597,12 @@
     font-family:var(--mono); font-size:0.52rem; letter-spacing:0.06em;
     padding:2px 6px; border-radius:2px; font-weight:600;
   }
-  .spend-high   { background:rgba(220,38,38,0.06);  color:#DC2626; border:1px solid rgba(220,38,38,0.15); }
+  .spend-high   { background:rgba(220,38,38,0.06);  color:var(--red); border:1px solid rgba(220,38,38,0.15); }
   .spend-medium { background:rgba(217,119,6,0.06);  color:#D97706; border:1px solid rgba(217,119,6,0.15); }
-  .spend-low    { background:rgba(5,150,105,0.06);color:#059669; border:1px solid rgba(5,150,105,0.15); }
+  .spend-low    { background:rgba(5,150,105,0.06);color:var(--green); border:1px solid rgba(5,150,105,0.15); }
   .ballot-fcc-note { font-family:var(--mono); font-size:0.52rem; color:var(--text-faint); }
   .ballot-camps { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); margin-top:0.3rem; }
-  .ballot-yes { color:#059669; } .ballot-no { color:#DC2626; }
+  .ballot-yes { color:var(--green); } .ballot-no { color:var(--red); }
   /* map dot indicator for ballot measures */
   .tile.has-ballot::after {
     content:'';
@@ -614,8 +638,8 @@
   .poll-race-block { margin-bottom:0.65rem; }
   .poll-race-label { font-family:var(--mono); font-size:0.54rem; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; border:1px solid; display:inline-block; margin-bottom:0.3rem; }
   .poll-card {
-    background:#F8FAFC;
-    border:1px solid #E2E8F0;
+    background:var(--surface-alt);
+    border:1px solid var(--border);
     border-radius:6px;
     padding:0.5rem 0.65rem;
     margin-bottom:0.35rem;
@@ -643,7 +667,7 @@
     transition:background 0.1s; -webkit-tap-highlight-color:transparent;
   }
   .mobile-state-card:last-child { border-bottom:none; }
-  .mobile-state-card:active { background:#F8FAFC; }
+  .mobile-state-card:active { background:var(--surface-alt); }
   .mobile-state-card.row-selected { background:rgba(43,108,176,0.06); }
   .msc-left { flex:1; min-width:0; }
   .msc-name { font-family:var(--sans); font-weight:600; font-size:0.9rem; color:var(--text); }
@@ -667,7 +691,7 @@
   .drawer-close {
     position:absolute; top:12px; right:1rem;
     font-family:var(--mono); font-size:0.65rem; color:var(--text-muted);
-    background:#F1F5F9; border:1px solid var(--navy-border); border-radius:4px; padding:3px 8px;
+    background:var(--surface-faint); border:1px solid var(--navy-border); border-radius:4px; padding:3px 8px;
     cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
   .drawer-overlay {
@@ -708,7 +732,7 @@
 
   /* ── SCROLLBARS ── */
   ::-webkit-scrollbar { width:5px; height:5px; }
-  ::-webkit-scrollbar-track { background:#F1F5F9; }
+  ::-webkit-scrollbar-track { background:var(--surface-faint); }
   ::-webkit-scrollbar-thumb { background:#CBD5E1; border-radius:3px; }
 
   /* ══════════════════════════════════════════
@@ -1654,13 +1678,13 @@ function wireMapInteractions() {
 
     if (currentMapLayer === 'cash' && _cashByState && _cashByState[abbr]) {
       const ch = _cashByState[abbr];
-      tooltipExtra = `<br><span style="color:#059669;font-weight:600">$${fmtCompact(ch.cash_on_hand)}</span> <span style="color:var(--text-muted)">cash on hand</span>`;
+      tooltipExtra = `<br><span style="color:var(--green);font-weight:600">$${fmtCompact(ch.cash_on_hand)}</span> <span style="color:var(--text-muted)">cash on hand</span>`;
       if (ch.total_disbursements) tooltipExtra += `<br><span style="font-size:0.54rem;color:var(--text-muted)">$${fmtCompact(ch.total_disbursements)} disbursed</span>`;
       // Show per-candidate breakdown
       if (_cashByState['_detail_' + abbr]) {
         tooltipExtra += '<br><span style="font-size:0.5rem;color:var(--text-faint);letter-spacing:0.04em">BY CANDIDATE</span>';
         _cashByState['_detail_' + abbr].forEach(c => {
-          tooltipExtra += `<br><span style="font-size:0.54rem"><span style="color:var(--text)">${c.name}</span> <span style="color:#059669;font-weight:600">$${fmtCompact(c.cash)}</span></span>`;
+          tooltipExtra += `<br><span style="font-size:0.54rem"><span style="color:var(--text)">${c.name}</span> <span style="color:var(--green);font-weight:600">$${fmtCompact(c.cash)}</span></span>`;
         });
       }
       borderColor = '#059669';
@@ -3463,7 +3487,7 @@ function filteredSorted() {
 function drawTable() {
   const data = filteredSorted();
   const filterNote = stateFilter
-    ? `<span style="color:var(--blue);margin-left:0.5rem;font-weight:600">▼ ${SM[stateFilter].name} <button onclick="clearStateFilter()" style="font-family:var(--mono);font-size:0.58rem;color:var(--text-muted);background:#F1F5F9;border:1px solid #E2E8F0;border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px">✕ clear</button></span>`
+    ? `<span style="color:var(--blue);margin-left:0.5rem;font-weight:600">▼ ${SM[stateFilter].name} <button onclick="clearStateFilter()" style="font-family:var(--mono);font-size:0.58rem;color:var(--text-muted);background:var(--surface-faint);border:1px solid var(--border);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px">✕ clear</button></span>`
     : '';
   document.getElementById('tableInfo').innerHTML = `${data.length} of 50 states + DC${filterNote} <span class="tbl-info-tip" title="Includes all 50 U.S. states plus Washington D.C. — 51 total jurisdictions tracked for FCC political advertising windows.">ⓘ</span>`;
   const tb = document.getElementById('tableBody'); tb.innerHTML = '';
@@ -3942,7 +3966,7 @@ function updateChangeBanner() {
 updateKPIStats();
 </script>
 
-<footer style="text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;color:#94A3B8;border-top:1px solid #E3E8EF;margin-top:20px;">
+<footer style="text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;color:var(--slate);border-top:1px solid var(--border-faint);margin-top:20px;">
   © 2026 PoliticalWindow.com · All rights reserved · FCC Political Ad Intelligence
 </footer>
 
