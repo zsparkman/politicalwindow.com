@@ -1552,15 +1552,15 @@ function addStatesLayer() {
     paint: {
       'line-color': [
         'case',
-        ['boolean', ['feature-state', 'selected'], false], '#1E293B',
-        ['boolean', ['feature-state', 'hover'], false], '#64748B',
-        'rgba(148,163,184,0.5)'
+        ['boolean', ['feature-state', 'selected'], false], 'rgba(255,255,255,0.92)',
+        ['boolean', ['feature-state', 'hover'], false], 'rgba(255,255,255,0.78)',
+        'rgba(255,255,255,0.50)'
       ],
       'line-width': [
         'case',
         ['boolean', ['feature-state', 'selected'], false], 2,
         ['boolean', ['feature-state', 'hover'], false], 1.5,
-        0.6
+        0.8
       ],
       'line-opacity': [
         'case',
