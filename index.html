@@ -2162,7 +2162,7 @@ function showDistricts(abbr) {
     type: 'line',
     source: 'districts',
     paint: {
-      'line-color': 'rgba(203,213,225,0.85)',
+      'line-color': 'rgba(255,255,255,0.80)',
       'line-width': 2,
       'line-opacity': 0
     }
@@ -3016,14 +3016,14 @@ function highlightActiveDistricts(abbr) {
   // opacity 0.20) so active districts stay visible before hover.
   if (glMap.getLayer('districts-active-glow-outer')) {
     glMap.setFilter('districts-active-glow-outer', filter);
-    glMap.setPaintProperty('districts-active-glow-outer', 'line-color', glowColor);
+    glMap.setPaintProperty('districts-active-glow-outer', 'line-color', 'rgba(255,255,255,1)');
   } else {
     glMap.addLayer({
       id: 'districts-active-glow-outer',
       type: 'line',
       source: 'districts',
       paint: {
-        'line-color': glowColor,
+        'line-color': 'rgba(255,255,255,1)',
         'line-width': [
           'case',
           ['boolean', ['feature-state', 'cand-hover'], false], 6,
@@ -3054,15 +3054,16 @@ function highlightActiveDistricts(abbr) {
       type: 'line',
       source: 'districts',
       paint: {
-        'line-color': [
-          'case',
-          ['boolean', ['feature-state', 'cand-hover'], false], '#E2E8F0',
-          'rgba(203,213,225,0.65)',
-        ],
+        'line-color': 'rgba(255,255,255,1)',
         'line-width': [
           'case',
           ['boolean', ['feature-state', 'cand-hover'], false], 2.5,
           1.2,
+        ],
+        'line-opacity': [
+          'case',
+          ['boolean', ['feature-state', 'cand-hover'], false], 0.95,
+          0.55,
         ],
       },
       filter,
