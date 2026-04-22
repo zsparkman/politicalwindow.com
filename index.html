@@ -2162,9 +2162,8 @@ function showDistricts(abbr) {
     type: 'line',
     source: 'districts',
     paint: {
-      'line-color': 'rgba(100,116,139,0.5)',
-      'line-width': 1,
-      'line-dasharray': [3, 2],
+      'line-color': 'rgba(203,213,225,0.85)',
+      'line-width': 2,
       'line-opacity': 0
     }
   });
@@ -3003,7 +3002,7 @@ function highlightActiveDistricts(abbr) {
         'fill-color': glowColor,
         'fill-opacity': [
           'case',
-          ['boolean', ['feature-state', 'cand-hover'], false], 0.6,
+          ['boolean', ['feature-state', 'cand-hover'], false], 0.72,
           0.55,
         ],
       },
@@ -3027,14 +3026,14 @@ function highlightActiveDistricts(abbr) {
         'line-color': glowColor,
         'line-width': [
           'case',
-          ['boolean', ['feature-state', 'cand-hover'], false], 4,
-          2,
+          ['boolean', ['feature-state', 'cand-hover'], false], 6,
+          3,
         ],
         'line-blur': 4,
         'line-opacity': [
           'case',
-          ['boolean', ['feature-state', 'cand-hover'], false], 0.35,
-          0.20,
+          ['boolean', ['feature-state', 'cand-hover'], false], 0.55,
+          0.38,
         ],
       },
       filter,
@@ -3057,13 +3056,13 @@ function highlightActiveDistricts(abbr) {
       paint: {
         'line-color': [
           'case',
-          ['boolean', ['feature-state', 'cand-hover'], false], '#64748B',
-          'rgba(100,116,139,0)',
+          ['boolean', ['feature-state', 'cand-hover'], false], '#E2E8F0',
+          'rgba(203,213,225,0.65)',
         ],
         'line-width': [
           'case',
-          ['boolean', ['feature-state', 'cand-hover'], false], 1.5,
-          0,
+          ['boolean', ['feature-state', 'cand-hover'], false], 2.5,
+          1.2,
         ],
       },
       filter,
@@ -3084,7 +3083,7 @@ function highlightSelectedDistrict(abbr, districtCode) {
       id: 'districts-selected-fill',
       type: 'fill',
       source: 'districts',
-      paint: { 'fill-color': 'rgba(43,108,176,0.65)', 'fill-opacity': 0.45 },
+      paint: { 'fill-color': 'rgba(43,108,176,0.85)', 'fill-opacity': 0.65 },
       filter,
     }, beforeId);
   }
