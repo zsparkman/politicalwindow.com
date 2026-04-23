@@ -109,8 +109,11 @@ a{color:var(--blue);text-decoration:none}
 header{background:var(--header-bg);border-bottom:1px solid var(--header-border);padding:0 20px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;height:48px;position:sticky;top:0;z-index:100}
 .header-left{display:flex;align-items:center;gap:10px}
 .header-meta{font-family:var(--mono);font-size:0.58rem;color:rgba(255,255,255,0.7)}
-.header-page-title{font-family:var(--sans);font-size:0.85rem;font-weight:600;color:rgba(255,255,255,0.85);letter-spacing:0.02em}
-.header-right{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.header-right{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.logout-btn{font-family:var(--mono);font-size:0.58rem;color:rgba(255,255,255,0.5);background:none;border:none;cursor:pointer;padding:2px 6px;letter-spacing:0.06em}
+.logout-btn:hover{color:var(--header-fg)}
+#page-header{border-bottom:1px solid var(--navy-border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff}
+.sub{font-size:0.65rem;color:var(--text-muted);margin-top:2px;font-family:var(--mono)}
 .header-search{max-width:520px;width:100%;justify-self:center;display:flex;align-items:center;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:0 14px;height:34px;transition:border-color 0.15s,box-shadow 0.15s}
 .header-search:focus-within{border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(37,99,235,0.15);background:rgba(255,255,255,0.12)}
 .header-search svg{width:16px;height:16px;color:rgba(255,255,255,0.45);flex-shrink:0}
@@ -297,9 +300,16 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
     <input type="text" placeholder="Search candidates..." id="headerSearch">
   </div>
   <div class="header-right">
-    <span class="header-page-title">Candidate Tracker</span>
+    <span class="header-meta" id="live-date"></span>
   </div>
 </header>
+
+<div id="page-header">
+  <div>
+    <div style="font-size:0.95rem;font-weight:700;color:var(--text);letter-spacing:0.02em;font-family:var(--sans)">Candidate Tracker</div>
+    <div class="sub" id="header-sub">FEC political ad spending by candidate &middot; 2026 cycle</div>
+  </div>
+</div>
 
 <main>
   <!-- KPI ROW -->
@@ -373,6 +383,9 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
 </div><!-- /page-wrap -->
 
 <script>
+document.getElementById('live-date').textContent =
+  new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
+
 const RATES_API = 'https://rates.politicalwindow.com';
 let ALL_CANDIDATES = [];
 let FILTERED = [];
