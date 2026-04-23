@@ -78,7 +78,7 @@ body{background:var(--navy);color:var(--text);font-family:var(--sans);min-height
 }
 a{color:var(--blue);text-decoration:none}
 select,input,button{font-family:var(--mono);outline:none}
-.stat-val,.stat-lbl,.filter-lbl,.tab,#sort-wrap,.sort-btn,#grouped-count,.g-name,.g-num-val,.g-num-lbl,.pill,.detail-title,#raw-header,th,td,#loading,footer{font-family:var(--mono)}
+.stat-val,.stat-lbl,.tab,#sort-wrap,.sort-btn,#grouped-count,.g-name,.g-num-val,.g-num-lbl,.pill,.detail-title,#raw-header,th,td,#loading,footer{font-family:var(--mono)}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
 
@@ -126,17 +126,17 @@ header { background:var(--header-bg); border-bottom:1px solid var(--header-borde
 #header{border-bottom:1px solid var(--navy-border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff}
 .sub{font-size:0.65rem;color:var(--text-muted);margin-top:2px}
 #stats{display:flex;gap:24px}
-.stat-val{font-size:1rem;font-weight:700;color:var(--blue);text-align:right}
-.stat-lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.1em;text-align:right}
+.stat-val{font-size:1rem;font-weight:600;color:var(--blue);text-align:right}
+.stat-lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.08em;text-align:right}
 
 /* ── CONTROLS ── */
 #controls{padding:12px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;background:#fff}
 .tab-group{display:flex;gap:6px}
-.tab{font-size:0.62rem;font-weight:700;letter-spacing:0.1em;padding:5px 14px;border:1px solid var(--navy-border);border-radius:6px;cursor:pointer;background:transparent;color:var(--text-faint);transition:all 0.12s}
+.tab{font-size:0.62rem;font-weight:600;letter-spacing:0.04em;padding:5px 14px;border:1px solid var(--navy-border);border-radius:4px;cursor:pointer;background:transparent;color:var(--text-muted);transition:all 0.12s}
 .tab:hover{border-color:#CBD5E1;color:var(--text)}
 .tab.active{border-color:var(--blue);background:var(--blue-glow);color:var(--blue)}
 .filter-wrap{display:flex;flex-direction:column;gap:3px}
-.filter-lbl{font-size:0.62rem;color:var(--text-faint);letter-spacing:0.1em}
+.filter-lbl{font-family:var(--sans);font-size:0.62rem;color:var(--text-faint);letter-spacing:0.05em;font-weight:500}
 select,input{font-size:0.65rem;color:var(--text);background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:6px;padding:4px 8px}
 select:focus,input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,108,176,0.08)}
 input{width:170px}
@@ -173,8 +173,8 @@ input{width:170px}
 .detail-wrap.open{display:block}
 .detail-wrap td{max-width:none;white-space:normal;word-break:break-word}
 .detail-title{font-size:0.62rem;color:var(--text-faint);letter-spacing:0.1em;margin-bottom:8px}
-table{width:100%;border-collapse:collapse;font-size:0.62rem;table-layout:fixed}
-th{text-align:left;padding:6px 8px;border-bottom:2px solid var(--navy-border);border-right:1px solid var(--navy-border);font-weight:700;letter-spacing:0.06em;color:var(--text-faint);white-space:nowrap;background:var(--surface-alt);font-size:0.62rem}
+table{width:100%;border-collapse:collapse;font-size:0.7rem;table-layout:fixed}
+th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--navy-border);border-right:1px solid var(--border-faint);font-weight:600;letter-spacing:0.05em;color:var(--text-faint);white-space:nowrap;background:var(--surface-alt);font-size:0.62rem}
 th:last-child{border-right:none}
 th.sortable{cursor:pointer;user-select:none;position:relative;padding-right:30px}
 th.sortable:hover{color:var(--blue)}
@@ -182,7 +182,7 @@ th.sortable:hover::after{background:#EEF2F7}
 th.sortable::after{content:'\21C5';position:absolute;right:0;top:0;bottom:0;width:26px;display:flex;align-items:center;justify-content:center;background:var(--surface-faint);border-left:1px solid var(--navy-border);font-size:0.78rem;color:#CBD5E1;pointer-events:none}
 th.sort-asc::after{content:'\25B2';color:var(--blue);font-size:0.65rem;background:#EBF0F7;border-left-color:var(--navy-border)}
 th.sort-desc::after{content:'\25BC';color:var(--blue);font-size:0.65rem;background:#EBF0F7;border-left-color:var(--navy-border)}
-td{padding:5px 8px;border-bottom:1px solid var(--navy-border);white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;font-size:0.62rem;color:var(--text)}
+td{padding:7px 8px;border-bottom:1px solid #F1F5F9;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;font-size:0.7rem;color:var(--text)}
 tr:nth-child(even) td{background:var(--surface-alt)}
 tr:hover td{background:rgba(43,108,176,0.04)}
 .c-green{color:var(--green);font-weight:700}
@@ -295,7 +295,7 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
 </header>
 <div id="header">
   <div>
-    <div style="font-size:0.95rem;font-weight:700;color:var(--text);letter-spacing:0.01em;font-family:var(--sans)">Filings</div>
+    <div style="font-size:1rem;font-weight:600;color:var(--text);letter-spacing:0.01em;font-family:var(--sans)">Filings</div>
     <div class="sub" id="header-sub">Loading...</div>
   </div>
   <div id="stats">

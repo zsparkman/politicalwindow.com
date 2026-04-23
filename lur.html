@@ -93,13 +93,13 @@ header{background:var(--header-bg);border-bottom:1px solid var(--header-border);
 #sub-header{border-bottom:1px solid var(--navy-border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff}
 .sub{font-size:0.65rem;color:var(--text-muted);margin-top:2px;font-family:var(--mono)}
 #stats{display:flex;gap:24px}
-.stat-val{font-size:1rem;font-weight:700;color:var(--blue);text-align:right;font-family:var(--mono)}
-.stat-lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.1em;text-align:right;font-family:var(--mono)}
+.stat-val{font-size:1rem;font-weight:600;color:var(--blue);text-align:right;font-family:var(--mono)}
+.stat-lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.08em;text-align:right;font-family:var(--mono)}
 
 /* ── FILTERS ── */
 #filters{padding:10px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;background:#fff}
 .filter-wrap{display:flex;flex-direction:column;gap:3px;flex-shrink:0}
-.filter-lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.1em;font-family:var(--mono);font-weight:500}
+.filter-lbl{font-family:var(--sans);font-size:0.62rem;color:var(--text-faint);letter-spacing:0.05em;font-weight:500}
 .filter-search{display:flex;align-items:center;gap:6px;background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:6px;padding:4px 10px;min-width:200px;transition:border-color 0.15s}
 .filter-search:focus-within{border-color:var(--blue);box-shadow:0 0 0 2px rgba(29,78,216,0.1)}
 .filter-search svg{flex-shrink:0;color:var(--text-faint)}
@@ -118,11 +118,11 @@ header{background:var(--header-bg);border-bottom:1px solid var(--header-border);
 
 /* ── VARIANCE TABLE ── */
 #matchups-wrap{background:#fff;border:1px solid var(--navy-border);border-radius:8px;overflow:clip;box-shadow:var(--shadow-md);display:none}
-.tbl-hdr{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--navy-border);align-items:center;font-family:var(--mono);font-size:0.65rem;font-weight:700;color:var(--text);letter-spacing:0.08em}
+.tbl-hdr{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--navy-border);align-items:center;font-family:var(--mono);font-size:0.62rem;font-weight:600;color:var(--text);letter-spacing:0.06em}
 .tbl-hdr span:last-child{color:var(--text-faint);font-weight:500}
 table{width:100%;border-collapse:collapse}
-th{font-family:var(--mono);font-size:0.56rem;font-weight:700;letter-spacing:0.08em;color:var(--text-faint);padding:6px 10px;text-align:left;border-bottom:1px solid var(--navy-border);background:var(--surface-table);white-space:nowrap}
-td{font-family:var(--mono);font-size:0.6rem;padding:5px 10px;border-bottom:1px solid #F1F5F9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+th{font-family:var(--mono);font-size:0.62rem;font-weight:600;letter-spacing:0.05em;color:var(--text-faint);padding:6px 10px;text-align:left;border-bottom:1px solid var(--border-faint);background:var(--surface-table);white-space:nowrap}
+td{font-family:var(--mono);font-size:0.7rem;padding:7px 10px;border-bottom:1px solid #F1F5F9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
 .c-r{color:#EF4444}.c-d{color:#2563EB}.c-muted{color:var(--text-muted)}.c-faint{color:var(--text-faint)}.c-amber{color:var(--amber)}.c-green{color:var(--green)}.c-bright{color:var(--text)}
 .matchup-slot-hdr{padding:8px 14px;font-size:0.62rem;color:var(--text-muted);letter-spacing:0.06em;border-bottom:1px solid var(--navy-border);background:var(--surface-alt)}
 .highlight-row{background:rgba(29,78,216,0.04)}
@@ -241,7 +241,7 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
 
 <div id="sub-header">
   <div>
-    <div style="font-size:0.95rem;font-weight:800;color:var(--text);font-family:var(--sans)">LUR Monitor Report</div>
+    <div style="font-size:1rem;font-weight:600;color:var(--text);font-family:var(--sans)">LUR Monitor Report</div>
     <div class="sub" id="header-sub">Slots where 2+ candidates paid different rates for the same airtime</div>
   </div>
   <div id="stats">
