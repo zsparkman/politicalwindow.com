@@ -145,7 +145,7 @@ header{background:var(--header-bg);border-bottom:1px solid var(--header-border);
 /* ── TABS ── */
 #tabs-bar{padding:10px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:6px;align-items:center;background:#fff}
 .tab{font-size:0.62rem;font-weight:600;letter-spacing:0.04em;padding:5px 14px;border:1px solid var(--navy-border);border-radius:4px;cursor:pointer;background:transparent;color:var(--text-muted)}
-.tab.active{border-color:var(--blue);background:var(--blue-glow);color:var(--blue)}
+.tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
 
 /* ── MAIN ── */
 #main{padding:16px 24px;display:flex;flex-direction:column;gap:14px}
@@ -407,10 +407,6 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
     <div class="filter-lbl">WEEK TO</div>
     <input type="date" id="f-week-to">
   </div>
-  <div class="filter-search">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="text" id="f-search" placeholder="advertiser, station, buyer...">
-  </div>
   <button id="clear-filters" class="sort-btn" style="color:var(--blue)">CLEAR</button>
   <button id="run-report" style="font-family:var(--mono);font-size:0.7rem;font-weight:600;letter-spacing:0.08em;padding:6px 18px;border:1px solid var(--blue);border-radius:6px;cursor:pointer;background:var(--blue);color:#fff;margin-left:auto">RUN REPORT</button>
 </div>
@@ -422,6 +418,10 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
   <button class="tab" data-view="trend">WEEKLY TREND</button>
   <button class="tab" data-view="lines">LINE ITEMS</button>
   <button class="tab" data-view="variance">VARIANCE REPORT</button>
+  <div class="filter-search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="f-search" placeholder="advertiser, station, buyer...">
+  </div>
 </div>
 
 <div id="pin-bar"></div>
