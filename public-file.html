@@ -130,7 +130,11 @@ header { background:var(--header-bg); border-bottom:1px solid var(--header-borde
 .stat-lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.08em;text-align:right}
 
 /* ── CONTROLS ── */
-#controls{padding:12px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;background:#fff}
+#controls{padding:12px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:12px;flex-wrap:nowrap;align-items:flex-end;background:#fff}
+.filter-items-wrap{display:flex;flex-wrap:wrap;gap:8px;flex:1;align-items:flex-end;min-width:0}
+.filter-btn-group{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.run-report-btn{font-family:var(--mono);font-size:0.6rem;font-weight:600;letter-spacing:0.06em;padding:5px 14px;border:1px solid var(--blue);border-radius:5px;cursor:pointer;background:var(--blue);color:#fff;white-space:nowrap}
+.clear-btn{font-family:var(--mono);font-size:0.52rem;font-weight:500;letter-spacing:0.06em;padding:3px 14px;border:1px solid var(--navy-border);border-radius:4px;cursor:pointer;background:#fff;color:var(--text-muted);white-space:nowrap}
 .tab-group{display:flex;gap:6px}
 .tab{font-size:0.62rem;font-weight:600;letter-spacing:0.04em;padding:5px 14px;border:1px solid var(--navy-border);border-radius:4px;cursor:pointer;background:transparent;color:var(--text-muted);transition:all 0.12s}
 .tab:hover{border-color:#CBD5E1;color:var(--text)}
@@ -306,51 +310,56 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
   </div>
 </div>
 <div id="controls">
-  <div class="tab-group">
-    <button class="tab active" data-view="date">BY DATE</button>
-    <button class="tab" data-view="candidate">BY CANDIDATE</button>
-    <button class="tab" data-view="dma">BY DMA</button>
-    <button class="tab" data-view="station">BY STATION</button>
-    <button class="tab" data-view="raw">CONTRACTS</button>
+  <div class="filter-items-wrap">
+    <div class="tab-group">
+      <button class="tab active" data-view="date">BY DATE</button>
+      <button class="tab" data-view="candidate">BY CANDIDATE</button>
+      <button class="tab" data-view="dma">BY DMA</button>
+      <button class="tab" data-view="station">BY STATION</button>
+      <button class="tab" data-view="raw">CONTRACTS</button>
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">PARTY</div>
+      <select id="f-party"><option value="ALL">All Parties</option><option>R</option><option>D</option><option>I</option></select>
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">STATE</div>
+      <select id="f-state"><option value="ALL">All States</option></select>
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">OFFICE</div>
+      <select id="f-office"><option value="ALL">All Offices</option></select>
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">DMA</div>
+      <select id="f-dma"><option value="ALL">All DMAs</option></select>
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">STATION</div>
+      <select id="f-station"><option value="ALL">All Stations</option></select>
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">WINDOW</div>
+      <select id="f-window">
+        <option value="ALL">All</option>
+        <option value="IN">In Window</option>
+        <option value="Primary">Primary</option>
+        <option value="General">General</option>
+        <option value="OOW">Out of Window</option>
+      </select>
+    </div>
+    <div class="filter-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="f-search" placeholder="candidate, advertiser, station...">
+    </div>
+    <div id="sort-wrap">SORT:
+      <button class="sort-btn active" data-sort="spend">SPEND</button>
+      <button class="sort-btn" data-sort="contracts">CONTRACTS</button>
+    </div>
   </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">PARTY</div>
-    <select id="f-party"><option value="ALL">All Parties</option><option>R</option><option>D</option><option>I</option></select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">STATE</div>
-    <select id="f-state"><option value="ALL">All States</option></select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">OFFICE</div>
-    <select id="f-office"><option value="ALL">All Offices</option></select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">DMA</div>
-    <select id="f-dma"><option value="ALL">All DMAs</option></select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">STATION</div>
-    <select id="f-station"><option value="ALL">All Stations</option></select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">WINDOW</div>
-    <select id="f-window">
-      <option value="ALL">All</option>
-      <option value="IN">In Window</option>
-      <option value="Primary">Primary</option>
-      <option value="General">General</option>
-      <option value="OOW">Out of Window</option>
-    </select>
-  </div>
-  <div class="filter-search">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input id="f-search" placeholder="candidate, advertiser, station...">
-  </div>
-  <button id="clear-filters" class="sort-btn" style="color:var(--blue)">CLEAR</button>
-  <div id="sort-wrap">SORT:
-    <button class="sort-btn active" data-sort="spend">SPEND</button>
-    <button class="sort-btn" data-sort="contracts">CONTRACTS</button>
+  <div class="filter-btn-group">
+    <button id="run-report" class="run-report-btn">RUN REPORT</button>
+    <button id="clear-filters" class="clear-btn">CLEAR</button>
   </div>
 </div>
 <div id="main">
@@ -723,6 +732,7 @@ document.getElementById('headerSearch').addEventListener('input',function(){
   document.getElementById('f-search').value=this.value;
   render();
 });
+document.getElementById('run-report').addEventListener('click',function(){render();});
 document.getElementById('clear-filters').addEventListener('click',function(){
   document.getElementById('f-party').value='ALL';
   document.getElementById('f-state').value='ALL';

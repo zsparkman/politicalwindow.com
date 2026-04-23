@@ -129,7 +129,12 @@ header{background:var(--header-bg);border-bottom:1px solid var(--header-border);
 .stat-lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.08em;text-align:right}
 
 /* ── FILTERS ── */
-#filters{padding:10px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;background:#fff}
+#filters{padding:10px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:10px;flex-wrap:nowrap;align-items:flex-end;background:#fff}
+.filter-items-wrap{display:flex;flex-wrap:wrap;gap:8px;flex:1;align-items:flex-end;min-width:0}
+.filter-btn-group{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.run-report-btn{font-family:var(--mono);font-size:0.6rem;font-weight:600;letter-spacing:0.06em;padding:5px 14px;border:1px solid var(--blue);border-radius:5px;cursor:pointer;background:var(--blue);color:#fff;white-space:nowrap}
+.clear-btn{font-family:var(--mono);font-size:0.52rem;font-weight:500;letter-spacing:0.06em;padding:3px 14px;border:1px solid var(--navy-border);border-radius:4px;cursor:pointer;background:#fff;color:var(--text-muted);white-space:nowrap}
+.filter-tab-group{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .filter-wrap{display:flex;flex-direction:column;gap:3px}
 .filter-lbl{font-family:var(--sans);font-size:0.62rem;color:var(--text-faint);letter-spacing:0.05em;font-weight:500}
 .filter-wrap select,.filter-wrap input[type=text],.filter-wrap input[type=date]{font-size:0.65rem;color:var(--text);background:#fff;border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px}
@@ -143,7 +148,6 @@ header{background:var(--header-bg);border-bottom:1px solid var(--header-border);
 .sort-btn{background:transparent;border:none;cursor:pointer;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;padding:2px 6px}
 
 /* ── TABS ── */
-#tabs-bar{padding:10px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:6px;align-items:center;background:#fff}
 .tab{font-size:0.62rem;font-weight:600;letter-spacing:0.04em;padding:5px 14px;border:1px solid var(--navy-border);border-radius:4px;cursor:pointer;background:transparent;color:var(--text-muted)}
 .tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
 
@@ -356,73 +360,76 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
 </div>
 
 <div id="filters">
-  <div class="filter-wrap">
-    <div class="filter-lbl">PARTY</div>
-    <select id="f-party">
-      <option value="ALL">All Parties</option>
-      <option>R</option><option>D</option><option>I</option>
-    </select>
+  <div class="filter-items-wrap">
+    <div class="filter-wrap">
+      <div class="filter-lbl">PARTY</div>
+      <select id="f-party">
+        <option value="ALL">All Parties</option>
+        <option>R</option><option>D</option><option>I</option>
+      </select>
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">STATE</div>
+      <select id="f-state"><option value="ALL">All States</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option><option>DC</option></select>
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">OFFICE</div>
+      <select id="f-office"><option value="ALL">All Offices</option></select>
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">DMA</div>
+      <select id="f-dma"><option value="ALL">All DMAs</option></select>
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">STATION</div>
+      <select id="f-station"><option value="ALL">All Stations</option></select>
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">DAYPART</div>
+      <select id="f-daypart">
+        <option value="ALL">All Dayparts</option>
+        <option value="EM">EM</option><option value="MN">MN</option><option value="DT">DT</option>
+        <option value="EF">EF</option><option value="EN">EN</option><option value="PA">PA</option>
+        <option value="PT">PT</option><option value="LN">LN</option><option value="LF">LF</option>
+        <option value="ON">ON</option>
+      </select>
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">WINDOW</div>
+      <select id="f-window">
+        <option value="ALL">All</option>
+        <option value="IN">In Window</option>
+        <option value="Primary">Primary</option>
+        <option value="General">General</option>
+        <option value="OOW">Out of Window</option>
+      </select>
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">WEEK FROM</div>
+      <input type="date" id="f-week-from">
+    </div>
+    <div class="filter-wrap">
+      <div class="filter-lbl">WEEK TO</div>
+      <input type="date" id="f-week-to">
+    </div>
+    <div class="filter-tab-group">
+      <button class="tab active" data-view="pivot">PIVOT TABLE</button>
+      <button class="tab" data-view="trend">WEEKLY TREND</button>
+      <button class="tab" data-view="lines">LINE ITEMS</button>
+      <button class="tab" data-view="variance">VARIANCE REPORT</button>
+    </div>
+    <div class="filter-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="f-search" placeholder="advertiser, station, buyer...">
+    </div>
   </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">STATE</div>
-    <select id="f-state"><option value="ALL">All States</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option><option>DC</option></select>
+  <div class="filter-btn-group">
+    <button id="run-report" class="run-report-btn">RUN REPORT</button>
+    <button id="clear-filters" class="clear-btn">CLEAR</button>
   </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">OFFICE</div>
-    <select id="f-office"><option value="ALL">All Offices</option></select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">DMA</div>
-    <select id="f-dma"><option value="ALL">All DMAs</option></select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">STATION</div>
-    <select id="f-station"><option value="ALL">All Stations</option></select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">DAYPART</div>
-    <select id="f-daypart">
-      <option value="ALL">All Dayparts</option>
-      <option value="EM">EM</option><option value="MN">MN</option><option value="DT">DT</option>
-      <option value="EF">EF</option><option value="EN">EN</option><option value="PA">PA</option>
-      <option value="PT">PT</option><option value="LN">LN</option><option value="LF">LF</option>
-      <option value="ON">ON</option>
-    </select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">WINDOW</div>
-    <select id="f-window">
-      <option value="ALL">All</option>
-      <option value="IN">In Window</option>
-      <option value="Primary">Primary</option>
-      <option value="General">General</option>
-      <option value="OOW">Out of Window</option>
-    </select>
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">WEEK FROM</div>
-    <input type="date" id="f-week-from">
-  </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">WEEK TO</div>
-    <input type="date" id="f-week-to">
-  </div>
-  <button id="clear-filters" class="sort-btn" style="color:var(--blue)">CLEAR</button>
-  <button id="run-report" style="font-family:var(--mono);font-size:0.7rem;font-weight:600;letter-spacing:0.08em;padding:6px 18px;border:1px solid var(--blue);border-radius:6px;cursor:pointer;background:var(--blue);color:#fff;margin-left:auto">RUN REPORT</button>
 </div>
 
 <div id="truncation-note" style="display:none;padding:8px 24px;font-family:var(--mono);font-size:0.6rem;color:var(--amber);background:var(--amber-dim);border-bottom:1px solid rgba(217,119,6,0.2);letter-spacing:0.06em"></div>
-
-<div id="tabs-bar">
-  <button class="tab active" data-view="pivot">PIVOT TABLE</button>
-  <button class="tab" data-view="trend">WEEKLY TREND</button>
-  <button class="tab" data-view="lines">LINE ITEMS</button>
-  <button class="tab" data-view="variance">VARIANCE REPORT</button>
-  <div class="filter-search">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="text" id="f-search" placeholder="advertiser, station, buyer...">
-  </div>
-</div>
 
 <div id="pin-bar"></div>
 
