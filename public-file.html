@@ -638,7 +638,7 @@ window.toggleDetail=function(i){
 
 function loadData(){
 var DATA_BADGE=document.getElementById('data-badge');
-fetch(API+'/api/rates?limit=5000')
+fetch(API+'/api/public-file?limit=5000')
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(j){
     ALL_DATA=j.data||[];
