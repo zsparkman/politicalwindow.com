@@ -2215,7 +2215,7 @@ function buildDistrictLabelPoints(geo) {
   const byNum = {};
   (geo.features || []).forEach(f => {
     const num = f.properties.district_number;
-    if (num == null) return;
+    if (num == null || num === 0) return;
     const rings = collectOuterRings(f.geometry);
     if (!rings.length) return;
     let best = null, bestArea = -1;
