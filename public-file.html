@@ -116,6 +116,11 @@ header { background:var(--header-bg); border-bottom:1px solid var(--header-borde
 .logo-badge { font-family:var(--mono); font-size:0.55rem; font-weight:600; color:#93C5FD; background:rgba(37,99,235,0.15); border:1px solid rgba(37,99,235,0.3); border-radius:10px; padding:2px 8px; letter-spacing:0.06em; }
 .header-right { display:flex; align-items:center; gap:10px; justify-content:flex-end; }
 .header-meta { font-family:var(--mono); font-size:0.6rem; color:rgba(255,255,255,0.7); letter-spacing:0.04em; }
+.header-search{max-width:520px;width:100%;justify-self:center;display:flex;align-items:center;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:0 14px;height:34px;transition:border-color 0.15s,box-shadow 0.15s}
+.header-search:focus-within{border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(37,99,235,0.15);background:rgba(255,255,255,0.12)}
+.header-search svg{width:16px;height:16px;color:rgba(255,255,255,0.45);flex-shrink:0}
+.header-search input{border:none;outline:none;background:transparent;font-family:var(--sans);font-size:0.75rem;color:var(--header-fg);width:100%;padding:0 8px}
+.header-search input::placeholder{color:rgba(255,255,255,0.4)}
 
 /* ── SUB-HEADER / STATS ── */
 #header{border-bottom:1px solid var(--navy-border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff}
@@ -135,6 +140,11 @@ header { background:var(--header-bg); border-bottom:1px solid var(--header-borde
 select,input{font-size:0.65rem;color:var(--text);background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:6px;padding:4px 8px}
 select:focus,input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,108,176,0.08)}
 input{width:170px}
+.filter-search{display:flex;align-items:center;gap:6px;background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:6px;padding:4px 10px;min-width:200px;transition:border-color 0.15s}
+.filter-search:focus-within{border-color:var(--blue);box-shadow:0 0 0 2px rgba(29,78,216,0.1)}
+.filter-search svg{flex-shrink:0;color:var(--text-faint)}
+.filter-search input{background:transparent;border:none;outline:none;box-shadow:none;color:var(--text);font-family:var(--sans);font-size:0.7rem;width:100%;padding:0}
+.filter-search input::placeholder{color:var(--text-faint)}
 #sort-wrap{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:0.65rem;color:var(--text-faint)}
 .sort-btn{background:transparent;border:none;cursor:pointer;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;color:var(--text-faint);padding:2px 6px;transition:color 0.12s}
 .sort-btn:hover{color:var(--text)}
@@ -277,7 +287,10 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
       <span class="logo-badge">2026</span>
     </div>
   </div>
-  <div></div>
+  <div class="header-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Search filings..." id="headerSearch">
+  </div>
   <div class="header-right">
     <span class="header-meta" id="live-date"></span>
     <span class="header-meta" id="data-badge" style="color:rgba(255,255,255,0.6);font-size:0.55rem;letter-spacing:0.05em;min-width:10em;text-align:right">&#x2B24; LOADING...</span>
@@ -334,8 +347,8 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
       <option value="OOW">Out of Window</option>
     </select>
   </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">SEARCH</div>
+  <div class="filter-search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input id="f-search" placeholder="candidate, advertiser, station...">
   </div>
   <button id="clear-filters" class="sort-btn" style="color:var(--blue)">CLEAR</button>
@@ -706,7 +719,14 @@ document.querySelectorAll('#raw-thead th.sortable').forEach(function(th){
   });
 });
 ['f-party','f-state','f-office','f-dma','f-station','f-window'].forEach(function(id){document.getElementById(id).addEventListener('change',render);});
-document.getElementById('f-search').addEventListener('input',render);
+document.getElementById('f-search').addEventListener('input',function(){
+  document.getElementById('headerSearch').value=this.value;
+  render();
+});
+document.getElementById('headerSearch').addEventListener('input',function(){
+  document.getElementById('f-search').value=this.value;
+  render();
+});
 document.getElementById('clear-filters').addEventListener('click',function(){
   document.getElementById('f-party').value='ALL';
   document.getElementById('f-state').value='ALL';
@@ -715,6 +735,7 @@ document.getElementById('clear-filters').addEventListener('click',function(){
   document.getElementById('f-station').value='ALL';
   document.getElementById('f-window').value='ALL';
   document.getElementById('f-search').value='';
+  document.getElementById('headerSearch').value='';
   render();
 });
 // ── AUTH ──────────────────────────────────────────────────────────────────────

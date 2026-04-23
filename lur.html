@@ -81,6 +81,11 @@ header{background:var(--header-bg);border-bottom:1px solid var(--header-border);
 .header-meta{font-family:var(--mono);font-size:0.58rem;color:rgba(255,255,255,0.7)}
 .header-right{display:flex;align-items:center;gap:10px;justify-content:flex-end}
 .logo-badge{font-family:var(--mono);font-size:0.6rem;font-weight:600;color:#FBBF24;background:rgba(217,119,6,0.15);border:1px solid rgba(217,119,6,0.3);border-radius:2px;padding:2px 5px;letter-spacing:0.08em}
+.header-search{max-width:520px;width:100%;justify-self:center;display:flex;align-items:center;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:0 14px;height:34px;transition:border-color 0.15s,box-shadow 0.15s}
+.header-search:focus-within{border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(37,99,235,0.15);background:rgba(255,255,255,0.12)}
+.header-search svg{width:16px;height:16px;color:rgba(255,255,255,0.45);flex-shrink:0}
+.header-search input{border:none;outline:none;background:transparent;font-family:var(--sans);font-size:0.75rem;color:var(--header-fg);width:100%;padding:0 8px}
+.header-search input::placeholder{color:rgba(255,255,255,0.4)}
 #logout-btn{font-family:var(--mono);font-size:0.58rem;color:rgba(255,255,255,0.5);background:none;border:none;cursor:pointer;padding:2px 6px}
 #logout-btn:hover{color:var(--header-fg)}
 
@@ -95,6 +100,11 @@ header{background:var(--header-bg);border-bottom:1px solid var(--header-border);
 #filters{padding:10px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;background:#fff}
 .filter-wrap{display:flex;flex-direction:column;gap:3px;flex-shrink:0}
 .filter-lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.1em;font-family:var(--mono);font-weight:500}
+.filter-search{display:flex;align-items:center;gap:6px;background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:6px;padding:4px 10px;min-width:200px;transition:border-color 0.15s}
+.filter-search:focus-within{border-color:var(--blue);box-shadow:0 0 0 2px rgba(29,78,216,0.1)}
+.filter-search svg{flex-shrink:0;color:var(--text-faint)}
+.filter-search input{background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:0.7rem;width:100%}
+.filter-search input::placeholder{color:var(--text-faint)}
 select,input[type=text],input[type=date]{font-size:0.65rem;color:var(--text);background:#fff;border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px}
 select:focus,input:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-glow)}
 input[type=text]{width:170px}
@@ -222,7 +232,10 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
 <div class="page-wrap">
 <header>
   <div class="header-left"><span class="logo-badge">LUR MONITOR</span><span class="header-meta" id="data-badge" style="color:rgba(255,255,255,0.5);font-size:0.55rem">&#x25CF; LOADING...</span></div>
-  <div></div>
+  <div class="header-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Search candidates, stations..." id="headerSearch">
+  </div>
   <div class="header-right"><span class="header-meta" id="live-date"></span><button id="logout-btn" onclick="logout()" style="display:none">LOGOUT</button></div>
 </header>
 
@@ -251,6 +264,10 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
   <div class="filter-wrap"><div class="filter-lbl">WINDOW</div><select id="f-window"><option value="ALL">All</option><option value="IN" selected>In Window</option><option value="Primary">Primary</option><option value="General">General</option><option value="OOW">Out of Window</option></select></div>
   <div class="filter-wrap"><div class="filter-lbl">WEEK FROM</div><input type="date" id="f-week-from"></div>
   <div class="filter-wrap"><div class="filter-lbl">WEEK TO</div><input type="date" id="f-week-to"></div>
+  <div class="filter-search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="f-search" placeholder="candidate, station, advertiser...">
+  </div>
   <div style="display:flex;flex-direction:column;gap:4px;margin-left:auto;flex-shrink:0">
     <button id="run-report" style="font-family:var(--mono);font-size:0.6rem;font-weight:700;letter-spacing:0.1em;padding:5px 14px;border:1px solid var(--blue);border-radius:5px;cursor:pointer;background:var(--blue);color:#fff;white-space:nowrap">RUN REPORT</button>
     <button id="clear-filters" style="font-family:var(--mono);font-size:0.52rem;font-weight:600;letter-spacing:0.08em;padding:3px 14px;border:1px solid var(--navy-border);border-radius:5px;cursor:pointer;background:#fff;color:var(--blue);white-space:nowrap">CLEAR</button>
@@ -403,6 +420,7 @@ function getFiltered(){
   var wkFrom=document.getElementById('f-week-from').value;
   var wkTo=document.getElementById('f-week-to').value;
   var cand=document.getElementById('f-candidate').value;
+  var search=document.getElementById('f-search').value.toLowerCase();
   return ALL_DATA.filter(function(r){
     if(party!=='ALL'&&r.party!==party)return false;
     if(state!=='ALL'&&r.state!==state)return false;
@@ -416,6 +434,15 @@ function getFiltered(){
     }
     if(wkFrom&&r.week_of<wkFrom)return false;
     if(wkTo&&r.week_of>wkTo)return false;
+    if(search){
+      if(!(r.candidate||'').toLowerCase().includes(search)&&
+         !(r.advertiser||'').toLowerCase().includes(search)&&
+         !(r.station||'').toLowerCase().includes(search)&&
+         !(r.station_display||'').toLowerCase().includes(search)&&
+         !(r.description||'').toLowerCase().includes(search)&&
+         !(r.state||'').toLowerCase().includes(search)&&
+         !(r.dma_name||'').toLowerCase().includes(search))return false;
+    }
     return true;
   });
 }
@@ -606,10 +633,20 @@ document.getElementById('run-report').addEventListener('click',loadData);
   document.getElementById(id).addEventListener('change',function(){if(ALL_DATA.length)render();});
 });
 ['f-week-from','f-week-to'].forEach(function(id){document.getElementById(id).addEventListener('change',function(){if(ALL_DATA.length)render();});});
+document.getElementById('f-search').addEventListener('input',function(){
+  document.getElementById('headerSearch').value=this.value;
+  if(ALL_DATA.length)render();
+});
+document.getElementById('headerSearch').addEventListener('input',function(){
+  document.getElementById('f-search').value=this.value;
+  if(ALL_DATA.length)render();
+});
 document.getElementById('clear-filters').addEventListener('click',function(){
   ['f-party','f-state','f-dma','f-station','f-rateclass','f-daypart','f-candidate'].forEach(function(id){document.getElementById(id).value='ALL';});
   document.getElementById('f-window').value='IN';
   document.getElementById('f-week-from').value='';document.getElementById('f-week-to').value='';
+  document.getElementById('f-search').value='';
+  document.getElementById('headerSearch').value='';
   if(ALL_DATA.length)render();
 });
 

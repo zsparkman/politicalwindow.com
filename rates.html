@@ -114,9 +114,10 @@ select,input,button{font-family:var(--mono);outline:none}
 header{background:var(--header-bg);border-bottom:1px solid var(--header-border);padding:0 20px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;height:48px;position:sticky;top:0;z-index:100}
 .header-left{display:flex;align-items:center;gap:10px}
 .header-meta{font-family:var(--mono);font-size:0.6rem;color:rgba(255,255,255,0.7);letter-spacing:0.04em}
-.header-search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:0 12px;height:32px;max-width:420px;width:100%;margin:0 auto}
-.header-search svg{flex-shrink:0;color:rgba(255,255,255,0.45)}
-.header-search input{border:none;background:transparent;font-family:var(--sans);font-size:0.72rem;color:var(--header-fg);width:100%;outline:none}
+.header-search{max-width:520px;width:100%;justify-self:center;display:flex;align-items:center;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:0 14px;height:34px;transition:border-color 0.15s,box-shadow 0.15s}
+.header-search:focus-within{border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(37,99,235,0.15);background:rgba(255,255,255,0.12)}
+.header-search svg{width:16px;height:16px;color:rgba(255,255,255,0.45);flex-shrink:0}
+.header-search input{border:none;outline:none;background:transparent;font-family:var(--sans);font-size:0.75rem;color:var(--header-fg);width:100%;padding:0 8px}
 .header-search input::placeholder{color:rgba(255,255,255,0.4)}
 .header-right{display:flex;align-items:center;gap:10px;justify-content:flex-end}
 
@@ -134,6 +135,11 @@ header{background:var(--header-bg);border-bottom:1px solid var(--header-border);
 select,input[type=text],input[type=date]{font-size:0.65rem;color:var(--text);background:#fff;border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px}
 input[type=text]{width:140px}
 input[type=date]{width:116px}
+.filter-search{display:flex;align-items:center;gap:6px;background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:6px;padding:4px 10px;margin-left:auto;min-width:200px;transition:border-color 0.15s}
+.filter-search:focus-within{border-color:var(--blue);box-shadow:0 0 0 2px rgba(29,78,216,0.1)}
+.filter-search svg{flex-shrink:0;color:var(--text-faint)}
+.filter-search input{background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:0.7rem;width:100%}
+.filter-search input::placeholder{color:var(--text-faint)}
 .sort-btn{background:transparent;border:none;cursor:pointer;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;padding:2px 6px}
 
 /* ── TABS ── */
@@ -401,8 +407,8 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
     <div class="filter-lbl">WEEK TO</div>
     <input type="date" id="f-week-to">
   </div>
-  <div class="filter-wrap">
-    <div class="filter-lbl">SEARCH</div>
+  <div class="filter-search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input type="text" id="f-search" placeholder="advertiser, station, buyer...">
   </div>
   <button id="clear-filters" class="sort-btn" style="color:var(--blue)">CLEAR</button>
