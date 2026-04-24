@@ -97,23 +97,38 @@ header{background:var(--header-bg);border-bottom:1px solid var(--header-border);
 .stat-lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.08em;text-align:right;font-family:var(--mono)}
 
 /* ── FILTERS ── */
-#filters{padding:10px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:8px;flex-wrap:nowrap;align-items:flex-end;background:#fff}
-.filter-items-wrap{display:flex;flex-wrap:wrap;gap:8px;flex:1;align-items:flex-end;min-width:0}
+#filters{padding:10px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:10px;align-items:flex-end;background:#fff}
+.filter-items-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px 10px;flex:1;min-width:0;align-items:end}
 .filter-btn-group{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
 .run-report-btn{font-family:var(--mono);font-size:0.6rem;font-weight:600;letter-spacing:0.06em;padding:5px 14px;border:1px solid var(--blue);border-radius:5px;cursor:pointer;background:var(--blue);color:#fff;white-space:nowrap}
 .clear-btn{font-family:var(--mono);font-size:0.52rem;font-weight:500;letter-spacing:0.06em;padding:3px 14px;border:1px solid var(--navy-border);border-radius:4px;cursor:pointer;background:#fff;color:var(--text-muted);white-space:nowrap}
-.filter-wrap{display:flex;flex-direction:column;gap:3px;flex-shrink:0}
+.filter-wrap{display:flex;flex-direction:column;gap:3px}
 .filter-lbl{font-family:var(--sans);font-size:0.62rem;color:var(--text-faint);letter-spacing:0.05em;font-weight:500}
-.filter-search{display:flex;align-items:center;gap:6px;background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:6px;padding:4px 10px;min-width:200px;transition:border-color 0.15s}
+.filter-search{grid-column:span 2;display:flex;align-items:center;gap:6px;background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:6px;padding:4px 10px;transition:border-color 0.15s}
 .filter-search:focus-within{border-color:var(--blue);box-shadow:0 0 0 2px rgba(29,78,216,0.1)}
 .filter-search svg{flex-shrink:0;color:var(--text-faint)}
 .filter-search input{background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:0.7rem;width:100%}
 .filter-search input::placeholder{color:var(--text-faint)}
-.filter-wrap select,.filter-wrap input[type=text],.filter-wrap input[type=date]{font-size:0.65rem;color:var(--text);background:#fff;border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px}
-.filter-wrap select:focus,.filter-wrap input:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-glow)}
-.filter-wrap input[type=text]{width:170px}
-.filter-wrap input[type=date]{width:116px}
+.filter-wrap input[type=date]{font-size:0.65rem;color:var(--text);background:#fff;border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px;width:100%;outline:none}
+.filter-wrap input[type=date]:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-glow)}
 .sort-btn{background:transparent;border:none;cursor:pointer;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;color:var(--text-faint);padding:2px 6px}
+/* ── MULTISELECT ── */
+.ms-wrap{position:relative}
+.ms-btn{display:flex;align-items:center;justify-content:space-between;gap:4px;font-family:var(--mono);font-size:0.65rem;color:var(--text);background:#fff;border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px;cursor:pointer;width:100%;text-align:left;line-height:1.35;outline:none}
+.ms-btn:hover{border-color:var(--blue)}
+.ms-btn:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-glow)}
+.ms-btn.has-sel{border-color:var(--blue);color:var(--blue);background:rgba(29,78,216,0.04)}
+.ms-val{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-caret{flex-shrink:0;color:var(--text-faint);transition:transform 0.15s}
+.ms-wrap.open .ms-caret{transform:rotate(180deg)}
+.ms-wrap.open{z-index:200}
+.ms-panel{display:none;position:absolute;top:calc(100% + 3px);left:0;z-index:500;background:#fff;border:1px solid var(--navy-border);border-radius:6px;box-shadow:var(--shadow-md);min-width:150px;max-width:280px;max-height:220px;overflow-y:auto;padding:4px 0}
+.ms-wrap.open .ms-panel{display:block}
+.ms-opt{display:flex;align-items:center;gap:7px;padding:5px 10px;cursor:pointer;font-family:var(--mono);font-size:0.63rem;color:var(--text-muted);white-space:nowrap;user-select:none}
+.ms-opt:hover{background:rgba(29,78,216,0.05);color:var(--text)}
+.ms-opt.sel{color:var(--blue)}
+.ms-chk{width:11px;height:11px;flex-shrink:0;border:1px solid var(--navy-border);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.45rem;color:transparent;line-height:1}
+.ms-opt.sel .ms-chk{border-color:var(--blue);background:var(--blue);color:#fff}
 
 /* ── MAIN ── */
 #main{padding:16px 24px;display:flex;flex-direction:column;gap:14px}
@@ -265,14 +280,14 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
 
 <div id="filters">
   <div class="filter-items-wrap">
-    <div class="filter-wrap"><div class="filter-lbl">CANDIDATE</div><select id="f-candidate"><option value="ALL">All Candidates</option></select></div>
-    <div class="filter-wrap"><div class="filter-lbl">PARTY</div><select id="f-party"><option value="ALL">All Parties</option><option>R</option><option>D</option><option>I</option></select></div>
-    <div class="filter-wrap"><div class="filter-lbl">STATE</div><select id="f-state"><option value="ALL">All States</option></select></div>
-    <div class="filter-wrap"><div class="filter-lbl">DMA</div><select id="f-dma"><option value="ALL">All DMAs</option></select></div>
-    <div class="filter-wrap"><div class="filter-lbl">STATION</div><select id="f-station"><option value="ALL">All Stations</option></select></div>
-    <div class="filter-wrap"><div class="filter-lbl">RATE CLASS</div><select id="f-rateclass"><option value="ALL">All</option></select></div>
-    <div class="filter-wrap"><div class="filter-lbl">DAYPART</div><select id="f-daypart"><option value="ALL">All</option><option value="EM">EM</option><option value="MN">MN</option><option value="DT">DT</option><option value="EF">EF</option><option value="EN">EN</option><option value="PA">PA</option><option value="PT">PT</option><option value="LN">LN</option><option value="LF">LF</option><option value="ON">ON</option></select></div>
-    <div class="filter-wrap"><div class="filter-lbl">WINDOW</div><select id="f-window"><option value="ALL">All</option><option value="IN" selected>In Window</option><option value="Primary">Primary</option><option value="General">General</option><option value="OOW">Out of Window</option></select></div>
+    <div class="filter-wrap"><div class="filter-lbl">CANDIDATE</div><div class="ms-wrap" id="f-candidate"><button class="ms-btn" type="button"><span class="ms-val">All Candidates</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">PARTY</div><div class="ms-wrap" id="f-party"><button class="ms-btn" type="button"><span class="ms-val">All Parties</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">STATE</div><div class="ms-wrap" id="f-state"><button class="ms-btn" type="button"><span class="ms-val">All States</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">DMA</div><div class="ms-wrap" id="f-dma"><button class="ms-btn" type="button"><span class="ms-val">All DMAs</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">STATION</div><div class="ms-wrap" id="f-station"><button class="ms-btn" type="button"><span class="ms-val">All Stations</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">RATE CLASS</div><div class="ms-wrap" id="f-rateclass"><button class="ms-btn" type="button"><span class="ms-val">All</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">DAYPART</div><div class="ms-wrap" id="f-daypart"><button class="ms-btn" type="button"><span class="ms-val">All</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">WINDOW</div><div class="ms-wrap" id="f-window"><button class="ms-btn has-sel" type="button"><span class="ms-val">In Window</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
     <div class="filter-wrap"><div class="filter-lbl">WEEK FROM</div><input type="date" id="f-week-from"></div>
     <div class="filter-wrap"><div class="filter-lbl">WEEK TO</div><input type="date" id="f-week-to"></div>
     <div class="filter-search">
@@ -337,6 +352,7 @@ var TOKEN=localStorage.getItem('pw_token');
 function authFetch(url,opts){var o=opts||{};o.headers=Object.assign({},o.headers,{'Authorization':'Bearer '+(TOKEN||'')});return fetch(url,o);}
 
 var ALL_DATA=[];
+var MS_STATE={};
 // ── Cable PSID → retail brand display ───────────────────────────────────────
 // Rows from /api/lur, /api/lur-violations, /api/lur-monitor, /api/lur-campaign
 // and /api/lines all carry station_display when the backend resolves the
@@ -409,11 +425,11 @@ function fmtCompact(v){if(v>=1e6)return(v/1e6).toFixed(2)+'M';if(v>=1e3)return(v
 // ── Build query params ──
 function buildQueryParams(){
   var p=[];
-  var party=document.getElementById('f-party').value;if(party!=='ALL')p.push('party='+encodeURIComponent(party));
-  var state=document.getElementById('f-state').value;if(state!=='ALL')p.push('state='+encodeURIComponent(state));
-  var station=document.getElementById('f-station').value;if(station!=='ALL')p.push('station='+encodeURIComponent(station));
-  var dma=document.getElementById('f-dma').value;if(dma!=='ALL')p.push('dma='+encodeURIComponent(dma));
-  var daypart=document.getElementById('f-daypart').value;if(daypart!=='ALL')p.push('daypart_code='+encodeURIComponent(daypart));
+  var parties=msGetVals('f-party');if(parties.length===1)p.push('party='+encodeURIComponent(parties[0]));
+  var states=msGetVals('f-state');if(states.length===1)p.push('state='+encodeURIComponent(states[0]));
+  var stations=msGetVals('f-station');if(stations.length===1)p.push('station='+encodeURIComponent(stations[0]));
+  var dmas=msGetVals('f-dma');if(dmas.length===1)p.push('dma='+encodeURIComponent(dmas[0]));
+  var dayparts=msGetVals('f-daypart');if(dayparts.length===1)p.push('daypart_code='+encodeURIComponent(dayparts[0]));
   var wf=document.getElementById('f-week-from').value;if(wf)p.push('week_from='+encodeURIComponent(wf));
   var wt=document.getElementById('f-week-to').value;if(wt)p.push('week_to='+encodeURIComponent(wt));
   return p.join('&');
@@ -421,29 +437,29 @@ function buildQueryParams(){
 
 // ── Filter data ──
 function getFiltered(){
-  var party=document.getElementById('f-party').value;
-  var state=document.getElementById('f-state').value;
-
-  var dma=document.getElementById('f-dma').value;
-  var station=document.getElementById('f-station').value;
-  var daypart=document.getElementById('f-daypart').value;
-  var rateclass=document.getElementById('f-rateclass').value;
-  var winFilter=document.getElementById('f-window').value;
+  var parties=msGetVals('f-party');
+  var states=msGetVals('f-state');
+  var dmas=msGetVals('f-dma');
+  var stations=msGetVals('f-station');
+  var dayparts=msGetVals('f-daypart');
+  var rateclasses=msGetVals('f-rateclass');
+  var wins=msGetVals('f-window');
+  var cands=msGetVals('f-candidate');
   var wkFrom=document.getElementById('f-week-from').value;
   var wkTo=document.getElementById('f-week-to').value;
-  var cand=document.getElementById('f-candidate').value;
   var search=document.getElementById('f-search').value.toLowerCase();
   return ALL_DATA.filter(function(r){
-    if(party!=='ALL'&&r.party!==party)return false;
-    if(state!=='ALL'&&r.state!==state)return false;
-    if(dma!=='ALL'&&r.dma!==dma)return false;
-    if(station!=='ALL'&&r.station!==station)return false;
-    if(daypart!=='ALL'&&r.daypart_code!==daypart)return false;
-    if(rateclass!=='ALL'&&(r.rate_class||'')!==rateclass)return false;
-    if(winFilter!=='ALL'){
-      if(winFilter==='IN'){if(r.window_status!=='Primary'&&r.window_status!=='General')return false;}
-      else{if(r.window_status!==winFilter)return false;}
+    if(parties.length>0&&!parties.includes(r.party))return false;
+    if(states.length>0&&!states.includes(r.state))return false;
+    if(dmas.length>0&&!dmas.includes(r.dma))return false;
+    if(stations.length>0&&!stations.includes(r.station))return false;
+    if(dayparts.length>0&&!dayparts.includes(r.daypart_code))return false;
+    if(rateclasses.length>0&&!rateclasses.includes(r.rate_class||''))return false;
+    if(wins.length>0){
+      var ws=r.window_status;
+      if(!wins.some(function(w){return w==='IN'?(ws==='Primary'||ws==='General'):ws===w;}))return false;
     }
+    if(cands.length>0&&!cands.includes(r.candidate||r.advertiser||''))return false;
     if(wkFrom&&r.week_of<wkFrom)return false;
     if(wkTo&&r.week_of>wkTo)return false;
     if(search){
@@ -461,7 +477,7 @@ function getFiltered(){
 
 // ── Render matchups (same logic as rates.html renderMatchups) ──
 function renderMatchups(rows){
-  var candFilter=document.getElementById('f-candidate').value;
+  var candFilters=msGetVals('f-candidate');
 
   // Group by station + description + time_period + week_of
   var slots={},slotOrder=[];
@@ -477,8 +493,8 @@ function renderMatchups(rows){
     s.rows.forEach(function(r){names.add(r.candidate||r.advertiser||'\u2014');rates.add(parseFloat(r.rate)||0);});
     if(names.size<2||rates.size<2)return false;
     // If candidate filter active, only show slots where that candidate appears
-    if(candFilter!=='ALL'){
-      return s.rows.some(function(r){return(r.candidate||r.advertiser||'')==candFilter;});
+    if(candFilters.length>0){
+      return s.rows.some(function(r){return candFilters.includes(r.candidate||r.advertiser||'');});
     }
     return true;
   });
@@ -529,7 +545,7 @@ function renderMatchups(rows){
       var cand=r.candidate||r.advertiser||'\u2014';
       var rate=parseFloat(r.rate)||0;
       var isLur=Math.abs(rate-lurRate)<0.01;
-      var isHighlighted=candFilter!=='ALL'&&cand===candFilter;
+      var isHighlighted=candFilters.length===1&&cand===candFilters[0];
       var overPct=lurRate>0&&rate>lurRate?(' <span style="font-size:0.48rem;color:var(--red);font-weight:700">+'+Math.round(((rate-lurRate)/lurRate)*100)+'%</span>'):'';
       var lurTag=isLur?(' <span style="font-size:0.48rem;color:var(--green);font-weight:700;background:var(--green-dim);padding:0 3px;border-radius:2px">LUR</span>'):'';
 
@@ -601,18 +617,11 @@ function loadData(){
       var DATA_BADGE=document.getElementById('data-badge');
       if(DATA_BADGE){var t=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});DATA_BADGE.style.color='#34D399';DATA_BADGE.textContent='\u25CF LIVE \u00B7 '+ALL_DATA.length.toLocaleString()+' lines';}
 
-      // Populate candidate dropdown from loaded data (preserve prior selection)
-      var candSel=document.getElementById('f-candidate');
-      var prevCand=candSel.value;
+      // Populate candidate multiselect from loaded data (preserve prior selection)
       var entityParam=new URLSearchParams(window.location.search).get('candidate');
       var cands=new Set();ALL_DATA.forEach(function(r){if(r.candidate)cands.add(r.candidate);});
-      var sorted=[...cands].sort();
-      candSel.innerHTML='<option value="ALL">All Candidates</option>';
-      sorted.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;candSel.appendChild(o);});
-
-      // Restore candidate selection: URL param takes priority, then prior dropdown value
-      if(entityParam)candSel.value=entityParam;
-      else if(prevCand!=='ALL')candSel.value=prevCand;
+      if(entityParam)MS_STATE['f-candidate']=new Set([entityParam]);
+      msPop('f-candidate',[...cands].sort());
 
       // Populate other dropdowns
       buildDropdowns();
@@ -627,23 +636,79 @@ function loadData(){
 
 function buildDropdowns(){
   var data=ALL_DATA;
-  function pop(id,vals,fmt){
-    var el=document.getElementById(id),first=el.options[0],cur=el.value;
-    el.innerHTML='';el.appendChild(first);
-    vals.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=fmt?fmt(v):v;el.appendChild(o);});
-    if(cur!=='ALL'){for(var i=0;i<el.options.length;i++){if(el.options[i].value===cur){el.value=cur;break;}}}
-  }
-  pop('f-state',[...new Set(data.map(function(r){return r.state;}).filter(Boolean))].sort());
-  pop('f-dma',[...new Set(data.map(function(r){return r.dma;}).filter(Boolean))].sort());
-  pop('f-station',[...new Set(data.map(function(r){return r.station;}).filter(Boolean))].sort(),stationLabelFromCode);
-  pop('f-rateclass',[...new Set(data.map(function(r){return r.rate_class;}).filter(Boolean))].sort());
+  msPop('f-state',[...new Set(data.map(function(r){return r.state;}).filter(Boolean))].sort());
+  msPop('f-dma',[...new Set(data.map(function(r){return r.dma;}).filter(Boolean))].sort());
+  msPop('f-station',[...new Set(data.map(function(r){return r.station;}).filter(Boolean))].sort(),stationLabelFromCode);
+  msPop('f-rateclass',[...new Set(data.map(function(r){return r.rate_class;}).filter(Boolean))].sort());
+}
+
+// ── Multiselect component ──
+function msInit(id,ph,cb){
+  var wrap=document.getElementById(id);if(!wrap)return;
+  wrap._ms_ph=ph;wrap._ms_cb=cb||function(){};
+  if(!MS_STATE[id])MS_STATE[id]=new Set();
+  wrap.querySelector('.ms-btn').addEventListener('click',function(e){
+    e.stopPropagation();
+    var open=wrap.classList.contains('open');
+    document.querySelectorAll('.ms-wrap.open').forEach(function(w){w.classList.remove('open');});
+    if(!open)wrap.classList.add('open');
+  });
+}
+document.addEventListener('click',function(){document.querySelectorAll('.ms-wrap.open').forEach(function(w){w.classList.remove('open');});});
+function msPop(id,vals,fmtFn){
+  var wrap=document.getElementById(id);if(!wrap)return;
+  var panel=wrap.querySelector('.ms-panel');if(!panel)return;
+  if(!MS_STATE[id])MS_STATE[id]=new Set();
+  var prev=MS_STATE[id];
+  panel.innerHTML='';
+  vals.forEach(function(v){
+    var label=fmtFn?fmtFn(v):v;
+    var isSel=prev.has(v);
+    var opt=document.createElement('div');opt.className='ms-opt'+(isSel?' sel':'');opt.dataset.value=v;
+    var chk=document.createElement('span');chk.className='ms-chk';if(isSel)chk.textContent='✓';
+    var lbl=document.createElement('span');lbl.textContent=label;
+    opt.appendChild(chk);opt.appendChild(lbl);
+    opt.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(MS_STATE[id].has(v)){MS_STATE[id].delete(v);opt.classList.remove('sel');chk.textContent='';}
+      else{MS_STATE[id].add(v);opt.classList.add('sel');chk.textContent='✓';}
+      _msUpdateBtn(id);
+      if(wrap._ms_cb)wrap._ms_cb();
+    });
+    panel.appendChild(opt);
+  });
+  _msUpdateBtn(id);
+}
+function _msUpdateBtn(id){
+  var wrap=document.getElementById(id);if(!wrap)return;
+  var s=MS_STATE[id]||new Set();
+  var btn=wrap.querySelector('.ms-btn');var val=wrap.querySelector('.ms-val');if(!btn||!val)return;
+  if(s.size===0){val.textContent=wrap._ms_ph||'All';btn.classList.remove('has-sel');}
+  else if(s.size===1){val.textContent=Array.from(s)[0];btn.classList.add('has-sel');}
+  else{val.textContent=s.size+' selected';btn.classList.add('has-sel');}
+}
+function msGetVals(id){var s=MS_STATE[id];if(!s||s.size===0)return[];return Array.from(s);}
+function msClear(id){
+  var wrap=document.getElementById(id);if(!wrap)return;
+  MS_STATE[id]=new Set();
+  var panel=wrap.querySelector('.ms-panel');
+  if(panel)panel.querySelectorAll('.ms-opt').forEach(function(o){o.classList.remove('sel');var c=o.querySelector('.ms-chk');if(c)c.textContent='';});
+  _msUpdateBtn(id);
 }
 
 // ── Events ──
+var _msRender=function(){if(ALL_DATA.length)render();};
+(function(){
+  var ph={'f-candidate':'All Candidates','f-party':'All Parties','f-state':'All States','f-dma':'All DMAs','f-station':'All Stations','f-rateclass':'All','f-daypart':'All','f-window':'All'};
+  Object.keys(ph).forEach(function(id){msInit(id,ph[id],_msRender);});
+})();
+// Static filter options
+msPop('f-party',['R','D','I']);
+msPop('f-daypart',['EM','MN','DT','EF','EN','PA','PT','LN','LF','ON']);
+MS_STATE['f-window']=new Set(['IN']);
+msPop('f-window',['IN','Primary','General','OOW'],function(v){return{IN:'In Window',Primary:'Primary',General:'General',OOW:'Out of Window'}[v]||v;});
+
 document.getElementById('run-report').addEventListener('click',loadData);
-['f-party','f-state','f-dma','f-station','f-rateclass','f-daypart','f-window','f-candidate'].forEach(function(id){
-  document.getElementById(id).addEventListener('change',function(){if(ALL_DATA.length)render();});
-});
 ['f-week-from','f-week-to'].forEach(function(id){document.getElementById(id).addEventListener('change',function(){if(ALL_DATA.length)render();});});
 document.getElementById('f-search').addEventListener('input',function(){
   document.getElementById('headerSearch').value=this.value;
@@ -654,11 +719,11 @@ document.getElementById('headerSearch').addEventListener('input',function(){
   if(ALL_DATA.length)render();
 });
 document.getElementById('clear-filters').addEventListener('click',function(){
-  ['f-party','f-state','f-dma','f-station','f-rateclass','f-daypart','f-candidate'].forEach(function(id){document.getElementById(id).value='ALL';});
-  document.getElementById('f-window').value='IN';
+  ['f-party','f-state','f-dma','f-station','f-rateclass','f-daypart','f-candidate','f-window'].forEach(msClear);
+  MS_STATE['f-window']=new Set(['IN']);
+  msPop('f-window',['IN','Primary','General','OOW'],function(v){return{IN:'In Window',Primary:'Primary',General:'General',OOW:'Out of Window'}[v]||v;});
   document.getElementById('f-week-from').value='';document.getElementById('f-week-to').value='';
-  document.getElementById('f-search').value='';
-  document.getElementById('headerSearch').value='';
+  document.getElementById('f-search').value='';document.getElementById('headerSearch').value='';
   if(ALL_DATA.length)render();
 });
 
@@ -675,11 +740,9 @@ function showIdleState(){
   loadFilters();
 }
 function populateCandidateDropdown(candidates){
-  var sel=document.getElementById('f-candidate');
-  sel.innerHTML='<option value="ALL">All Candidates</option>';
-  candidates.sort().forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
   var entityParam=new URLSearchParams(window.location.search).get('candidate');
-  if(entityParam)sel.value=entityParam;
+  if(entityParam)MS_STATE['f-candidate']=new Set([entityParam]);
+  msPop('f-candidate',candidates.sort());
 }
 function loadCandidateList(){
   authFetch(API+'/api/candidates/tracker')
@@ -694,28 +757,20 @@ function loadFilters(){
   authFetch(API+'/api/lines/filters')
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(j){
-      function pop(id,vals,fmt){
-        var el=document.getElementById(id),first=el.options[0],cur=el.value;
-        el.innerHTML='';el.appendChild(first);
-        vals.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=fmt?fmt(v):v;el.appendChild(o);});
-        if(cur!=='ALL'){for(var i=0;i<el.options.length;i++){if(el.options[i].value===cur){el.value=cur;break;}}}
-      }
-      if(j.states&&j.states.length)pop('f-state',j.states);
-      if(j.dmas&&j.dmas.length)pop('f-dma',j.dmas);
-      if(j.stations&&j.stations.length)pop('f-station',j.stations,stationLabelFromCode);
-      if(j.dayparts&&j.dayparts.length)pop('f-daypart',j.dayparts);
-      if(j.rate_classes&&j.rate_classes.length)pop('f-rateclass',j.rate_classes);
-      // Also populate candidates from filters
+      var params=new URLSearchParams(window.location.search);
+      if(params.get('candidate'))MS_STATE['f-candidate']=new Set([params.get('candidate')]);
+      if(params.get('state'))MS_STATE['f-state']=new Set([params.get('state')]);
+      if(params.get('station'))MS_STATE['f-station']=new Set([params.get('station')]);
+      if(j.states&&j.states.length)msPop('f-state',j.states);
+      if(j.dmas&&j.dmas.length)msPop('f-dma',j.dmas);
+      if(j.stations&&j.stations.length)msPop('f-station',j.stations,stationLabelFromCode);
+      if(j.dayparts&&j.dayparts.length)msPop('f-daypart',j.dayparts);
+      if(j.rate_classes&&j.rate_classes.length)msPop('f-rateclass',j.rate_classes);
       if(j.candidates&&j.candidates.length){
         populateCandidateDropdown(j.candidates);
       }else{
         loadCandidateList();
       }
-      // Apply URL params
-      var params=new URLSearchParams(window.location.search);
-      if(params.get('candidate'))document.getElementById('f-candidate').value=params.get('candidate');
-      if(params.get('state'))document.getElementById('f-state').value=params.get('state');
-      if(params.get('station'))document.getElementById('f-station').value=params.get('station');
     }).catch(function(){loadCandidateList();});
 }
 
