@@ -290,7 +290,44 @@ footer {
   color: rgba(255,255,255,0.8);
 }
 
-/* ── 11. MINI LOGIN MODAL ── */
+/* ── 11. PUBLIC FILE: RECORD GRID STRUCTURE ── */
+/* Column separators on th — fix unresolved --border-faint var */
+#grouped th, #raw-wrap th {
+  border-right: 1px solid #D8DFE8;
+}
+#grouped th:last-child, #raw-wrap th:last-child {
+  border-right: none;
+}
+
+/* Visible row + column separators in td */
+#grouped td, #raw-wrap td {
+  border-bottom: 1px solid #E3E8EF;
+  border-right: 1px solid #EDF1F5;
+}
+#grouped td:last-child, #raw-wrap td:last-child {
+  border-right: none;
+}
+
+/* Explicit odd/even so contrast shows against the detail-wrap #F8FAFC background */
+#grouped tbody tr:nth-child(odd) td,
+#raw-wrap tbody tr:nth-child(odd) td {
+  background: #fff;
+}
+#grouped tbody tr:nth-child(even) td,
+#raw-wrap tbody tr:nth-child(even) td {
+  background: #F4F7FA;
+}
+#grouped tbody tr:hover td,
+#raw-wrap tbody tr:hover td {
+  background: #EEF4FD;
+}
+
+/* Last row inside detail-wrap: no hanging bottom border */
+#grouped .detail-wrap tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ── 12. MINI LOGIN MODAL ── */
 #mini-login-overlay {
   display: none;
   position: fixed;
