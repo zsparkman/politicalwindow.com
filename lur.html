@@ -231,7 +231,6 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
     <a href="/lur" class="sidebar-panel-link active">LUR Monitor</a>
     <div class="sidebar-panel-section">Reference</div>
     <a href="/" class="sidebar-panel-link">FCC Window Map</a>
-    <div class="sidebar-auth" id="sidebar-auth"></div>
   </div>
 </nav>
 
@@ -242,7 +241,7 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input type="text" placeholder="Search candidates, stations..." id="headerSearch">
   </div>
-  <div class="header-right"><span class="header-meta" id="live-date"></span></div>
+  <div class="header-right"><div id="header-auth"></div></div>
 </header>
 
 <div id="sub-header">
@@ -399,7 +398,7 @@ function pc(p){return p==='R'?'c-r':p==='D'?'c-d':'c-muted';}
 function fmtWeek(w){if(!w)return'\u2014';return w.slice(5,7)+'/'+w.slice(8,10)+'/'+w.slice(2,4);}
 function fmtCompact(v){if(v>=1e6)return(v/1e6).toFixed(2)+'M';if(v>=1e3)return(v/1e3).toFixed(0)+'K';return v.toFixed(0);}
 
-document.getElementById('live-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
+// date removed from header
 
 // ── Build query params ──
 function buildQueryParams(){
@@ -662,8 +661,8 @@ function toggleSidebar(){var sb=document.getElementById('sidebar');sb.classList.
 
 // ── Auth (same as rates.html) ──
 function showOverlay(){document.getElementById('auth-overlay').style.display='flex';}
-function hideOverlay(){document.getElementById('auth-overlay').style.display='none';var lb=document.getElementById('logout-btn');if(lb)lb.style.display='';if(window.initSidebarAuth)window.initSidebarAuth();}
-window.logout=function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');TOKEN=null;ALL_DATA=[];showOverlay();var lb=document.getElementById('logout-btn');if(lb)lb.style.display='none';if(window.initSidebarAuth)window.initSidebarAuth();};
+function hideOverlay(){document.getElementById('auth-overlay').style.display='none';var lb=document.getElementById('logout-btn');if(lb)lb.style.display='';if(window.initHeaderAuth)window.initHeaderAuth();}
+window.logout=function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');TOKEN=null;ALL_DATA=[];showOverlay();var lb=document.getElementById('logout-btn');if(lb)lb.style.display='none';if(window.initHeaderAuth)window.initHeaderAuth();};
 function showIdleState(){
   var el=document.getElementById('loading');el.style.display='flex';el.textContent='SELECT FILTERS AND CLICK RUN REPORT';
   var badge=document.getElementById('data-badge');if(badge){badge.style.color='rgba(255,255,255,0.7)';badge.textContent='\u25CF READY';}
@@ -1010,8 +1009,8 @@ document.addEventListener('keydown',function(e){
     closeInvoiceReview();
   }
 });
-window.initSidebarAuth=function(){var el=document.getElementById('sidebar-auth');if(!el)return;var user=localStorage.getItem('pw_user');var token=localStorage.getItem('pw_token');if(token&&user){el.innerHTML='<div class="sidebar-auth-user">'+user+'</div><button class="sidebar-auth-logout" id="sidebar-logout-btn">LOGOUT</button>';document.getElementById('sidebar-logout-btn').addEventListener('click',function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');if(typeof window.logout==='function'){window.logout();}else{location.reload();}});}else{el.innerHTML='<a class="sidebar-auth-request" href="mailto:info@politicalwindow.com">Request Access</a>';}};
-document.addEventListener('DOMContentLoaded',window.initSidebarAuth);
+window.initHeaderAuth=function(){var el=document.getElementById('header-auth');if(!el)return;var user=localStorage.getItem('pw_user');var token=localStorage.getItem('pw_token');if(token&&user){el.innerHTML='<span class="header-auth-user">'+user+'</span><button class="header-auth-logout" id="header-logout-btn">Log Out</button>';document.getElementById('header-logout-btn').addEventListener('click',function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');if(typeof window.logout==='function'){window.logout();}else{location.reload();}});}else{el.innerHTML='<button class="header-auth-login" onclick="showOverlay()">Log In</button><a class="header-auth-request" href="mailto:info@politicalwindow.com">Request Access</a>';}};
+document.addEventListener('DOMContentLoaded',window.initHeaderAuth);
 </script>
 </body>
 </html>

@@ -217,64 +217,189 @@ footer {
   font-family: var(--sans);
 }
 
-/* ── 10. SIDEBAR AUTH WIDGET ── */
-.sidebar-panel {
+/* ── 10. HEADER AUTH WIDGET ── */
+#header-auth {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
-.sidebar-auth {
-  margin-top: auto;
-  flex-shrink: 0;
-  padding: 12px 14px;
-  border-top: 1px solid var(--navy-border);
-}
-
-.sidebar-auth-user {
-  font-family: var(--mono);
-  font-size: 0.5rem;
-  color: var(--text-faint);
-  letter-spacing: 0.04em;
+.header-auth-user {
+  font-family: var(--sans);
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.65);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 6px;
+  max-width: 180px;
 }
 
-.sidebar-auth-logout {
-  font-family: var(--mono);
-  font-size: 0.52rem;
-  color: var(--text-faint);
-  background: none;
-  border: 1px solid var(--navy-border);
-  border-radius: 4px;
+.header-auth-login {
+  font-family: var(--sans);
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 5px;
+  padding: 5px 13px;
   cursor: pointer;
-  padding: 4px 10px;
-  letter-spacing: 0.06em;
-  width: 100%;
+  transition: all 0.15s;
   white-space: nowrap;
 }
 
-.sidebar-auth-logout:hover {
-  color: var(--text);
-  border-color: var(--text-muted);
+.header-auth-login:hover {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
 }
 
-.sidebar-auth-request {
-  display: block;
+.header-auth-request {
   font-family: var(--sans);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 600;
   color: #fff;
   background: var(--blue);
-  text-decoration: none;
-  text-align: center;
-  padding: 7px 10px;
+  border: none;
   border-radius: 5px;
-  letter-spacing: 0.01em;
+  padding: 5px 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.header-auth-request:hover {
+  background: var(--blue-light);
+}
+
+.header-auth-logout {
+  font-family: var(--sans);
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.4);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px 8px;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+
+.header-auth-logout:hover {
+  color: rgba(255,255,255,0.8);
+}
+
+/* ── 11. MINI LOGIN MODAL ── */
+#mini-login-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0.55);
+  backdrop-filter: blur(3px);
+  z-index: 300;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-top: 56px;
+  padding-right: 12px;
+}
+
+#mini-login-overlay.open {
+  display: flex;
+}
+
+#mini-login-card {
+  background: #fff;
+  border-radius: 8px;
+  width: 300px;
+  padding: 22px 20px 18px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.22);
+  border: 1px solid #E2E8F0;
+}
+
+.mini-login-title {
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.mini-login-field {
+  margin-bottom: 11px;
+}
+
+.mini-login-field label {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: #6B7280;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.mini-login-field input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #D1D5DB;
+  border-radius: 5px;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  color: var(--text);
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.mini-login-field input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+.mini-login-btn {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  background: var(--blue);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
   transition: background 0.15s;
 }
 
-.sidebar-auth-request:hover {
+.mini-login-btn:hover {
   background: var(--blue-light);
+}
+
+.mini-login-err {
+  font-family: var(--sans);
+  font-size: 0.58rem;
+  color: #DC2626;
+  margin-top: 8px;
+  min-height: 16px;
+}
+
+.mini-login-footer {
+  font-family: var(--sans);
+  font-size: 0.58rem;
+  color: #9CA3AF;
+  text-align: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #F3F4F6;
+}
+
+.mini-login-footer a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.mini-login-footer a:hover {
+  text-decoration: underline;
 }
