@@ -4,6 +4,98 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-04-24 — LUR invoice review modal: per-panel selection + matched-line indicator removed + "COMPARE INVOICES" caps
+
+**Scope.** `lur.html` only. Three changes to the Invoice Review modal
+(the pop-out that opens when a user clicks the "compare invoices" button
+on a rate-variance row).
+
+### 1. Per-panel independent invoice selection
+
+**Before.** When a variance group had 3+ buyers, the modal rendered a
+single row of tabs at the top labeled `Invoice A vs Invoice C`,
+`Invoice B vs Invoice C`, etc. The right-hand panel was hard-wired to
+the LUR (lowest-rate invoice, always `sorted[sorted.length-1]`); tabs
+only rotated which *other* invoice landed in the left panel. Users
+could not compare, e.g., A vs B directly.
+
+**After.** Each panel has its own selector row directly above its PDF
+viewport, listing every invoice in the group (`Invoice A / Invoice B /
+Invoice C / ...`). Left and right selections are fully independent, so
+any pair (including same-on-both) is viewable. The active invoice on
+each side gets the blue underline; styling deliberately matches the old
+tab strip — same monospace-caps text, same faint→blue active state.
+
+**Implementation.**
+- Removed `<div class="inv-tabs" id="inv-tabs">` from the modal HTML
+  and removed the `.inv-tabs` / `.inv-tab*` CSS.
+- Added `.inv-panel-selector` / `.inv-panel-tab` CSS (visually
+  identical to the old tabs).
+- `openInvoiceReview` no longer populates a top tab strip; it stores
+  `overlay._leftIdx = 0` and `overlay._rightIdx = sorted.length - 1`
+  (initial view preserves the old behavior: highest-rate left, LUR
+  right) and calls the new `renderInvoicePanels`.
+- New `renderInvoicePanels(sorted, leftIdx, rightIdx, lurRate)` —
+  full rebuild of both panels on modal open.
+- New `renderInvoicePanelSide(side, sorted, idx, lurRate)` — re-renders
+  only the affected panel on selector click; preserves the other side's
+  PDF scroll + rotation state.
+- `buildPanelHTML` was refactored to take
+  `(side, sorted, idx, lurRate)` instead of
+  `(row, label, idx, isLur, lurRate)`. It now renders the selector
+  row inline at the top of each panel and derives the "is this the
+  LUR?" flag from the row's rate (`rate === lurRate`) instead of
+  position, so the green rate color + "LUR Rate" footer badge follow
+  the invoice regardless of which panel it ends up in.
+- Each `.inv-panel` got a `data-side="left|right"` attribute so the
+  single-side re-render can replace it in place.
+- `switchInvoiceTab(tabIdx)` was replaced by
+  `selectInvoice(side, idx)`; the onclick on each `.inv-panel-tab`
+  calls it.
+- Removed `renderInvoicePair` (replaced by the two functions above).
+
+### 2. Matched-line indicator removed
+
+**Before.** After rendering each PDF page, `renderPanelPages` scanned
+the text content for the row's `order_number` / `line_number` / `rate`,
+scored candidate rows by keyword hits, and drew:
+- a translucent amber highlight bar (`.inv-pdf-highlight-row`)
+  across the matched row,
+- an orange `"▶ MATCHED LINE"` tag (`.inv-pdf-highlight-tag`) at its
+  left edge, and
+- scrolled the viewport to center the match.
+On miss, it prepended a red `.inv-pdf-banner` that read
+`Locate Order #… in the document below`.
+
+**After.** Removed entirely. `renderPanelPages` now just renders each
+page as a canvas. No text scanning, no highlight, no tag, no banner.
+Rationale from user: the per-panel selector now makes it obvious which
+invoice is in view; the highlight was judged more intrusive than
+helpful.
+
+**Implementation.** Stripped the inner `.then(function(textContent){…})`
+block, the `scrollTarget` scroll-into-view, and the miss-banner from
+`renderPanelPages`. Removed the unused `.inv-pdf-highlight-row`,
+`.inv-pdf-highlight-tag`, and `.inv-pdf-banner` CSS rules, along with
+the unused `.inv-pdf-highlight` rule (no longer referenced anywhere).
+
+### 3. "compare invoices" → "COMPARE INVOICES"
+
+Label text inside `.inv-review-label` on the variance-table row button
+(pre-pop-out) is now all-caps `COMPARE INVOICES`. Styling (monospace,
+0.48rem, red, 0.02em letter-spacing) and positioning unchanged — this
+is a pure text change.
+
+### Verification
+
+- `grep -n 'switchInvoiceTab\|renderInvoicePair\|inv-tabs\|MATCHED' lur.html`
+  returns only comments in JSDoc describing the removal.
+- `node --check` on extracted `<script>` block passes clean.
+- No changes to `CLAUDE.md` rules; added a short note under
+  "Current State (Apr 2026)".
+
+---
+
 ## 2026-04-16 — Favicon on every page + sidebar size consistency
 
 **Symptom.** User flagged two UI gaps:

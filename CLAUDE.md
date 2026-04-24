@@ -154,6 +154,27 @@ multiple PSIDs in the same DMA intentionally collapse to the same
 label. Comcast uses its legal name, not Xfinity.
 
 ## Current State (Apr 2026)
+- **LUR Invoice Review modal (4/24)** — the pop-out on `lur.html` that
+  opens from the red "COMPARE INVOICES" button on a variance row now uses
+  independent per-panel invoice selection. Each panel has its own
+  `.inv-panel-selector` row above its PDF viewport listing every invoice
+  in the group (Invoice A / B / C / …); left and right selections are
+  independent (any pair viewable, including same-on-both). Initial view
+  preserves the legacy default: highest-rate left, LUR right. The
+  green "LUR Rate" footer badge now follows the row whose rate equals
+  the group minimum, not the panel position. Driven by
+  `openInvoiceReview` → `renderInvoicePanels` → `buildPanelHTML(side,
+  sorted, idx, lurRate)` and `selectInvoice(side, idx)` →
+  `renderInvoicePanelSide`. The old top-of-modal `#inv-tabs` strip,
+  `renderInvoicePair`, and `switchInvoiceTab` are gone.
+- **LUR matched-line indicator removed (4/24)** — `renderPanelPages` no
+  longer scans PDF text content, no longer draws the amber highlight
+  bar, no longer renders the "▶ MATCHED LINE" tag, and no longer
+  prepends the "Locate Order #… in the document below" banner on miss.
+  The `.inv-pdf-highlight-row` / `.inv-pdf-highlight-tag` /
+  `.inv-pdf-banner` / `.inv-pdf-highlight` CSS rules were deleted. The
+  selector UI above each panel already makes clear which invoice is
+  which; the highlight was judged intrusive.
 - Rate Intel section live for TX and CA tiles
 - Ballot measures populated from API (empty until seeded)
 - FCC General Window: Sep 4–Nov 3, 2026

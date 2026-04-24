@@ -179,11 +179,14 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
 .inv-callout-label{font-family:var(--mono);font-size:0.52rem;font-weight:700;letter-spacing:0.1em;color:var(--red)}
 .inv-callout-detail{font-family:var(--mono);font-size:0.56rem;color:var(--text)}
 .inv-callout .inv-badge{font-family:var(--mono);font-size:0.48rem;padding:1px 5px;border-radius:2px;font-weight:700;color:var(--red);background:rgba(220,38,38,0.1)}
-.inv-tabs{display:none;padding:6px 18px 0;border-bottom:1px solid var(--navy-border);background:var(--surface-table);flex-shrink:0}
-.inv-tabs.show{display:flex;gap:0}
-.inv-tab{font-family:var(--mono);font-size:0.55rem;font-weight:700;letter-spacing:0.08em;color:var(--text-faint);padding:6px 14px;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent}
-.inv-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
-.inv-tab:hover{color:var(--text)}
+/* Per-panel invoice selector row. One sits above each PDF viewport; user picks
+   any invoice (A/B/C/...) independently for the left and right panel. Styled
+   to match the original top-of-modal tab strip: monospace caps, muted text
+   faint → blue underline on active. */
+.inv-panel-selector{display:flex;gap:0;padding:6px 14px 0;border-bottom:1px solid var(--navy-border);background:var(--surface-table);flex-shrink:0}
+.inv-panel-tab{font-family:var(--mono);font-size:0.55rem;font-weight:700;letter-spacing:0.08em;color:var(--text-faint);padding:6px 14px;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent}
+.inv-panel-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.inv-panel-tab:hover{color:var(--text)}
 .inv-body{display:flex;flex:1;overflow:hidden;min-height:0}
 .inv-panel{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--navy-border);overflow:hidden}
 .inv-panel:last-child{border-right:none}
@@ -194,12 +197,8 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
 .inv-panel-rate{font-family:var(--mono);font-size:1.1rem;font-weight:700;margin-top:4px}
 .inv-panel-rate-sub{font-family:var(--mono);font-size:0.52rem;color:var(--text-muted);display:inline;margin-left:6px;font-weight:400}
 .inv-pdf-wrap{flex:1;overflow-y:auto;background:#E5E7EB;position:relative;min-height:0}
-.inv-pdf-banner{background:var(--red);color:#fff;font-family:var(--mono);font-size:0.58rem;font-weight:700;letter-spacing:0.06em;padding:8px 14px;text-align:center;position:sticky;top:0;z-index:2}
 .inv-pdf-canvas-wrap{position:relative}
 .inv-pdf-canvas-wrap canvas{display:block;width:100%}
-.inv-pdf-highlight{position:absolute;border:2.5px solid #dc2626;background:rgba(220,38,38,0.10);border-radius:2px;pointer-events:none;z-index:1}
-.inv-pdf-highlight-row{position:absolute;left:0;right:0;background:rgba(250,204,21,0.45);border-top:2.5px solid #d97706;border-bottom:2.5px solid #d97706;box-shadow:8px 0 0 0 #d97706 inset;pointer-events:none;z-index:1}
-.inv-pdf-highlight-tag{position:absolute;left:0;background:#d97706;color:#fff;font-family:var(--mono);font-size:0.42rem;font-weight:700;letter-spacing:0.07em;padding:2px 7px 2px 5px;border-radius:0 3px 3px 0;pointer-events:none;z-index:2;white-space:nowrap}
 .inv-pdf-skeleton{padding:20px;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;min-height:200px}
 .inv-pdf-skeleton-bar{height:8px;background:#D1D5DB;border-radius:4px;animation:inv-pulse 1.5s ease-in-out infinite}
 @keyframes inv-pulse{0%,100%{opacity:0.4}50%{opacity:1}}
@@ -321,7 +320,6 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
       <button class="inv-close-btn" onclick="closeInvoiceReview()" title="Close">&#10005;</button>
     </div>
     <div class="inv-callout" id="inv-callout"></div>
-    <div class="inv-tabs" id="inv-tabs"></div>
     <div class="inv-body" id="inv-body"></div>
     <div class="inv-bottombar">
       <div class="inv-bottombar-left">Read-only review &middot; No actions recorded</div>
@@ -535,7 +533,7 @@ function renderMatchups(rows){
       +esc(stationLabel(s)||'\u2014')+' \u00B7 '+esc(s.description||'\u2014')+' \u00B7 '+esc(s.time_period||'\u2014')+' \u00B7 WK '+esc(fmtWeek(s.week_of))
       +winBadge
       +' <span style="color:var(--slate)">('+new Set(s.rows.map(function(r){return r.candidate||r.advertiser||'\u2014';})).size+' buyers)</span>'
-      +'<button class="inv-review-btn" data-group-idx="'+groupIdx+'" title="Compare invoices"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10.2" y1="10.2" x2="14" y2="14"/></svg><span class="inv-review-label">compare invoices</span></button>'
+      +'<button class="inv-review-btn" data-group-idx="'+groupIdx+'" title="Compare invoices"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10.2" y1="10.2" x2="14" y2="14"/></svg><span class="inv-review-label">COMPARE INVOICES</span></button>'
       +'</td></tr>';
 
     s.rows.sort(function(a,b){var ar=parseFloat(a.rate)||0,br=parseFloat(b.rate)||0;return br-ar;});
@@ -815,12 +813,26 @@ function ensurePdfJs(cb){
   document.head.appendChild(s);
 }
 
+/**
+ * Open the Invoice Review modal for a group of variance rows (same
+ * station/program/week, 2+ buyers at different rates).
+ *
+ * Selection model (2026-04-24): each panel has its own invoice selector
+ * above it. The left and right panels can independently display any
+ * invoice in the sorted set (A/B/C/...). Initial selection mirrors the
+ * old fixed comparison: left = highest-rate (A), right = LUR (lowest).
+ *
+ * The "LUR Rate" footer badge + green rate color now follow the row's
+ * rate (matches the group minimum), not the panel position \u2014 so the
+ * badge shows under whichever panel is currently displaying the LUR,
+ * even if the user moved it from right \u2192 left.
+ */
 function openInvoiceReview(group){
   var overlay=document.getElementById('invoice-overlay');
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
 
-  // Sort rows: highest rate first
+  // Sort rows: highest rate first. `sorted[0]` = A, `sorted[N-1]` = LUR.
   var sorted=group.rows.slice().sort(function(a,b){return(parseFloat(b.rate)||0)-(parseFloat(a.rate)||0);});
   var lurRate=Math.min.apply(null,sorted.map(function(r){return parseFloat(r.rate)||Infinity;}));
   var hiRate=Math.max.apply(null,sorted.map(function(r){return parseFloat(r.rate)||0;}));
@@ -834,7 +846,9 @@ function openInvoiceReview(group){
   topHtml+=' <span class="inv-badge inv-badge-var">'+uniqueBuyers+' BUYERS &middot; +'+variancePct+'% VARIANCE</span>';
   document.getElementById('inv-topbar-left').innerHTML=topHtml;
 
-  // Callout strip
+  // Callout strip describes the overall group variance (hi vs lo across
+  // all invoices) \u2014 independent of which pair the user currently has
+  // selected in the panels.
   var hiRow=sorted[0],loRow=sorted[sorted.length-1];
   var hiName=hiRow.candidate||hiRow.advertiser||'\u2014';
   var loName=loRow.candidate||loRow.advertiser||'\u2014';
@@ -845,26 +859,14 @@ function openInvoiceReview(group){
   callHtml+='<span class="inv-badge">+'+variancePct+'% &middot; '+sameProg+' &middot; '+sameWk+(sameWin?' &middot; '+sameWin:'')+'</span>';
   document.getElementById('inv-callout').innerHTML=callHtml;
 
-  // Tabs for 3+ buyers
-  var tabsEl=document.getElementById('inv-tabs');
-  if(sorted.length>2){
-    tabsEl.classList.add('show');
-    var tabHtml='';
-    for(var t=0;t<sorted.length-1;t++){
-      tabHtml+='<button class="inv-tab'+(t===0?' active':'')+'" data-tab="'+t+'" onclick="switchInvoiceTab('+t+')">Invoice '+String.fromCharCode(65+t)+' vs '+String.fromCharCode(65+sorted.length-1)+'</button>';
-    }
-    tabsEl.innerHTML=tabHtml;
-  }else{
-    tabsEl.classList.remove('show');
-    tabsEl.innerHTML='';
-  }
-
-  // Store sorted rows for tab switching
+  // Store state on overlay \u2014 read by selectInvoice() when user picks a
+  // different invoice for either side.
   overlay._sortedRows=sorted;
   overlay._lurRate=lurRate;
+  overlay._leftIdx=0;
+  overlay._rightIdx=sorted.length-1;
 
-  // Render initial pair
-  renderInvoicePair(sorted,0,lurRate);
+  renderInvoicePanels(sorted,overlay._leftIdx,overlay._rightIdx,lurRate);
 
   // Open Both PDFs link
   var bothLink=document.getElementById('inv-open-both');
@@ -879,28 +881,60 @@ function openInvoiceReview(group){
 
 function fmtRate(v){var n=parseFloat(v);return isNaN(n)?'0.00':n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
 
-function renderInvoicePair(sorted,tabIdx,lurRate){
+/** Full re-render of both panels. Called on modal open. */
+function renderInvoicePanels(sorted,leftIdx,rightIdx,lurRate){
   _panelRotation={};_panelPdfCache={};
   var body=document.getElementById('inv-body');
-  var leftRow=sorted[tabIdx];
-  var rightRow=sorted[sorted.length-1]; // always compare against lowest
-  body.innerHTML=buildPanelHTML(leftRow,'A',tabIdx,false,lurRate)+buildPanelHTML(rightRow,String.fromCharCode(65+sorted.length-1),sorted.length-1,true,lurRate);
-
-  // Load PDFs
-  loadPanelPdf('inv-pdf-left',leftRow);
-  loadPanelPdf('inv-pdf-right',rightRow);
+  body.innerHTML=buildPanelHTML('left',sorted,leftIdx,lurRate)+buildPanelHTML('right',sorted,rightIdx,lurRate);
+  loadPanelPdf('inv-pdf-left',sorted[leftIdx]);
+  loadPanelPdf('inv-pdf-right',sorted[rightIdx]);
 }
 
-function buildPanelHTML(row,label,idx,isLur,lurRate){
-  var cand=row.candidate||row.advertiser||'\u2014';
-  var rate=parseFloat(row.rate)||0;
+/** Re-render a single side (left or right) in place, without disturbing
+ *  the other panel or its PDF scroll state. Called from selectInvoice(). */
+function renderInvoicePanelSide(side,sorted,idx,lurRate){
+  var panelId=side==='left'?'inv-pdf-left':'inv-pdf-right';
+  delete _panelRotation[panelId];
+  delete _panelPdfCache[panelId];
+  var body=document.getElementById('inv-body');
+  var existing=body.querySelector('.inv-panel[data-side="'+side+'"]');
+  if(!existing)return;
+  var tmp=document.createElement('div');
+  tmp.innerHTML=buildPanelHTML(side,sorted,idx,lurRate);
+  existing.replaceWith(tmp.firstChild);
+  loadPanelPdf(panelId,sorted[idx]);
+}
+
+/**
+ * Build the HTML for one panel (left or right).
+ *   side    \u2014 'left' | 'right'; determines the PDF container id used
+ *             by loadPanelPdf + rotatePdfPanel.
+ *   sorted  \u2014 full sorted row set (needed to render the selector row).
+ *   idx     \u2014 which invoice to display in this panel.
+ *   lurRate \u2014 group minimum rate; any row matching is tagged as LUR.
+ */
+function buildPanelHTML(side,sorted,idx,lurRate){
+  var row=sorted[idx];
+  var label=String.fromCharCode(65+idx);
+  var isLur=(parseFloat(row.rate)||0)===lurRate;
   var rateColor=isLur?'var(--green)':'var(--red)';
-  var panelId=isLur?'inv-pdf-right':'inv-pdf-left';
+  var panelId=side==='left'?'inv-pdf-left':'inv-pdf-right';
+  var cand=row.candidate||row.advertiser||'\u2014';
   var units=row.units||'\u2014';
   var total=row.line_total?'$'+fmtRate(row.line_total):'\u2014';
   var lineNum=row.line_number?'Line #'+esc(row.line_number):'';
 
-  var h='<div class="inv-panel">';
+  // Per-panel selector row (Invoice A / B / C / ...). Active invoice
+  // gets the blue underline \u2014 styling matches the old single-row tabs.
+  var sel='<div class="inv-panel-selector">';
+  for(var i=0;i<sorted.length;i++){
+    var L=String.fromCharCode(65+i);
+    sel+='<button class="inv-panel-tab'+(i===idx?' active':'')+'" onclick="selectInvoice(\''+side+'\','+i+')">Invoice '+L+'</button>';
+  }
+  sel+='</div>';
+
+  var h='<div class="inv-panel" data-side="'+side+'">';
+  h+=sel;
   h+='<div class="inv-panel-hdr">';
   h+='<div class="inv-panel-label">Invoice '+esc(label)+(lineNum?' &middot; <span style="color:var(--text);font-weight:700">'+lineNum+'</span>':'')+'</div>';
   h+='<div class="inv-panel-cand">'+esc(cand)+' &middot; <span style="font-size:0.6rem;color:var(--text-muted);font-weight:400">Order #'+esc(row.order_number||'\u2014')+'</span></div>';
@@ -933,17 +967,20 @@ function getPdfProxyUrl(row){
   return row.fcc_pdf_url||null;
 }
 
+/**
+ * Render every page of the PDF as a <canvas> into the container.
+ *
+ * 2026-04-24: the "matched line" visual indicator was removed \u2014 no more
+ * text-content scanning, no yellow/amber highlight bar, no "MATCHED LINE"
+ * tag, no "Locate Order #... in the document below" fallback banner.
+ * The user judged the indicator more intrusive than useful; the selector
+ * UI above each panel already makes clear which invoice is which.
+ */
 function renderPanelPages(containerId,pdf,lib,row,rotation){
   var container=document.getElementById(containerId);
   if(!container)return;
   container.innerHTML='';
-  var orderNum=row.order_number||'';
-  var lineNum=row.line_number?String(row.line_number):'';
-  var rateStr=row.rate?parseFloat(row.rate).toFixed(2):'';
-  var rateAlt=row.rate?String(parseFloat(row.rate)):'';
   var rot=rotation||0;
-  var found=false;
-  var scrollTarget=null;
   var renderChain=Promise.resolve();
   var scale=2.5;
   for(var p=1;p<=pdf.numPages;p++){
@@ -960,80 +997,13 @@ function renderPanelPages(containerId,pdf,lib,row,rotation){
           wrap.appendChild(canvas);
           container.appendChild(wrap);
           var ctx=canvas.getContext('2d');
-          return page.render({canvasContext:ctx,viewport:viewport}).promise.then(function(){
-            // Skip text highlights when rotated \u2014 coordinate math assumes 0\u00b0
-            if(found||(!orderNum&&!lineNum)||rot)return;
-            return page.getTextContent().then(function(textContent){
-              if(found)return;
-              var items=textContent.items;
-              var rows={};
-              items.forEach(function(item){
-                if(!item.str||!item.str.trim())return;
-                var y=Math.round(item.transform[5]);
-                var bucketY=Math.round(y/3)*3;
-                if(!rows[bucketY])rows[bucketY]={y:y,items:[],text:''};
-                rows[bucketY].items.push(item);
-                rows[bucketY].text+=' '+item.str;
-              });
-              var bestRow=null,bestScore=0;
-              Object.keys(rows).forEach(function(ky){
-                var r=rows[ky];
-                var txt=r.text;
-                var score=0;
-                if(lineNum&&txt.indexOf(lineNum)!==-1)score+=2;
-                if(orderNum&&txt.indexOf(orderNum)!==-1)score+=3;
-                if(rateStr&&txt.indexOf(rateStr)!==-1)score+=2;
-                else if(rateAlt&&txt.indexOf(rateAlt)!==-1)score+=1;
-                if(score>bestScore){bestScore=score;bestRow=r;}
-              });
-              if(bestRow&&bestScore>=3){
-                found=true;
-                var minX=Infinity,maxX=0,minY=Infinity,maxY=0;
-                bestRow.items.forEach(function(item){
-                  var tx=item.transform;
-                  var ix=tx[4]*scale;
-                  var ih=(item.height||tx[0])*scale;
-                  var iw=(item.width||0)*scale;
-                  var iy=viewport.height-tx[5]*scale-ih;
-                  if(ix<minX)minX=ix;
-                  if(ix+iw>maxX)maxX=ix+iw;
-                  if(iy<minY)minY=iy;
-                  if(iy+ih>maxY)maxY=iy+ih;
-                });
-                var hl=document.createElement('div');
-                hl.className='inv-pdf-highlight-row';
-                hl.style.top=Math.max(0,minY-4)+'px';
-                hl.style.height=Math.max(12,(maxY-minY)+8)+'px';
-                wrap.appendChild(hl);
-                var tag=document.createElement('div');
-                tag.className='inv-pdf-highlight-tag';
-                tag.textContent='▶ MATCHED LINE';
-                tag.style.top=Math.max(0,minY-4)+'px';
-                wrap.appendChild(tag);
-                scrollTarget=hl;
-              }
-            }).catch(function(){});
-          });
+          return page.render({canvasContext:ctx,viewport:viewport}).promise;
         });
       });
     })(p);
   }
-  renderChain.then(function(){
-    if(scrollTarget){
-      setTimeout(function(){scrollTarget.scrollIntoView({behavior:'smooth',block:'center'});},150);
-    }
-    if(!found&&!rot&&(orderNum||lineNum)){
-      var banner=document.createElement('div');
-      banner.className='inv-pdf-banner';
-      var hint='Locate ';
-      if(orderNum)hint+='Order #'+orderNum;
-      if(lineNum)hint+=(orderNum?', ':'')+' Line #'+lineNum;
-      hint+=' in the document below';
-      banner.textContent=hint;
-      container.insertBefore(banner,container.firstChild);
-    }
-  });
 }
+
 
 function loadPanelPdf(containerId,row){
   var container=document.getElementById(containerId);
@@ -1070,11 +1040,24 @@ function rotatePdfPanel(panelId,delta){
   if(cache)renderPanelPages(panelId,cache.pdf,cache.lib,cache.row,_panelRotation[panelId]);
 }
 
-function switchInvoiceTab(tabIdx){
-  var tabs=document.querySelectorAll('#inv-tabs .inv-tab');
-  tabs.forEach(function(t){t.classList.toggle('active',parseInt(t.dataset.tab)===tabIdx);});
+/**
+ * Handle a click on a per-panel Invoice A/B/C selector tab.
+ *   side — 'left' | 'right'
+ *   idx  — index into overlay._sortedRows (0 = highest rate, len-1 = LUR)
+ * Re-renders only the affected side, so the unchanged panel keeps its
+ * current PDF scroll position and rotation.
+ */
+function selectInvoice(side,idx){
   var overlay=document.getElementById('invoice-overlay');
-  renderInvoicePair(overlay._sortedRows,tabIdx,overlay._lurRate);
+  if(!overlay._sortedRows)return;
+  if(side==='left'){
+    if(overlay._leftIdx===idx)return;
+    overlay._leftIdx=idx;
+  }else{
+    if(overlay._rightIdx===idx)return;
+    overlay._rightIdx=idx;
+  }
+  renderInvoicePanelSide(side,overlay._sortedRows,idx,overlay._lurRate);
 }
 
 function closeInvoiceReview(){
