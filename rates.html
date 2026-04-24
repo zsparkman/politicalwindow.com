@@ -129,9 +129,9 @@ header{background:var(--header-bg);border-bottom:1px solid var(--header-border);
 .stat-lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.08em;text-align:right}
 
 /* ── FILTERS ── */
-#filters{padding:10px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:10px;align-items:flex-end;background:#fff}
-.filter-items-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px 10px;flex:1;min-width:0;align-items:end}
-.filter-btn-group{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+#filters{padding:10px 24px;border-bottom:1px solid var(--navy-border);background:#fff}
+.filter-items-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px 10px;align-items:end}
+.filter-btn-group{display:flex;flex-direction:column;gap:4px;align-self:end;justify-self:start}
 .run-report-btn{font-family:var(--mono);font-size:0.6rem;font-weight:600;letter-spacing:0.06em;padding:5px 14px;border:1px solid var(--blue);border-radius:5px;cursor:pointer;background:var(--blue);color:#fff;white-space:nowrap}
 .clear-btn{font-family:var(--mono);font-size:0.52rem;font-weight:500;letter-spacing:0.06em;padding:3px 14px;border:1px solid var(--navy-border);border-radius:4px;cursor:pointer;background:#fff;color:var(--text-muted);white-space:nowrap}
 .filter-tab-group{grid-column:1/-1;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
@@ -384,6 +384,8 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
     <div class="filter-wrap"><div class="filter-lbl">STATION</div><div class="ms-wrap" id="f-station"><button class="ms-btn" type="button"><span class="ms-val">All Stations</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
     <div class="filter-wrap"><div class="filter-lbl">DAYPART</div><div class="ms-wrap" id="f-daypart"><button class="ms-btn" type="button"><span class="ms-val">All Dayparts</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
     <div class="filter-wrap"><div class="filter-lbl">WINDOW</div><div class="ms-wrap" id="f-window"><button class="ms-btn" type="button"><span class="ms-val">All</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">RATE CLASS</div><div class="ms-wrap" id="f-rateclass"><button class="ms-btn" type="button"><span class="ms-val">All</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">AGENCY</div><div class="ms-wrap" id="f-agency"><button class="ms-btn" type="button"><span class="ms-val">All Agencies</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
     <div class="filter-wrap"><div class="filter-lbl">WEEK FROM</div><input type="date" id="f-week-from"></div>
     <div class="filter-wrap"><div class="filter-lbl">WEEK TO</div><input type="date" id="f-week-to"></div>
     <div class="filter-tab-group">
@@ -396,10 +398,10 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="search" autocomplete="off" readonly id="f-search" placeholder="advertiser, station, buyer...">
     </div>
-  </div>
-  <div class="filter-btn-group">
-    <button id="run-report" class="run-report-btn">RUN REPORT</button>
-    <button id="clear-filters" class="clear-btn">CLEAR</button>
+    <div class="filter-btn-group">
+      <button id="run-report" class="run-report-btn">RUN REPORT</button>
+      <button id="clear-filters" class="clear-btn">CLEAR</button>
+    </div>
   </div>
 </div>
 
@@ -664,6 +666,8 @@ function getFiltered(){
   var stations=msGetVals('f-station');
   var dayparts=msGetVals('f-daypart');
   var wins=msGetVals('f-window');
+  var rateclasses=msGetVals('f-rateclass');
+  var agencies=msGetVals('f-agency');
   var wkFrom=document.getElementById('f-week-from').value;
   var wkTo=document.getElementById('f-week-to').value;
   var search=document.getElementById('f-search').value.toLowerCase();
@@ -675,6 +679,8 @@ function getFiltered(){
     if(dmas.length>0&&!dmas.includes(r.dma))return false;
     if(stations.length>0&&!stations.includes(r.station))return false;
     if(dayparts.length>0&&!dayparts.includes(r.daypart_code))return false;
+    if(rateclasses.length>0&&!rateclasses.includes(r.rate_class||''))return false;
+    if(agencies.length>0&&!agencies.includes(r.agency||''))return false;
     if(wins.length>0){
       var ws=r.window_status;
       if(!wins.some(function(w){return w==='IN'?(ws==='Primary'||ws==='General'):ws===w;}))return false;
@@ -1473,6 +1479,8 @@ function buildQueryParams(){
   var stations=msGetVals('f-station');if(stations.length===1)p.push('station='+encodeURIComponent(stations[0]));
   var dmas=msGetVals('f-dma');if(dmas.length===1)p.push('dma='+encodeURIComponent(dmas[0]));
   var dayparts=msGetVals('f-daypart');if(dayparts.length===1)p.push('daypart_code='+encodeURIComponent(dayparts[0]));
+  var rateclasses=msGetVals('f-rateclass');if(rateclasses.length===1)p.push('rate_class='+encodeURIComponent(rateclasses[0]));
+  var agencies=msGetVals('f-agency');if(agencies.length===1)p.push('agency='+encodeURIComponent(agencies[0]));
   var wf=document.getElementById('f-week-from').value;if(wf)p.push('week_from='+encodeURIComponent(wf));
   var wt=document.getElementById('f-week-to').value;if(wt)p.push('week_to='+encodeURIComponent(wt));
   return p.join('&');
@@ -1568,7 +1576,7 @@ function msClear(id){
 }
 
 (function(){
-  var ph={'f-party':'All Parties','f-state':'All States','f-office':'All Offices','f-dma':'All DMAs','f-station':'All Stations','f-daypart':'All Dayparts','f-window':'All'};
+  var ph={'f-party':'All Parties','f-state':'All States','f-office':'All Offices','f-dma':'All DMAs','f-station':'All Stations','f-daypart':'All Dayparts','f-window':'All','f-rateclass':'All','f-agency':'All Agencies'};
   Object.keys(ph).forEach(function(id){msInit(id,ph[id],render);});
 })();
 msPop('f-party',['R','D','I']);
@@ -1609,7 +1617,7 @@ document.getElementById('lines-wrap').addEventListener('click',function(e){
   renderLines(getFiltered());
 });
 document.getElementById('clear-filters').addEventListener('click',function(){
-  ['f-party','f-state','f-office','f-dma','f-station','f-daypart','f-window'].forEach(msClear);
+  ['f-party','f-state','f-office','f-dma','f-station','f-daypart','f-window','f-rateclass','f-agency'].forEach(msClear);
   document.getElementById('f-week-from').value='';
   document.getElementById('f-week-to').value='';
   document.getElementById('f-search').value='';
@@ -1632,6 +1640,8 @@ function loadFilters(){
       if(j.dmas&&j.dmas.length)msPop('f-dma',j.dmas);
       if(j.stations&&j.stations.length)msPop('f-station',j.stations,stationLabelFromCode);
       if(j.dayparts&&j.dayparts.length)msPop('f-daypart',j.dayparts);
+      if(j.rate_classes&&j.rate_classes.length)msPop('f-rateclass',j.rate_classes);
+      if(j.agencies&&j.agencies.length)msPop('f-agency',j.agencies);
     }).catch(function(e){console.warn('Failed to load filter options:',e.message);});
 }
 // ── AUTH ──────────────────────────────────────────────────────────────────────

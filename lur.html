@@ -97,9 +97,9 @@ header{background:var(--header-bg);border-bottom:1px solid var(--header-border);
 .stat-lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.08em;text-align:right;font-family:var(--mono)}
 
 /* ── FILTERS ── */
-#filters{padding:10px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:10px;align-items:flex-end;background:#fff}
-.filter-items-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px 10px;flex:1;min-width:0;align-items:end}
-.filter-btn-group{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+#filters{padding:10px 24px;border-bottom:1px solid var(--navy-border);background:#fff}
+.filter-items-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px 10px;align-items:end}
+.filter-btn-group{display:flex;flex-direction:column;gap:4px;align-self:end;justify-self:start}
 .run-report-btn{font-family:var(--mono);font-size:0.6rem;font-weight:600;letter-spacing:0.06em;padding:5px 14px;border:1px solid var(--blue);border-radius:5px;cursor:pointer;background:var(--blue);color:#fff;white-space:nowrap}
 .clear-btn{font-family:var(--mono);font-size:0.52rem;font-weight:500;letter-spacing:0.06em;padding:3px 14px;border:1px solid var(--navy-border);border-radius:4px;cursor:pointer;background:#fff;color:var(--text-muted);white-space:nowrap}
 .filter-wrap{display:flex;flex-direction:column;gap:3px}
@@ -294,10 +294,10 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="search" autocomplete="off" readonly id="f-search" placeholder="candidate, station, advertiser...">
     </div>
-  </div>
-  <div class="filter-btn-group">
-    <button id="run-report" class="run-report-btn">RUN REPORT</button>
-    <button id="clear-filters" class="clear-btn">CLEAR</button>
+    <div class="filter-btn-group">
+      <button id="run-report" class="run-report-btn">RUN REPORT</button>
+      <button id="clear-filters" class="clear-btn">CLEAR</button>
+    </div>
   </div>
 </div>
 

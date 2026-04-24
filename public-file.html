@@ -130,26 +130,40 @@ header { background:var(--header-bg); border-bottom:1px solid var(--header-borde
 .stat-lbl{font-size:0.58rem;color:var(--text-faint);letter-spacing:0.08em;text-align:right}
 
 /* ── CONTROLS ── */
-#controls{padding:12px 24px;border-bottom:1px solid var(--navy-border);display:flex;gap:12px;flex-wrap:nowrap;align-items:flex-end;background:#fff}
-.filter-items-wrap{display:flex;flex-wrap:wrap;gap:8px;flex:1;align-items:flex-end;min-width:0}
-.filter-btn-group{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+#controls{padding:12px 24px;border-bottom:1px solid var(--navy-border);background:#fff}
+.filter-items-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px 10px;align-items:end}
+.filter-btn-group{display:flex;flex-direction:column;gap:4px;align-self:end;justify-self:start}
 .run-report-btn{font-family:var(--mono);font-size:0.6rem;font-weight:600;letter-spacing:0.06em;padding:5px 14px;border:1px solid var(--blue);border-radius:5px;cursor:pointer;background:var(--blue);color:#fff;white-space:nowrap}
 .clear-btn{font-family:var(--mono);font-size:0.52rem;font-weight:500;letter-spacing:0.06em;padding:3px 14px;border:1px solid var(--navy-border);border-radius:4px;cursor:pointer;background:#fff;color:var(--text-muted);white-space:nowrap}
-.tab-group{display:flex;gap:6px}
+.tab-group{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}
 .tab{font-size:0.62rem;font-weight:600;letter-spacing:0.04em;padding:5px 14px;border:1px solid var(--navy-border);border-radius:4px;cursor:pointer;background:transparent;color:var(--text-muted);transition:all 0.12s}
 .tab:hover{border-color:#CBD5E1;color:var(--text)}
 .tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
 .filter-wrap{display:flex;flex-direction:column;gap:3px}
 .filter-lbl{font-family:var(--sans);font-size:0.62rem;color:var(--text-faint);letter-spacing:0.05em;font-weight:500}
-select,input{font-size:0.65rem;color:var(--text);background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px}
-select:focus,input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,108,176,0.08)}
-input{width:170px}
-.filter-search{display:flex;align-items:center;gap:6px;background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:6px;padding:4px 10px;min-width:200px;transition:border-color 0.15s}
+input{font-size:0.65rem;color:var(--text);background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,108,176,0.08)}
+.filter-search{grid-column:span 2;display:flex;align-items:center;gap:6px;background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:6px;padding:4px 10px;transition:border-color 0.15s}
 .filter-search:focus-within{border-color:var(--blue);box-shadow:0 0 0 2px rgba(29,78,216,0.1)}
 .filter-search svg{flex-shrink:0;color:var(--text-faint)}
 .filter-search input{background:transparent;border:none;outline:none;box-shadow:none;color:var(--text);font-family:var(--sans);font-size:0.7rem;width:100%;padding:0}
 .filter-search input::placeholder{color:var(--text-faint)}
-#sort-wrap{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:0.65rem;color:var(--text-faint)}
+#sort-wrap{display:flex;align-items:center;gap:8px;font-size:0.65rem;color:var(--text-faint)}
+.ms-wrap{position:relative}
+.ms-btn{display:flex;align-items:center;justify-content:space-between;gap:4px;font-family:var(--mono);font-size:0.65rem;color:var(--text);background:#fff;border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px;cursor:pointer;width:100%;text-align:left;line-height:1.35;outline:none}
+.ms-btn:hover{border-color:var(--blue)}
+.ms-btn:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-glow)}
+.ms-btn.has-sel{border-color:var(--blue);color:var(--blue);background:rgba(29,78,216,0.04)}
+.ms-caret{flex-shrink:0;transition:transform 0.15s}
+.ms-wrap.open .ms-caret{transform:rotate(180deg)}
+.ms-wrap.open{z-index:200}
+.ms-panel{display:none;position:absolute;top:calc(100% + 3px);left:0;z-index:500;background:#fff;border:1px solid var(--navy-border);border-radius:6px;box-shadow:var(--shadow-md);min-width:150px;max-width:280px;max-height:220px;overflow-y:auto;padding:4px 0}
+.ms-wrap.open .ms-panel{display:block}
+.ms-opt{display:flex;align-items:center;gap:7px;padding:5px 10px;cursor:pointer;font-family:var(--mono);font-size:0.63rem;color:var(--text-muted);white-space:nowrap;user-select:none}
+.ms-opt:hover{background:rgba(29,78,216,0.05);color:var(--text)}
+.ms-opt.sel{color:var(--blue)}
+.ms-chk{width:11px;height:11px;flex-shrink:0;border:1px solid var(--navy-border);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.45rem;color:transparent;line-height:1}
+.ms-opt.sel .ms-chk{border-color:var(--blue);background:var(--blue);color:#fff}
 .sort-btn{background:transparent;border:none;cursor:pointer;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;color:var(--text-faint);padding:2px 6px;transition:color 0.12s}
 .sort-btn:hover{color:var(--text)}
 .sort-btn.active{color:var(--blue);font-weight:700}
@@ -329,36 +343,12 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
       <button class="tab" data-view="station">BY STATION</button>
       <button class="tab" data-view="raw">CONTRACTS</button>
     </div>
-    <div class="filter-wrap">
-      <div class="filter-lbl">PARTY</div>
-      <select id="f-party"><option value="ALL">All Parties</option><option>R</option><option>D</option><option>I</option></select>
-    </div>
-    <div class="filter-wrap">
-      <div class="filter-lbl">STATE</div>
-      <select id="f-state"><option value="ALL">All States</option></select>
-    </div>
-    <div class="filter-wrap">
-      <div class="filter-lbl">OFFICE</div>
-      <select id="f-office"><option value="ALL">All Offices</option></select>
-    </div>
-    <div class="filter-wrap">
-      <div class="filter-lbl">DMA</div>
-      <select id="f-dma"><option value="ALL">All DMAs</option></select>
-    </div>
-    <div class="filter-wrap">
-      <div class="filter-lbl">STATION</div>
-      <select id="f-station"><option value="ALL">All Stations</option></select>
-    </div>
-    <div class="filter-wrap">
-      <div class="filter-lbl">WINDOW</div>
-      <select id="f-window">
-        <option value="ALL">All</option>
-        <option value="IN">In Window</option>
-        <option value="Primary">Primary</option>
-        <option value="General">General</option>
-        <option value="OOW">Out of Window</option>
-      </select>
-    </div>
+    <div class="filter-wrap"><div class="filter-lbl">PARTY</div><div class="ms-wrap" id="f-party"><button class="ms-btn" type="button"><span class="ms-val">All Parties</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">STATE</div><div class="ms-wrap" id="f-state"><button class="ms-btn" type="button"><span class="ms-val">All States</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">OFFICE</div><div class="ms-wrap" id="f-office"><button class="ms-btn" type="button"><span class="ms-val">All Offices</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">DMA</div><div class="ms-wrap" id="f-dma"><button class="ms-btn" type="button"><span class="ms-val">All DMAs</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">STATION</div><div class="ms-wrap" id="f-station"><button class="ms-btn" type="button"><span class="ms-val">All Stations</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
+    <div class="filter-wrap"><div class="filter-lbl">WINDOW</div><div class="ms-wrap" id="f-window"><button class="ms-btn" type="button"><span class="ms-val">All</span><svg class="ms-caret" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg></button><div class="ms-panel"></div></div></div>
     <div class="filter-search">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="search" autocomplete="off" readonly id="f-search" placeholder="candidate, advertiser, station...">
@@ -367,10 +357,10 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
       <button class="sort-btn active" data-sort="spend">SPEND</button>
       <button class="sort-btn" data-sort="contracts">CONTRACTS</button>
     </div>
-  </div>
-  <div class="filter-btn-group">
-    <button id="run-report" class="run-report-btn">RUN REPORT</button>
-    <button id="clear-filters" class="clear-btn">CLEAR</button>
+    <div class="filter-btn-group">
+      <button id="run-report" class="run-report-btn">RUN REPORT</button>
+      <button id="clear-filters" class="clear-btn">CLEAR</button>
+    </div>
   </div>
 </div>
 <div id="main">
@@ -430,6 +420,7 @@ function toggleSidebar() {
 
 var API='https://rates.politicalwindow.com';
 var ALL_DATA=[],SERVER_STATS={},currentView='date',currentSort='spend';
+var MS_STATE={};
 var rawSort={col:'start_date',dir:'desc'};
 var _PV_ROW_STORE={};
 // ── Cable PSID → retail brand display ───────────────────────────────────────
@@ -500,22 +491,77 @@ function fccLink(r){
 // Resolved candidate name, falling back to raw advertiser
 function candKey(r){return r.candidate||r.advertiser||'Unknown';}
 
+function msInit(id,ph,cb){
+  var wrap=document.getElementById(id);if(!wrap)return;
+  wrap._ms_ph=ph;wrap._ms_cb=cb||function(){};
+  if(!MS_STATE[id])MS_STATE[id]=new Set();
+  wrap.querySelector('.ms-btn').addEventListener('click',function(e){
+    e.stopPropagation();
+    var open=wrap.classList.contains('open');
+    document.querySelectorAll('.ms-wrap.open').forEach(function(w){w.classList.remove('open');});
+    if(!open)wrap.classList.add('open');
+  });
+}
+document.addEventListener('click',function(){document.querySelectorAll('.ms-wrap.open').forEach(function(w){w.classList.remove('open');});});
+function msPop(id,vals,fmtFn){
+  var wrap=document.getElementById(id);if(!wrap)return;
+  var panel=wrap.querySelector('.ms-panel');if(!panel)return;
+  if(!MS_STATE[id])MS_STATE[id]=new Set();
+  var prev=MS_STATE[id];
+  panel.innerHTML='';
+  vals.forEach(function(v){
+    var label=fmtFn?fmtFn(v):v;
+    var isSel=prev.has(v);
+    var opt=document.createElement('div');opt.className='ms-opt'+(isSel?' sel':'');opt.dataset.value=v;
+    var chk=document.createElement('span');chk.className='ms-chk';if(isSel)chk.textContent='✓';
+    var lbl=document.createElement('span');lbl.textContent=label;
+    opt.appendChild(chk);opt.appendChild(lbl);
+    opt.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(MS_STATE[id].has(v)){MS_STATE[id].delete(v);opt.classList.remove('sel');chk.textContent='';}
+      else{MS_STATE[id].add(v);opt.classList.add('sel');chk.textContent='✓';}
+      _msUpdateBtn(id);
+      if(wrap._ms_cb)wrap._ms_cb();
+    });
+    panel.appendChild(opt);
+  });
+  _msUpdateBtn(id);
+}
+function _msUpdateBtn(id){
+  var wrap=document.getElementById(id);if(!wrap)return;
+  var s=MS_STATE[id]||new Set();
+  var btn=wrap.querySelector('.ms-btn');var val=wrap.querySelector('.ms-val');if(!btn||!val)return;
+  if(s.size===0){val.textContent=wrap._ms_ph||'All';btn.classList.remove('has-sel');}
+  else if(s.size===1){val.textContent=Array.from(s)[0];btn.classList.add('has-sel');}
+  else{val.textContent=s.size+' selected';btn.classList.add('has-sel');}
+}
+function msGetVals(id){var s=MS_STATE[id];if(!s||s.size===0)return[];return Array.from(s);}
+function msClear(id){
+  var wrap=document.getElementById(id);if(!wrap)return;
+  MS_STATE[id]=new Set();
+  var panel=wrap.querySelector('.ms-panel');
+  if(panel)panel.querySelectorAll('.ms-opt').forEach(function(o){o.classList.remove('sel');var c=o.querySelector('.ms-chk');if(c)c.textContent='';});
+  _msUpdateBtn(id);
+}
+
 function getFiltered(){
-  var party=document.getElementById('f-party').value,state=document.getElementById('f-state').value,office=document.getElementById('f-office').value,dma=document.getElementById('f-dma').value,station=document.getElementById('f-station').value,win=document.getElementById('f-window').value,search=document.getElementById('f-search').value.toLowerCase();
+  var parties=msGetVals('f-party'),states=msGetVals('f-state'),offices=msGetVals('f-office'),dmas=msGetVals('f-dma'),stations=msGetVals('f-station'),wins=msGetVals('f-window'),search=document.getElementById('f-search').value.toLowerCase();
   return ALL_DATA.filter(function(r){
-    if(party!=='ALL'&&r.party!==party)return false;
-    if(state!=='ALL'&&r.state!==state)return false;
-    if(office!=='ALL'&&(r.office_type||'')!==office)return false;
-    if(dma!=='ALL'&&r.dma_name!==dma)return false;
-    if(station!=='ALL'&&r.callsign!==station)return false;
-    if(win!=='ALL'){if(win==='IN'){if(r.window_status!=='General'&&r.window_status!=='Primary')return false;}else{if(r.window_status!==win)return false;}}
+    if(parties.length>0&&!parties.includes(r.party))return false;
+    if(states.length>0&&!states.includes(r.state))return false;
+    if(offices.length>0&&!offices.includes(r.office_type||''))return false;
+    if(dmas.length>0&&!dmas.includes(r.dma_name))return false;
+    if(stations.length>0&&!stations.includes(r.callsign))return false;
+    if(wins.length>0){
+      if(!wins.some(function(w){return w==='IN'?(r.window_status==='General'||r.window_status==='Primary'):r.window_status===w;}))return false;
+    }
     if(search){var s=search;if(!(  (r.candidate||'').toLowerCase().includes(s)||(r.advertiser||'').toLowerCase().includes(s)||(r.callsign||'').toLowerCase().includes(s)||(stationLabel(r)||'').toLowerCase().includes(s)||(r.dma_name||'').toLowerCase().includes(s)||(r.state||'').toLowerCase().includes(s)||(r.party||'').toLowerCase().includes(s)||(r.office_type||'').toLowerCase().includes(s)||(r.order_number||'').toLowerCase().includes(s)||(r.window_status||'').toLowerCase().includes(s)))return false;}
     return true;
   });
 }
 
 function isUnfiltered(){
-  return document.getElementById('f-party').value==='ALL'&&document.getElementById('f-state').value==='ALL'&&document.getElementById('f-office').value==='ALL'&&document.getElementById('f-dma').value==='ALL'&&document.getElementById('f-station').value==='ALL'&&document.getElementById('f-window').value==='ALL'&&!document.getElementById('f-search').value;
+  return msGetVals('f-party').length===0&&msGetVals('f-state').length===0&&msGetVals('f-office').length===0&&msGetVals('f-dma').length===0&&msGetVals('f-station').length===0&&msGetVals('f-window').length===0&&!document.getElementById('f-search').value;
 }
 function updateStats(rows){
   if(isUnfiltered()&&SERVER_STATS.total_spend){
@@ -640,7 +686,6 @@ function render(){
   document.getElementById('grouped').style.display=isRaw?'none':'block';
   document.getElementById('raw-wrap').style.display=isRaw?'block':'none';
   if(isRaw){renderRaw(rows);}else{renderGrouped(buildGroups(rows));}
-  updateOptionStates();
 }
 
 function updateOptionStates(){
@@ -697,25 +742,19 @@ fetch(API+'/api/public-file?limit=5000')
     document.getElementById('header-sub').textContent=sub;
     if(DATA_BADGE){var t=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});DATA_BADGE.style.color='#059669';DATA_BADGE.textContent='\u2B24 LIVE \u00B7 UPDATED '+t.toUpperCase();}
     var states=Array.from(new Set(ALL_DATA.map(function(r){return r.state;}).filter(Boolean))).sort();
-    var stateEl=document.getElementById('f-state');
-    states.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;stateEl.appendChild(o);});
+    msPop('f-state',states);
     var offices=Array.from(new Set(ALL_DATA.map(function(r){return r.office_type;}).filter(Boolean))).sort();
-    var officeEl=document.getElementById('f-office');
-    offices.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;officeEl.appendChild(o);});
+    msPop('f-office',offices);
     var dmas=Array.from(new Set(ALL_DATA.map(function(r){return r.dma_name;}).filter(Boolean))).sort();
-    var dmaEl=document.getElementById('f-dma');
-    dmas.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;dmaEl.appendChild(o);});
-    // Capture station_display per callsign as we index, so PSID rows show
-    // their retail-brand label in the filter dropdown while the option value
-    // stays the raw code (filter compare at getFiltered() checks r.callsign).
+    msPop('f-dma',dmas);
+    // Capture station_display per callsign so PSID rows show their retail-brand label.
     var stationSet={};
     ALL_DATA.forEach(function(r){
       if(!r.callsign)return;
       if(!stationSet[r.callsign])stationSet[r.callsign]=stationLabel(r)||r.callsign;
     });
-    var stations=Object.keys(stationSet).sort(function(a,b){return stationSet[a].localeCompare(stationSet[b]);});
-    var stationEl=document.getElementById('f-station');
-    stations.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=stationSet[v];stationEl.appendChild(o);});
+    var stationKeys=Object.keys(stationSet).sort(function(a,b){return stationSet[a].localeCompare(stationSet[b]);});
+    msPop('f-station',stationKeys,function(v){return stationSet[v]||v;});
     // Apply ?q= search param from global search bar
     var qParam=new URLSearchParams(window.location.search).get('q');
     if(qParam){document.getElementById('f-search').value=qParam;}
@@ -748,7 +787,12 @@ document.querySelectorAll('#raw-thead th.sortable').forEach(function(th){
     render();
   });
 });
-['f-party','f-state','f-office','f-dma','f-station','f-window'].forEach(function(id){document.getElementById(id).addEventListener('change',render);});
+(function(){
+  var ph={'f-party':'All Parties','f-state':'All States','f-office':'All Offices','f-dma':'All DMAs','f-station':'All Stations','f-window':'All'};
+  Object.keys(ph).forEach(function(id){msInit(id,ph[id],render);});
+})();
+msPop('f-party',['R','D','I']);
+msPop('f-window',['IN','Primary','General','OOW'],function(v){return{IN:'In Window',Primary:'Primary',General:'General',OOW:'Out of Window'}[v]||v;});
 document.getElementById('f-search').addEventListener('input',function(){
   document.getElementById('headerSearch').value=this.value;
   render();
@@ -759,12 +803,7 @@ document.getElementById('headerSearch').addEventListener('input',function(){
 });
 document.getElementById('run-report').addEventListener('click',function(){render();});
 document.getElementById('clear-filters').addEventListener('click',function(){
-  document.getElementById('f-party').value='ALL';
-  document.getElementById('f-state').value='ALL';
-  document.getElementById('f-office').value='ALL';
-  document.getElementById('f-dma').value='ALL';
-  document.getElementById('f-station').value='ALL';
-  document.getElementById('f-window').value='ALL';
+  ['f-party','f-state','f-office','f-dma','f-station','f-window'].forEach(msClear);
   document.getElementById('f-search').value='';
   document.getElementById('headerSearch').value='';
   render();
