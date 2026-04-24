@@ -197,8 +197,13 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
 .inv-bottombar-right a{font-family:var(--mono);font-size:0.52rem;color:var(--blue);font-weight:700}
 .inv-bottombar-right button{font-family:var(--mono);font-size:0.55rem;font-weight:700;letter-spacing:0.08em;padding:5px 16px;border:1px solid var(--navy-border);border-radius:5px;background:#fff;color:var(--text);cursor:pointer}
 .inv-bottombar-right button:hover{border-color:var(--blue);color:var(--blue)}
-.inv-review-btn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:3px;background:rgba(29,78,216,0.08);color:var(--blue);font-size:0.6rem;cursor:pointer;border:none;margin-left:8px;vertical-align:middle;transition:all 0.12s;line-height:1}
-.inv-review-btn:hover{background:var(--blue);color:#fff}
+.inv-review-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:4px;background:rgba(185,28,28,0.08);color:var(--red);font-size:0.55rem;cursor:pointer;border:1px solid rgba(185,28,28,0.25);margin-left:10px;vertical-align:middle;transition:all 0.12s;line-height:1}
+.inv-review-btn:hover{background:rgba(185,28,28,0.18);border-color:var(--red)}
+.inv-review-label{font-family:var(--mono);font-size:0.48rem;color:var(--red);font-weight:600;letter-spacing:0.02em}
+.inv-rotate-btns{display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--navy-border)}
+.inv-rotate-label{font-family:var(--mono);font-size:0.42rem;font-weight:700;letter-spacing:0.1em;color:var(--text-faint);text-transform:uppercase;margin-right:2px}
+.inv-rotate-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:4px;background:var(--surface-table);border:1px solid var(--navy-border);color:var(--text);font-family:var(--mono);font-size:0.6rem;font-weight:700;cursor:pointer;transition:all 0.12s;letter-spacing:0.04em}
+.inv-rotate-btn:hover{background:var(--blue);border-color:var(--blue);color:#fff}
 
 @media(max-width:640px){.page-wrap{margin-left:62px}.sidebar-panel{display:none}#stats{gap:12px;flex-wrap:wrap}
 .inv-body{flex-direction:column}
@@ -513,7 +518,7 @@ function renderMatchups(rows){
       +esc(stationLabel(s)||'\u2014')+' \u00B7 '+esc(s.description||'\u2014')+' \u00B7 '+esc(s.time_period||'\u2014')+' \u00B7 WK '+esc(fmtWeek(s.week_of))
       +winBadge
       +' <span style="color:var(--slate)">('+new Set(s.rows.map(function(r){return r.candidate||r.advertiser||'\u2014';})).size+' buyers)</span>'
-      +'<button class="inv-review-btn" data-group-idx="'+groupIdx+'" title="Review invoices">&#10530;</button>'
+      +'<button class="inv-review-btn" data-group-idx="'+groupIdx+'" title="Compare invoices"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10.2" y1="10.2" x2="14" y2="14"/></svg><span class="inv-review-label">compare invoices</span></button>'
       +'</td></tr>';
 
     s.rows.sort(function(a,b){var ar=parseFloat(a.rate)||0,br=parseFloat(b.rate)||0;return br-ar;});
@@ -725,6 +730,8 @@ document.addEventListener('DOMContentLoaded',function(){
 var _pdfjs=null;
 var _pdfjsLoading=false;
 var _pdfjsCallbacks=[];
+var _panelRotation={};
+var _panelPdfCache={};
 
 function ensurePdfJs(cb){
   if(_pdfjs){cb(_pdfjs);return;}
@@ -813,6 +820,7 @@ function openInvoiceReview(group){
 function fmtRate(v){var n=parseFloat(v);return isNaN(n)?'0.00':n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
 
 function renderInvoicePair(sorted,tabIdx,lurRate){
+  _panelRotation={};_panelPdfCache={};
   var body=document.getElementById('inv-body');
   var leftRow=sorted[tabIdx];
   var rightRow=sorted[sorted.length-1]; // always compare against lowest
@@ -837,6 +845,15 @@ function buildPanelHTML(row,label,idx,isLur,lurRate){
   h+='<div class="inv-panel-label">Invoice '+esc(label)+(lineNum?' &middot; <span style="color:var(--text);font-weight:700">'+lineNum+'</span>':'')+'</div>';
   h+='<div class="inv-panel-cand">'+esc(cand)+' &middot; <span style="font-size:0.6rem;color:var(--text-muted);font-weight:400">Order #'+esc(row.order_number||'\u2014')+'</span></div>';
   h+='<div class="inv-panel-rate" style="color:'+rateColor+'">$'+fmtRate(row.rate)+'<span class="inv-panel-rate-sub">'+esc(units)+' units &middot; '+esc(total)+' total</span></div>';
+  h+='<div class="inv-rotate-btns">'
+    +'<span class="inv-rotate-label">ROTATE</span>'
+    +'<button class="inv-rotate-btn" onclick="rotatePdfPanel(\''+panelId+'\', -90)" title="Rotate counter-clockwise">'
+    +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6"/><path d="M2.66 15.57a10 10 0 1 0 .57-8.38"/></svg>'
+    +' CCW</button>'
+    +'<button class="inv-rotate-btn" onclick="rotatePdfPanel(\''+panelId+'\', 90)" title="Rotate clockwise">'
+    +'CW <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38"/></svg>'
+    +'</button>'
+    +'</div>';
   h+='</div>';
   h+='<div class="inv-pdf-wrap" id="'+panelId+'">';
   h+='<div class="inv-pdf-skeleton"><div class="inv-pdf-skeleton-bar" style="width:80%"></div><div class="inv-pdf-skeleton-bar" style="width:60%"></div><div class="inv-pdf-skeleton-bar" style="width:70%"></div><div style="margin-top:10px;font-family:var(--mono);font-size:0.52rem;color:var(--text-faint)">LOADING PDF\u2026</div></div>';
@@ -856,6 +873,103 @@ function getPdfProxyUrl(row){
   return row.fcc_pdf_url||null;
 }
 
+function renderPanelPages(containerId,pdf,lib,row,rotation){
+  var container=document.getElementById(containerId);
+  if(!container)return;
+  container.innerHTML='';
+  var orderNum=row.order_number||'';
+  var lineNum=row.line_number?String(row.line_number):'';
+  var rateStr=row.rate?parseFloat(row.rate).toFixed(2):'';
+  var rateAlt=row.rate?String(parseFloat(row.rate)):'';
+  var rot=rotation||0;
+  var found=false;
+  var scrollTarget=null;
+  var renderChain=Promise.resolve();
+  var scale=2.5;
+  for(var p=1;p<=pdf.numPages;p++){
+    (function(pageNum){
+      renderChain=renderChain.then(function(){
+        return pdf.getPage(pageNum).then(function(page){
+          var viewport=page.getViewport({scale:scale,rotation:rot});
+          var wrap=document.createElement('div');
+          wrap.className='inv-pdf-canvas-wrap';
+          wrap.style.position='relative';
+          var canvas=document.createElement('canvas');
+          canvas.width=viewport.width;
+          canvas.height=viewport.height;
+          wrap.appendChild(canvas);
+          container.appendChild(wrap);
+          var ctx=canvas.getContext('2d');
+          return page.render({canvasContext:ctx,viewport:viewport}).promise.then(function(){
+            // Skip text highlights when rotated \u2014 coordinate math assumes 0\u00b0
+            if(found||(!orderNum&&!lineNum)||rot)return;
+            return page.getTextContent().then(function(textContent){
+              if(found)return;
+              var items=textContent.items;
+              var rows={};
+              items.forEach(function(item){
+                if(!item.str||!item.str.trim())return;
+                var y=Math.round(item.transform[5]);
+                var bucketY=Math.round(y/3)*3;
+                if(!rows[bucketY])rows[bucketY]={y:y,items:[],text:''};
+                rows[bucketY].items.push(item);
+                rows[bucketY].text+=' '+item.str;
+              });
+              var bestRow=null,bestScore=0;
+              Object.keys(rows).forEach(function(ky){
+                var r=rows[ky];
+                var txt=r.text;
+                var score=0;
+                if(lineNum&&txt.indexOf(lineNum)!==-1)score+=2;
+                if(orderNum&&txt.indexOf(orderNum)!==-1)score+=3;
+                if(rateStr&&txt.indexOf(rateStr)!==-1)score+=2;
+                else if(rateAlt&&txt.indexOf(rateAlt)!==-1)score+=1;
+                if(score>bestScore){bestScore=score;bestRow=r;}
+              });
+              if(bestRow&&bestScore>=3){
+                found=true;
+                var minX=Infinity,maxX=0,minY=Infinity,maxY=0;
+                bestRow.items.forEach(function(item){
+                  var tx=item.transform;
+                  var ix=tx[4]*scale;
+                  var ih=(item.height||tx[0])*scale;
+                  var iw=(item.width||0)*scale;
+                  var iy=viewport.height-tx[5]*scale-ih;
+                  if(ix<minX)minX=ix;
+                  if(ix+iw>maxX)maxX=ix+iw;
+                  if(iy<minY)minY=iy;
+                  if(iy+ih>maxY)maxY=iy+ih;
+                });
+                var hl=document.createElement('div');
+                hl.className='inv-pdf-highlight-row';
+                hl.style.top=Math.max(0,minY-4)+'px';
+                hl.style.height=Math.max(12,(maxY-minY)+8)+'px';
+                wrap.appendChild(hl);
+                scrollTarget=wrap;
+              }
+            }).catch(function(){});
+          });
+        });
+      });
+    })(p);
+  }
+  renderChain.then(function(){
+    if(scrollTarget){
+      setTimeout(function(){scrollTarget.scrollIntoView({behavior:'smooth',block:'center'});},150);
+    }
+    if(!found&&!rot&&(orderNum||lineNum)){
+      var banner=document.createElement('div');
+      banner.className='inv-pdf-banner';
+      var hint='Locate ';
+      if(orderNum)hint+='Order #'+orderNum;
+      if(lineNum)hint+=(orderNum?', ':'')+' Line #'+lineNum;
+      hint+=' in the document below';
+      banner.textContent=hint;
+      container.insertBefore(banner,container.firstChild);
+    }
+  });
+}
+
 function loadPanelPdf(containerId,row){
   var container=document.getElementById(containerId);
   if(!container)return;
@@ -869,15 +983,6 @@ function loadPanelPdf(containerId,row){
       container.innerHTML='<div class="inv-pdf-error">Could not load PDF viewer.<br><br><a href="'+esc(row.fcc_pdf_url||'')+'" target="_blank" rel="noopener">Open PDF &#8599;</a></div>';
       return;
     }
-
-    // Build search signals for locating the relevant line
-    var orderNum=row.order_number||'';
-    var lineNum=row.line_number?String(row.line_number):'';
-    var rateStr=row.rate?parseFloat(row.rate).toFixed(2):'';
-    // Also try rate without trailing zeros (e.g. "150" for "150.00")
-    var rateAlt=row.rate?String(parseFloat(row.rate)):'';
-
-    // Fetch PDF through proxy (solves CORS)
     var fetchOpts={};
     if(TOKEN)fetchOpts.headers={'Authorization':'Bearer '+TOKEN};
     fetch(proxyUrl,fetchOpts).then(function(r){
@@ -886,108 +991,18 @@ function loadPanelPdf(containerId,row){
     }).then(function(buf){
       return lib.getDocument({data:buf}).promise;
     }).then(function(pdf){
-      container.innerHTML='';
-      var found=false;
-      var scrollTarget=null;
-      var renderChain=Promise.resolve();
-      for(var p=1;p<=pdf.numPages;p++){
-        (function(pageNum){
-          renderChain=renderChain.then(function(){
-            return pdf.getPage(pageNum).then(function(page){
-              var scale=2.5;
-              var viewport=page.getViewport({scale:scale});
-              var wrap=document.createElement('div');
-              wrap.className='inv-pdf-canvas-wrap';
-              wrap.style.position='relative';
-              var canvas=document.createElement('canvas');
-              canvas.width=viewport.width;
-              canvas.height=viewport.height;
-              wrap.appendChild(canvas);
-              container.appendChild(wrap);
-              var ctx=canvas.getContext('2d');
-              return page.render({canvasContext:ctx,viewport:viewport}).promise.then(function(){
-                if(found||(!orderNum&&!lineNum))return;
-                return page.getTextContent().then(function(textContent){
-                  if(found)return;
-                  var items=textContent.items;
-
-                  // Strategy: find the text row that best matches our line.
-                  // Group text items by Y position (same row = similar Y)
-                  var rows={};
-                  items.forEach(function(item){
-                    if(!item.str||!item.str.trim())return;
-                    var y=Math.round(item.transform[5]);
-                    // Bucket by Y within 3-unit tolerance
-                    var bucketY=Math.round(y/3)*3;
-                    if(!rows[bucketY])rows[bucketY]={y:y,items:[],text:''};
-                    rows[bucketY].items.push(item);
-                    rows[bucketY].text+=' '+item.str;
-                  });
-
-                  // Score each row for match quality
-                  var bestRow=null,bestScore=0;
-                  Object.keys(rows).forEach(function(ky){
-                    var r=rows[ky];
-                    var txt=r.text;
-                    var score=0;
-                    // Highest signal: line number match in context of order
-                    if(lineNum&&txt.indexOf(lineNum)!==-1)score+=2;
-                    if(orderNum&&txt.indexOf(orderNum)!==-1)score+=3;
-                    if(rateStr&&txt.indexOf(rateStr)!==-1)score+=2;
-                    else if(rateAlt&&txt.indexOf(rateAlt)!==-1)score+=1;
-                    // We want the row that has the most matching signals
-                    if(score>bestScore){bestScore=score;bestRow=r;}
-                  });
-
-                  // If we found a strong match (at least order# or line#+rate)
-                  if(bestRow&&bestScore>=3){
-                    found=true;
-                    // Calculate bounding box spanning the full row
-                    var minX=Infinity,maxX=0,minY=Infinity,maxY=0;
-                    bestRow.items.forEach(function(item){
-                      var tx=item.transform;
-                      var ix=tx[4]*scale;
-                      var ih=(item.height||tx[0])*scale;
-                      var iw=(item.width||0)*scale;
-                      var iy=viewport.height-tx[5]*scale-ih;
-                      if(ix<minX)minX=ix;
-                      if(ix+iw>maxX)maxX=ix+iw;
-                      if(iy<minY)minY=iy;
-                      if(iy+ih>maxY)maxY=iy+ih;
-                    });
-                    // Draw full-width row highlight
-                    var hl=document.createElement('div');
-                    hl.className='inv-pdf-highlight-row';
-                    hl.style.top=Math.max(0,minY-4)+'px';
-                    hl.style.height=Math.max(12,(maxY-minY)+8)+'px';
-                    wrap.appendChild(hl);
-                    scrollTarget=wrap;
-                  }
-                }).catch(function(){});
-              });
-            });
-          });
-        })(p);
-      }
-      renderChain.then(function(){
-        if(scrollTarget){
-          setTimeout(function(){scrollTarget.scrollIntoView({behavior:'smooth',block:'center'});},150);
-        }
-        if(!found&&(orderNum||lineNum)){
-          var banner=document.createElement('div');
-          banner.className='inv-pdf-banner';
-          var hint='Locate ';
-          if(orderNum)hint+='Order #'+orderNum;
-          if(lineNum)hint+=(orderNum?', ':'')+' Line #'+lineNum;
-          hint+=' in the document below';
-          banner.textContent=hint;
-          container.insertBefore(banner,container.firstChild);
-        }
-      });
+      _panelPdfCache[containerId]={pdf:pdf,lib:lib,row:row};
+      renderPanelPages(containerId,pdf,lib,row,_panelRotation[containerId]||0);
     }).catch(function(){
       container.innerHTML='<div class="inv-pdf-error">Could not load PDF.'+(row.fcc_pdf_url?'<br><br><a href="'+esc(row.fcc_pdf_url)+'" target="_blank" rel="noopener">Open PDF &#8599;</a>':'')+'</div>';
     });
   });
+}
+
+function rotatePdfPanel(panelId,delta){
+  _panelRotation[panelId]=((_panelRotation[panelId]||0)+delta+360)%360;
+  var cache=_panelPdfCache[panelId];
+  if(cache)renderPanelPages(panelId,cache.pdf,cache.lib,cache.row,_panelRotation[panelId]);
 }
 
 function switchInvoiceTab(tabIdx){
@@ -998,6 +1013,7 @@ function switchInvoiceTab(tabIdx){
 }
 
 function closeInvoiceReview(){
+  _panelRotation={};_panelPdfCache={};
   var overlay=document.getElementById('invoice-overlay');
   overlay.classList.remove('open');
   document.body.style.overflow='';
