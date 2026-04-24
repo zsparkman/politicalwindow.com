@@ -903,6 +903,7 @@
     <a href="/lur" class="sidebar-panel-link">LUR Monitor</a>
     <div class="sidebar-panel-section">Reference</div>
     <a href="/" class="sidebar-panel-link">FCC Window Map</a>
+    <div class="sidebar-auth" id="sidebar-auth"></div>
   </div>
 </nav>
 
@@ -918,7 +919,7 @@
     <input type="text" name="q" placeholder="Search filings, stations, candidates..." id="globalSearch">
   </form>
   <div class="header-right">
-    <a href="/public-file?uploaded=week" class="header-btn-cta" id="scanNewFilings">Scan New Filings</a>
+    <span class="header-meta" id="live-date"></span>
   </div>
 </header>
 
@@ -3762,7 +3763,7 @@ function stateHasBallot(abbr) { return !!(BALLOT[abbr] && BALLOT[abbr].length > 
 // ── INIT ───────────────────────────────────────────────────────────────────────
 buildMap(); buildHead(); drawTable();
 initMap().catch(() => {});
-// live-date removed from header — date now in data-badge after load
+document.getElementById('live-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
 
 // Attempt to load live data (non-blocking)
 loadLiveData();
@@ -3993,5 +3994,9 @@ updateKPIStats();
   </a>
 </nav>
 
+<script>
+window.initSidebarAuth=function(){var el=document.getElementById('sidebar-auth');if(!el)return;var user=localStorage.getItem('pw_user');var token=localStorage.getItem('pw_token');if(token&&user){el.innerHTML='<div class="sidebar-auth-user">'+user+'</div><button class="sidebar-auth-logout" id="sidebar-logout-btn">LOGOUT</button>';document.getElementById('sidebar-logout-btn').addEventListener('click',function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');if(typeof window.logout==='function'){window.logout();}else{location.reload();}});}else{el.innerHTML='<a class="sidebar-auth-request" href="mailto:info@politicalwindow.com">Request Access</a>';}};
+document.addEventListener('DOMContentLoaded',window.initSidebarAuth);
+</script>
 </body>
 </html>

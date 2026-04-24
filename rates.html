@@ -328,6 +328,7 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
     <a href="/lur" class="sidebar-panel-link">LUR Monitor</a>
     <div class="sidebar-panel-section">Reference</div>
     <a href="/" class="sidebar-panel-link">FCC Window Map</a>
+    <div class="sidebar-auth" id="sidebar-auth"></div>
   </div>
 </nav>
 
@@ -342,7 +343,6 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
   </div>
   <div class="header-right">
     <span class="header-meta" id="live-date"></span>
-    <button class="logout-btn" id="logout-btn" onclick="logout()" style="display:none">LOGOUT</button>
   </div>
 </header>
 
@@ -1613,8 +1613,8 @@ function loadFilters(){
 }
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 function showOverlay(){var el=document.getElementById('auth-overlay');if(el)el.style.display='flex';}
-function hideOverlay(){var el=document.getElementById('auth-overlay');if(el)el.style.display='none';var lb=document.getElementById('logout-btn');if(lb)lb.style.display='';}
-window.logout=function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');RATES_TOKEN=null;ALL_DATA=[];showOverlay();var lb=document.getElementById('logout-btn');if(lb)lb.style.display='none';};
+function hideOverlay(){var el=document.getElementById('auth-overlay');if(el)el.style.display='none';var lb=document.getElementById('logout-btn');if(lb)lb.style.display='';if(window.initSidebarAuth)window.initSidebarAuth();}
+window.logout=function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');RATES_TOKEN=null;ALL_DATA=[];showOverlay();var lb=document.getElementById('logout-btn');if(lb)lb.style.display='none';if(window.initSidebarAuth)window.initSidebarAuth();};
 // Auth overlay elements live below this <\/script> tag, so wait for DOMContentLoaded
 document.addEventListener('DOMContentLoaded',function(){
   document.querySelectorAll('.auth-tab').forEach(function(tab){tab.addEventListener('click',function(){document.querySelectorAll('.auth-tab').forEach(function(t){t.classList.remove('active');});tab.classList.add('active');document.querySelectorAll('.auth-pane').forEach(function(p){p.style.display='none';});document.getElementById('pane-'+tab.dataset.pane).style.display='block';document.getElementById('auth-err').textContent='';});});
@@ -1659,5 +1659,9 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </div>
 
+<script>
+window.initSidebarAuth=function(){var el=document.getElementById('sidebar-auth');if(!el)return;var user=localStorage.getItem('pw_user');var token=localStorage.getItem('pw_token');if(token&&user){el.innerHTML='<div class="sidebar-auth-user">'+user+'</div><button class="sidebar-auth-logout" id="sidebar-logout-btn">LOGOUT</button>';document.getElementById('sidebar-logout-btn').addEventListener('click',function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');if(typeof window.logout==='function'){window.logout();}else{location.reload();}});}else{el.innerHTML='<a class="sidebar-auth-request" href="mailto:info@politicalwindow.com">Request Access</a>';}};
+document.addEventListener('DOMContentLoaded',window.initSidebarAuth);
+</script>
 </body>
 </html>

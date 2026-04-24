@@ -171,3 +171,65 @@ tbody tr:hover td {
 footer {
   font-family: var(--sans);
 }
+
+/* ── 10. SIDEBAR AUTH WIDGET ── */
+.sidebar-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-auth {
+  margin-top: auto;
+  flex-shrink: 0;
+  padding: 12px 14px;
+  border-top: 1px solid var(--navy-border);
+}
+
+.sidebar-auth-user {
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 6px;
+}
+
+.sidebar-auth-logout {
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  color: var(--text-faint);
+  background: none;
+  border: 1px solid var(--navy-border);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 4px 10px;
+  letter-spacing: 0.06em;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.sidebar-auth-logout:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.sidebar-auth-request {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--blue);
+  text-decoration: none;
+  text-align: center;
+  padding: 7px 10px;
+  border-radius: 5px;
+  letter-spacing: 0.01em;
+  transition: background 0.15s;
+}
+
+.sidebar-auth-request:hover {
+  background: var(--blue-light);
+}

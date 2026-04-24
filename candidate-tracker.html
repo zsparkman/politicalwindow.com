@@ -287,6 +287,7 @@ footer{text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;
     <a href="/lur" class="sidebar-panel-link">LUR Monitor</a>
     <div class="sidebar-panel-section">Reference</div>
     <a href="/" class="sidebar-panel-link">FCC Window Map</a>
+    <div class="sidebar-auth" id="sidebar-auth"></div>
   </div>
 </nav>
 
@@ -792,6 +793,8 @@ function toggleSidebar() {
 
 // ── INIT ──
 loadCandidates();
+window.initSidebarAuth=function(){var el=document.getElementById('sidebar-auth');if(!el)return;var user=localStorage.getItem('pw_user');var token=localStorage.getItem('pw_token');if(token&&user){el.innerHTML='<div class="sidebar-auth-user">'+user+'</div><button class="sidebar-auth-logout" id="sidebar-logout-btn">LOGOUT</button>';document.getElementById('sidebar-logout-btn').addEventListener('click',function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');location.reload();});}else{el.innerHTML='<a class="sidebar-auth-request" href="mailto:info@politicalwindow.com">Request Access</a>';}};
+document.addEventListener('DOMContentLoaded',window.initSidebarAuth);
 </script>
 </body>
 </html>
