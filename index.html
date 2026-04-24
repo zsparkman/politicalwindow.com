@@ -151,7 +151,7 @@
   .sidebar-panel-link:hover { color:var(--text); background:var(--surface-alt); }
   .sidebar-panel-link.active { color:var(--blue); background:rgba(29,78,216,0.06); border-left-color:var(--blue); font-weight:700; }
   .sidebar-panel-section {
-    font-family:var(--mono); font-size:0.5rem; letter-spacing:0.1em; text-transform:uppercase;
+    font-family:var(--sans); font-size:0.5rem; letter-spacing:0.1em; text-transform:uppercase;
     color:var(--text-faint); padding:12px 16px 4px; font-weight:600;
   }
   .sidebar-collapse-btn {
@@ -177,7 +177,7 @@
   .logo { display:flex; align-items:baseline; gap:0.5rem; }
   .logo-text { font-family:var(--display); font-size:1.5rem; letter-spacing:0.01em; color:var(--text); line-height:1; font-weight:700; }
   .logo-dot { color:var(--blue); }
-  .logo-badge { font-family:var(--mono); font-size:0.55rem; font-weight:600; color:var(--blue); background:rgba(43,108,176,0.08); border:1px solid rgba(43,108,176,0.2); border-radius:10px; padding:2px 8px; letter-spacing:0.06em; }
+  .logo-badge { font-family:var(--sans); font-size:0.55rem; font-weight:600; color:var(--blue); background:rgba(43,108,176,0.08); border:1px solid rgba(43,108,176,0.2); border-radius:10px; padding:2px 8px; letter-spacing:0.06em; }
   .header-search {
     max-width:520px; width:100%; justify-self:center;
     display:flex; align-items:center; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
@@ -191,7 +191,7 @@
   }
   .header-search input::placeholder { color:rgba(255,255,255,0.4); }
   .header-right { display:flex; align-items:center; gap:8px; justify-content:flex-end; }
-  .header-meta { font-family:var(--mono); font-size:0.58rem; color:rgba(255,255,255,0.7); }
+  .header-meta { font-family:var(--sans); font-size:0.58rem; color:rgba(255,255,255,0.7); }
   .header-btn {
     font-family:var(--sans); font-size:0.65rem; font-weight:600; padding:5px 12px;
     border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.06);
@@ -244,7 +244,7 @@
   .kpi-label svg { width:12px; height:12px; opacity:0.4; }
   .kpi-value { font-family:var(--sans); font-size:1.85rem; font-weight:800; color:var(--text); line-height:1.1; }
   .kpi-sub { font-family:var(--sans); font-size:0.55rem; color:var(--text-faint); }
-  .kpi-change { font-family:var(--mono); font-size:0.56rem; font-weight:600; display:inline-flex; align-items:center; gap:2px; margin-top:2px; }
+  .kpi-change { font-family:var(--sans); font-size:0.56rem; font-weight:600; display:inline-flex; align-items:center; gap:2px; margin-top:2px; }
   .kpi-change-up { color:var(--red); }
   .kpi-change-down { color:var(--green); }
   .kpi-change-neutral { color:var(--text-faint); }
@@ -304,22 +304,22 @@
   .map-inset:hover { border-color:var(--blue); box-shadow:var(--shadow-md); }
   .map-inset .maplibregl-ctrl-attrib { display:none !important; }
   .map-inset .maplibregl-ctrl { display:none !important; }
-  .map-inset-label { position:absolute; bottom:2px; right:4px; font-family:var(--mono); font-size:0.5rem; color:#1E293B; text-shadow:0 0 4px rgba(255,255,255,0.8); z-index:2; pointer-events:none; letter-spacing:0.05em; font-weight:600; }
+  .map-inset-label { position:absolute; bottom:2px; right:4px; font-family:var(--sans); font-size:0.5rem; color:#1E293B; text-shadow:0 0 4px rgba(255,255,255,0.8); z-index:2; pointer-events:none; letter-spacing:0.05em; font-weight:600; }
   #insetAK { width:calc(175px * var(--inset-scale)); height:calc(144px * var(--inset-scale)); bottom:6px; left:6px; }
   #insetHI { width:calc(100px * var(--inset-scale)); height:calc(70px * var(--inset-scale)); bottom:6px; left:calc(12px + 175px * var(--inset-scale)); }
   .map-tooltip {
     position:absolute; pointer-events:none; background:rgba(255,255,255,0.96); backdrop-filter:blur(8px);
     border:1px solid var(--navy-border); border-left:3px solid var(--blue);
-    border-radius:6px; padding:8px 12px; font-family:var(--mono); font-size:0.62rem; color:var(--text);
+    border-radius:6px; padding:8px 12px; font-family:var(--sans); font-size:0.62rem; color:var(--text);
     z-index:50; box-shadow:var(--shadow-lg); max-width:260px; line-height:1.6;
   }
   .map-breadcrumb {
-    font-family:var(--mono); font-size:0.6rem; color:var(--text-muted);
+    font-family:var(--sans); font-size:0.6rem; color:var(--text-muted);
     display:flex; align-items:center; gap:0.3rem; margin-bottom:0.5rem;
   }
   .map-breadcrumb button {
     background:none; border:none; color:var(--blue-light); cursor:pointer;
-    font-family:var(--mono); font-size:0.6rem; padding:0;
+    font-family:var(--sans); font-size:0.6rem; padding:0;
   }
   .map-breadcrumb button:hover { text-decoration:underline; }
 
@@ -350,7 +350,7 @@
   }
   .tile {
     display:flex; align-items:center; justify-content:center;
-    font-family:var(--mono); font-size:0.58rem; font-weight:600; letter-spacing:0.03em;
+    font-family:var(--sans); font-size:0.58rem; font-weight:600; letter-spacing:0.03em;
     border-radius:3px; cursor:pointer; transition:transform 0.12s, border-color 0.12s;
     border:1px solid transparent; position:relative; user-select:none;
     -webkit-tap-highlight-color: transparent; touch-action:manipulation;
@@ -384,16 +384,16 @@
   .dval.green { color:var(--green); }
   .drow { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
   .race-tags { display:flex; flex-wrap:wrap; gap:0.3rem; margin-top:0.3rem; }
-  .race-tag { font-family:var(--mono); font-size:0.56rem; padding:2px 6px; border-radius:2px; border:1px solid; }
+  .race-tag { font-family:var(--sans); font-size:0.56rem; padding:2px 6px; border-radius:2px; border:1px solid; }
   .tag-senate   { border-color:#93C5FD; color:#2563EB; background:rgba(37,99,235,0.06); }
   .tag-governor { border-color:#C4B5FD; color:#7C3AED; background:rgba(124,58,237,0.06); }
   .tag-house    { border-color:#86EFAC; color:var(--green); background:rgba(5,150,105,0.06); }
   .wbar { margin-top:0.4rem; height:5px; background:var(--navy-border); border-radius:3px; overflow:hidden; }
   .wbar-fill { height:100%; border-radius:3px; }
-  .wbar-note { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); margin-top:3px; }
+  .wbar-note { font-family:var(--sans); font-size:0.56rem; color:var(--text-muted); margin-top:3px; }
   .no-sel { display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; padding-top:0; text-align:left; gap:0; }
   .no-sel-icon { font-size:2rem; opacity:0.35; }
-  .no-sel-txt { font-family:var(--mono); font-size:0.65rem; color:var(--text-faint); letter-spacing:0.08em; line-height:1.9; }
+  .no-sel-txt { font-family:var(--sans); font-size:0.65rem; color:var(--text-faint); letter-spacing:0.08em; line-height:1.9; }
   .insight-section { margin-bottom:1rem; }
   .insight-title { font-family:var(--sans); font-size:0.58rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:0.5rem; display:flex; align-items:center; gap:0.3rem; }
   .insight-title svg { width:12px; height:12px; opacity:0.5; }
@@ -406,31 +406,31 @@
   .insight-item:hover { border-color:var(--navy-border); background:#fff; box-shadow:var(--shadow-sm); }
   .insight-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
   .insight-item-name { font-weight:600; color:var(--text); flex:1; min-width:0; }
-  .insight-item-meta { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); flex-shrink:0; }
-  .insight-item-tag { font-family:var(--mono); font-size:0.5rem; padding:1px 5px; border-radius:2px; font-weight:600; flex-shrink:0; }
-  .insight-empty { font-family:var(--mono); font-size:0.62rem; color:var(--text-faint); padding:6px 0; }
+  .insight-item-meta { font-family:var(--sans); font-size:0.56rem; color:var(--text-muted); flex-shrink:0; }
+  .insight-item-tag { font-family:var(--sans); font-size:0.5rem; padding:1px 5px; border-radius:2px; font-weight:600; flex-shrink:0; }
+  .insight-empty { font-family:var(--sans); font-size:0.62rem; color:var(--text-faint); padding:6px 0; }
   .change-banner { background:rgba(29,78,216,0.04); border:1px solid rgba(29,78,216,0.12); border-radius:6px; padding:8px 10px; margin-bottom:10px; }
-  .change-line { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); padding:2px 0; display:flex; align-items:center; gap:5px; }
+  .change-line { font-family:var(--sans); font-size:0.56rem; color:var(--text-muted); padding:2px 0; display:flex; align-items:center; gap:5px; }
   .change-line strong { color:var(--text); }
   .change-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
   .insight-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem; padding-bottom:0.5rem; border-bottom:1px solid var(--navy-border); }
   .insight-header-title { font-family:var(--sans); font-size:0.85rem; font-weight:700; color:var(--text); }
-  .insight-header-sub { font-family:var(--mono); font-size:0.52rem; color:var(--text-faint); }
+  .insight-header-sub { font-family:var(--sans); font-size:0.52rem; color:var(--text-faint); }
 
   /* Candidates */
   .cand-race-block { margin-bottom:0.6rem; }
-  .cand-race-label { font-family:var(--mono); font-size:0.54rem; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; border:1px solid; display:inline-block; margin-bottom:0.3rem; }
+  .cand-race-label { font-family:var(--sans); font-size:0.54rem; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; border:1px solid; display:inline-block; margin-bottom:0.3rem; }
   .cand-row { display:flex; align-items:center; gap:0.4rem; padding:5px 7px; border-radius:4px; background:var(--surface-alt); margin-bottom:2px; flex-wrap:wrap; }
   .cand-finance { display:flex; gap:0.6rem; width:100%; padding:2px 0 0 11px; }
-  .cand-finance-item { font-family:var(--mono); font-size:0.5rem; color:var(--text-faint); }
+  .cand-finance-item { font-family:var(--sans); font-size:0.5rem; color:var(--text-faint); }
   .cand-finance-item strong { color:var(--text-muted); font-weight:600; }
   .pdot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
   .cname { font-family:var(--sans); font-size:0.72rem; font-weight:500; color:var(--text); flex:1; min-width:0; }
   .cnote { font-size:0.57rem; color:var(--text-faint); display:block; }
-  .cbadge { font-family:var(--mono); font-size:0.52rem; padding:1px 5px; border-radius:2px; flex-shrink:0; white-space:nowrap; }
+  .cbadge { font-family:var(--sans); font-size:0.52rem; padding:1px 5px; border-radius:2px; flex-shrink:0; white-space:nowrap; }
   .cbadge-inc { background:rgba(217,119,6,0.08); color:var(--amber); border:1px solid rgba(217,119,6,0.2); }
   .cbadge-dec { background:var(--surface-faint); color:var(--text-muted); border:1px solid var(--navy-border); }
-  .cparty { font-family:var(--mono); font-size:0.56rem; flex-shrink:0; }
+  .cparty { font-family:var(--sans); font-size:0.56rem; flex-shrink:0; }
 
   /* ── CANDIDATES TAB · Slicer / Party Groups / Districts (4.14.26) ──
      Office slicers act as primary filter; candidates grouped by party below.
@@ -440,7 +440,7 @@
     padding-bottom:0.55rem; border-bottom:1px solid var(--navy-border);
   }
   .cand-slicer {
-    font-family:var(--mono); font-size:0.56rem; letter-spacing:0.07em;
+    font-family:var(--sans); font-size:0.56rem; letter-spacing:0.07em;
     padding:6px 11px; border-radius:3px; cursor:pointer;
     background:var(--surface-alt); border:1px solid var(--navy-border);
     color:var(--text-muted); font-weight:700; text-transform:uppercase;
@@ -453,7 +453,7 @@
 
   .party-group { margin-bottom:0.65rem; }
   .party-group-label {
-    font-family:var(--mono); font-size:0.54rem; letter-spacing:0.08em;
+    font-family:var(--sans); font-size:0.54rem; letter-spacing:0.08em;
     text-transform:uppercase; font-weight:700;
     padding:3px 7px; border-radius:2px; display:inline-block; margin-bottom:0.35rem;
   }
@@ -462,7 +462,7 @@
   .party-group-I .party-group-label { background:rgba(139,92,246,0.06); color:var(--ind); border:1px solid rgba(139,92,246,0.20); }
 
   .cand-action-btn {
-    font-family:var(--mono); font-size:0.55rem; letter-spacing:0.06em;
+    font-family:var(--sans); font-size:0.55rem; letter-spacing:0.06em;
     padding:5px 10px; border-radius:3px; cursor:pointer;
     background:var(--surface-faint); border:1px solid var(--navy-border);
     color:var(--text-muted); margin:4px 0 6px 0; font-weight:600;
@@ -485,7 +485,7 @@
 
   /* Candidates tab · House district list */
   .cand-district-header {
-    font-family:var(--mono); font-size:0.54rem; letter-spacing:0.08em;
+    font-family:var(--sans); font-size:0.54rem; letter-spacing:0.08em;
     text-transform:uppercase; color:var(--text-faint); margin-bottom:0.35rem;
   }
   .cand-district-list { display:flex; flex-direction:column; gap:3px; margin-bottom:0.55rem; }
@@ -496,15 +496,15 @@
   }
   .cand-district-row:hover { background:#fff; border-color:var(--navy-border); box-shadow:var(--shadow-sm); }
   .cand-district-row.active { background:rgba(5,150,105,0.08); border-color:#86EFAC; }
-  .cand-district-code { font-family:var(--mono); font-size:0.68rem; font-weight:700; color:var(--text); flex-shrink:0; min-width:46px; }
-  .cand-district-meta { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); flex:1; min-width:0; }
-  .cand-district-spend { font-family:var(--mono); font-size:0.56rem; color:var(--green); font-weight:700; flex-shrink:0; }
-  .cand-district-empty { font-family:var(--mono); font-size:0.6rem; color:var(--text-faint); padding:8px 9px; text-align:center; border:1px dashed var(--navy-border); border-radius:4px; margin-bottom:0.5rem; }
+  .cand-district-code { font-family:var(--sans); font-size:0.68rem; font-weight:700; color:var(--text); flex-shrink:0; min-width:46px; }
+  .cand-district-meta { font-family:var(--sans); font-size:0.56rem; color:var(--text-muted); flex:1; min-width:0; }
+  .cand-district-spend { font-family:var(--sans); font-size:0.56rem; color:var(--green); font-weight:700; flex-shrink:0; }
+  .cand-district-empty { font-family:var(--sans); font-size:0.6rem; color:var(--text-faint); padding:8px 9px; text-align:center; border:1px dashed var(--navy-border); border-radius:4px; margin-bottom:0.5rem; }
   /* Row wrapper forces the back button onto its own line, fully above the
      CD name (Follow-up #1: resolves overlap with .cand-district-current). */
   .cand-district-back-row { display:block; margin-bottom:0.4rem; }
   .cand-district-back {
-    font-family:var(--mono); font-size:0.54rem; letter-spacing:0.06em;
+    font-family:var(--sans); font-size:0.54rem; letter-spacing:0.06em;
     color:var(--text-muted); cursor:pointer; background:transparent;
     border:none; padding:4px 8px 4px 6px; border-radius:3px;
     text-transform:uppercase; display:inline-flex; align-items:center; gap:0.3rem;
@@ -512,13 +512,13 @@
   .cand-district-back:hover { color:var(--blue); background:rgba(43,108,176,0.06); }
   .cand-district-current {
     display:block; clear:both;
-    font-family:var(--mono); font-size:0.64rem; font-weight:700; letter-spacing:0.05em;
+    font-family:var(--sans); font-size:0.64rem; font-weight:700; letter-spacing:0.05em;
     color:var(--green); padding:5px 9px; background:rgba(5,150,105,0.08);
     border:1px solid #86EFAC; border-radius:3px;
     margin-bottom:0.55rem; width:fit-content;
   }
   .cand-loading-note {
-    font-family:var(--mono); font-size:0.54rem; color:var(--text-faint);
+    font-family:var(--sans); font-size:0.54rem; color:var(--text-faint);
     margin-top:0.4rem; font-style:italic;
   }
 
@@ -534,7 +534,7 @@
     transition:border-color 0.15s;
   }
   .search-wrap:focus-within { border-color:var(--blue); box-shadow:0 0 0 2px rgba(43,108,176,0.1); }
-  .search-wrap input { background:transparent; border:none; outline:none; color:var(--text); font-family:var(--mono); font-size:0.72rem; width:100%; }
+  .search-wrap input { background:transparent; border:none; outline:none; color:var(--text); font-family:var(--sans); font-size:0.72rem; width:100%; }
   .search-wrap input::placeholder { color:var(--text-faint); }
   .tbl-info { font-family:var(--sans); font-size:0.65rem; color:var(--text-muted); white-space:nowrap; font-weight:500; }
   .tbl-info-tip { cursor:help; color:var(--blue); font-size:0.65rem; opacity:0.65; vertical-align:middle; }
@@ -582,7 +582,7 @@
 
   /* ── BALLOT MEASURES ── */
   .ballot-section { margin-top:0.75rem; }
-  .ballot-label { font-family:var(--mono); font-size:0.56rem; letter-spacing:0.1em; color:var(--text-faint); text-transform:uppercase; margin-bottom:0.5rem; }
+  .ballot-label { font-family:var(--sans); font-size:0.56rem; letter-spacing:0.1em; color:var(--text-faint); text-transform:uppercase; margin-bottom:0.5rem; }
   .ballot-measure {
     background:#F5F3FF;
     border:1px solid #DDD6FE;
@@ -591,17 +591,17 @@
     margin-bottom:0.5rem;
   }
   .ballot-measure-title { font-family:var(--sans); font-size:0.75rem; color:#6D28D9; font-weight:600; margin-bottom:0.25rem; }
-  .ballot-measure-desc { font-family:var(--mono); font-size:0.58rem; color:var(--text-muted); line-height:1.5; margin-bottom:0.4rem; }
+  .ballot-measure-desc { font-family:var(--sans); font-size:0.58rem; color:var(--text-muted); line-height:1.5; margin-bottom:0.4rem; }
   .ballot-measure-meta { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; }
   .ballot-spend-tag {
-    font-family:var(--mono); font-size:0.52rem; letter-spacing:0.06em;
+    font-family:var(--sans); font-size:0.52rem; letter-spacing:0.06em;
     padding:2px 6px; border-radius:2px; font-weight:600;
   }
   .spend-high   { background:rgba(220,38,38,0.06);  color:var(--red); border:1px solid rgba(220,38,38,0.15); }
   .spend-medium { background:rgba(217,119,6,0.06);  color:#D97706; border:1px solid rgba(217,119,6,0.15); }
   .spend-low    { background:rgba(5,150,105,0.06);color:var(--green); border:1px solid rgba(5,150,105,0.15); }
-  .ballot-fcc-note { font-family:var(--mono); font-size:0.52rem; color:var(--text-faint); }
-  .ballot-camps { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); margin-top:0.3rem; }
+  .ballot-fcc-note { font-family:var(--sans); font-size:0.52rem; color:var(--text-faint); }
+  .ballot-camps { font-family:var(--sans); font-size:0.56rem; color:var(--text-muted); margin-top:0.3rem; }
   .ballot-yes { color:var(--green); } .ballot-no { color:var(--red); }
   /* map dot indicator for ballot measures */
   .tile.has-ballot::after {
@@ -636,7 +636,7 @@
   /* ── POLLING ── */
   .poll-section { margin-top:0; }
   .poll-race-block { margin-bottom:0.65rem; }
-  .poll-race-label { font-family:var(--mono); font-size:0.54rem; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; border:1px solid; display:inline-block; margin-bottom:0.3rem; }
+  .poll-race-label { font-family:var(--sans); font-size:0.54rem; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; border:1px solid; display:inline-block; margin-bottom:0.3rem; }
   .poll-card {
     background:var(--surface-alt);
     border:1px solid var(--border);
@@ -646,18 +646,18 @@
   }
   .poll-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.35rem; gap:0.4rem; }
   .poll-pollster { font-family:var(--sans); font-size:0.65rem; color:var(--text); font-weight:500; flex:1; min-width:0; }
-  .poll-meta { font-family:var(--mono); font-size:0.5rem; color:var(--text-faint); white-space:nowrap; }
+  .poll-meta { font-family:var(--sans); font-size:0.5rem; color:var(--text-faint); white-space:nowrap; }
   .poll-bar-row { display:flex; align-items:center; gap:0.35rem; margin-bottom:3px; }
-  .poll-cand-name { font-family:var(--mono); font-size:0.56rem; color:var(--text-muted); width:90px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .poll-cand-name { font-family:var(--sans); font-size:0.56rem; color:var(--text-muted); width:90px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .poll-bar-track { flex:1; height:12px; background:#E2E8F0; border-radius:2px; overflow:hidden; position:relative; }
   .poll-bar-fill { height:100%; border-radius:2px; transition:width 0.4s ease; }
   .poll-bar-fill.fill-r { background:var(--rep); }
   .poll-bar-fill.fill-d { background:var(--dem); }
   .poll-bar-fill.fill-i { background:var(--ind); }
   .poll-bar-fill.fill-u { background:var(--slate); }
-  .poll-pct { font-family:var(--mono); font-size:0.56rem; font-weight:600; color:var(--text); width:28px; text-align:right; flex-shrink:0; }
-  .poll-moe { font-family:var(--mono); font-size:0.48rem; color:var(--text-faint); margin-top:2px; }
-  .poll-none { font-family:var(--mono); font-size:0.62rem; color:var(--text-faint); }
+  .poll-pct { font-family:var(--sans); font-size:0.56rem; font-weight:600; color:var(--text); width:28px; text-align:right; flex-shrink:0; }
+  .poll-moe { font-family:var(--sans); font-size:0.48rem; color:var(--text-faint); margin-top:2px; }
+  .poll-none { font-family:var(--sans); font-size:0.62rem; color:var(--text-faint); }
 
   /* ── MOBILE STATE CARD (shown instead of table row on mobile) ── */
   .mobile-state-list { display:none; }
@@ -671,8 +671,8 @@
   .mobile-state-card.row-selected { background:rgba(43,108,176,0.06); }
   .msc-left { flex:1; min-width:0; }
   .msc-name { font-family:var(--sans); font-weight:600; font-size:0.9rem; color:var(--text); }
-  .msc-dates { font-family:var(--mono); font-size:0.6rem; color:var(--text-muted); margin-top:2px; }
-  .msc-cands { font-family:var(--mono); font-size:0.58rem; color:var(--text-faint); margin-top:3px; }
+  .msc-dates { font-family:var(--sans); font-size:0.6rem; color:var(--text-muted); margin-top:2px; }
+  .msc-cands { font-family:var(--sans); font-size:0.58rem; color:var(--text-faint); margin-top:3px; }
   .msc-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
   .msc-arrow { color:var(--text-faint); font-size:0.75rem; margin-left:4px; }
 
@@ -690,7 +690,7 @@
   .drawer-handle { width:36px; height:4px; background:#CBD5E1; border-radius:2px; margin:12px auto 16px; }
   .drawer-close {
     position:absolute; top:12px; right:1rem;
-    font-family:var(--mono); font-size:0.65rem; color:var(--text-muted);
+    font-family:var(--sans); font-size:0.65rem; color:var(--text-muted);
     background:var(--surface-faint); border:1px solid var(--navy-border); border-radius:4px; padding:3px 8px;
     cursor:pointer; -webkit-tap-highlight-color:transparent;
   }
@@ -769,7 +769,7 @@
     }
     .mobile-nav a {
       flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
-      text-decoration:none; color:var(--text-faint); font-family:var(--mono);
+      text-decoration:none; color:var(--text-faint); font-family:var(--sans);
       font-size:0.45rem; letter-spacing:0.05em; text-transform:uppercase;
       padding:4px 0; transition:color 0.15s;
     }
@@ -2665,7 +2665,7 @@ function renderCandidatesPane(abbr) {
   const s = SM[abbr]; if (!s) return '';
   const races = getRacesForState(s);
   if (races.length === 0) {
-    return `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No major federal races on file for ${s.abbr}</div>`;
+    return `<div style="font-family:var(--sans);font-size:0.68rem;color:var(--text-faint)">No major federal races on file for ${s.abbr}</div>`;
   }
   const st = ensureCandTabState(abbr);
   if (!races.includes(st.office)) { st.office = races[0]; st.district = null; }
@@ -2693,7 +2693,7 @@ function renderStatewideOffice(abbr, s, st) {
   // when there's no recorded spend we still show 2+ candidates per party.
   const merged = mergeCuratedIntoEntities(abbr, st.office, entities);
   if (!merged.length) {
-    return `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No ${st.office} candidates on file yet for ${abbr}</div>
+    return `<div style="font-family:var(--sans);font-size:0.68rem;color:var(--text-faint)">No ${st.office} candidates on file yet for ${abbr}</div>
             ${renderSeeAllLink(abbr, st.office)}`;
   }
   const grouped = groupByPartySorted(merged);
@@ -2703,7 +2703,7 @@ function renderStatewideOffice(abbr, s, st) {
     if (group) html += group;
   });
   if (!html) {
-    return `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No ${st.office} candidates with reported spend for ${abbr}</div>
+    return `<div style="font-family:var(--sans);font-size:0.68rem;color:var(--text-faint)">No ${st.office} candidates with reported spend for ${abbr}</div>
             ${renderSeeAllLink(abbr, st.office)}`;
   }
   // Single small gray See All link at the bottom of the candidates list
@@ -2835,7 +2835,7 @@ function renderHouseOffice(abbr, s, st) {
       if (g) groupsHTML += g;
     });
     if (!groupsHTML) {
-      groupsHTML = `<div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-faint)">No candidates with reported spend for ${abbr}-${st.district}</div>`;
+      groupsHTML = `<div style="font-family:var(--sans);font-size:0.62rem;color:var(--text-faint)">No candidates with reported spend for ${abbr}-${st.district}</div>`;
     }
     html += groupsHTML;
     html += renderSeeAllLink(abbr, 'House', st.district);
@@ -3185,7 +3185,7 @@ function buildDetailHTML(abbr) {
         </div>
       </div>`).join('');
   } else {
-    issuesHTML = `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No ballot measures on file for ${s.abbr}</div>`;
+    issuesHTML = `<div style="font-family:var(--sans);font-size:0.68rem;color:var(--text-faint)">No ballot measures on file for ${s.abbr}</div>`;
   }
 
   // ── Primary window note ──
@@ -3230,7 +3230,7 @@ function buildDetailHTML(abbr) {
 
   return `<div class="fade-in">
     <div class="detail-header">
-      <div style="font-family:var(--mono);font-size:0.57rem;letter-spacing:0.08em;margin-bottom:0.3rem">${statusLineHTML}</div>
+      <div style="font-family:var(--sans);font-size:0.57rem;letter-spacing:0.08em;margin-bottom:0.3rem">${statusLineHTML}</div>
       <div class="detail-state-name">${s.name}</div>
       <div class="detail-state-abbr">${s.abbr} · 2026 ELECTION CYCLE</div>
     </div>
@@ -3489,7 +3489,7 @@ function filteredSorted() {
 function drawTable() {
   const data = filteredSorted();
   const filterNote = stateFilter
-    ? `<span style="color:var(--blue);margin-left:0.5rem;font-weight:600">▼ ${SM[stateFilter].name} <button onclick="clearStateFilter()" style="font-family:var(--mono);font-size:0.58rem;color:var(--text-muted);background:var(--surface-faint);border:1px solid var(--border);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px">✕ clear</button></span>`
+    ? `<span style="color:var(--blue);margin-left:0.5rem;font-weight:600">▼ ${SM[stateFilter].name} <button onclick="clearStateFilter()" style="font-family:var(--sans);font-size:0.58rem;color:var(--text-muted);background:var(--surface-faint);border:1px solid var(--border);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px">✕ clear</button></span>`
     : '';
   document.getElementById('tableInfo').innerHTML = `${data.length} of 50 states + DC${filterNote} <span class="tbl-info-tip" title="Includes all 50 U.S. states plus Washington D.C. — 51 total jurisdictions tracked for FCC political advertising windows.">ⓘ</span>`;
   const tb = document.getElementById('tableBody'); tb.innerHTML = '';
@@ -3553,7 +3553,7 @@ function drawMobileList(data) {
       </div>
       <div class="msc-right">
         ${s.status==='general-only'&&s.pDate?`<span class="spill spill-green">✓ COMPLETE</span>`:SPILL[s.status]||''}
-        ${s.dWin!==null&&s.dWin>0?`<span style="font-family:var(--mono);font-size:0.55rem;color:var(--text-faint)">${s.dWin}d to window</span>`:''}
+        ${s.dWin!==null&&s.dWin>0?`<span style="font-family:var(--sans);font-size:0.55rem;color:var(--text-faint)">${s.dWin}d to window</span>`:''}
       </div>
       <span class="msc-arrow">›</span>
     `;
@@ -3723,7 +3723,7 @@ const POLLS = {};
 function buildPollContent(abbr) {
   const statePolls = POLLS[abbr];
   if (!statePolls || Object.keys(statePolls).length === 0) {
-    return `<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text-faint)">No polling data available for ${abbr}</div>`;
+    return `<div style="font-family:var(--sans);font-size:0.68rem;color:var(--text-faint)">No polling data available for ${abbr}</div>`;
   }
 
   let html = '';
