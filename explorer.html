@@ -257,7 +257,7 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
   </div>
   <div class="filter-wrap">
     <div class="filter-lbl">SEARCH</div>
-    <input type="search" autocomplete="off" id="f-search" placeholder="name, station, DMA...">
+    <input type="search" autocomplete="off" readonly id="f-search" placeholder="name, station, DMA...">
   </div>
   <div id="sort-wrap">SORT:
     <button class="sort-btn active" data-sort="spend">SPEND</button>
@@ -438,6 +438,8 @@ document.querySelectorAll('.sort-btn').forEach(function(btn){
   btn.addEventListener('click',function(){document.querySelectorAll('.sort-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');currentSort=btn.dataset.sort;render();});
 });
 ['f-party','f-state','f-dma','f-adv'].forEach(function(id){document.getElementById(id).addEventListener('change',render);});
+var _fsEl=document.getElementById('f-search');
+if(_fsEl)_fsEl.addEventListener('focus',function(){this.removeAttribute('readonly');},{once:true});
 document.getElementById('f-search').addEventListener('input',render);
 window.initHeaderAuth=function(){var el=document.getElementById('header-auth');if(!el)return;var user=localStorage.getItem('pw_user');var token=localStorage.getItem('pw_token');if(token&&user){el.innerHTML='<span class="header-auth-user">'+user+'</span><button class="header-auth-logout" id="header-logout-btn">Log Out</button>';document.getElementById('header-logout-btn').addEventListener('click',function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');location.reload();});}else{el.innerHTML='<button class="header-auth-login" onclick="document.getElementById(\'mini-login-overlay\').classList.add(\'open\')">Log In</button><a class="header-auth-request" href="mailto:info@politicalwindow.com">Request Access</a>';}};
 document.addEventListener('DOMContentLoaded',window.initHeaderAuth);

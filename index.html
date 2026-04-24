@@ -915,7 +915,7 @@
   </div>
   <form class="header-search" id="globalSearchForm" action="/public-file" method="get">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="search" autocomplete="off" name="q" placeholder="Search filings, stations, candidates..." id="globalSearch">
+    <input type="search" autocomplete="off" readonly name="q" placeholder="Search filings, stations, candidates..." id="globalSearch">
   </form>
   <div class="header-right">
     <div id="header-auth"></div>
@@ -1030,7 +1030,7 @@
         <div class="table-toolbar">
           <div class="search-wrap">
             <span style="color:var(--text-faint);font-size:0.8rem">🔍</span>
-            <input type="search" autocomplete="off" id="searchInput" placeholder="Search state...">
+            <input type="search" autocomplete="off" readonly id="searchInput" placeholder="Search state...">
           </div>
           <span class="tbl-info" id="tableInfo"></span>
         </div>
@@ -3561,6 +3561,10 @@ function drawMobileList(data) {
 }
 
 // ── FILTERS ────────────────────────────────────────────────────────────────────
+['searchInput','globalSearch'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('focus', function(){ this.removeAttribute('readonly'); }, {once:true});
+});
 document.getElementById('searchInput').addEventListener('input', e => { q = e.target.value.toLowerCase().trim(); drawTable(); });
 document.querySelectorAll('[data-race]').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('[data-race]').forEach(b => b.classList.remove('active'));

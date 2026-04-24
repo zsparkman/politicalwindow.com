@@ -260,7 +260,7 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
   <div class="header-left"><span class="header-meta" id="data-badge" style="color:rgba(255,255,255,0.5);font-size:0.55rem;letter-spacing:0.03em">&#x25CF; LOADING...</span></div>
   <div class="header-search">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="search" autocomplete="off" placeholder="Search candidates, stations..." id="headerSearch">
+    <input type="search" autocomplete="off" readonly placeholder="Search candidates, stations..." id="headerSearch">
   </div>
   <div class="header-right"><div id="header-auth"></div></div>
 </header>
@@ -292,7 +292,7 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
     <div class="filter-wrap"><div class="filter-lbl">WEEK TO</div><input type="date" id="f-week-to"></div>
     <div class="filter-search">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="search" autocomplete="off" id="f-search" placeholder="candidate, station, advertiser...">
+      <input type="search" autocomplete="off" readonly id="f-search" placeholder="candidate, station, advertiser...">
     </div>
   </div>
   <div class="filter-btn-group">
@@ -710,6 +710,10 @@ msPop('f-window',['IN','Primary','General','OOW'],function(v){return{IN:'In Wind
 
 document.getElementById('run-report').addEventListener('click',loadData);
 ['f-week-from','f-week-to'].forEach(function(id){document.getElementById(id).addEventListener('change',function(){if(ALL_DATA.length)render();});});
+['f-search','headerSearch'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el)el.addEventListener('focus',function(){this.removeAttribute('readonly');},{once:true});
+});
 document.getElementById('f-search').addEventListener('input',function(){
   document.getElementById('headerSearch').value=this.value;
   if(ALL_DATA.length)render();

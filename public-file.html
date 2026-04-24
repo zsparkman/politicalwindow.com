@@ -205,6 +205,38 @@ tr:hover td{background:rgba(43,108,176,0.04)}
 footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing:0.08em;padding:20px}
 
 
+/* ── DOC COLUMN ICONS ── */
+.doc-icons{display:flex;gap:10px;align-items:center;justify-content:center}
+.doc-icon-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;cursor:pointer;padding:2px 3px;color:var(--text-faint);transition:color 0.12s;text-decoration:none;line-height:1}
+.doc-icon-btn:hover{color:var(--link)}
+.doc-icon-btn svg{width:16px;height:16px;display:block}
+.doc-icon-label{font-family:var(--mono);font-size:0.42rem;font-weight:700;letter-spacing:0.08em;color:inherit}
+
+/* ── SINGLE-DOC PDF VIEWER MODAL ── */
+#pdf-viewer-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);align-items:center;justify-content:center}
+#pdf-viewer-overlay.open{display:flex}
+#pdf-viewer-modal{display:flex;flex-direction:column;width:min(860px,96vw);height:min(92vh,960px);background:var(--surface);border-radius:6px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.35)}
+.pv-topbar{background:#0f1623;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;min-height:44px}
+.pv-topbar-left{font-family:var(--mono);font-size:0.58rem;color:#E2E8F0;letter-spacing:0.06em;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv-close-btn{background:transparent;border:none;color:rgba(255,255,255,0.6);font-size:1rem;cursor:pointer;line-height:1;padding:4px 6px;border-radius:3px;transition:color 0.12s;flex-shrink:0}
+.pv-close-btn:hover{color:#fff}
+.pv-toolbar{background:var(--surface-table);border-bottom:1px solid var(--navy-border);padding:8px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.pv-rotate-label{font-family:var(--mono);font-size:0.42rem;font-weight:700;letter-spacing:0.1em;color:var(--text-faint);text-transform:uppercase;margin-right:2px}
+.pv-rotate-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:4px;background:var(--surface);border:1px solid var(--navy-border);color:var(--text);font-family:var(--mono);font-size:0.6rem;font-weight:700;cursor:pointer;transition:all 0.12s;letter-spacing:0.04em}
+.pv-rotate-btn:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+.pv-pdf-wrap{flex:1;overflow-y:auto;background:#E5E7EB;position:relative;min-height:0}
+.pv-pdf-canvas-wrap canvas{display:block;width:100%}
+.pv-pdf-skeleton{padding:20px;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;min-height:200px}
+.pv-pdf-skeleton-bar{height:8px;background:#D1D5DB;border-radius:4px;animation:pv-pulse 1.5s ease-in-out infinite}
+@keyframes pv-pulse{0%,100%{opacity:0.4}50%{opacity:1}}
+.pv-pdf-error{padding:30px 14px;text-align:center;font-family:var(--mono);font-size:0.6rem;color:var(--text-muted)}
+.pv-pdf-error a{color:var(--blue);font-weight:700}
+.pv-footer{padding:8px 14px;border-top:1px solid var(--navy-border);background:var(--surface-table);font-family:var(--mono);font-size:0.5rem;color:var(--text-muted);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+.pv-footer a{color:var(--blue);font-weight:700}
+.pv-footer-actions{display:flex;align-items:center;gap:12px}
+.pv-close-action{font-family:var(--mono);font-size:0.55rem;font-weight:700;letter-spacing:0.08em;padding:5px 16px;border:1px solid var(--navy-border);border-radius:4px;background:var(--surface);color:var(--text);cursor:pointer;transition:all 0.12s}
+.pv-close-action:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+
 @media(max-width:700px){
   .sidebar{display:none}
   .page-wrap{margin-left:0!important}
@@ -270,7 +302,7 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
   </div>
   <div class="header-search">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="search" autocomplete="off" placeholder="Search filings..." id="headerSearch">
+    <input type="search" autocomplete="off" readonly placeholder="Search filings..." id="headerSearch">
   </div>
   <div class="header-right">
     <div id="header-auth"></div>
@@ -329,7 +361,7 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
     </div>
     <div class="filter-search">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="search" autocomplete="off" id="f-search" placeholder="candidate, advertiser, station...">
+      <input type="search" autocomplete="off" readonly id="f-search" placeholder="candidate, advertiser, station...">
     </div>
     <div id="sort-wrap">SORT:
       <button class="sort-btn active" data-sort="spend">SPEND</button>
@@ -399,6 +431,7 @@ function toggleSidebar() {
 var API='https://rates.politicalwindow.com';
 var ALL_DATA=[],SERVER_STATS={},currentView='date',currentSort='spend';
 var rawSort={col:'start_date',dir:'desc'};
+var _PV_ROW_STORE={};
 // ── Cable PSID → retail brand display ───────────────────────────────────────
 // Cable rows return the PSID as callsign (e.g. "003777"); the backend
 // resolves it to a friendly label via station_display_name(). Broadcast
@@ -447,7 +480,23 @@ var DAYPART_CODES={'Early Morning':'EM','Daytime':'DT','Early Fringe':'EF','Earl
 function fmtDayparts(str){if(!str)return'\u2014';return str.split(/[,;\/+|&]+/).map(function(s){var t=s.trim();return DAYPART_CODES[t]||t;}).filter(Boolean).join('\u00B7');}
 // Use line-level daypart_codes array from rate_lines when available; fall back to contract-level text parsing.
 function fmtDaypartCodes(r){var c=r.daypart_codes;if(c&&c.length)return c.join('\u00B7');return fmtDayparts(r.daypart);}
-function fccLink(r){return r.folder_id&&r.file_manager_id?'<a href="https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf" target="_blank" style="color:var(--link);font-size:0.6rem">PDF \u2197</a>':'\u2014';}
+function fccLink(r){
+  var hasPdf=r.fcc_file_id||r.fcc_pdf_url||(r.folder_id&&r.file_manager_id);
+  if(!hasPdf)return'\u2014';
+  var key=(r.order_number||'')+'_'+(r.file_manager_id||r.folder_id||r.fcc_file_id||'');
+  _PV_ROW_STORE[key]=r;
+  var safeKey=key.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  var dl=r.fcc_pdf_url||(r.folder_id&&r.file_manager_id?'https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf':null);
+  var viewBtn='<button class="doc-icon-btn" onclick="openPdfViewer(\''+safeKey+'\')" title="View PDF">'
+    +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+    +'<span class="doc-icon-label">VIEW</span></button>';
+  var dlBtn=dl
+    ?'<a href="'+esc(dl)+'" target="_blank" rel="noopener" class="doc-icon-btn" title="Download PDF">'
+      +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+      +'<span class="doc-icon-label">DOWNLOAD</span></a>'
+    :'';
+  return'<div class="doc-icons">'+viewBtn+dlBtn+'</div>';
+}
 // Resolved candidate name, falling back to raw advertiser
 function candKey(r){return r.candidate||r.advertiser||'Unknown';}
 
@@ -720,11 +769,168 @@ document.getElementById('clear-filters').addEventListener('click',function(){
   document.getElementById('headerSearch').value='';
   render();
 });
+['f-search','headerSearch'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el)el.addEventListener('focus',function(){this.removeAttribute('readonly');},{once:true});
+});
+// ── Single-Doc PDF Viewer ──
+var _pvPdfjs=null,_pvPdfjsLoading=false,_pvPdfjsCallbacks=[];
+var _pvRotation=0,_pvPdfCache=null;
+
+function ensurePvPdfJs(cb){
+  if(_pvPdfjs){cb(_pvPdfjs);return;}
+  _pvPdfjsCallbacks.push(cb);
+  if(_pvPdfjsLoading)return;
+  _pvPdfjsLoading=true;
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  s.onload=function(){
+    var lib=window.pdfjsLib;
+    lib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    _pvPdfjs=lib;
+    _pvPdfjsCallbacks.forEach(function(fn){fn(lib);});
+    _pvPdfjsCallbacks=[];
+  };
+  s.onerror=function(){
+    _pvPdfjsLoading=false;
+    _pvPdfjsCallbacks.forEach(function(fn){fn(null);});
+    _pvPdfjsCallbacks=[];
+  };
+  document.head.appendChild(s);
+}
+
+function getPvPdfUrl(r){
+  if(r.fcc_file_id)return API+'/api/pdf-proxy/'+encodeURIComponent(r.fcc_file_id);
+  if(r.fcc_pdf_url)return r.fcc_pdf_url;
+  if(r.folder_id&&r.file_manager_id)return'https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf';
+  return null;
+}
+
+function getPvDirectUrl(r){
+  if(r.fcc_pdf_url)return r.fcc_pdf_url;
+  if(r.folder_id&&r.file_manager_id)return'https://publicfiles.fcc.gov/api/manager/download/'+r.folder_id+'/'+r.file_manager_id+'.pdf';
+  return null;
+}
+
+function renderPvPages(pdf,lib,rotation){
+  var container=document.getElementById('pv-pdf-wrap');
+  if(!container)return;
+  container.innerHTML='';
+  var scale=2.5,rot=rotation||0;
+  var chain=Promise.resolve();
+  for(var p=1;p<=pdf.numPages;p++){
+    (function(pageNum){
+      chain=chain.then(function(){
+        return pdf.getPage(pageNum).then(function(page){
+          var vp=page.getViewport({scale:scale,rotation:rot});
+          var wrap=document.createElement('div');
+          wrap.className='pv-pdf-canvas-wrap';
+          var canvas=document.createElement('canvas');
+          canvas.width=vp.width;canvas.height=vp.height;
+          wrap.appendChild(canvas);
+          container.appendChild(wrap);
+          return page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+        });
+      });
+    })(p);
+  }
+}
+
+function loadPvPdf(r){
+  var container=document.getElementById('pv-pdf-wrap');
+  if(!container)return;
+  var proxyUrl=getPvPdfUrl(r);
+  if(!proxyUrl){
+    container.innerHTML='<div class="pv-pdf-error">No PDF available.<br><br>Order #'+esc(r.order_number||'—')+'</div>';
+    return;
+  }
+  container.innerHTML='<div class="pv-pdf-skeleton"><div class="pv-pdf-skeleton-bar" style="width:80%"></div><div class="pv-pdf-skeleton-bar" style="width:60%"></div><div class="pv-pdf-skeleton-bar" style="width:70%"></div><div style="margin-top:10px;font-family:var(--mono);font-size:0.52rem;color:var(--text-faint)">LOADING PDF…</div></div>';
+  ensurePvPdfJs(function(lib){
+    if(!lib){
+      var dl=getPvDirectUrl(r);
+      container.innerHTML='<div class="pv-pdf-error">Could not load PDF viewer.'+(dl?'<br><br><a href="'+esc(dl)+'" target="_blank" rel="noopener">Open PDF &#8599;</a>':'')+'</div>';
+      return;
+    }
+    var fetchOpts={};
+    var tok=localStorage.getItem('pw_token');
+    if(tok)fetchOpts.headers={'Authorization':'Bearer '+tok};
+    fetch(proxyUrl,fetchOpts).then(function(resp){
+      if(!resp.ok)throw new Error('HTTP '+resp.status);
+      return resp.arrayBuffer();
+    }).then(function(buf){
+      return lib.getDocument({data:buf}).promise;
+    }).then(function(pdf){
+      _pvPdfCache={pdf:pdf,lib:lib};
+      renderPvPages(pdf,lib,_pvRotation);
+    }).catch(function(){
+      var dl=getPvDirectUrl(r);
+      container.innerHTML='<div class="pv-pdf-error">Could not load PDF.'+(dl?'<br><br><a href="'+esc(dl)+'" target="_blank" rel="noopener">Open PDF &#8599;</a>':'')+'</div>';
+    });
+  });
+}
+
+function openPdfViewer(key){
+  var r=_PV_ROW_STORE[key];
+  if(!r)return;
+  _pvRotation=0;_pvPdfCache=null;
+  var overlay=document.getElementById('pdf-viewer-overlay');
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+  var cand=r.candidate||r.advertiser||'—';
+  var station=stationLabel(r)||r.callsign||'—';
+  document.getElementById('pv-topbar-left').textContent=cand+' · '+station+' · Order #'+(r.order_number||'—');
+  document.getElementById('pv-footer-info').textContent=(r.window_status||'')+(r.start_date?' · '+r.start_date.slice(0,10):'');
+  var dl=getPvDirectUrl(r);
+  var dlEl=document.getElementById('pv-open-pdf');
+  if(dl){dlEl.href=dl;dlEl.style.display='';}else{dlEl.style.display='none';}
+  loadPvPdf(r);
+}
+
+function closePdfViewer(){
+  _pvPdfCache=null;_pvRotation=0;
+  var overlay=document.getElementById('pdf-viewer-overlay');
+  overlay.classList.remove('open');
+  document.body.style.overflow='';
+  document.getElementById('pv-pdf-wrap').innerHTML='';
+}
+
+function rotatePdfViewer(delta){
+  _pvRotation=(_pvRotation+delta+360)%360;
+  if(_pvPdfCache)renderPvPages(_pvPdfCache.pdf,_pvPdfCache.lib,_pvRotation);
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&document.getElementById('pdf-viewer-overlay').classList.contains('open'))closePdfViewer();
+});
+
 document.addEventListener('DOMContentLoaded', loadData);
 window.initHeaderAuth=function(){var el=document.getElementById('header-auth');if(!el)return;var user=localStorage.getItem('pw_user');var token=localStorage.getItem('pw_token');if(token&&user){el.innerHTML='<span class="header-auth-user">'+user+'</span><button class="header-auth-logout" id="header-logout-btn">Log Out</button>';document.getElementById('header-logout-btn').addEventListener('click',function(){localStorage.removeItem('pw_token');localStorage.removeItem('pw_user');location.reload();});}else{el.innerHTML='<button class="header-auth-login" onclick="document.getElementById(\'mini-login-overlay\').classList.add(\'open\')">Log In</button><a class="header-auth-request" href="mailto:info@politicalwindow.com">Request Access</a>';}};
 document.addEventListener('DOMContentLoaded',window.initHeaderAuth);
 (function(){var ov=document.getElementById('mini-login-overlay');if(!ov)return;ov.addEventListener('click',function(e){if(e.target===ov)ov.classList.remove('open');});document.addEventListener('keydown',function(e){if(e.key==='Escape')ov.classList.remove('open');});document.getElementById('ml-btn').addEventListener('click',function(){var btn=this,err=document.getElementById('ml-err'),email=document.getElementById('ml-email').value.trim(),pw=document.getElementById('ml-password').value;if(!email||!pw){err.textContent='Email and password required';return;}btn.disabled=true;btn.textContent='Signing in…';err.textContent='';fetch('https://rates.politicalwindow.com/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pw})}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});}).then(function(res){if(!res.ok){err.textContent=res.d.error||'Login failed';btn.disabled=false;btn.textContent='Log In';return;}localStorage.setItem('pw_token',res.d.token);localStorage.setItem('pw_user',res.d.email);ov.classList.remove('open');location.reload();}).catch(function(){err.textContent='Network error';btn.disabled=false;btn.textContent='Log In';});});document.getElementById('ml-password').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('ml-btn').click();});})();
 </script>
+
+<!-- PDF VIEWER MODAL -->
+<div id="pdf-viewer-overlay" onclick="if(event.target===this)closePdfViewer()">
+  <div id="pdf-viewer-modal">
+    <div class="pv-topbar">
+      <div class="pv-topbar-left" id="pv-topbar-left"></div>
+      <button class="pv-close-btn" onclick="closePdfViewer()" title="Close">&#10005;</button>
+    </div>
+    <div class="pv-toolbar">
+      <span class="pv-rotate-label">ROTATE</span>
+      <button class="pv-rotate-btn" onclick="rotatePdfViewer(-90)" title="Rotate counter-clockwise"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6"/><path d="M2.66 15.57a10 10 0 1 0 .57-8.38"/></svg> CCW</button>
+      <button class="pv-rotate-btn" onclick="rotatePdfViewer(90)" title="Rotate clockwise">CW <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38"/></svg></button>
+    </div>
+    <div class="pv-pdf-wrap" id="pv-pdf-wrap"></div>
+    <div class="pv-footer">
+      <span id="pv-footer-info"></span>
+      <div class="pv-footer-actions">
+        <a href="#" id="pv-open-pdf" target="_blank" rel="noopener">Open PDF &#8599;</a>
+        <button class="pv-close-action" onclick="closePdfViewer()">CLOSE</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="mini-login-overlay"><div id="mini-login-card"><div class="mini-login-title">Sign In</div><div class="mini-login-field"><label for="ml-email">Email</label><input id="ml-email" type="email" placeholder="you@example.com" autocomplete="email"></div><div class="mini-login-field"><label for="ml-password">Password</label><input id="ml-password" type="password" autocomplete="current-password"></div><button class="mini-login-btn" id="ml-btn">Log In</button><div class="mini-login-err" id="ml-err"></div><div class="mini-login-footer">No access yet? <a href="mailto:info@politicalwindow.com">Request Access</a></div></div></div>
 </body>
