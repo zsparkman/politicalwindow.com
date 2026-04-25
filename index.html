@@ -2604,21 +2604,64 @@ function normalizeEntity(e) {
   };
 }
 
-// Look up curated metadata (incumbent flag / note) from CANDS by candidate name.
-// Falls back to last-name fuzzy match if exact match fails.
-function lookupCuratedMeta(abbr, name) {
+// Look up curated metadata (incumbent flag / note) from CANDS for one
+// candidate. Match is scoped by `opts = { race, district, party }` so
+// last-name fuzzy matches do not bleed across races/districts/parties.
+//
+// Without scoping, "Jennifer Davis" (IL-8 R, non-incumbent) was picking
+// up Danny Davis's (IL-7 D, incumbent) 'inc' code via the last-name
+// fallback — and rendering with an INCUMBENT badge despite incumbent=
+// false on her own row. Tightening the match key fixes that class of
+// bug everywhere it surfaces, not just IL.
+//
+// Match precedence (within scope):
+//   1. Exact full-name match (case-insensitive).
+//   2. Last-name match, preferring a same-party row when multiple
+//      last-name matches exist (handles e.g. a R and a D with the
+//      same last name in the same district).
+//   3. Last-name match, any party (fallback).
+//   4. Default `dec` status, null note.
+//
+// `opts` is optional for backward-compat (legacy callers fall back to
+// race-/district-/party-blind matching, the bug-prone path). Every
+// current caller in this file passes scope; new callers should too.
+function lookupCuratedMeta(abbr, name, opts) {
   const races = CANDS[abbr] || [];
   const nameLower = (name || '').toLowerCase();
   const parts = (name || '').trim().split(/\s+/);
   const lastE = parts.length > 1 ? parts[parts.length - 1].toLowerCase() : nameLower;
+  const wantRace  = opts && opts.race ? String(opts.race).toLowerCase() : null;
+  const wantDist  = opts && opts.district != null && opts.district !== ''
+                      ? String(opts.district) : null;
+  const wantParty = opts && opts.party ? opts.party : null;
+
+  // Collect all in-scope matches; pick the best after the loop so we
+  // can prefer exact > last-name-with-party > last-name-any-party.
+  const exactMatches = [];
+  const lastMatches  = [];
   for (const rc of races) {
+    if (wantRace && (rc.race || '').toLowerCase() !== wantRace) continue;
     for (const c of rc.list) {
-      if (c.n.toLowerCase() === nameLower) return { statusCode: c.s, status: c.status || null, note: c.note || null };
+      if (wantDist != null) {
+        const cd = c.d != null ? String(c.d) : null;
+        if (cd !== wantDist) continue;
+      }
+      const cnLower = c.n.toLowerCase();
+      if (cnLower === nameLower) { exactMatches.push(c); continue; }
       const cp = c.n.trim().split(/\s+/);
       if (cp.length > 1 && cp[cp.length - 1].toLowerCase() === lastE) {
-        return { statusCode: c.s, status: c.status || null, note: c.note || null };
+        lastMatches.push(c);
       }
     }
+  }
+  const pick = (c) => ({ statusCode: c.s, status: c.status || null, note: c.note || null });
+  if (exactMatches.length) return pick(exactMatches[0]);
+  if (lastMatches.length) {
+    if (wantParty) {
+      const partyMatch = lastMatches.find(c => c.p === wantParty);
+      if (partyMatch) return pick(partyMatch);
+    }
+    return pick(lastMatches[0]);
   }
   return { statusCode: 'dec', status: null, note: null };
 }
@@ -2678,7 +2721,14 @@ function groupByPartySorted(candidates) {
 // runoff-rule clarification) but the chip lets the user distinguish
 // runoff finalists from pre-primary declared at a glance.
 function renderCandRowHTML(abbr, cand) {
-  const meta = lookupCuratedMeta(abbr, cand.name);
+  // Pass the cand's race/district/party so lookupCuratedMeta scopes its
+  // last-name fuzzy match — without this, e.g. "Jennifer Davis" (IL-8 R)
+  // would pick up Danny Davis's (IL-7 D, incumbent) 'inc' code.
+  const meta = lookupCuratedMeta(abbr, cand.name, {
+    race:     cand.office,
+    district: cand.district,
+    party:    cand.party,
+  });
   const pc   = PC[cand.party] || 'var(--slate)';
 
   const status = cand.status || meta.status || null;
