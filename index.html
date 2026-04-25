@@ -428,9 +428,64 @@
   .cname { font-family:var(--sans); font-size:0.72rem; font-weight:500; color:var(--text); flex:1; min-width:0; }
   .cnote { font-size:0.57rem; color:var(--text-faint); display:block; }
   .cbadge { font-family:var(--sans); font-size:0.52rem; padding:1px 5px; border-radius:2px; flex-shrink:0; white-space:nowrap; }
-  .cbadge-inc { background:rgba(217,119,6,0.08); color:var(--amber); border:1px solid rgba(217,119,6,0.2); }
-  .cbadge-dec { background:var(--surface-faint); color:var(--text-muted); border:1px solid var(--navy-border); }
+  .cbadge-inc      { background:rgba(217,119,6,0.08); color:var(--amber); border:1px solid rgba(217,119,6,0.2); }
+  .cbadge-dec      { background:var(--surface-faint); color:var(--text-muted); border:1px solid var(--navy-border); }
+  /* Election-phase status badges (added 2026-04-24, merged 2+3 commit 3).
+     Nominee + Runoff use the green/red anchor colors so the user can
+     spot primary outcomes at a glance; Lost Primary uses the muted
+     slate to recede behind active candidates; Retiring + Exploring
+     use neutral surface treatments since they're informational. */
+  .cbadge-nominee  { background:rgba(5,150,105,0.10); color:var(--green); border:1px solid rgba(5,150,105,0.28); font-weight:700; }
+  .cbadge-runoff   { background:rgba(220,38,38,0.08); color:var(--red); border:1px solid rgba(220,38,38,0.24); font-weight:700; }
+  .cbadge-lost     { background:var(--surface-faint); color:var(--text-faint); border:1px solid var(--navy-border); text-decoration:line-through; }
+  .cbadge-retiring { background:rgba(124,58,237,0.06); color:#A78BFA; border:1px solid rgba(124,58,237,0.18); }
+  .cbadge-exp      { background:rgba(29,78,216,0.06); color:var(--blue-light); border:1px solid rgba(29,78,216,0.18); }
+  /* RUNOFF chip — sits next to .cparty in addition to whatever .cbadge
+     applies, so a runoff candidate reads as "D · RUNOFF · DECLARED". */
+  .cparty-runoff-chip { font-family:var(--sans); font-size:0.50rem; font-weight:700;
+    padding:1px 4px; border-radius:2px; margin-left:3px;
+    background:rgba(220,38,38,0.10); color:var(--red); border:1px solid rgba(220,38,38,0.28); }
   .cparty { font-family:var(--sans); font-size:0.56rem; flex-shrink:0; }
+
+  /* Post-primary "Nominee data forthcoming" banner above the party
+     groups when isPrimaryComplete && no Nominee status on any row. */
+  .cand-banner {
+    font-family:var(--sans); font-size:0.6rem; line-height:1.4;
+    padding:0.45rem 0.6rem; border-radius:3px; margin-bottom:0.6rem;
+    border-left:3px solid var(--blue);
+    background:rgba(29,78,216,0.05); color:var(--text-muted);
+  }
+  .cand-banner-info { /* default style; named for future variants */ }
+
+  /* Lost Primary disclosure — collapsed below active party groups in
+     post-primary states. Uses native <details>/<summary> for zero-JS
+     toggle; styling overrides the default disclosure triangle. */
+  .cand-lost-disclosure { margin-top:0.7rem; border-top:1px dashed var(--navy-border); padding-top:0.55rem; }
+  .cand-lost-summary {
+    font-family:var(--sans); font-size:0.6rem; font-weight:600;
+    color:var(--text-muted); cursor:pointer; padding:0.25rem 0; user-select:none;
+    list-style:none;
+  }
+  .cand-lost-summary::-webkit-details-marker { display:none; }
+  .cand-lost-summary::before { content:'▶  '; color:var(--text-faint); transition:transform 0.15s; display:inline-block; }
+  .cand-lost-disclosure[open] .cand-lost-summary::before { content:'▼  '; }
+  .cand-lost-summary:hover { color:var(--text); }
+  .cand-lost-body { margin-top:0.4rem; opacity:0.85; }
+  .cand-lost-body .cand-row { /* dimmed display for lost-primary rows */ opacity:0.85; }
+
+  /* Office-level "See all N declared candidates" affordance — pre-primary
+     only, expands all party groups inline. Distinct from the per-party
+     .cand-see-more (still shown when applicable) and from the external-
+     link .cand-see-all-link (which navigates to /candidate-tracker). */
+  .cand-see-all-declared {
+    display:block; width:100%; margin:0.5rem 0;
+    font-family:var(--sans); font-size:0.6rem; font-weight:600;
+    color:var(--blue-light); background:transparent;
+    border:1px dashed rgba(37,99,235,0.4); border-radius:3px;
+    padding:0.45rem 0.6rem; cursor:pointer; transition:all 0.12s;
+    text-align:center;
+  }
+  .cand-see-all-declared:hover { background:rgba(37,99,235,0.06); border-color:var(--blue-light); }
 
   /* ── CANDIDATES TAB · Slicer / Party Groups / Districts (4.14.26) ──
      Office slicers act as primary filter; candidates grouped by party below.
@@ -2456,6 +2511,37 @@ function isRunoffPhase(s) {
   return !!s && (s.status === 'runoff-window' || s.status === 'runoff-upcoming');
 }
 
+// Election-phase classifier for one state. Distinct from the FCC-window
+// `s.status` value that drives map coloring — see Prompt_Outline §6b.
+//
+// Returns one of:
+//   'Pre-Primary'  — primary date is in the future (>7d out)
+//   'Primary'      — within ±7 days of primary date (visual emphasis window)
+//   'Runoff'       — primary done; runoff date set and not yet passed
+//   'Post-Primary' — primary done; runoff done or absent
+//   'General'      — past the FCC general window (Sep 4, 2026)
+//   'Unknown'      — no primary date on file
+//
+// TEMPORARY IMPLEMENTATION (2026-04-24, merged 2+3 commit 3). Built on
+// the existing s.dPrim / s.dRun / s.status fields. Item 4b will refine
+// the boundaries (e.g. "Primary" window may extend, "General" cutoff
+// may align differently). Callers should treat the return value as
+// authoritative; the implementation is the moving part.
+function getStateElectionPhase(s) {
+  if (!s || s.dPrim == null) return 'Unknown';
+  // General: from GENERAL_WINDOW (Sep 4, 2026) onward.
+  if (TODAY >= GENERAL_WINDOW) return 'General';
+  // Pre-primary: primary still > 7 days out.
+  if (s.dPrim > 7) return 'Pre-Primary';
+  // Primary window: ±7 days around the primary date.
+  if (s.dPrim <= 7 && s.dPrim >= -7) return 'Primary';
+  // Past primary. If a runoff is on the calendar and not yet past, we're
+  // in Runoff phase. Otherwise Post-Primary.
+  if (s.dPrim < 0 && s.rDate && s.dRun != null && s.dRun >= 0) return 'Runoff';
+  if (s.dPrim < 0) return 'Post-Primary';
+  return 'Unknown';
+}
+
 // Normalize a candidate display name into a stable comparison key for
 // cross-source dedupe inside `mergeCuratedIntoEntities`. Mirrors the
 // `name_norm` SQL expression in
@@ -2527,14 +2613,14 @@ function lookupCuratedMeta(abbr, name) {
   const lastE = parts.length > 1 ? parts[parts.length - 1].toLowerCase() : nameLower;
   for (const rc of races) {
     for (const c of rc.list) {
-      if (c.n.toLowerCase() === nameLower) return { status: c.s, note: c.note || null };
+      if (c.n.toLowerCase() === nameLower) return { statusCode: c.s, status: c.status || null, note: c.note || null };
       const cp = c.n.trim().split(/\s+/);
       if (cp.length > 1 && cp[cp.length - 1].toLowerCase() === lastE) {
-        return { status: c.s, note: c.note || null };
+        return { statusCode: c.s, status: c.status || null, note: c.note || null };
       }
     }
   }
-  return { status: 'dec', note: null };
+  return { statusCode: 'dec', status: null, note: null };
 }
 
 // Return tracker entities for a state + office (optionally filtered by House district).
@@ -2579,12 +2665,40 @@ function groupByPartySorted(candidates) {
 }
 
 // Render a single candidate row with curated metadata + spend.
+//
+// Status badge selection (2026-04-24, merged 2+3 commit 3) prefers the
+// full status string from the entity (`cand.status`, plumbed by commit
+// 1) over the legacy 'inc'/'exp'/'dec' code from `lookupCuratedMeta`.
+// The legacy code remains the fallback so tracker entities not merged
+// with a CANDS twin (no status backfill possible) still render with a
+// best-effort badge.
+//
+// In Runoff candidates additionally surface a RUNOFF chip alongside
+// the party letter — they remain "Declared" semantically (per user's
+// runoff-rule clarification) but the chip lets the user distinguish
+// runoff finalists from pre-primary declared at a glance.
 function renderCandRowHTML(abbr, cand) {
-  const meta    = lookupCuratedMeta(abbr, cand.name);
-  const pc      = PC[cand.party] || 'var(--slate)';
-  const badge   = meta.status === 'inc'
-    ? `<span class="cbadge cbadge-inc">INCUMBENT</span>`
-    : `<span class="cbadge cbadge-dec">DECLARED</span>`;
+  const meta = lookupCuratedMeta(abbr, cand.name);
+  const pc   = PC[cand.party] || 'var(--slate)';
+
+  const status = cand.status || meta.status || null;
+  const isIncumbent = meta.statusCode === 'inc' || cand.incumbent === true;
+
+  // Badge — full status wins, with incumbent fallback for the
+  // pre-Item-4c "all post-primary candidates read 'Declared'" window.
+  let badge;
+  if (status === 'Nominee')         badge = `<span class="cbadge cbadge-nominee">NOMINEE</span>`;
+  else if (status === 'Lost Primary') badge = `<span class="cbadge cbadge-lost">LOST PRIMARY</span>`;
+  else if (status === 'Retiring')   badge = `<span class="cbadge cbadge-retiring">RETIRING</span>`;
+  else if (status === 'Exploring' || meta.statusCode === 'exp') badge = `<span class="cbadge cbadge-exp">EXPLORING</span>`;
+  else if (isIncumbent)             badge = `<span class="cbadge cbadge-inc">INCUMBENT</span>`;
+  else                              badge = `<span class="cbadge cbadge-dec">DECLARED</span>`;
+
+  // RUNOFF chip — sits between the party letter and the badge slot.
+  const runoffChipHTML = status === 'In Runoff'
+    ? `<span class="cparty-runoff-chip">RUNOFF</span>`
+    : '';
+
   const noteHTML  = meta.note ? `<span class="cnote">${meta.note}</span>` : '';
   const spendHTML = cand.spend > 0
     ? `<span class="cand-finance-item">Ad Spend: <strong style="color:var(--green)">$${fmtCompact(cand.spend)}</strong></span>`
@@ -2596,7 +2710,7 @@ function renderCandRowHTML(abbr, cand) {
   return `<div class="cand-row" data-cand-name="${safeN}" data-cand-state="${abbr}">
     <div class="pdot" style="background:${pc}"></div>
     <div class="cname">${cand.name}${noteHTML}</div>
-    <span class="cparty" style="color:${pc}">${cand.party}</span>${badge}
+    <span class="cparty" style="color:${pc}">${cand.party}</span>${runoffChipHTML}${badge}
     <div class="cand-finance">${spendHTML}${lurHTML}</div>
   </div>`;
 }
@@ -2618,38 +2732,70 @@ function renderPartyGroup(abbr, office, partyCode, list, primComplete, expanded,
   // Sort: spend-desc first, then no-spend in list order. groupByPartySorted
   // already produced spend-desc, but we re-sort defensively so the fallback
   // entries land at the tail regardless of caller.
-  const sorted    = list.slice().sort((a, b) => (b.spend || 0) - (a.spend || 0));
-  const withSpend = sorted.filter(c => c.spend > 0);
-  const noSpend   = sorted.filter(c => !(c.spend > 0));
+  const sorted = list.slice().sort((a, b) => (b.spend || 0) - (a.spend || 0));
+
+  // Lost Primary candidates do not appear in the active party group —
+  // they surface in the Lost Primary disclosure rendered at the office
+  // level by renderStatewideOffice / renderHouseOffice. Filter here so
+  // the post-primary "show all Declared" branch stays clean.
+  const active   = sorted.filter(c => c.status !== 'Lost Primary');
+  const nominees = active.filter(c => c.status === 'Nominee');
+  const inRunoff = active.filter(c => c.status === 'In Runoff');
+  const withSpend = active.filter(c => c.spend > 0);
+  const noSpend   = active.filter(c => !(c.spend > 0));
+
   let shown;
   let showSeeMore = false;
-  if (primComplete) {
-    // Post-primary: prefer entries with spend; fall back to 1 nominee.
-    shown = withSpend.length ? withSpend : sorted.slice(0, 1);
+
+  if (runoffPhase) {
+    // Runoff state. Per user direction: prefer rows explicitly tagged
+    // 'In Runoff' so the user sees who advanced. If none are tagged
+    // yet (data lag — Item 4c will close this gap once primary results
+    // are scraped), fall back to the legacy top-3-with-MIN-FLOOR-2
+    // behavior so the slicer doesn't go dark.
+    if (inRunoff.length > 0) {
+      shown = inRunoff;
+    } else {
+      const MIN_FLOOR = 2;
+      const base = withSpend.slice(0, 3);
+      shown = base.length < MIN_FLOOR
+        ? base.concat(noSpend.slice(0, MIN_FLOOR - base.length))
+        : base;
+      if (active.length > shown.length) showSeeMore = true;
+    }
+  } else if (primComplete) {
+    if (nominees.length > 0) {
+      // Nominee path — primary completed and at least one row was
+      // promoted to status='Nominee'. Show only nominees (typically
+      // one per party in non-runoff cases).
+      shown = nominees;
+    } else {
+      // No Nominee status set yet (Item 4c primary-results loader has
+      // not landed). Per user direction: show all status='Declared'
+      // ranked by spend desc; the "Primary completed [date]. Nominee
+      // data forthcoming." banner is rendered at the office level by
+      // the caller. We intentionally do NOT slice to top-N here —
+      // post-primary phase is when the user wants the full picture.
+      shown = active.length > 0 ? active : sorted.slice(0, 1);
+    }
   } else if (expanded) {
-    shown = sorted.slice();
+    // Pre-primary, user has clicked See More for this party.
+    shown = active.slice();
   } else {
-    // In-primary or runoff phase: show the top 3 by spend, but guarantee a
-    // minimum of 2 entries per party by padding from the no-spend pool when
-    // with-spend coverage is thin (Follow-up #2: min-1-per-party-per-race,
-    // bumped to 2 to match Follow-up #1 for primary/runoff states).
+    // Pre-primary default. Existing behavior: top 3 by spend with
+    // MIN_FLOOR=2 padding from no-spend pool.
     const MIN_FLOOR = 2;
     const base = withSpend.slice(0, 3);
-    if (base.length < MIN_FLOOR) {
-      const need = MIN_FLOOR - base.length;
-      shown = base.concat(noSpend.slice(0, need));
-    } else {
-      shown = base;
-    }
-    // See More covers whatever is still unshown (both spend + no-spend).
-    const total = sorted.length;
-    if (total > shown.length) showSeeMore = true;
+    shown = base.length < MIN_FLOOR
+      ? base.concat(noSpend.slice(0, MIN_FLOOR - base.length))
+      : base;
+    if (active.length > shown.length) showSeeMore = true;
   }
   if (!shown.length) return '';
   const rowsHTML = shown.map(c => renderCandRowHTML(abbr, c)).join('');
   let actionHTML = '';
   if (showSeeMore) {
-    const more = sorted.length - shown.length;
+    const more = active.length - shown.length;
     if (more > 0) {
       actionHTML = `<button class="cand-action-btn cand-see-more" data-party="${partyCode}" data-action="see-more">See More (+${more}) ▼</button>`;
     }
@@ -2725,9 +2871,68 @@ function renderCandidatesPane(abbr) {
           <div class="cand-pane-content">${contentHTML}</div>`;
 }
 
+// Banner shown above the party groups when a state's primary is
+// complete but no Nominee status has been written to any row yet —
+// Item 4c primary-results loader will close this gap. Same copy in
+// every state until 4c ships.
+function buildPrimaryCompleteBanner(s) {
+  if (!s || !s.pDate) return '';
+  const dateStr = fmtL(s.pDate);
+  return `<div class="cand-banner cand-banner-info">Primary completed ${dateStr}. Nominee data forthcoming.</div>`;
+}
+
+// Lost Primary disclosure — collapsed below active candidates in any
+// post-primary view that has Lost Primary rows. Native <details>
+// element so toggling needs no JS.
+function buildLostPrimaryDisclosure(abbr, candidates) {
+  const lost = candidates.filter(c => c.status === 'Lost Primary');
+  if (!lost.length) return '';
+  const total = candidates.length;
+  const sorted = lost.slice().sort((a, b) => (b.spend || 0) - (a.spend || 0));
+  const rowsHTML = sorted.map(c => renderCandRowHTML(abbr, c)).join('');
+  return `<details class="cand-lost-disclosure">
+    <summary class="cand-lost-summary">Primary participants (${total}, including ${lost.length} who lost the primary)</summary>
+    <div class="cand-lost-body">${rowsHTML}</div>
+  </details>`;
+}
+
+// Office-level "See all N declared candidates" affordance, pre-primary
+// only. Click expands every party group at once (renderPartyGroup's
+// `expanded` flag flips to true for D/R/I). Distinct from the per-
+// party "See More (+N)" (still shown when applicable) and from the
+// external-link "See All Candidates" (which goes to /candidate-tracker).
+function buildSeeAllDeclaredAffordance(merged, alreadyShownCount) {
+  const declaredCount = merged.filter(c => c.status !== 'Lost Primary').length;
+  if (declaredCount <= alreadyShownCount) return '';
+  return `<button class="cand-see-all-declared" data-action="see-all-declared">See all ${declaredCount} declared candidates ▼</button>`;
+}
+
+// Approximate count of rows actually rendered by renderPartyGroup
+// across D/R/I, used to decide whether the "See all N declared"
+// affordance should appear. Mirrors the slice logic without
+// round-tripping through DOM.
+function countShownInPartyGroups(merged, st) {
+  const grouped = groupByPartySorted(merged.filter(c => c.status !== 'Lost Primary'));
+  let n = 0;
+  ['D','R','I'].forEach(p => {
+    const list = grouped[p] || [];
+    if (st.expanded[p]) { n += list.length; return; }
+    const withSpend = list.filter(c => c.spend > 0);
+    const noSpend   = list.filter(c => !(c.spend > 0));
+    const MIN_FLOOR = 2;
+    const base = withSpend.slice(0, 3);
+    const shown = base.length < MIN_FLOOR
+      ? base.concat(noSpend.slice(0, MIN_FLOOR - base.length))
+      : base;
+    n += shown.length;
+  });
+  return n;
+}
+
 function renderStatewideOffice(abbr, s, st) {
   const primComplete = isPrimaryComplete(s);
   const runoffPhase  = isRunoffPhase(s);
+  const phase        = getStateElectionPhase(s);
   const entities     = getCandidatesFor(abbr, st.office);
 
   // Merge curated candidates (from CANDS) into the party groups so that
@@ -2738,15 +2943,36 @@ function renderStatewideOffice(abbr, s, st) {
             ${renderSeeAllLink(abbr, st.office)}`;
   }
   const grouped = groupByPartySorted(merged);
-  let html = '';
+
+  // Banner: post-primary, no Nominee anywhere on the slate.
+  const anyNominee = merged.some(c => c.status === 'Nominee');
+  const bannerHTML = (primComplete && !runoffPhase && !anyNominee)
+    ? buildPrimaryCompleteBanner(s)
+    : '';
+
+  let groupsHTML = '';
   ['D','R','I'].forEach(p => {
     const group = renderPartyGroup(abbr, st.office, p, grouped[p], primComplete, st.expanded[p], runoffPhase);
-    if (group) html += group;
+    if (group) groupsHTML += group;
   });
-  if (!html) {
+  if (!groupsHTML) {
     return `<div style="font-family:var(--sans);font-size:0.68rem;color:var(--text-faint)">No ${st.office} candidates with reported spend for ${abbr}</div>
             ${renderSeeAllLink(abbr, st.office)}`;
   }
+
+  let html = bannerHTML + groupsHTML;
+
+  // Pre-primary "See all N declared candidates" affordance.
+  if (phase === 'Pre-Primary' || phase === 'Primary') {
+    const shownCount = countShownInPartyGroups(merged, st);
+    html += buildSeeAllDeclaredAffordance(merged, shownCount);
+  }
+
+  // Lost Primary disclosure — only meaningful post-primary.
+  if (primComplete || runoffPhase) {
+    html += buildLostPrimaryDisclosure(abbr, merged);
+  }
+
   // Single small gray See All link at the bottom of the candidates list
   html += renderSeeAllLink(abbr, st.office);
   return html;
@@ -2944,9 +3170,14 @@ function renderHouseOffice(abbr, s, st) {
     </div>`;
     html += `<div class="cand-district-current">${abbr}-${st.district}</div>`;
     const entries = (districtMap[st.district] || { cands: [] }).cands;
-    // Curated CANDS are per-state, not per-district, so we don't pull them
-    // into a specific CD drill-in — if the tracker has no candidates for
-    // this district we show an empty message and the See All link.
+    const phase   = getStateElectionPhase(s);
+
+    // Banner: post-primary CD with no Nominee on the slate.
+    const anyNominee = entries.some(c => c.status === 'Nominee');
+    if (primComplete && !runoffPhase && !anyNominee) {
+      html += buildPrimaryCompleteBanner(s);
+    }
+
     const grouped = groupByPartySorted(entries);
     let groupsHTML = '';
     ['D','R','I'].forEach(p => {
@@ -2957,6 +3188,18 @@ function renderHouseOffice(abbr, s, st) {
       groupsHTML = `<div style="font-family:var(--sans);font-size:0.62rem;color:var(--text-faint)">No candidates with reported spend for ${abbr}-${st.district}</div>`;
     }
     html += groupsHTML;
+
+    // Pre-primary "See all N declared candidates" affordance per CD.
+    if (phase === 'Pre-Primary' || phase === 'Primary') {
+      const shownCount = countShownInPartyGroups(entries, st);
+      html += buildSeeAllDeclaredAffordance(entries, shownCount);
+    }
+
+    // Lost Primary disclosure for this CD post-primary.
+    if (primComplete || runoffPhase) {
+      html += buildLostPrimaryDisclosure(abbr, entries);
+    }
+
     html += renderSeeAllLink(abbr, 'House', st.district);
   } else {
     if (districts.length === 0) {
@@ -3025,6 +3268,15 @@ function wireCandidatesPane(container, abbr) {
         st.expanded[party] = true;
         rerenderCandidatesPane(container, abbr);
       }
+      return;
+    }
+    // Office-level "See all N declared candidates" — flips D/R/I expanded
+    // flags together so every party group shows its full list inline.
+    const seeAllDeclared = ev.target.closest('[data-action="see-all-declared"]');
+    if (seeAllDeclared) {
+      const st = ensureCandTabState(abbr);
+      st.expanded = { D: true, R: true, I: true };
+      rerenderCandidatesPane(container, abbr);
       return;
     }
     const districtRow = ev.target.closest('.cand-district-row');
