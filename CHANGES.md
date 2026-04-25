@@ -4,6 +4,101 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-04-24 — Session close: merged 2+3 (frontend half)
+
+Bookmark for next session. Branch `fix/candidate-data-2026-04-24`,
+3 commits, not pushed/merged at session close. Companion bookmark in
+`../politicalwindow-api/CHANGES.md`.
+
+### Landed
+
+Three commits, all in `index.html`. Together they close the IL-8
+"Christ Kallas alphabetically wins" bug and the "JB Pritzker vs
+JB PRITZKER" cross-API duplicate.
+
+- **`cc59045` — plumb status string.** `loadLiveData` carries the
+  Title-Case server `status` (Declared/Nominee/Lost Primary/In
+  Runoff/Retiring/Exploring) onto every CANDS row alongside the
+  legacy 3-value `s` code. `normalizeEntity` adds `status: null`
+  to tracker entities. `mergeCuratedIntoEntities` backfills status
+  onto tracker entities from the CANDS-side row. Incidental fix:
+  the `Exploring` badge regression caused by Item 4a's Title-Case
+  backfill (lowercase compare missed the new value) — now case-
+  insensitive.
+
+- **`95809d9` — dedupe key normalization with merge-on-collision.**
+  New `normalizeNameKey` helper mirrors the SQL audit normalizer
+  and adds a `"LAST, FIRST" → "FIRST LAST"` reorder. Composite key
+  `(normalizeNameKey, district)` replaces the prior `name.toLowerCase()`
+  Set-based dedupe. On collision the function MERGES rather than
+  drops — CANDS supplies authoritative display fields (name, party,
+  incumbent, status), tracker preserves financial signal (spend,
+  fec_id, entity_id). Closes the JB Pritzker symptom and the
+  district-shadowing bug noted as Item 1 follow-ups.
+
+- **`47dd0ad` — status-driven post-primary selection.** Replaces the
+  alphabetical-first-name fallback in `renderPartyGroup` post-primary
+  branch with status-aware selection. Adds five new `.cbadge-*`
+  variants (NOMINEE, RUNOFF, LOST PRIMARY, RETIRING, EXPLORING), a
+  `.cparty-runoff-chip` element next to the party letter for In
+  Runoff candidates, a "Primary completed [date]. Nominee data
+  forthcoming." banner above the party groups in post-primary states
+  with no Nominee row, a `<details>`-based Lost Primary disclosure
+  below the party groups, and a pre-primary "See all N declared
+  candidates" affordance. New temporary helper `getStateElectionPhase`
+  built on existing date fields — Item 4b will refine without
+  changing call signature. Honors the no-client-storage rule
+  (disclosure state is DOM-local, not persisted).
+
+### Backend dependency
+
+None at merge time. The 3 commits read `cand.status` which the API
+emits Title-Case after the API-side commit `0c22c5e` landed earlier
+in the session.
+
+### IL-8 user-visible behavior change
+
+Before: Christ Kallas alone displayed in the IL-8 Democratic slot,
+because the post-primary fallback selected the alphabetically-first
+row when no candidate had tracker spend.
+
+After: banner shows "Primary completed 2026-03-17. Nominee data
+forthcoming." All 10 IL-8 Democrats render below, sorted by spend
+desc. Same correction applies to every post-primary state with no
+Nominee data yet — until Item 4c lands and tags actual nominees.
+
+### Deferred (next session)
+
+- **Item 4b — state election phase.** `getStateElectionPhase` is a
+  temporary impl; refine the boundaries (Primary window width,
+  General cutoff alignment) and surface the phase as a UI chip in
+  the state-detail sidebar. Call sites stable, only the helper body
+  moves.
+- **Item 4c — primary results.** Plan-only at session close. Once
+  shipped, `Nominee`/`Lost Primary`/`In Runoff` rows appear in the
+  DB and the dormant code paths added in `47dd0ad` activate.
+- **Item 4d — visual continuity.** Blocked on 4b's state-phase chip
+  + 4c's status data flowing.
+
+### Followups (smaller scope, no item assigned)
+
+1. **Same-district same-name dedupe collision.** Composite key in
+   `mergeCuratedIntoEntities` may over-collapse pairs like "Joe
+   Kennedy III" / "Joe Kennedy" in the same district —
+   `normalizeNameKey` strips JR/SR/II/III/IV. Mitigation: add
+   `fec_id`/`external_id` to the composite key as a tiebreaker.
+2. **`countShownInPartyGroups` + `renderPartyGroup` drift risk.**
+   Two implementations of the same MIN_FLOOR=2 / top-3 slice math
+   in `index.html`. Will drift on next touch; refactor to a shared
+   helper next time either is edited.
+
+(Companion CHANGES entry in `politicalwindow-api/CHANGES.md` lists
+backend-side followups: `seed.js` DELETE-FROM footgun guard, and
+the deferred seed-cycle audit for other off-cycle Governor
+miscodings.)
+
+---
+
 ## 2026-04-24 — LUR invoice review modal: per-panel selection + matched-line indicator removed + "COMPARE INVOICES" caps
 
 **Scope.** `lur.html` only. Three changes to the Invoice Review modal
