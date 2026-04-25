@@ -2456,6 +2456,43 @@ function isRunoffPhase(s) {
   return !!s && (s.status === 'runoff-window' || s.status === 'runoff-upcoming');
 }
 
+// Normalize a candidate display name into a stable comparison key for
+// cross-source dedupe inside `mergeCuratedIntoEntities`. Mirrors the
+// `name_norm` SQL expression in
+// politicalwindow-api/scripts/audit-name-duplicates.js (uppercase,
+// strip `.,'`, collapse whitespace, strip trailing JR/SR/II/III/IV)
+// and EXTENDS it with a "LAST, FIRST" → "FIRST LAST" reorder so a
+// ratewindow-api tracker name in last-comma-first format collapses to
+// the same key as the politicalwindow-api row in display format.
+//
+// Examples:
+//   "JB Pritzker"            → "JB PRITZKER"
+//   "JB PRITZKER"            → "JB PRITZKER"
+//   "PRITZKER, JB"           → "JB PRITZKER"      ← reorder
+//   "Robert Francis O'Rourke Jr" → "ROBERT FRANCIS OROURKE"
+//   "O'ROURKE, ROBERT FRANCIS JR" → "ROBERT FRANCIS OROURKE"
+//
+// Keep this in sync with the SQL audit normalizer. The JS version is
+// a strict superset (adds the comma swap) since cross-API dedupe sees
+// both name formats while the SQL audit only sees the politicalwindow-
+// api side.
+function normalizeNameKey(raw) {
+  if (!raw) return '';
+  let s = String(raw).trim();
+  // Reorder "LAST, FIRST [SUFFIX]" → "FIRST [SUFFIX] LAST" before any
+  // other processing so the suffix-stripping regex sees a uniform form.
+  if (s.includes(',')) {
+    const idx = s.indexOf(',');
+    const last = s.slice(0, idx).trim();
+    const rest = s.slice(idx + 1).trim();
+    if (last && rest) s = `${rest} ${last}`;
+  }
+  s = s.replace(/[.,']/g, '');
+  s = s.toUpperCase().replace(/\s+/g, ' ').trim();
+  s = s.replace(/(\S+)\s+(JR|SR|II|III|IV)$/, '$1');
+  return s;
+}
+
 // Normalize one tracker-API entity to the shape used by the renderer.
 function normalizeEntity(e) {
   const officeRaw = (e.office || '').toLowerCase();
@@ -2747,7 +2784,10 @@ function mergeCuratedIntoEntities(abbr, office, entities) {
     if (!matches) return;
     rc.list.forEach(c => {
       if (!c.n) return;
-      const key = c.n.toLowerCase();
+      // Backfill key uses normalizeNameKey so "PRITZKER, JB" tracker
+      // names match "JB Pritzker" CANDS rows for the district/status
+      // backfill before the merge-on-collision step below.
+      const key = normalizeNameKey(c.n);
       let district = null;
       if (office === 'House' && c.d != null) {
         const n = parseInt(c.d, 10);
@@ -2761,7 +2801,7 @@ function mergeCuratedIntoEntities(abbr, office, entities) {
     });
   });
   const patched = entities.map(e => {
-    const meta = metaByName[(e.name || '').toLowerCase()];
+    const meta = metaByName[normalizeNameKey(e.name || '')];
     if (!meta) return e;
     const next = { ...e };
     // District backfill: only for House, only when entity district is missing.
@@ -2775,8 +2815,39 @@ function mergeCuratedIntoEntities(abbr, office, entities) {
     return next;
   });
 
+  // ── MERGE-ON-COLLISION (NOT a simple Set-based dedupe) ──────────────
+  //
+  // Composite key: (normalizeNameKey(name), district). Including
+  // district in the key fixes the secondary "district shadowing" bug:
+  // a tracker entity with a wrong/null district no longer hides its
+  // correct-district CANDS twin (the district backfill above patches
+  // null→correct, but a wrong district stays wrong, and the keys
+  // diverge so both rows surface — caller will see two entries instead
+  // of silently dropping the CANDS one).
+  //
+  // When a CANDS row's key matches an existing tracker entity's key,
+  // we MERGE rather than skip. CANDS supplies authoritative display
+  // fields (name, party, incumbent, status, notes) — FEC/Ballotpedia/
+  // manual sources are better-curated than ratewindow-api's Claude-
+  // extracted invoice strings, which can read "PRITZKER, JB" or
+  // "JB PRITZKER FOR GOVERNOR" depending on the contract template.
+  // Tracker preserves financial signal: spend, fec_id, entity_id.
+  // Never drop a tracker row's spend.
+  //
+  // For intra-CANDS collisions (two CANDS rows with the same composite
+  // key — rare; would indicate same-name same-district duplicates in
+  // /api/candidates) the legacy "first wins" semantic is preserved via
+  // a separate `candsSeen` set.
   const out = patched.slice();
-  const seen = new Set(patched.map(e => (e.name || '').toLowerCase()));
+  const keyOf = (name, district) =>
+    `${normalizeNameKey(name)}|${district != null ? district : ''}`;
+  const trackerByKey = new Map();
+  patched.forEach((e, i) => {
+    const k = keyOf(e.name, e.district);
+    if (!trackerByKey.has(k)) trackerByKey.set(k, i);
+  });
+  const candsSeen = new Set();
+
   const races = (s.cands || []).filter(rc => {
     const r = (rc.race || '').toLowerCase();
     if (office === 'Senate')   return r.includes('senate');
@@ -2786,17 +2857,33 @@ function mergeCuratedIntoEntities(abbr, office, entities) {
   });
   races.forEach(rc => {
     rc.list.forEach(c => {
-      const key = (c.n || '').toLowerCase();
-      if (seen.has(key)) return;
-      seen.add(key);
-      // Preserve House district from CANDS so renderHouseOffice can bucket
-      // curated-only candidates into the correct CD. Atlarge states surface
-      // as 'AL'; everything else is the numeric district as a string.
+      // Compute the candidate's intended district (parity with the
+      // tracker-side district that would produce a key match).
       let district = null;
       if (office === 'House' && c.d != null) {
         const n = parseInt(c.d, 10);
-        if (Number.isFinite(n)) district = (DISTRICT_COUNTS[abbr] === 1) ? 'AL' : String(n);
+        if (Number.isFinite(n)) district = isAtLarge ? 'AL' : String(n);
       }
+      const k = keyOf(c.n || '', district);
+
+      if (trackerByKey.has(k)) {
+        // Tracker collision — merge CANDS authoritative display fields
+        // into the existing tracker entity, preserving spend signal.
+        const i = trackerByKey.get(k);
+        const tr = out[i];
+        out[i] = {
+          ...tr,
+          name:      c.n,                                          // CANDS canonical display
+          party:     (c.p === 'D' || c.p === 'R') ? c.p : 'I',     // CANDS authoritative party
+          incumbent: c.s === 'inc',                                // CANDS knows incumbency
+          status:    c.status || tr.status || null,                // CANDS preferred; fall back to any prior backfill
+          // spend, fec_id, entity_id, office, district preserved from tracker
+        };
+        return;
+      }
+      if (candsSeen.has(k)) return;  // intra-CANDS dedupe
+      candsSeen.add(k);
+
       out.push({
         name: c.n,
         party: (c.p === 'D' || c.p === 'R') ? c.p : 'I',
