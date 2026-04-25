@@ -2473,6 +2473,11 @@ function normalizeEntity(e) {
     spend:     Number(e.total_spend) || 0,
     fec_id:    e.fec_candidate_id || null,
     entity_id: e.political_entity_id || null,
+    // status: ratewindow-api tracker entities never carry an election-phase
+    // status — the value (if any) is supplied by mergeCuratedIntoEntities
+    // from the CANDS-side row. Initialized null here so downstream code can
+    // assume the field exists on every entity object.
+    status:    null,
   };
 }
 
@@ -2717,30 +2722,57 @@ function renderStatewideOffice(abbr, s, st) {
 function mergeCuratedIntoEntities(abbr, office, entities) {
   const s = SM[abbr]; if (!s) return entities.slice();
 
-  // Build a name → district map from CANDS (FEC-sourced, authoritative
-  // on district) and backfill it onto any tracker entity whose upstream
-  // feed left district=null. Without this, a House tracker entity with
-  // a null district (happens whenever ratewindow-api's candidate feed
-  // omits CD) would shadow its correctly-districted CANDS twin via the
-  // `seen` dedupe below and land the candidate in the stripped
-  // unknown-district bucket. Atlarge states collapse to 'AL'.
+  // Build a name → {district, status} map from CANDS (FEC-sourced /
+  // Ballotpedia / manual — authoritative on district AND status) and
+  // backfill onto tracker entities whose upstream feed (ratewindow-api
+  // /api/candidates/tracker) lacks both fields by design.
+  //
+  // Without the district backfill, a House tracker entity with null
+  // district would shadow its correctly-districted CANDS twin via the
+  // `seen` dedupe below and land in the stripped unknown-district
+  // bucket (atlarge states collapse to 'AL').
+  //
+  // The status backfill (added 2026-04-24, merged 2+3 commit 1) is the
+  // only path by which a tracker entity acquires an election-phase
+  // status — necessary for renderPartyGroup's status-driven post-primary
+  // selection. Tracker entities never carry status from upstream.
   const isAtLarge = DISTRICT_COUNTS[abbr] === 1;
-  const houseDistByName = {};
-  if (office === 'House') {
-    (s.cands || []).forEach(rc => {
-      if ((rc.race || '').toLowerCase() !== 'house') return;
-      rc.list.forEach(c => {
-        if (!c.n || c.d == null) return;
+  const metaByName = {};
+  (s.cands || []).forEach(rc => {
+    const r = (rc.race || '').toLowerCase();
+    const matches = office === 'House'    ? r === 'house'
+                  : office === 'Senate'   ? r.includes('senate')
+                  : office === 'Governor' ? r === 'governor'
+                  : false;
+    if (!matches) return;
+    rc.list.forEach(c => {
+      if (!c.n) return;
+      const key = c.n.toLowerCase();
+      let district = null;
+      if (office === 'House' && c.d != null) {
         const n = parseInt(c.d, 10);
-        if (!Number.isFinite(n)) return;
-        houseDistByName[c.n.toLowerCase()] = isAtLarge ? 'AL' : String(n);
-      });
+        if (Number.isFinite(n)) district = isAtLarge ? 'AL' : String(n);
+      }
+      // First wins on key collision in CANDS itself (rare; would mean
+      // two same-name same-office rows from /api/candidates).
+      if (!metaByName[key]) {
+        metaByName[key] = { district, status: c.status || null };
+      }
     });
-  }
+  });
   const patched = entities.map(e => {
-    if (office !== 'House' || e.district) return e;
-    const d = houseDistByName[(e.name || '').toLowerCase()];
-    return d ? { ...e, district: d } : e;
+    const meta = metaByName[(e.name || '').toLowerCase()];
+    if (!meta) return e;
+    const next = { ...e };
+    // District backfill: only for House, only when entity district is missing.
+    if (office === 'House' && !next.district && meta.district) {
+      next.district = meta.district;
+    }
+    // Status backfill: tracker entities arrive with status=null; whenever
+    // CANDS supplies one, surface it. CANDS wins on disagreement because
+    // tracker has no status of its own.
+    if (meta.status) next.status = meta.status;
+    return next;
   });
 
   const out = patched.slice();
@@ -2774,6 +2806,7 @@ function mergeCuratedIntoEntities(abbr, office, entities) {
         fec_id: null,
         entity_id: null,
         incumbent: c.s === 'inc',
+        status: c.status || null,
       });
     });
   });
@@ -3665,10 +3698,18 @@ async function loadLiveData() {
       const byRace = {};
       for (const c of list) {
         if (!byRace[c.race]) byRace[c.race] = [];
+        // 2026-04-24 (merged 2+3 commit 1): plumb full status string through.
+        // `s` stays the legacy 3-value code so existing readers keep working;
+        // `status` carries the canonical Title-Case server value (Declared,
+        // Nominee, Lost Primary, In Runoff, Retiring, Exploring) for renderers
+        // that need to filter by election-phase state. Compare lowercased so
+        // pre-Item-4a snapshots (lowercase) still resolve the Exploring badge.
+        const statusLower = (c.status || '').toLowerCase();
         byRace[c.race].push({
           n: c.name,
           p: c.party,
-          s: c.incumbent ? 'inc' : (c.status === 'exploring' ? 'exp' : 'dec'),
+          s: c.incumbent ? 'inc' : (statusLower === 'exploring' ? 'exp' : 'dec'),
+          status: c.status || null,
           note: c.notes || undefined,
           d: c.district != null ? c.district : undefined,
         });
