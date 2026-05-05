@@ -149,6 +149,32 @@ input{width:170px}
 .filter-search svg{flex-shrink:0;color:var(--text-faint)}
 .filter-search input{background:transparent;border:none;outline:none;box-shadow:none;color:var(--text);font-family:var(--sans);font-size:0.7rem;width:100%;padding:0}
 .filter-search input::placeholder{color:var(--text-faint)}
+
+/* ── MULTI-SELECT (party, state, office, dma, station) ──
+   Replaces native <select> with a checkbox list panel. Trigger looks
+   identical to the original select; panel pops below on click. */
+.ms-wrap{position:relative}
+.ms-trigger{display:flex;align-items:center;justify-content:space-between;gap:6px;font-family:var(--mono);font-size:0.65rem;color:var(--text);background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px;cursor:pointer;min-width:120px;max-width:180px;height:26px;text-align:left}
+.ms-trigger:hover{border-color:#CBD5E1}
+.ms-trigger.open{border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,108,176,0.08)}
+.ms-trigger-label{flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms-trigger-chev{flex-shrink:0;color:var(--text-faint);font-size:0.55rem;line-height:1}
+.ms-panel{position:absolute;top:calc(100% + 4px);left:0;z-index:50;min-width:200px;max-width:300px;max-height:340px;background:#fff;border:1px solid var(--navy-border);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,0.12);display:none;flex-direction:column}
+.ms-panel.open{display:flex}
+.ms-panel-search{padding:6px;border-bottom:1px solid var(--navy-border)}
+.ms-panel-search input{width:100%;font-family:var(--mono);font-size:0.62rem;border:1px solid var(--navy-border);border-radius:3px;padding:4px 6px;background:var(--surface-alt);outline:none}
+.ms-panel-search input:focus{border-color:var(--blue)}
+.ms-panel-actions{display:flex;gap:8px;padding:4px 8px;border-bottom:1px solid var(--navy-border);background:#FAFBFC}
+.ms-action-btn{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.06em;color:var(--blue);background:transparent;border:none;cursor:pointer;padding:2px 4px;font-weight:600}
+.ms-action-btn:hover{text-decoration:underline}
+.ms-options{flex:1;overflow-y:auto;padding:2px 0;max-height:240px}
+.ms-option{display:flex;align-items:center;gap:6px;padding:4px 8px;font-family:var(--mono);font-size:0.62rem;color:var(--text);cursor:pointer;user-select:none}
+.ms-option:hover{background:rgba(43,108,176,0.06)}
+.ms-option input[type=checkbox]{margin:0;cursor:pointer;flex-shrink:0;accent-color:var(--blue)}
+.ms-option.dim .ms-option-label{color:#CBD5E1}
+.ms-option-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms-empty{padding:8px;font-family:var(--mono);font-size:0.6rem;color:var(--text-faint);text-align:center}
+
 #sort-wrap{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:0.65rem;color:var(--text-faint)}
 .sort-btn{background:transparent;border:none;cursor:pointer;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;color:var(--text-faint);padding:2px 6px;transition:color 0.12s}
 .sort-btn:hover{color:var(--text)}
@@ -331,23 +357,23 @@ footer{font-size:0.5rem;color:var(--text-faint);text-align:center;letter-spacing
     </div>
     <div class="filter-wrap">
       <div class="filter-lbl">PARTY</div>
-      <select id="f-party"><option value="ALL">All Parties</option><option>R</option><option>D</option><option>I</option></select>
+      <div id="ms-party"></div>
     </div>
     <div class="filter-wrap">
       <div class="filter-lbl">STATE</div>
-      <select id="f-state"><option value="ALL">All States</option></select>
+      <div id="ms-state"></div>
     </div>
     <div class="filter-wrap">
       <div class="filter-lbl">OFFICE</div>
-      <select id="f-office"><option value="ALL">All Offices</option></select>
+      <div id="ms-office"></div>
     </div>
     <div class="filter-wrap">
       <div class="filter-lbl">DMA</div>
-      <select id="f-dma"><option value="ALL">All DMAs</option></select>
+      <div id="ms-dma"></div>
     </div>
     <div class="filter-wrap">
       <div class="filter-lbl">STATION</div>
-      <select id="f-station"><option value="ALL">All Stations</option></select>
+      <div id="ms-station"></div>
     </div>
     <div class="filter-wrap">
       <div class="filter-lbl">WINDOW</div>
@@ -500,14 +526,19 @@ function fccLink(r){
 // Resolved candidate name, falling back to raw advertiser
 function candKey(r){return r.candidate||r.advertiser||'Unknown';}
 
+// MS = registry of multi-select widgets. .selected is a Set per widget;
+// empty Set = no filter applied (matches everything for that field).
+var MS = {};
+
 function getFiltered(){
-  var party=document.getElementById('f-party').value,state=document.getElementById('f-state').value,office=document.getElementById('f-office').value,dma=document.getElementById('f-dma').value,station=document.getElementById('f-station').value,win=document.getElementById('f-window').value,search=document.getElementById('f-search').value.toLowerCase();
+  var win=document.getElementById('f-window').value;
+  var search=document.getElementById('f-search').value.toLowerCase();
   return ALL_DATA.filter(function(r){
-    if(party!=='ALL'&&r.party!==party)return false;
-    if(state!=='ALL'&&r.state!==state)return false;
-    if(office!=='ALL'&&(r.office_type||'')!==office)return false;
-    if(dma!=='ALL'&&r.dma_name!==dma)return false;
-    if(station!=='ALL'&&r.callsign!==station)return false;
+    if(MS.party   && MS.party.selected.size   && !MS.party.selected.has(r.party))return false;
+    if(MS.state   && MS.state.selected.size   && !MS.state.selected.has(r.state))return false;
+    if(MS.office  && MS.office.selected.size  && !MS.office.selected.has(r.office_type||''))return false;
+    if(MS.dma     && MS.dma.selected.size     && !MS.dma.selected.has(r.dma_name))return false;
+    if(MS.station && MS.station.selected.size && !MS.station.selected.has(r.callsign))return false;
     if(win!=='ALL'){if(win==='IN'){if(r.window_status!=='General'&&r.window_status!=='Primary')return false;}else{if(r.window_status!==win)return false;}}
     if(search){var s=search;if(!(  (r.candidate||'').toLowerCase().includes(s)||(r.advertiser||'').toLowerCase().includes(s)||(r.callsign||'').toLowerCase().includes(s)||(stationLabel(r)||'').toLowerCase().includes(s)||(r.dma_name||'').toLowerCase().includes(s)||(r.state||'').toLowerCase().includes(s)||(r.party||'').toLowerCase().includes(s)||(r.office_type||'').toLowerCase().includes(s)||(r.order_number||'').toLowerCase().includes(s)||(r.window_status||'').toLowerCase().includes(s)))return false;}
     return true;
@@ -515,7 +546,13 @@ function getFiltered(){
 }
 
 function isUnfiltered(){
-  return document.getElementById('f-party').value==='ALL'&&document.getElementById('f-state').value==='ALL'&&document.getElementById('f-office').value==='ALL'&&document.getElementById('f-dma').value==='ALL'&&document.getElementById('f-station').value==='ALL'&&document.getElementById('f-window').value==='ALL'&&!document.getElementById('f-search').value;
+  return (!MS.party    || MS.party.selected.size===0)
+      && (!MS.state    || MS.state.selected.size===0)
+      && (!MS.office   || MS.office.selected.size===0)
+      && (!MS.dma      || MS.dma.selected.size===0)
+      && (!MS.station  || MS.station.selected.size===0)
+      && document.getElementById('f-window').value==='ALL'
+      && !document.getElementById('f-search').value;
 }
 function updateStats(rows){
   if(isUnfiltered()&&SERVER_STATS.total_spend){
@@ -643,38 +680,85 @@ function render(){
   updateOptionStates();
 }
 
-function updateOptionStates(){
-  var filterIds=['f-party','f-state','f-office','f-dma','f-station','f-window'];
-  var fields={
-    'f-party':function(r){return r.party;},
-    'f-state':function(r){return r.state;},
-    'f-office':function(r){return r.office_type;},
-    'f-dma':function(r){return r.dma_name;},
-    'f-station':function(r){return r.callsign;},
-    'f-window':function(r){return r.window_status;}
+// Compute which option values still have rows after applying every OTHER
+// filter — used to dim unreachable options across all filter widgets.
+// Returns a per-widget Map<value, count>.
+function computeOptionCounts(){
+  var win=document.getElementById('f-window').value;
+  var search=document.getElementById('f-search').value.toLowerCase();
+  function passSearch(r){
+    if(!search)return true;
+    return (r.candidate||'').toLowerCase().includes(search)
+        || (r.advertiser||'').toLowerCase().includes(search)
+        || (r.callsign||'').toLowerCase().includes(search)
+        || (r.dma_name||'').toLowerCase().includes(search)
+        || (r.state||'').toLowerCase().includes(search)
+        || (r.party||'').toLowerCase().includes(search)
+        || (r.office_type||'').toLowerCase().includes(search)
+        || (r.order_number||'').toLowerCase().includes(search)
+        || (r.window_status||'').toLowerCase().includes(search);
+  }
+  function passWindow(r){
+    if(win==='ALL')return true;
+    if(win==='IN')return r.window_status==='General'||r.window_status==='Primary';
+    return r.window_status===win;
+  }
+  // For each filter, count each option as if THIS filter were not applied.
+  var counts={party:{},state:{},office:{},dma:{},station:{},window:{}};
+  var fieldFns={
+    party:function(r){return r.party;},
+    state:function(r){return r.state;},
+    office:function(r){return r.office_type;},
+    dma:function(r){return r.dma_name;},
+    station:function(r){return r.callsign;}
   };
-  filterIds.forEach(function(fid){
-    var sel=document.getElementById(fid);
-    var otherFilters={};
-    filterIds.forEach(function(oid){
-      if(oid!==fid)otherFilters[oid]=document.getElementById(oid).value;
+  ALL_DATA.forEach(function(r){
+    if(!passSearch(r))return;
+    // Per-widget: pass requires every OTHER widget's filter to match.
+    var passes={
+      party:   !MS.party    || MS.party.selected.size===0    || MS.party.selected.has(r.party),
+      state:   !MS.state    || MS.state.selected.size===0    || MS.state.selected.has(r.state),
+      office:  !MS.office   || MS.office.selected.size===0   || MS.office.selected.has(r.office_type||''),
+      dma:     !MS.dma      || MS.dma.selected.size===0      || MS.dma.selected.has(r.dma_name),
+      station: !MS.station  || MS.station.selected.size===0  || MS.station.selected.has(r.callsign),
+      window:  passWindow(r)
+    };
+    Object.keys(fieldFns).forEach(function(k){
+      // For widget k, every OTHER widget must pass.
+      var ok=true;
+      for(var o in passes){ if(o!==k && !passes[o]){ ok=false; break; } }
+      if(!ok)return;
+      var v=fieldFns[k](r);
+      if(v==null||v==='')return;
+      counts[k][v]=(counts[k][v]||0)+1;
     });
-    var search=document.getElementById('f-search').value.toLowerCase();
-    var opts=sel.options;
-    for(var i=1;i<opts.length;i++){
-      var val=opts[i].value;
-      var count=ALL_DATA.filter(function(r){
-        for(var oid in otherFilters){
-          if(otherFilters[oid]!=='ALL'&&fields[oid](r)!==otherFilters[oid])return false;
-        }
-        if(search){
-          if(!((r.candidate||'').toLowerCase().includes(search)||(r.advertiser||'').toLowerCase().includes(search)||(r.callsign||'').toLowerCase().includes(search)||(r.dma_name||'').toLowerCase().includes(search)||(r.state||'').toLowerCase().includes(search)||(r.party||'').toLowerCase().includes(search)||(r.office_type||'').toLowerCase().includes(search)||(r.order_number||'').toLowerCase().includes(search)||(r.window_status||'').toLowerCase().includes(search)))return false;
-        }
-        return fields[fid](r)===val;
-      }).length;
-      opts[i].style.color=count===0?'#CBD5E1':'';
+    // Window option states (single-select)
+    var ok2=passes.party&&passes.state&&passes.office&&passes.dma&&passes.station;
+    if(ok2 && r.window_status){
+      counts.window[r.window_status]=(counts.window[r.window_status]||0)+1;
     }
   });
+  return counts;
+}
+
+function updateOptionStates(){
+  var counts=computeOptionCounts();
+  // Multi-select widgets: dim the option rows in any open panels.
+  ['party','state','office','dma','station'].forEach(function(k){
+    if(!MS[k])return;
+    MS[k].setCounts(counts[k]||{});
+  });
+  // Window single-select: dim native options as before.
+  var winSel=document.getElementById('f-window');
+  if(winSel){
+    var winCounts=counts.window||{};
+    var inCount=(winCounts['Primary']||0)+(winCounts['General']||0);
+    for(var i=1;i<winSel.options.length;i++){
+      var v=winSel.options[i].value;
+      var n=v==='IN'?inCount:(winCounts[v]||0);
+      winSel.options[i].style.color=n===0?'#CBD5E1':'';
+    }
+  }
 }
 
 window.toggleDetail=function(i){
@@ -683,6 +767,152 @@ window.toggleDetail=function(i){
   document.querySelectorAll('.g-arrow').forEach(function(el){el.textContent='\u25BC';});
   if(!open){d.classList.add('open');a.textContent='\u25B2';}
 };
+
+// \u2500\u2500 MultiSelect factory \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// Mounts a custom multi-select inside `host`. Selection lives in a Set
+// (`.selected`) so getFiltered/isUnfiltered can use Set.has() directly.
+// onChange fires on every checkbox toggle, select-all, or clear.
+// setCounts(map) re-renders option labels with a faint suffix and
+// dims rows where count===0 (for cross-filter awareness).
+function createMultiSelect(host, opts){
+  host.innerHTML='';
+  host.classList.add('ms-wrap');
+  var selected=new Set();
+  var trigger=document.createElement('button');
+  trigger.type='button';trigger.className='ms-trigger';
+  var labelSpan=document.createElement('span');labelSpan.className='ms-trigger-label';
+  var chev=document.createElement('span');chev.className='ms-trigger-chev';chev.textContent='\u25BE';
+  trigger.appendChild(labelSpan);trigger.appendChild(chev);
+  var panel=document.createElement('div');panel.className='ms-panel';
+  var searchWrap=document.createElement('div');searchWrap.className='ms-panel-search';
+  var searchInput=document.createElement('input');searchInput.type='text';searchInput.placeholder='Search\u2026';
+  searchWrap.appendChild(searchInput);
+  var actions=document.createElement('div');actions.className='ms-panel-actions';
+  var allBtn=document.createElement('button');allBtn.type='button';allBtn.className='ms-action-btn';allBtn.textContent='SELECT ALL';
+  var clrBtn=document.createElement('button');clrBtn.type='button';clrBtn.className='ms-action-btn';clrBtn.textContent='CLEAR';
+  actions.appendChild(allBtn);actions.appendChild(clrBtn);
+  var optsWrap=document.createElement('div');optsWrap.className='ms-options';
+  panel.appendChild(searchWrap);panel.appendChild(actions);panel.appendChild(optsWrap);
+  host.appendChild(trigger);host.appendChild(panel);
+
+  var currentOptions=[];   // [{value,label}]
+  var counts={};           // {value: count}
+
+  function updateLabel(){
+    var arr=Array.from(selected);
+    if(arr.length===0){labelSpan.textContent=opts.placeholder;return;}
+    if(arr.length===1){
+      var m=currentOptions.find(function(o){return o.value===arr[0];});
+      labelSpan.textContent=m?m.label:arr[0];return;
+    }
+    if(arr.length<=3 && arr.every(function(v){return v.length<=4;})){
+      labelSpan.textContent=arr.join(', ');return;
+    }
+    labelSpan.textContent=arr.length+' selected';
+  }
+
+  function renderOptions(){
+    var search=(searchInput.value||'').toLowerCase();
+    var filtered=currentOptions.filter(function(o){
+      return !search || (o.label||'').toLowerCase().includes(search) || (o.value||'').toLowerCase().includes(search);
+    });
+    if(filtered.length===0){optsWrap.innerHTML='<div class="ms-empty">No options</div>';return;}
+    optsWrap.innerHTML='';
+    filtered.forEach(function(o){
+      var n=counts[o.value]||0;
+      var row=document.createElement('label');
+      row.className='ms-option'+(n===0?' dim':'');
+      var cb=document.createElement('input');cb.type='checkbox';cb.checked=selected.has(o.value);
+      var lab=document.createElement('span');lab.className='ms-option-label';
+      lab.title=o.label||o.value;
+      lab.textContent=o.label||o.value;
+      cb.addEventListener('change',function(){
+        if(cb.checked) selected.add(o.value); else selected.delete(o.value);
+        updateLabel();
+        if(opts.onChange) opts.onChange();
+      });
+      row.appendChild(cb);row.appendChild(lab);
+      optsWrap.appendChild(row);
+    });
+  }
+
+  function refresh(){
+    if(opts.getOptions) currentOptions=opts.getOptions();
+    renderOptions();updateLabel();
+  }
+
+  searchInput.addEventListener('input',renderOptions);
+  searchInput.addEventListener('click',function(e){e.stopPropagation();});
+  allBtn.addEventListener('click',function(e){
+    e.stopPropagation();
+    var search=(searchInput.value||'').toLowerCase();
+    currentOptions.forEach(function(o){
+      if(!search || (o.label||'').toLowerCase().includes(search) || (o.value||'').toLowerCase().includes(search)){
+        selected.add(o.value);
+      }
+    });
+    renderOptions();updateLabel();
+    if(opts.onChange) opts.onChange();
+  });
+  clrBtn.addEventListener('click',function(e){
+    e.stopPropagation();
+    selected.clear();renderOptions();updateLabel();
+    if(opts.onChange) opts.onChange();
+  });
+
+  trigger.addEventListener('click',function(e){
+    e.stopPropagation();
+    var open=panel.classList.contains('open');
+    document.querySelectorAll('.ms-panel.open').forEach(function(p){if(p!==panel) p.classList.remove('open');});
+    document.querySelectorAll('.ms-trigger.open').forEach(function(t){if(t!==trigger) t.classList.remove('open');});
+    if(open){panel.classList.remove('open');trigger.classList.remove('open');return;}
+    refresh();
+    panel.classList.add('open');trigger.classList.add('open');
+    setTimeout(function(){searchInput.focus();},0);
+  });
+  document.addEventListener('click',function(e){
+    if(!host.contains(e.target)){
+      panel.classList.remove('open');trigger.classList.remove('open');
+    }
+  });
+
+  updateLabel();
+  return {
+    selected:selected,
+    refresh:refresh,
+    setCounts:function(c){counts=c||{};if(panel.classList.contains('open'))renderOptions();},
+    clear:function(){selected.clear();updateLabel();renderOptions();},
+    setOptions:function(list){currentOptions=list;renderOptions();updateLabel();}
+  };
+}
+
+function setupMultiSelects(){
+  var defs=[
+    {key:'party',  ph:'All Parties',  field:function(r){return r.party;},      labelFor:function(v){return v;}},
+    {key:'state',  ph:'All States',   field:function(r){return r.state;},      labelFor:function(v){return v;}},
+    {key:'office', ph:'All Offices',  field:function(r){return r.office_type;},labelFor:function(v){return v;}},
+    {key:'dma',    ph:'All DMAs',     field:function(r){return r.dma_name;},   labelFor:function(v){return v;}},
+    {key:'station',ph:'All Stations', field:function(r){return r.callsign;},   labelFor:function(v){return _stationLabelMap[v]||v;}}
+  ];
+  var _stationLabelMap={};
+  ALL_DATA.forEach(function(r){
+    if(r.callsign && !_stationLabelMap[r.callsign]) _stationLabelMap[r.callsign]=stationLabel(r)||r.callsign;
+  });
+  defs.forEach(function(def){
+    var host=document.getElementById('ms-'+def.key);
+    var values=Array.from(new Set(ALL_DATA.map(def.field).filter(Boolean))).sort(function(a,b){
+      var la=def.labelFor(a),lb=def.labelFor(b);
+      return la.localeCompare(lb);
+    });
+    var optionList=values.map(function(v){return {value:v,label:def.labelFor(v)};});
+    MS[def.key]=createMultiSelect(host,{
+      placeholder:def.ph,
+      getOptions:function(){return optionList;},
+      onChange:function(){render();}
+    });
+    MS[def.key].setOptions(optionList);
+  });
+}
 
 function loadData(){
 var DATA_BADGE=document.getElementById('data-badge');
@@ -696,26 +926,7 @@ fetch(API+'/api/public-file?limit=5000')
     if(ALL_DATA.length<SERVER_STATS.total_rows)sub+=' \u00B7 showing first '+ALL_DATA.length.toLocaleString();
     document.getElementById('header-sub').textContent=sub;
     if(DATA_BADGE){var t=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});DATA_BADGE.style.color='#059669';DATA_BADGE.textContent='\u2B24 LIVE \u00B7 UPDATED '+t.toUpperCase();}
-    var states=Array.from(new Set(ALL_DATA.map(function(r){return r.state;}).filter(Boolean))).sort();
-    var stateEl=document.getElementById('f-state');
-    states.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;stateEl.appendChild(o);});
-    var offices=Array.from(new Set(ALL_DATA.map(function(r){return r.office_type;}).filter(Boolean))).sort();
-    var officeEl=document.getElementById('f-office');
-    offices.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;officeEl.appendChild(o);});
-    var dmas=Array.from(new Set(ALL_DATA.map(function(r){return r.dma_name;}).filter(Boolean))).sort();
-    var dmaEl=document.getElementById('f-dma');
-    dmas.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;dmaEl.appendChild(o);});
-    // Capture station_display per callsign as we index, so PSID rows show
-    // their retail-brand label in the filter dropdown while the option value
-    // stays the raw code (filter compare at getFiltered() checks r.callsign).
-    var stationSet={};
-    ALL_DATA.forEach(function(r){
-      if(!r.callsign)return;
-      if(!stationSet[r.callsign])stationSet[r.callsign]=stationLabel(r)||r.callsign;
-    });
-    var stations=Object.keys(stationSet).sort(function(a,b){return stationSet[a].localeCompare(stationSet[b]);});
-    var stationEl=document.getElementById('f-station');
-    stations.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=stationSet[v];stationEl.appendChild(o);});
+    setupMultiSelects();
     // Apply ?q= search param from global search bar
     var qParam=new URLSearchParams(window.location.search).get('q');
     if(qParam){document.getElementById('f-search').value=qParam;}
@@ -748,7 +959,8 @@ document.querySelectorAll('#raw-thead th.sortable').forEach(function(th){
     render();
   });
 });
-['f-party','f-state','f-office','f-dma','f-station','f-window'].forEach(function(id){document.getElementById(id).addEventListener('change',render);});
+// Window remains a native single-select; multi-selects emit changes via onChange in createMultiSelect.
+document.getElementById('f-window').addEventListener('change',render);
 document.getElementById('f-search').addEventListener('input',function(){
   document.getElementById('headerSearch').value=this.value;
   render();
@@ -759,11 +971,7 @@ document.getElementById('headerSearch').addEventListener('input',function(){
 });
 document.getElementById('run-report').addEventListener('click',function(){render();});
 document.getElementById('clear-filters').addEventListener('click',function(){
-  document.getElementById('f-party').value='ALL';
-  document.getElementById('f-state').value='ALL';
-  document.getElementById('f-office').value='ALL';
-  document.getElementById('f-dma').value='ALL';
-  document.getElementById('f-station').value='ALL';
+  ['party','state','office','dma','station'].forEach(function(k){if(MS[k])MS[k].clear();});
   document.getElementById('f-window').value='ALL';
   document.getElementById('f-search').value='';
   document.getElementById('headerSearch').value='';
