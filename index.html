@@ -1004,7 +1004,6 @@
         Declared Candidates
       </div>
       <div class="kpi-value" id="kpiCands">0</div>
-      <div class="kpi-change kpi-change-neutral" id="kpiCandsChange"></div>
       <div class="kpi-sub" id="kpiCandsSub">across all races</div>
     </div>
     <div class="kpi-card kpi-card-amber">
@@ -4219,8 +4218,6 @@ function toggleSidebar() {
 // Global search navigates to /public-file with query param (handled by form action)
 
 // ── KPI STATS ─────────────────────────────────────────────────────────────────
-let _prevWindowOpen = null;
-let _prevTotalCands = null;
 function updateKPIStats() {
   const windowOpen = STATES.filter(s => s.status === 'window-open').length;
   const windowSoon = STATES.filter(s => s.status === 'window-soon').length;
@@ -4247,20 +4244,6 @@ function updateKPIStats() {
 
   document.getElementById('kpiCands').textContent = totalCands;
   document.getElementById('kpiCandsSub').textContent = `across ${STATES.filter(s => s.cands.length > 0).length} states`;
-
-  const candsChange = document.getElementById('kpiCandsChange');
-  if (candsChange) {
-    if (_prevTotalCands !== null && totalCands !== _prevTotalCands) {
-      const diff = totalCands - _prevTotalCands;
-      candsChange.className = 'kpi-change ' + (diff > 0 ? 'kpi-change-up' : 'kpi-change-down');
-      candsChange.textContent = (diff > 0 ? '+' : '') + diff + ' since last refresh';
-    } else {
-      candsChange.className = 'kpi-change kpi-change-neutral';
-      candsChange.textContent = totalCands > 0 ? 'tracking' : '';
-    }
-  }
-  _prevTotalCands = totalCands;
-  _prevWindowOpen = windowOpen;
 
   document.getElementById('kpiGeneral').textContent = dGen > 0 ? dGen : 0;
 
