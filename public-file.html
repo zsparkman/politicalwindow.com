@@ -153,12 +153,16 @@ input{width:170px}
 /* ── MULTI-SELECT (party, state, office, dma, station) ──
    Replaces native <select> with a checkbox list panel. Trigger looks
    identical to the original select; panel pops below on click. */
-.ms-wrap{position:relative}
-.ms-trigger{display:flex;align-items:center;justify-content:space-between;gap:6px;font-family:var(--mono);font-size:0.65rem;color:var(--text);background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px;cursor:pointer;min-width:120px;max-width:180px;height:26px;text-align:left}
+.ms-wrap{position:relative;display:inline-block}
+/* Mirror the native <select> exactly so multi-selects sit flush with the
+   single-select WINDOW dropdown. Inherit padding/font-size from the
+   global `select,input` rule so any future tweak to that line tracks. */
+.ms-trigger{display:inline-flex;align-items:center;justify-content:space-between;gap:6px;font-family:var(--mono);font-size:0.65rem;color:var(--text);background:var(--surface-alt);border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px;cursor:pointer;text-align:left;line-height:1.2;height:auto;width:auto;max-width:170px;min-width:0;box-sizing:border-box;font-weight:400}
+.ms-trigger:focus{outline:none}
 .ms-trigger:hover{border-color:#CBD5E1}
 .ms-trigger.open{border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,108,176,0.08)}
-.ms-trigger-label{flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ms-trigger-chev{flex-shrink:0;color:var(--text-faint);font-size:0.55rem;line-height:1}
+.ms-trigger-label{text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.ms-trigger-chev{flex-shrink:0;color:var(--text-faint);font-size:0.6rem;line-height:1;margin-left:2px}
 .ms-panel{position:absolute;top:calc(100% + 4px);left:0;z-index:50;min-width:200px;max-width:300px;max-height:340px;background:#fff;border:1px solid var(--navy-border);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,0.12);display:none;flex-direction:column}
 .ms-panel.open{display:flex}
 .ms-panel-search{padding:6px;border-bottom:1px solid var(--navy-border)}
