@@ -18,6 +18,24 @@ entire frontend — a single-file static SPA hosted on GitHub Pages.
 - **CARTO Dark Matter basemap** — free dark basemap tiles (no API key needed)
 - Falls back to tile-grid cartogram if MapLibre CDN fails to load
 
+## Analytics
+All HTML pages load two analytics tags inside `<head>`, in this order:
+
+1. **Google Analytics 4** — `gtag.js`, property `G-JGHV19ZYEQ`. Present
+   on `index.html`, `candidate-tracker.html`, `explorer.html`,
+   `public-file.html`, `rates.html`. Not present on `admin.html` or
+   `lur.html` (internal-only pages — kept off GA4 by design).
+2. **Microsoft Clarity** — project `wnbzwo190n` (added 2026-05-07).
+   Present on **all 7** HTML pages, including `admin.html` and
+   `lur.html`. Inserted immediately after the gtag block, or right
+   after `<head>` on the two pages without gtag. Provides session
+   recordings, heatmaps, and rage-click signal that complements GA4.
+
+When adding a new HTML page, copy both blocks from `index.html` (or
+just the Clarity block if it's an internal/admin page that should stay
+off GA4). Project ID `wnbzwo190n` is hard-coded in the loader; no env
+swap needed.
+
 ## API Endpoints Consumed
 | API | Base URL | Purpose |
 |---|---|---|

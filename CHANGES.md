@@ -4,6 +4,62 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-05-07 — Microsoft Clarity analytics installed
+
+Added the Microsoft Clarity tag (project ID `wnbzwo190n`) to every HTML
+page so we capture session recordings, heatmaps, and rage-click signal
+across the full site, not just the GA4 funnel.
+
+### What changed
+
+- **All 7 HTML pages** now load the Clarity loader snippet inside
+  `<head>`, **after** the existing `gtag.js` block (or immediately after
+  `<head>` for the two pages that don't carry GA4):
+  - `index.html` — main map / state-detail SPA
+  - `candidate-tracker.html` — candidate spend table
+  - `explorer.html` — FCC rate explorer
+  - `public-file.html` — public-file activity feed
+  - `rates.html` — candidate rate intelligence
+  - `admin.html` — admin tools (no GA4 block; Clarity inserted directly
+    after `<head>`)
+  - `lur.html` — LUR monitor (no GA4 block; same insertion pattern)
+
+### Snippet (identical on all 7 pages)
+
+```html
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "wnbzwo190n");
+</script>
+```
+
+### Notes / why it's safe
+
+- The loader is async (`t.async=1`) and inserts a remote `<script>`
+  before the first existing `<script>` in the document — no blocking on
+  first paint, no interaction with MapLibre, gtag, or any of our inline
+  bootstrap code.
+- No build step touched. Single-file SPA constraint preserved — the
+  snippet is inline, no new asset references beyond the Clarity CDN.
+- Coexists with GA4 (`G-JGHV19ZYEQ`); Clarity uses its own `clarity`
+  global, no collision with `dataLayer` / `gtag`.
+- Project ID `wnbzwo190n` is the production Clarity project. If we add
+  staging later, gate the loader on hostname.
+
+### How to verify post-deploy
+
+1. Hit politicalwindow.com in a fresh browser, open DevTools → Network,
+   filter `clarity.ms` — expect a request to
+   `https://www.clarity.ms/tag/wnbzwo190n` returning 200.
+2. `window.clarity` should be defined in the console.
+3. Within ~30 min, the new session shows up in the Clarity dashboard.
+
+---
+
 ## 2026-04-24 — Session close: merged 2+3 (frontend half)
 
 Bookmark for next session. Branch `fix/candidate-data-2026-04-24`,
