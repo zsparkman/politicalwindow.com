@@ -4,7 +4,115 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
-## 2026-05-11 — `groups.html` — Owner Dashboard viewport added
+## 2026-05-12 — `coastal.html` — Owner Dashboard moved to `/coastal` + visual rework
+
+Renamed and rebuilt the Owner Dashboard from yesterday's `groups.html`:
+served at the dedicated path `politicalwindow.com/coastal` (matches the
+`/lur`, `/admin`, `/explorer` extension-stripped pattern). The previous
+multi-tenant `?group=<slug>` engine is replaced by a per-owner file —
+each owner gets their own URL and their own copy of the file. White-glove
+onboarding for paid customers; matches the way each existing internal
+page is one self-contained file.
+
+### What changed
+
+- **Path moved**: `groups.html?group=coastal-tv` → `coastal.html`,
+  reachable at `https://politicalwindow.com/coastal` (no extension via
+  GH Pages). `groups.html` deleted from the repo. URL params on the
+  new page are only `view` / `dma` / `demo`; `group` is implicit.
+- **Auth tightened**: full authentication required (login overlay
+  matches the `lur.html` flow exactly — JWT in `localStorage.pw_token`
+  via `POST /auth/login` against `ratewindow-api`). The page renders
+  nothing data-related until `GET /auth/me` returns 200.
+- **Visual rework — hero is now two-card split, not one block.**
+  Left card: "${group} captured ${X}M" with the captured number set in
+  Bebas Neue at 5.5rem (the dominant element on the screen). Right
+  card: red-tinted gap card with "${Z}M went to competitors" at the
+  same dominance — the gap number is now the *equal partner* to the
+  capture number, not a half-size sub-line. Below: a 4-tile stats
+  strip with colored top-edge accents (blue / amber-or-green / red
+  / amber) for total addressable, share %, lost $, and LUR exposure.
+- **Market scoreboard replaces the table as the primary visual.**
+  Each market is now one row with three columns: market name + owned
+  callsigns + networks (left) · share-of-voice stacked bar sized
+  proportionally to total market $ with Coastal blue / Competitor red
+  segments (center) · share % in big Bebas Neue + gap $ in small mono
+  (right). Markets without coverage render a hatched "Coverage pending"
+  bar instead of fabricated numbers. Sort is by total $ descending.
+  The sortable table is still there below as a secondary affordance.
+- **Market detail — circular share ring.** The market-detail hero now
+  splits into the same two-card layout, with the right card holding
+  a 220×220 SVG donut showing the market's share % filled clockwise,
+  with a peer-benchmark dot positioned around the rim. Color flips
+  green vs blue depending on whether share ≥ peer benchmark. Gap $
+  promoted to its own full-width red card below the hero.
+- **Market detail — top buyers as horizontal bars, not a table.**
+  Each buyer is one row with the advertiser name, a stacked bar
+  (blue Coastal | red Competitors) sized by total $, and the total
+  on the right. Visual sense of magnitude is immediate.
+- **Market detail — weekly trend gets gradient area fills.**
+  The line chart now fills underneath both lines with vertical
+  gradients (blue 0.4→0.05 for Coastal, red 0.35→0.05 for comp).
+  Worst-comp-week annotation gets a 5px white-bordered dot.
+- **Compliance — station wall replaces the dense table.** All 22
+  Coastal stations render as a responsive grid of tiles
+  (`auto-fill, minmax(190px, 1fr)`). Each tile is color-coded:
+  red-tinted background with a red top edge if any LUR overcharges
+  detected, green-tinted with a green top edge if clean. Tile shows
+  callsign (large), market, network (uppercase), and either the
+  exposure $ in Bebas Neue red OR a "✓ Clean" green badge. The hero
+  for this view is also restructured into the two-card pattern
+  (red total exposure card + green clean-stations count card).
+- **Competition — advertiser leaderboard cards replace the table.**
+  Top 25 advertisers render as a responsive grid of cards
+  (`auto-fill, minmax(320px, 1fr)`). Each card shows rank #, party
+  tag, advertiser name + top markets meta, total $ in Bebas Neue,
+  a stacked split bar (Coastal blue | comp red) with $ labels below
+  in the matching colors, and a footer with WIN RATE label + colored
+  win-rate %. Hero of the competition view highlights the #1 buyer
+  + the worst single loss.
+- **Exports view** moved from KPI tiles to the same colored-accent
+  stat-tile pattern. Print-PDF, demo toggle, and shareable link all
+  inline; PPTX still deferred to v2.
+
+### Onboarding pattern for additional owner groups
+
+Copy `coastal.html` to `<owner-slug>.html` and edit the `GROUP`
+constant at the top (slug, display name, short name, station list,
+peer benchmark). One file per owner; no other code change. The
+shared `GROUPS`-config-object pattern from yesterday's `groups.html`
+is gone — that was the multi-tenant playground; per-owner dedicated
+files are the production model. Documented in
+`politicalwindow.architecture.md` §7.
+
+### Files touched
+
+- Created `politicalwindow.com/coastal.html` (~1,200 lines)
+- Deleted `politicalwindow.com/groups.html`
+- Doc updates: `CLAUDE.md` "Current State", `politicalwindow.architecture.md`
+  (§4 directory layout, §7 page/route map), this changelog,
+  root `political-window.architecture.md`
+
+### Visual decisions worth flagging
+
+- Bebas Neue at 5.5rem for hero numbers is intentionally larger than
+  any other page's display type. The pitch is the gap number; the
+  gap number must dominate the screen.
+- Red is reserved for "money you lost" — gap, LUR exposure, lost
+  buyers. Blue is "money you captured." Green is "you're clean / you
+  beat the benchmark." Amber is "exposure / pending v2."
+- The scoreboard bars are sized by *total market $* (not just gap),
+  so big markets visibly dominate small markets even when the
+  smaller market has worse share %. This communicates which markets
+  are worth fighting for; the per-row share % captures the quality
+  question separately.
+- Stations clean vs exposed are the only two states on the wall;
+  no in-between gradient. A station either has zero LUR overcharges
+  detected or it has some — there's no "yellow caution" middle.
+
+---
+
+## 2026-05-11 — `groups.html` — Owner Dashboard viewport added (superseded 5/12)
 
 New page: `groups.html`. A station-group owner dashboard built as a pure
 **read-only viewport** over the existing `ratewindow-api` data — no

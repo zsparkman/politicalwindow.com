@@ -1,0 +1,1637 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script type="text/javascript">
+  (function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "wnbzwo190n");
+</script>
+<title>Coastal TV — Owner Dashboard · PoliticalWindow.com</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FF642D'/%3E%3Cstop offset='100%25' stop-color='%23FF8F6B'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='7' fill='url(%23g)'/%3E%3Ctext x='16' y='22' font-family='system-ui,Arial,sans-serif' font-size='14' font-weight='800' text-anchor='middle' fill='%23fff'%3EPW%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --navy:#E2E6ED;--navy-mid:#F8F9FB;--navy-card:#FFFFFF;--navy-border:#C1CBDB;
+  --blue:#1D4ED8;--blue-light:#2563EB;--blue-glow:rgba(29,78,216,0.10);
+  --amber:#D97706;--red:#DC2626;--green:#059669;--slate:#94A3B8;
+  --text:#0F172A;--text-muted:#475569;--text-faint:#A0AEBF;
+  --mono:'IBM Plex Mono','SFMono-Regular',ui-monospace,Menlo,monospace;
+  --sans:'DM Sans','Inter',system-ui,-apple-system,Arial,sans-serif;
+  --display:'Bebas Neue','DM Sans',sans-serif;
+  --shadow-sm:0 1px 2px rgba(15,23,42,0.04);
+  --shadow-md:0 2px 8px rgba(15,23,42,0.06);
+  --shadow-lg:0 8px 24px rgba(15,23,42,0.08);
+  --surface:#FFFFFF;--surface-alt:#F8FAFC;--surface-faint:#F1F5F9;--surface-table:#FAFBFC;
+  --border:#E2E8F0;--border-strong:#CBD5E1;--border-faint:#E3E8EF;
+  --text-mute2:#64748B;
+  --header-bg:#1E293B;--header-border:#334155;--header-fg:#F1F5F9;
+  --header-fg-muted:rgba(255,255,255,0.7);
+  --brand-grad-start:#FF642D;--brand-grad-end:#FF8F6B;
+  --link:#2B6CB0;--blue-soft:#93C5FD;
+  --gap-red:#B8221E;--gap-red-soft:#FCA5A5;--gap-amber:#D97706;
+  --coastal:#1D4ED8;--coastal-soft:#DBEAFE;
+}
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--navy);color:var(--text);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font-family:var(--mono);cursor:pointer;outline:none}
+input,select{font-family:var(--mono);outline:none}
+
+/* ==== Header ==== */
+.hdr{background:var(--header-bg);border-bottom:1px solid var(--header-border);
+  padding:10px 22px;display:flex;align-items:center;gap:18px;flex-shrink:0}
+.hdr-logo{width:32px;height:32px;border-radius:7px;
+  background:linear-gradient(135deg,var(--brand-grad-start),var(--brand-grad-end));
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;
+  font-family:var(--sans);font-size:0.7rem;letter-spacing:-0.02em;flex-shrink:0}
+.hdr-product{font-family:var(--sans);font-size:0.85rem;color:var(--header-fg);
+  font-weight:600;letter-spacing:-0.01em}
+.hdr-product .pw{color:var(--header-fg-muted);font-weight:400}
+.hdr-divider{width:1px;height:18px;background:var(--header-border)}
+.hdr-group-name{font-family:var(--sans);font-size:0.78rem;color:var(--header-fg);font-weight:500}
+.hdr-cycle{font-family:var(--mono);font-size:0.6rem;color:var(--header-fg-muted);
+  letter-spacing:0.06em;text-transform:uppercase}
+.hdr-spacer{flex:1}
+.hdr-tabs{display:flex;gap:0;background:rgba(255,255,255,0.04);
+  border:1px solid var(--header-border);border-radius:6px;padding:2px}
+.hdr-tab{font-family:var(--mono);font-size:0.6rem;color:var(--header-fg-muted);
+  background:transparent;border:0;padding:6px 12px;border-radius:4px;
+  letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;font-weight:500}
+.hdr-tab:hover{color:var(--header-fg)}
+.hdr-tab.active{background:var(--blue);color:#fff}
+.hdr-meta{display:flex;align-items:center;gap:10px}
+.demo-badge{font-family:var(--mono);font-size:0.55rem;color:#FBBF24;
+  background:rgba(217,119,6,0.18);border:1px solid rgba(217,119,6,0.4);
+  border-radius:3px;padding:3px 7px;letter-spacing:0.08em;text-transform:uppercase}
+.user-pill{font-family:var(--mono);font-size:0.6rem;color:var(--header-fg-muted)}
+.icon-btn{font-family:var(--mono);font-size:0.55rem;color:var(--header-fg-muted);
+  background:transparent;border:1px solid var(--header-border);border-radius:4px;
+  padding:4px 9px;letter-spacing:0.06em;text-transform:uppercase}
+.icon-btn:hover{color:var(--header-fg);border-color:#475569}
+
+/* ==== Page ==== */
+.page{flex:1;padding:28px 32px;max-width:1480px;width:100%;margin:0 auto}
+.page.compact{padding:20px 32px}
+.crumbs{font-family:var(--mono);font-size:0.6rem;color:var(--text-faint);
+  letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px}
+.crumbs a{color:var(--text-muted)}
+.crumbs .sep{margin:0 8px;color:var(--border-strong)}
+
+/* ==== HERO — visual rework ==== */
+.hero-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:22px;margin-bottom:22px}
+.hero-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:36px 40px;box-shadow:var(--shadow-md);position:relative;overflow:hidden}
+.hero-card.gap{background:linear-gradient(135deg,#FFFFFF 0%, #FFF1F1 100%);
+  border-color:rgba(184,34,30,0.25)}
+.hero-eyebrow{font-family:var(--mono);font-size:0.6rem;color:var(--text-faint);
+  letter-spacing:0.14em;text-transform:uppercase;margin-bottom:12px;font-weight:600}
+.hero-headline{font-family:var(--display);font-size:2.4rem;line-height:1.05;
+  color:var(--text);font-weight:400;letter-spacing:0.005em;margin-bottom:14px}
+.hero-headline .num{color:var(--blue)}
+.hero-num-big{font-family:var(--display);font-size:5.5rem;line-height:1;color:var(--blue);
+  font-weight:400;letter-spacing:-0.005em;margin:6px 0}
+.hero-num-big.red{color:var(--gap-red)}
+.hero-sub{font-family:var(--sans);font-size:0.95rem;color:var(--text-muted);
+  line-height:1.4;margin-top:6px;font-weight:400}
+.hero-sub strong{color:var(--text);font-weight:600}
+.hero-foot{font-family:var(--mono);font-size:0.58rem;color:var(--text-faint);
+  letter-spacing:0.06em;margin-top:18px}
+
+/* Donut/ring */
+.share-ring-wrap{display:flex;align-items:center;justify-content:center;height:100%;
+  flex-direction:column;gap:14px}
+.share-ring{display:block}
+.share-ring-center{font-family:var(--display);font-size:3.4rem;color:var(--blue);
+  text-anchor:middle;font-weight:400}
+.share-ring-label{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.1em;
+  fill:var(--text-faint);text-anchor:middle;text-transform:uppercase}
+.share-ring-peer{font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);
+  text-align:center;letter-spacing:0.05em}
+.share-ring-peer .peer-pos{color:var(--green)}
+.share-ring-peer .peer-neg{color:var(--gap-red)}
+
+/* Quick stats strip */
+.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:18px 20px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.stat-tile .lbl{font-family:var(--mono);font-size:0.55rem;color:var(--text-faint);
+  letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;font-weight:600}
+.stat-tile .val{font-family:var(--display);font-size:2rem;color:var(--text);font-weight:400;
+  line-height:1;margin-bottom:4px;letter-spacing:0}
+.stat-tile .val.blue{color:var(--blue)}
+.stat-tile .val.red{color:var(--gap-red)}
+.stat-tile .val.amber{color:var(--gap-amber)}
+.stat-tile .val.green{color:var(--green)}
+.stat-tile .meta{font-family:var(--mono);font-size:0.58rem;color:var(--text-muted);letter-spacing:0.04em}
+.stat-tile .meta .pos{color:var(--green);font-weight:600}
+.stat-tile .meta .neg{color:var(--gap-red);font-weight:600}
+.stat-tile .accent{position:absolute;top:0;left:0;right:0;height:3px}
+.stat-tile.blue   .accent{background:var(--blue)}
+.stat-tile.red    .accent{background:var(--gap-red)}
+.stat-tile.amber  .accent{background:var(--gap-amber)}
+.stat-tile.green  .accent{background:var(--green)}
+
+/* ==== Market scoreboard — share-of-voice stacked bars ==== */
+.scoreboard{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:24px 28px;margin-bottom:22px;box-shadow:var(--shadow-sm)}
+.sb-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.sb-hd h2{font-family:var(--sans);font-size:0.95rem;color:var(--text);font-weight:600;
+  letter-spacing:-0.005em}
+.sb-hd .sub{font-family:var(--mono);font-size:0.58rem;color:var(--text-faint);
+  letter-spacing:0.06em;text-transform:uppercase}
+.sb-legend{display:flex;gap:14px;font-family:var(--mono);font-size:0.58rem;color:var(--text-muted)}
+.sb-legend .dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;
+  vertical-align:middle}
+.sb-row{display:grid;grid-template-columns:170px 1fr 100px;gap:14px;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--surface-faint);cursor:pointer;transition:background 0.12s}
+.sb-row:last-child{border-bottom:0}
+.sb-row:hover{background:var(--surface-alt)}
+.sb-mkt{display:flex;flex-direction:column;gap:2px}
+.sb-mkt .mkt-name{font-family:var(--sans);font-size:0.78rem;color:var(--text);font-weight:600}
+.sb-mkt .mkt-meta{font-family:var(--mono);font-size:0.58rem;color:var(--text-faint);letter-spacing:0.04em}
+.sb-bar{position:relative;height:30px;background:var(--surface-faint);border-radius:5px;
+  overflow:hidden;display:flex}
+.sb-bar .seg-coastal{background:linear-gradient(90deg,var(--blue) 0%, var(--blue-light) 100%);
+  display:flex;align-items:center;padding:0 8px;color:#fff;font-family:var(--mono);font-size:0.62rem;
+  font-weight:600;white-space:nowrap;overflow:hidden;letter-spacing:0.03em}
+.sb-bar .seg-comp{background:linear-gradient(90deg,var(--gap-red) 0%, #E64541 100%);
+  display:flex;align-items:center;padding:0 8px;color:#fff;font-family:var(--mono);font-size:0.62rem;
+  font-weight:600;white-space:nowrap;overflow:hidden;letter-spacing:0.03em}
+.sb-bar .seg-empty{flex:1;background:repeating-linear-gradient(45deg, var(--surface-faint),
+  var(--surface-faint) 4px, #E5E9F0 4px, #E5E9F0 8px);
+  display:flex;align-items:center;justify-content:center;color:var(--text-faint);
+  font-family:var(--mono);font-size:0.55rem;letter-spacing:0.08em;text-transform:uppercase}
+.sb-share{font-family:var(--display);font-size:1.4rem;color:var(--text);text-align:right;
+  font-weight:400;line-height:1}
+.sb-share .pct{color:var(--blue)}
+.sb-share .gap-amt{display:block;font-family:var(--mono);font-size:0.58rem;color:var(--gap-red);
+  letter-spacing:0.04em;margin-top:2px}
+
+/* ==== Panel + table (kept for detail views) ==== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  box-shadow:var(--shadow-sm);margin-bottom:20px;overflow:hidden}
+.card-hd{padding:14px 22px;border-bottom:1px solid var(--border-faint);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.card-hd h2{font-family:var(--sans);font-size:0.9rem;color:var(--text);font-weight:600;
+  letter-spacing:-0.005em}
+.card-hd .sub{font-family:var(--mono);font-size:0.58rem;color:var(--text-faint);
+  letter-spacing:0.05em;text-transform:uppercase}
+.card-bd{padding:18px 22px}
+.card-bd.flush{padding:0}
+
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:0.7rem}
+th{padding:10px 14px;text-align:left;background:var(--surface-table);
+  font-weight:600;font-size:0.6rem;color:var(--text-faint);letter-spacing:0.06em;
+  text-transform:uppercase;border-bottom:1px solid var(--border);cursor:pointer;
+  white-space:nowrap;user-select:none}
+th.sortable:hover{color:var(--text)}
+th.sort-asc::after{content:' ▲';font-size:0.5rem;color:var(--blue)}
+th.sort-desc::after{content:' ▼';font-size:0.5rem;color:var(--blue)}
+td{padding:10px 14px;border-bottom:1px solid var(--surface-faint);color:var(--text);
+  white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tr.row-link{cursor:pointer}
+tr.row-link:hover{background:var(--surface-alt)}
+tr.row-coastal{background:rgba(29,78,216,0.04)}
+tr.row-coastal:hover{background:rgba(29,78,216,0.08)}
+.cell-num{text-align:right;font-variant-numeric:tabular-nums}
+.cell-pct-bar{display:inline-block;width:50px;height:6px;background:var(--surface-faint);
+  border-radius:2px;vertical-align:middle;margin-left:6px;position:relative;overflow:hidden}
+.cell-pct-bar > span{position:absolute;left:0;top:0;bottom:0;background:var(--blue)}
+.tag{display:inline-block;font-family:var(--mono);font-size:0.55rem;font-weight:600;
+  letter-spacing:0.06em;padding:2px 6px;border-radius:3px;text-transform:uppercase}
+.tag-coastal{background:var(--blue-glow);color:var(--blue);border:1px solid rgba(29,78,216,0.3)}
+.tag-comp{background:var(--surface-faint);color:var(--text-muted);border:1px solid var(--border)}
+.tag-warn{background:rgba(217,119,6,0.12);color:var(--amber);border:1px solid rgba(217,119,6,0.35)}
+.tag-danger{background:rgba(220,38,38,0.10);color:var(--red);border:1px solid rgba(220,38,38,0.30)}
+.tag-cov-low{background:rgba(217,119,6,0.10);color:var(--amber);border:1px solid rgba(217,119,6,0.3)}
+.tag-cov-none{background:rgba(148,163,184,0.15);color:var(--text-mute2);border:1px solid var(--border)}
+
+.two-col{display:grid;grid-template-columns:2fr 1fr;gap:20px}
+.two-col.equal{grid-template-columns:1fr 1fr}
+
+/* ==== Consolidation panel ==== */
+.consol{background:linear-gradient(135deg,#EFF6FF 0%, #DBEAFE 100%);
+  border:1px solid var(--blue);border-radius:12px;padding:28px 32px;margin-bottom:22px;
+  box-shadow:0 4px 16px rgba(29,78,216,0.10)}
+.consol-eyebrow{font-family:var(--mono);font-size:0.6rem;color:var(--blue);
+  letter-spacing:0.14em;text-transform:uppercase;margin-bottom:10px;font-weight:600}
+.consol-headline{font-family:var(--sans);font-size:1.05rem;color:var(--text);
+  font-weight:600;margin-bottom:22px;letter-spacing:-0.01em;line-height:1.4}
+.consol-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.consol-stat{display:flex;flex-direction:column}
+.consol-stat .lbl{font-family:var(--mono);font-size:0.58rem;color:var(--text-muted);
+  letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px}
+.consol-stat .val{font-family:var(--display);font-size:2rem;font-weight:400;color:var(--text);
+  letter-spacing:0.005em}
+.consol-stat .val.gap{color:var(--gap-red)}
+
+/* ==== Station wall (Compliance) ==== */
+.station-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.sw-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden;
+  transition:transform 0.12s, box-shadow 0.12s;cursor:default}
+.sw-tile:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.sw-tile.exposed{border-color:rgba(220,38,38,0.4);background:linear-gradient(135deg,#FFFFFF 0%,#FEF2F2 100%)}
+.sw-tile.clean{border-color:rgba(5,150,105,0.3);background:linear-gradient(135deg,#FFFFFF 0%,#F0FDF4 100%)}
+.sw-bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--surface-faint)}
+.sw-tile.exposed .sw-bar{background:var(--gap-red)}
+.sw-tile.clean   .sw-bar{background:var(--green)}
+.sw-cs{font-family:var(--mono);font-size:0.85rem;color:var(--text);font-weight:700;letter-spacing:0.02em}
+.sw-mkt{font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);letter-spacing:0.04em}
+.sw-net{font-family:var(--mono);font-size:0.55rem;color:var(--text-faint);letter-spacing:0.05em;text-transform:uppercase}
+.sw-exp{font-family:var(--display);font-size:1.4rem;color:var(--gap-red);font-weight:400;
+  margin-top:8px;line-height:1}
+.sw-tile.clean .sw-exp{color:var(--green);font-size:0.95rem}
+.sw-violations{font-family:var(--mono);font-size:0.55rem;color:var(--text-faint);letter-spacing:0.04em}
+
+/* ==== Advertiser cards (Competition) ==== */
+.adv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.adv-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:18px 20px;display:flex;flex-direction:column;gap:10px;
+  box-shadow:var(--shadow-sm);transition:box-shadow 0.12s, transform 0.12s}
+.adv-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.adv-rank{font-family:var(--display);font-size:1rem;color:var(--text-faint);font-weight:400;
+  letter-spacing:0.05em}
+.adv-name{font-family:var(--sans);font-size:0.85rem;color:var(--text);font-weight:600;
+  line-height:1.3;letter-spacing:-0.005em}
+.adv-name .meta{font-family:var(--mono);font-size:0.55rem;color:var(--text-faint);
+  letter-spacing:0.05em;text-transform:uppercase;display:block;margin-top:3px}
+.adv-total{font-family:var(--display);font-size:2rem;color:var(--text);font-weight:400;line-height:1}
+.adv-split-bar{height:14px;border-radius:3px;overflow:hidden;display:flex;background:var(--surface-faint)}
+.adv-split-bar .seg-c{background:var(--blue)}
+.adv-split-bar .seg-r{background:var(--gap-red)}
+.adv-split-meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);letter-spacing:0.03em}
+.adv-split-meta .c{color:var(--blue);font-weight:600}
+.adv-split-meta .r{color:var(--gap-red);font-weight:600}
+.adv-foot{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:0.58rem;color:var(--text-faint);letter-spacing:0.04em;border-top:1px solid var(--surface-faint);padding-top:8px}
+.adv-win{font-family:var(--display);font-size:1.1rem;font-weight:400}
+.adv-win.lo{color:var(--gap-red)}
+.adv-win.mid{color:var(--gap-amber)}
+.adv-win.hi{color:var(--green)}
+
+/* ==== Buyer bars (market detail) ==== */
+.bbar-row{display:grid;grid-template-columns:140px 1fr 80px;gap:12px;align-items:center;padding:8px 0;
+  border-bottom:1px solid var(--surface-faint)}
+.bbar-row:last-child{border-bottom:0}
+.bbar-name{font-family:var(--sans);font-size:0.7rem;color:var(--text);font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bbar-bar{height:18px;border-radius:3px;overflow:hidden;display:flex;background:var(--surface-faint)}
+.bbar-bar .b-c{background:var(--blue)}
+.bbar-bar .b-r{background:var(--gap-red)}
+.bbar-tot{font-family:var(--mono);font-size:0.65rem;color:var(--text);text-align:right;font-weight:600}
+
+/* ==== SVG charts ==== */
+.svg-chart{display:block;width:100%;height:auto}
+.line-week{stroke-width:2;fill:none}
+.line-coastal{stroke:var(--blue)}
+.line-comp{stroke:var(--gap-red)}
+.area-coastal{fill:url(#g-coastal);opacity:0.85}
+.area-comp{fill:url(#g-comp);opacity:0.55}
+.heat-cell{stroke:#fff;stroke-width:1}
+
+/* ==== Loading / empty / error ==== */
+.loading{padding:60px 20px;text-align:center;font-family:var(--mono);font-size:0.75rem;
+  color:var(--blue);letter-spacing:0.15em}
+.loading::after{content:'';display:inline-block;animation:dots 1.4s infinite}
+@keyframes dots{0%,20%{content:'.'}40%{content:'..'}60%,100%{content:'...'}}
+.empty{padding:40px 20px;text-align:center;font-family:var(--mono);font-size:0.7rem;
+  color:var(--text-muted)}
+.error{padding:20px;background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;
+  font-family:var(--mono);font-size:0.7rem;color:var(--red);margin-bottom:20px}
+
+/* ==== Login overlay ==== */
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,0.92);z-index:1000;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.overlay.hidden{display:none}
+.auth-box{background:var(--surface);border-radius:12px;padding:32px;width:100%;
+  max-width:380px;box-shadow:var(--shadow-lg)}
+.auth-logo{width:48px;height:48px;border-radius:10px;
+  background:linear-gradient(135deg,var(--brand-grad-start),var(--brand-grad-end));
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;
+  font-family:var(--sans);font-size:0.9rem;margin:0 auto 14px}
+.auth-title{font-family:var(--sans);font-size:1.1rem;font-weight:700;color:var(--text);
+  text-align:center;margin-bottom:6px}
+.auth-sub{font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);
+  text-align:center;margin-bottom:24px;letter-spacing:0.05em}
+.auth-form{display:flex;flex-direction:column;gap:10px}
+.auth-form input{font-family:var(--sans);font-size:0.8rem;padding:10px 12px;
+  border:1px solid var(--border);border-radius:6px;color:var(--text)}
+.auth-form input:focus{border-color:var(--blue)}
+.auth-form button{background:var(--blue);color:#fff;border:0;padding:11px;
+  border-radius:6px;font-family:var(--mono);font-size:0.7rem;font-weight:600;
+  letter-spacing:0.08em;text-transform:uppercase;margin-top:6px}
+.auth-form button:hover{background:var(--blue-light)}
+.auth-form button:disabled{opacity:0.6;cursor:not-allowed}
+.auth-toggle{text-align:center;margin-top:14px;font-family:var(--mono);font-size:0.6rem;
+  color:var(--text-muted)}
+.auth-toggle a{cursor:pointer;color:var(--blue)}
+.auth-err{font-family:var(--mono);font-size:0.62rem;color:var(--red);text-align:center;
+  margin-top:8px;min-height:14px}
+
+/* ==== Footer ==== */
+.foot{padding:18px 32px;background:transparent;border-top:1px solid var(--border-faint);
+  font-family:var(--mono);font-size:0.58rem;color:var(--text-faint);
+  letter-spacing:0.08em;text-transform:uppercase;text-align:center;flex-shrink:0}
+.foot a{color:var(--text-muted)}
+
+/* ==== Print stylesheet — Owner Briefing PDF ==== */
+@media print{
+  body{background:#fff !important}
+  .hdr,.foot,.no-print,.hdr-tabs,.hdr-meta{display:none !important}
+  .page{padding:0 12mm !important;max-width:none !important}
+  .card,.hero-card,.scoreboard,.consol,.stat-tile,.sw-tile,.adv-card{
+    box-shadow:none !important;page-break-inside:avoid;break-inside:avoid;
+    border:1px solid #CBD5E1 !important}
+  .hero-headline{font-size:1.6rem !important}
+  .hero-num-big{font-size:3rem !important}
+  .stats-strip{grid-template-columns:repeat(4,1fr) !important}
+  table{font-size:0.55rem !important}
+  th,td{padding:5px 8px !important}
+  .print-only{display:block !important}
+  @page{size:letter;margin:14mm}
+}
+.print-only{display:none}
+.print-cover{display:none}
+@media print{
+  .print-cover{display:block;page-break-after:always;text-align:center;padding-top:30mm}
+  .print-cover .pc-eyebrow{font-family:var(--mono);font-size:0.7rem;color:#475569;
+    letter-spacing:0.15em;text-transform:uppercase;margin-bottom:18px}
+  .print-cover .pc-title{font-family:var(--display);font-size:2.4rem;color:#0F172A;
+    margin-bottom:8px;line-height:1.1}
+  .print-cover .pc-org{font-family:var(--sans);font-size:1rem;color:#475569;
+    margin-bottom:30mm;font-weight:500}
+  .print-cover .pc-date{font-family:var(--mono);font-size:0.7rem;color:#94A3B8;
+    letter-spacing:0.1em;text-transform:uppercase}
+}
+
+/* ==== Mobile ==== */
+@media(max-width:1100px){
+  .hero-grid{grid-template-columns:1fr}
+  .stats-strip{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  .hdr{flex-wrap:wrap;padding:10px 14px}
+  .hdr-tabs{order:5;width:100%;margin-top:8px;overflow-x:auto}
+  .page{padding:18px 14px}
+  .hero-card{padding:24px 20px}
+  .hero-num-big{font-size:3.4rem}
+  .stats-strip{grid-template-columns:1fr}
+  .two-col{grid-template-columns:1fr}
+  .consol-grid{grid-template-columns:1fr}
+  .sb-row{grid-template-columns:130px 1fr 70px;gap:10px}
+}
+</style>
+</head>
+<body>
+
+<!-- ==== Login overlay ==== -->
+<div id="overlay" class="overlay hidden">
+  <div class="auth-box">
+    <div class="auth-logo">PW</div>
+    <div class="auth-title" id="auth-title">Sign in</div>
+    <div class="auth-sub">Coastal TV · Owner Dashboard · invite-only</div>
+
+    <form id="login-form" class="auth-form">
+      <input id="login-email" type="email" placeholder="Email" autocomplete="email" required>
+      <input id="login-password" type="password" placeholder="Password" autocomplete="current-password" required>
+      <button id="login-btn" type="submit">Sign in</button>
+      <div class="auth-toggle">No account? <a id="show-register">Use an invite</a></div>
+    </form>
+
+    <form id="register-form" class="auth-form" style="display:none">
+      <input id="reg-invite" type="text" placeholder="Invite code" required>
+      <input id="reg-email" type="email" placeholder="Email" required>
+      <input id="reg-password" type="password" placeholder="Password (min 8)" required minlength="8">
+      <input id="reg-password2" type="password" placeholder="Confirm password" required>
+      <button id="register-btn" type="submit">Create account</button>
+      <div class="auth-toggle">Have an account? <a id="show-login">Sign in</a></div>
+    </form>
+
+    <div id="auth-err" class="auth-err"></div>
+  </div>
+</div>
+
+<!-- ==== Header ==== -->
+<header class="hdr no-print">
+  <div class="hdr-logo">PW</div>
+  <div class="hdr-product">PoliticalWindow <span class="pw">/ Owner Dashboard</span></div>
+  <div class="hdr-divider"></div>
+  <div>
+    <div class="hdr-group-name" id="hdr-group-name">Coastal Television Broadcasting Group</div>
+    <div class="hdr-cycle" id="hdr-cycle">2026 cycle</div>
+  </div>
+  <div class="hdr-spacer"></div>
+  <nav class="hdr-tabs" id="hdr-tabs"></nav>
+  <div class="hdr-meta">
+    <span class="demo-badge" id="demo-badge" style="display:none">DEMO MODE</span>
+    <span class="user-pill" id="user-pill"></span>
+    <button class="icon-btn" id="logout-btn">Logout</button>
+  </div>
+</header>
+
+<!-- ==== Print cover ==== -->
+<div class="print-cover">
+  <div class="pc-eyebrow">Owner Briefing</div>
+  <div class="pc-title" id="pc-title">Coastal Television Broadcasting Group</div>
+  <div class="pc-org">Political Revenue & Competitive Gap Analysis</div>
+  <div class="pc-date" id="pc-date"></div>
+</div>
+
+<!-- ==== Main ==== -->
+<main class="page" id="main">
+  <div class="loading">Loading</div>
+</main>
+
+<footer class="foot no-print">
+  Powered by PoliticalWindow · <a href="/">politicalwindow.com</a>
+</footer>
+
+<script>
+'use strict';
+
+/* =========================================================================
+ * GROUP — single owner per page (this page is dedicated to Coastal).
+ * Reuses the same data shape as the legacy `groups.html` engine; cloning
+ * this file to `/<other-owner>.html` and swapping the GROUP block is the
+ * onboarding pattern for additional owners.
+ * ========================================================================= */
+const GROUP = {
+  slug: 'coastal-tv',
+  display_name: 'Coastal Television Broadcasting Group',
+  short_name: 'Coastal TV',
+  cycle: 2026,
+  stations: [
+    {callsign:'KVRR',     dma_label:'Fargo, ND',          dma_db:'FARGO-VALLEY CITY',  network:'FOX',           state:'ND'},
+    {callsign:'KQDS-TV',  dma_label:'Duluth, MN',         dma_db:'DULUTH-SUPERIOR',    network:'FOX',           state:'MN'},
+    {callsign:'KTBY',     dma_label:'Anchorage, AK',      dma_db:'ANCHORAGE',          network:'FOX',           state:'AK'},
+    {callsign:'KYUR',     dma_label:'Anchorage, AK',      dma_db:'ANCHORAGE',          network:'ABC',           state:'AK'},
+    {callsign:'KYUR-DT2', dma_label:'Anchorage, AK',      dma_db:'ANCHORAGE',          network:'CW Plus',       state:'AK'},
+    {callsign:'KFNB',     dma_label:'Casper, WY',         dma_db:'CASPER-RIVERTON',    network:'FOX',           state:'WY'},
+    {callsign:'KTWO-TV',  dma_label:'Casper, WY',         dma_db:'CASPER-RIVERTON',    network:'ABC',           state:'WY'},
+    {callsign:'KLWY',     dma_label:'Cheyenne, WY',       dma_db:'CHEYENNE-SCOTTSBLF', network:'FOX',           state:'WY'},
+    {callsign:'KKTQ-LD',  dma_label:'Cheyenne, WY',       dma_db:'CHEYENNE-SCOTTSBLF', network:'ABC',           state:'WY'},
+    {callsign:'WYDC',     dma_label:'Corning-Elmira, NY', dma_db:'ELMIRA',             network:'FOX',           state:'NY'},
+    {callsign:'WGBC',     dma_label:'Meridian, MS',       dma_db:'MERIDIAN',           network:'NBC + FOX',     state:'MS'},
+    {callsign:'WMDN',     dma_label:'Meridian, MS',       dma_db:'MERIDIAN',           network:'CBS',           state:'MS'},
+    {callsign:'WNBJ-LD',  dma_label:'Jackson, TN',        dma_db:'JACKSON, TN',        network:'NBC + CW Plus', state:'TN'},
+    {callsign:'KJNB-LD',  dma_label:'Jonesboro, AR',      dma_db:'JONESBORO',          network:'FOX + CBS',     state:'AR'},
+    {callsign:'WPBY-LD',  dma_label:'Lafayette, IN',      dma_db:'LAFAYETTE, IN',      network:'FOX + NBC',     state:'IN'},
+    {callsign:'WPBI-LD',  dma_label:'Lafayette, IN',      dma_db:'LAFAYETTE, IN',      network:'ABC',           state:'IN'},
+    {callsign:'KATN',     dma_label:'Fairbanks, AK',      dma_db:'FAIRBANKS',          network:'ABC',           state:'AK'},
+    {callsign:'KATN-DT2', dma_label:'Fairbanks, AK',      dma_db:'FAIRBANKS',          network:'FOX',           state:'AK'},
+    {callsign:'KATN-DT3', dma_label:'Fairbanks, AK',      dma_db:'FAIRBANKS',          network:'CW Plus',       state:'AK'},
+    {callsign:'KJUD',     dma_label:'Juneau, AK',         dma_db:'JUNEAU',             network:'ABC',           state:'AK'},
+    {callsign:'KJUD-DT2', dma_label:'Juneau, AK',         dma_db:'JUNEAU',             network:'FOX',           state:'AK'},
+    {callsign:'KJUD-DT3', dma_label:'Juneau, AK',         dma_db:'JUNEAU',             network:'CW Plus',       state:'AK'}
+  ],
+  peer_share_pct: 22
+};
+
+/* =========================================================================
+ * State + constants
+ * ========================================================================= */
+const API = 'https://rates.politicalwindow.com';
+let TOKEN = localStorage.getItem('pw_token') || null;
+let USER_EMAIL = localStorage.getItem('pw_user') || '';
+const STATE = {view:'hero', dma:null, demo:false, data:null, loading:false, error:null};
+const VIEWS = [
+  {id:'hero',         label:'Overview'},
+  {id:'markets',      label:'Markets'},
+  {id:'compliance',   label:'Compliance'},
+  {id:'competition',  label:'Competition'},
+  {id:'exports',      label:'Exports'}
+];
+
+/* =========================================================================
+ * Routing — query-param based, single-group page
+ * ========================================================================= */
+function parseRoute(){
+  const q = new URLSearchParams(location.search);
+  STATE.view = q.get('view') || 'hero';
+  STATE.dma  = q.get('dma') || null;
+  STATE.demo = q.get('demo') === 'true';
+}
+function navigate(patch){
+  const q = new URLSearchParams(location.search);
+  if(patch.view !== undefined) q.set('view', patch.view);
+  if(patch.dma  !== undefined){ if(patch.dma===null) q.delete('dma'); else q.set('dma', patch.dma); }
+  if(patch.demo !== undefined){ if(!patch.demo) q.delete('demo'); else q.set('demo','true'); }
+  history.pushState({}, '', '?' + q.toString());
+  parseRoute(); render();
+}
+window.addEventListener('popstate', () => { parseRoute(); render(); });
+
+/* =========================================================================
+ * Auth
+ * ========================================================================= */
+function authFetch(url, opts){
+  const o = opts || {};
+  o.headers = Object.assign({}, o.headers, {'Authorization':'Bearer ' + (TOKEN || '')});
+  return fetch(url, o);
+}
+function showOverlay(){ document.getElementById('overlay').classList.remove('hidden'); }
+function hideOverlay(){ document.getElementById('overlay').classList.add('hidden'); }
+function logout(){
+  localStorage.removeItem('pw_token'); localStorage.removeItem('pw_user');
+  TOKEN = null; USER_EMAIL = '';
+  document.getElementById('user-pill').textContent = '';
+  showOverlay();
+}
+async function checkAuth(){
+  if(!TOKEN){ showOverlay(); return false; }
+  try{
+    const r = await authFetch(API + '/auth/me');
+    if(r.ok){
+      const d = await r.json();
+      USER_EMAIL = d.email || USER_EMAIL;
+      document.getElementById('user-pill').textContent = USER_EMAIL;
+      hideOverlay();
+      return true;
+    }
+  }catch(e){}
+  logout();
+  return false;
+}
+
+/* =========================================================================
+ * Data layer
+ * ========================================================================= */
+async function fetchJSON(url){
+  const r = await authFetch(url);
+  if(!r.ok) throw new Error(url + ' → ' + r.status);
+  return r.json();
+}
+
+async function loadGroupData(group){
+  const states = [...new Set(group.stations.map(s => s.state))];
+  const dmaSet = new Set(group.stations.map(s => s.dma_db));
+  const ownedCallsigns = new Set(group.stations.map(s => s.callsign));
+
+  const invoiceBatches = await Promise.all(states.map(st =>
+    fetchJSON(API + '/api/invoices?state=' + encodeURIComponent(st) + '&limit=2000')
+      .then(d => (d && d.data) || d || [])
+      .catch(e => { console.warn('invoices ' + st + ':', e.message); return []; })
+  ));
+  const allInvoices = invoiceBatches.flat()
+    .filter(inv => inv.station_market && dmaSet.has(inv.station_market.toUpperCase()));
+
+  const lurBatches = await Promise.all(group.stations.map(s =>
+    fetchJSON(API + '/api/lur?callsign=' + encodeURIComponent(s.callsign))
+      .then(d => ({callsign: s.callsign, payload: d}))
+      .catch(() => ({callsign: s.callsign, payload: null}))
+  ));
+  const lurByStation = {};
+  lurBatches.forEach(b => { lurByStation[b.callsign] = b.payload; });
+
+  const lineBatches = await Promise.all(group.stations.map(s =>
+    fetchJSON(API + '/api/lines?station=' + encodeURIComponent(s.callsign) + '&limit=2000')
+      .then(d => (d && d.data) || d || [])
+      .catch(() => [])
+  ));
+  const allLines = lineBatches.flat();
+
+  return {group, invoices: allInvoices, ownedCallsigns, dmaSet, states,
+          lurByStation, lines: allLines, fetchedAt: new Date()};
+}
+
+/* =========================================================================
+ * Aggregators
+ * ========================================================================= */
+function num(x){ const n = Number(x); return isFinite(n) ? n : 0; }
+function fmtUSD(n, dec){
+  if(n == null || isNaN(n)) return '—';
+  const abs = Math.abs(n);
+  if(abs >= 1e9) return '$' + (n/1e9).toFixed(dec ?? 2) + 'B';
+  if(abs >= 1e6) return '$' + (n/1e6).toFixed(dec ?? 2) + 'M';
+  if(abs >= 1e3) return '$' + (n/1e3).toFixed(0) + 'K';
+  return '$' + n.toFixed(0);
+}
+function fmtUSDFull(n){ if(n == null || isNaN(n)) return '—'; return '$' + Math.round(n).toLocaleString('en-US'); }
+function fmtPct(n, dec){ if(n == null || isNaN(n)) return '—'; return n.toFixed(dec ?? 1) + '%'; }
+function fmtInt(n){ if(n == null || isNaN(n)) return '—'; return Math.round(n).toLocaleString('en-US'); }
+
+function aggregate(data){
+  const owned = data.ownedCallsigns;
+  const byDma = {};
+  data.invoices.forEach(inv => {
+    const k = (inv.station_market || '').toUpperCase();
+    if(!byDma[k]){
+      byDma[k] = {dma: k, coastal_gross: 0, comp_gross: 0,
+        coastal_invoices: 0, comp_invoices: 0, stations: {}};
+    }
+    const isOwned = owned.has(inv.station_call_sign);
+    const g = num(inv.gross_amount);
+    if(isOwned){ byDma[k].coastal_gross += g; byDma[k].coastal_invoices++; }
+    else        { byDma[k].comp_gross    += g; byDma[k].comp_invoices++; }
+    const sk = inv.station_call_sign || '(unknown)';
+    if(!byDma[k].stations[sk]){
+      byDma[k].stations[sk] = {callsign: sk, owned: isOwned, gross: 0, invoices: 0,
+        unit_rates: [], buyers: new Set()};
+    }
+    const st = byDma[k].stations[sk];
+    st.gross += g; st.invoices++;
+    if(num(inv.rate_per_spot) > 0) st.unit_rates.push(num(inv.rate_per_spot));
+    if(inv.advertiser_raw) st.buyers.add(inv.advertiser_raw);
+  });
+
+  let coastal_total = 0, comp_total = 0;
+  Object.values(byDma).forEach(d => { coastal_total += d.coastal_gross; comp_total += d.comp_gross; });
+  const total_addressable = coastal_total + comp_total;
+  const gap = comp_total;
+  const coastal_share_pct = total_addressable > 0 ? (coastal_total / total_addressable) * 100 : 0;
+
+  const advAgg = {};
+  data.invoices.forEach(inv => {
+    const a = (inv.advertiser_raw || '(unknown)').trim();
+    if(!advAgg[a]) advAgg[a] = {advertiser: a, total: 0, coastal: 0, comp: 0,
+      win: 0, dmas: {}, office: inv.product_office || '', party: ''};
+    const g = num(inv.gross_amount);
+    advAgg[a].total += g;
+    if(owned.has(inv.station_call_sign)) advAgg[a].coastal += g; else advAgg[a].comp += g;
+    if(inv.station_market) advAgg[a].dmas[inv.station_market.toUpperCase()] = true;
+  });
+  const advertisers = Object.values(advAgg).map(a => ({
+    ...a, win_pct: a.total > 0 ? (a.coastal / a.total) * 100 : 0,
+    top_dmas: Object.keys(a.dmas).slice(0,3)
+  })).sort((x,y) => y.total - x.total);
+
+  const lurExposure = {};
+  data.group.stations.forEach(s => {
+    const payload = data.lurByStation[s.callsign];
+    let exposure = 0; let violations = 0; let topFlights = [];
+    if(payload && payload.violations){
+      payload.violations.forEach(v => {
+        const charged = num(v.charged_rate ?? v.rate_per_spot ?? v.unit_rate);
+        const lur     = num(v.lur_rate ?? v.lur);
+        const spots   = num(v.spots ?? v.spot_count ?? v.units ?? 1);
+        const delta   = Math.max(charged - lur, 0) * spots;
+        if(delta > 0){ exposure += delta; violations++; topFlights.push({...v, _delta: delta, callsign: s.callsign}); }
+      });
+    } else if(Array.isArray(payload)){
+      payload.forEach(v => {
+        const charged = num(v.rate ?? v.charged ?? v.unit_rate);
+        const lur     = num(v.lur);
+        const spots   = num(v.spots ?? v.units ?? 1);
+        const delta   = Math.max(charged - lur, 0) * spots;
+        if(delta > 0){ exposure += delta; violations++; topFlights.push({...v, _delta: delta, callsign: s.callsign}); }
+      });
+    }
+    lurExposure[s.callsign] = {exposure, violations, topFlights};
+  });
+  const lur_total = Object.values(lurExposure).reduce((acc,x) => acc + x.exposure, 0);
+  const all_violations = Object.values(lurExposure).flatMap(x => x.topFlights);
+
+  const dmaLabel = {};
+  data.group.stations.forEach(s => { dmaLabel[s.dma_db] = s.dma_label; });
+  const ownedByDma = {};
+  data.group.stations.forEach(s => {
+    if(!ownedByDma[s.dma_db]) ownedByDma[s.dma_db] = [];
+    ownedByDma[s.dma_db].push(s);
+  });
+  const marketRows = data.group.stations.map(s => s.dma_db)
+    .filter((v,i,a) => a.indexOf(v) === i)
+    .map(dma => {
+      const d = byDma[dma] || {coastal_gross:0,comp_gross:0,stations:{}};
+      const total = d.coastal_gross + d.comp_gross;
+      const owned_stations = ownedByDma[dma] || [];
+      const compStations = Object.values(d.stations || {})
+        .filter(st => !st.owned).sort((x,y) => y.gross - x.gross);
+      const top_comp = compStations[0] ? compStations[0].callsign : '—';
+      const lur_v = owned_stations.reduce((acc,s) => acc + (lurExposure[s.callsign]?.violations || 0), 0);
+      return {
+        dma_db: dma, dma_label: dmaLabel[dma] || dma,
+        owned_count: owned_stations.length,
+        owned_callsigns: owned_stations.map(s => s.callsign).join(', '),
+        owned_networks: owned_stations.map(s => s.network).join(' · '),
+        coastal_gross: d.coastal_gross, comp_gross: d.comp_gross, total: total,
+        gap: d.comp_gross, gap_pct: total > 0 ? (d.comp_gross / total) * 100 : 0,
+        share_pct: total > 0 ? (d.coastal_gross / total) * 100 : 0,
+        top_comp, lur_violations: lur_v,
+        coverage: total > 0 ? 1 : 0
+      };
+    });
+
+  return {coastal_total, comp_total, total_addressable, gap, coastal_share_pct,
+    byDma, marketRows, advertisers, lurExposure, lur_total, all_violations};
+}
+
+/* =========================================================================
+ * Demo anonymization
+ * ========================================================================= */
+const _anonMap = {};
+function anonCallsign(callsign){
+  if(!STATE.demo) return callsign;
+  if(STATE.data && STATE.data.ownedCallsigns.has(callsign)) return callsign;
+  if(_anonMap[callsign]) return _anonMap[callsign];
+  const n = Object.keys(_anonMap).length;
+  const letter = String.fromCharCode(65 + (n % 26));
+  const suffix = n >= 26 ? Math.floor(n/26) : '';
+  _anonMap[callsign] = 'Competitor ' + letter + suffix;
+  return _anonMap[callsign];
+}
+
+/* =========================================================================
+ * Renderers
+ * ========================================================================= */
+const $ = (sel) => document.querySelector(sel);
+
+function renderHeader(){
+  document.getElementById('hdr-group-name').textContent = GROUP.display_name;
+  document.getElementById('hdr-cycle').textContent = GROUP.cycle + ' cycle';
+  document.getElementById('demo-badge').style.display = STATE.demo ? 'inline-block' : 'none';
+  document.getElementById('pc-title').textContent = GROUP.display_name;
+  document.getElementById('pc-date').textContent = 'Generated ' +
+    new Date().toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'});
+  const tabs = VIEWS.map(v =>
+    `<button class="hdr-tab${STATE.view===v.id || (v.id==='markets' && STATE.view==='market') ? ' active':''}"
+       data-view="${v.id}">${v.label}</button>`
+  ).join('');
+  document.getElementById('hdr-tabs').innerHTML = tabs;
+  document.getElementById('hdr-tabs').querySelectorAll('.hdr-tab').forEach(b =>
+    b.onclick = () => navigate({view: b.dataset.view, dma: null}));
+}
+function renderLoading(msg){ $('#main').innerHTML = `<div class="loading">${msg || 'Loading'}</div>`; }
+function renderError(msg){ $('#main').innerHTML = `<div class="error">${msg}</div>`; }
+
+/* ---------- Hero — visual rework ---------- */
+function renderHero(){
+  const a = aggregate(STATE.data);
+  STATE._agg = a;
+  const peerPct = GROUP.peer_share_pct || 25;
+  const cycle = GROUP.cycle;
+  const dmaCount = new Set(GROUP.stations.map(s => s.dma_db)).size;
+  const coveredDmas = a.marketRows.filter(r => r.coverage > 0).length;
+
+  $('#main').innerHTML = `
+    <div class="crumbs">${GROUP.short_name} <span class="sep">/</span> Overview</div>
+
+    <div class="hero-grid">
+      <div class="hero-card">
+        <div class="hero-eyebrow">${cycle} cycle · ${dmaCount} markets · ${GROUP.stations.length} stations</div>
+        <div class="hero-headline">
+          ${GROUP.short_name} captured
+        </div>
+        <div class="hero-num-big">${fmtUSD(a.coastal_total)}</div>
+        <div class="hero-sub">
+          of <strong>${fmtUSD(a.total_addressable)}</strong> total political dollars flowing through your ${dmaCount} markets in the ${cycle} cycle.
+        </div>
+        <div class="hero-foot">Coverage: ${coveredDmas}/${dmaCount} markets indexed · Refreshed ${STATE.data.fetchedAt.toLocaleString()}</div>
+      </div>
+
+      <div class="hero-card gap">
+        <div class="hero-eyebrow" style="color:var(--gap-red)">The gap — what you didn't capture</div>
+        <div class="hero-headline" style="color:var(--text-muted);font-size:1.6rem">went to competitors</div>
+        <div class="hero-num-big red">${fmtUSD(a.gap)}</div>
+        <div class="hero-sub">
+          across ${a.marketRows.filter(r => r.gap > 0).length} markets — money that flowed past your stations to rivals.
+        </div>
+        <div class="hero-foot">${fmtPct(a.coastal_share_pct,1)} share captured · ${fmtPct(100-a.coastal_share_pct,1)} share lost</div>
+      </div>
+    </div>
+
+    <div class="stats-strip">
+      <div class="stat-tile blue"><div class="accent"></div>
+        <div class="lbl">Total addressable</div>
+        <div class="val blue">${fmtUSD(a.total_addressable)}</div>
+        <div class="meta">${fmtInt(STATE.data.invoices.length)} indexed invoices</div></div>
+      <div class="stat-tile ${a.coastal_share_pct >= peerPct ? 'green' : 'amber'}"><div class="accent"></div>
+        <div class="lbl">${GROUP.short_name} share</div>
+        <div class="val ${a.coastal_share_pct >= peerPct ? 'green' : 'amber'}">${fmtPct(a.coastal_share_pct,1)}</div>
+        <div class="meta">vs peer ${fmtPct(peerPct,0)} ·
+          <span class="${a.coastal_share_pct >= peerPct ? 'pos' : 'neg'}">
+            ${a.coastal_share_pct >= peerPct ? '+' : ''}${(a.coastal_share_pct - peerPct).toFixed(1)}pp</span>
+        </div></div>
+      <div class="stat-tile red"><div class="accent"></div>
+        <div class="lbl">Lost to competitors</div>
+        <div class="val red">${fmtUSD(a.gap)}</div>
+        <div class="meta">${fmtInt(a.marketRows.filter(r => r.gap > 0).length)} markets with active competition</div></div>
+      <div class="stat-tile amber"><div class="accent"></div>
+        <div class="lbl">LUR exposure</div>
+        <div class="val amber">${fmtUSD(a.lur_total)}</div>
+        <div class="meta">${fmtInt(a.all_violations.length)} flights flagged · refund risk</div></div>
+    </div>
+
+    <div class="scoreboard">
+      <div class="sb-hd">
+        <div>
+          <h2>Market scoreboard — share of voice</h2>
+          <div class="sub">Each row sized by total market $ · ${GROUP.short_name} blue · competitors red · click to drill in</div>
+        </div>
+        <div class="sb-legend">
+          <span><span class="dot" style="background:var(--blue)"></span>${GROUP.short_name}</span>
+          <span><span class="dot" style="background:var(--gap-red)"></span>Competitors</span>
+          <span><span class="dot" style="background:var(--surface-faint);border:1px solid var(--border)"></span>No coverage</span>
+        </div>
+      </div>
+      ${scoreboard(a.marketRows)}
+    </div>
+
+    <div class="card">
+      <div class="card-hd">
+        <div>
+          <h2>All markets — sortable detail</h2>
+          <div class="sub">Click any column to sort · click a row to drill in</div>
+        </div>
+        <button class="icon-btn" id="export-csv" style="color:var(--text-muted);border-color:var(--border)">Export CSV</button>
+      </div>
+      <div class="card-bd flush">${marketTable(a.marketRows)}</div>
+    </div>
+  `;
+  wireMarketTable();
+  document.querySelectorAll('.sb-row').forEach(r =>
+    r.onclick = () => navigate({view: 'market', dma: r.dataset.dma}));
+  document.getElementById('export-csv').onclick = () => exportMarketsCSV(a.marketRows);
+}
+
+/* Share-of-voice scoreboard — primary visual */
+function scoreboard(rows){
+  if(!rows.length) return '<div class="empty">No markets configured.</div>';
+  const sorted = [...rows].sort((a,b) => b.total - a.total || b.gap - a.gap);
+  const max = Math.max(...sorted.map(r => r.total), 1);
+  return sorted.map(r => {
+    if(r.total <= 0){
+      return `<div class="sb-row" data-dma="${r.dma_db}">
+        <div class="sb-mkt">
+          <div class="mkt-name">${r.dma_label}</div>
+          <div class="mkt-meta">${r.owned_count} owned · ${r.owned_callsigns}</div>
+        </div>
+        <div class="sb-bar">
+          <div class="seg-empty">Coverage pending</div>
+        </div>
+        <div class="sb-share" style="color:var(--text-faint);font-size:0.7rem;font-family:var(--mono)">—</div>
+      </div>`;
+    }
+    /* width-of-bar relative to the largest market; ensures visual sense of scale */
+    const wpct = (r.total / max) * 100;
+    const cFracOfRow = r.coastal_gross / r.total;
+    const xFracOfRow = r.comp_gross / r.total;
+    const shareColor = r.share_pct >= GROUP.peer_share_pct ? 'var(--green)' : 'var(--gap-red)';
+    return `<div class="sb-row" data-dma="${r.dma_db}">
+      <div class="sb-mkt">
+        <div class="mkt-name">${r.dma_label}</div>
+        <div class="mkt-meta">${r.owned_count} owned · ${r.owned_callsigns} · ${r.owned_networks||''}</div>
+      </div>
+      <div class="sb-bar" style="width:${wpct}%;min-width:120px">
+        ${cFracOfRow > 0 ? `<div class="seg-coastal" style="width:${cFracOfRow*100}%">${cFracOfRow*100 >= 12 ? fmtUSD(r.coastal_gross) : ''}</div>` : ''}
+        ${xFracOfRow > 0 ? `<div class="seg-comp"    style="width:${xFracOfRow*100}%">${xFracOfRow*100 >= 12 ? fmtUSD(r.comp_gross) : ''}</div>` : ''}
+      </div>
+      <div class="sb-share">
+        <span class="pct" style="color:${shareColor}">${fmtPct(r.share_pct,0)}</span>
+        ${r.gap > 0 ? `<span class="gap-amt">gap ${fmtUSD(r.gap)}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let _marketSort = {col: 'gap', dir: 'desc'};
+function marketTable(rows){
+  const sorted = [...rows].sort((a,b) => {
+    const av = a[_marketSort.col]; const bv = b[_marketSort.col];
+    if(typeof av === 'number' && typeof bv === 'number') return _marketSort.dir==='asc' ? av - bv : bv - av;
+    return _marketSort.dir==='asc' ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+  });
+  const cols = [
+    {k:'dma_label',     l:'DMA'},
+    {k:'owned_count',   l:'Owned',  num:true},
+    {k:'coastal_gross', l:GROUP.short_name + ' $', num:true, fmt:fmtUSDFull},
+    {k:'comp_gross',    l:'Competitor $', num:true, fmt:fmtUSDFull},
+    {k:'gap',           l:'Gap $',  num:true, fmt:fmtUSDFull},
+    {k:'gap_pct',       l:'Gap %',  num:true, fmt:v=>fmtPct(v)},
+    {k:'top_comp',      l:'Top competitor'},
+    {k:'lur_violations',l:'LUR flags', num:true, fmt:fmtInt}
+  ];
+  const head = cols.map(c =>
+    `<th class="sortable${_marketSort.col===c.k ? ' sort-' + _marketSort.dir : ''} ${c.num?'cell-num':''}"
+         data-col="${c.k}">${c.l}</th>`).join('');
+  const body = sorted.map(r => {
+    if(r.coverage === 0){
+      return `<tr class="row-link" data-dma="${r.dma_db}">
+        <td>${r.dma_label} <span class="tag tag-cov-none">No coverage</span></td>
+        <td class="cell-num">${r.owned_count}</td>
+        <td colspan="6" style="color:var(--text-faint)">— no invoice data indexed yet —</td>
+      </tr>`;
+    }
+    return `<tr class="row-link" data-dma="${r.dma_db}">
+      <td><strong>${r.dma_label}</strong> <span style="color:var(--text-faint);font-size:0.62rem">${r.owned_callsigns}</span></td>
+      <td class="cell-num">${r.owned_count}</td>
+      <td class="cell-num">${fmtUSDFull(r.coastal_gross)}</td>
+      <td class="cell-num">${fmtUSDFull(r.comp_gross)}</td>
+      <td class="cell-num" style="color:${r.gap > r.coastal_gross ? 'var(--gap-red)' : 'var(--text)'};font-weight:600">${fmtUSDFull(r.gap)}</td>
+      <td class="cell-num">${fmtPct(r.gap_pct)}<span class="cell-pct-bar"><span style="width:${Math.min(r.gap_pct,100)}%"></span></span></td>
+      <td>${anonCallsign(r.top_comp)}</td>
+      <td class="cell-num">${r.lur_violations > 0 ? `<span class="tag tag-warn">${r.lur_violations}</span>` : '0'}</td>
+    </tr>`;
+  }).join('');
+  return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+function wireMarketTable(){
+  document.querySelectorAll('th.sortable').forEach(th => {
+    th.onclick = () => {
+      const c = th.dataset.col;
+      _marketSort.dir = (_marketSort.col === c && _marketSort.dir === 'desc') ? 'asc' : 'desc';
+      _marketSort.col = c;
+      const view = STATE.view; render();  /* full re-render keeps sort + scoreboard in sync */
+    };
+  });
+  document.querySelectorAll('tr.row-link').forEach(tr => {
+    tr.onclick = () => navigate({view: 'market', dma: tr.dataset.dma});
+  });
+}
+function exportMarketsCSV(rows){
+  const head = ['dma','owned_stations','owned_count','coastal_gross','comp_gross','gap','gap_pct','top_comp','lur_violations'];
+  const lines = [head.join(',')].concat(rows.map(r => [
+    `"${r.dma_label}"`, `"${r.owned_callsigns}"`, r.owned_count,
+    r.coastal_gross.toFixed(2), r.comp_gross.toFixed(2), r.gap.toFixed(2),
+    r.gap_pct.toFixed(2), `"${anonCallsign(r.top_comp)}"`, r.lur_violations
+  ].join(','))).join('\n');
+  const blob = new Blob([lines], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = GROUP.slug + '-markets-' + (new Date().toISOString().slice(0,10)) + '.csv';
+  a.click();
+}
+
+/* ---------- Markets list ---------- */
+function renderMarketsList(){
+  const a = aggregate(STATE.data);
+  STATE._agg = a;
+  $('#main').innerHTML = `
+    <div class="crumbs">${GROUP.short_name} <span class="sep">/</span> Markets</div>
+    <div class="scoreboard">
+      <div class="sb-hd">
+        <div><h2>Share of voice — every market</h2>
+          <div class="sub">Sorted by total $ · click to drill in</div></div>
+        <div class="sb-legend">
+          <span><span class="dot" style="background:var(--blue)"></span>${GROUP.short_name}</span>
+          <span><span class="dot" style="background:var(--gap-red)"></span>Competitors</span>
+        </div>
+      </div>
+      ${scoreboard(a.marketRows)}
+    </div>
+    <div class="card">
+      <div class="card-hd"><h2>Sortable detail</h2><div class="sub">Click any column header</div></div>
+      <div class="card-bd flush">${marketTable(a.marketRows)}</div>
+    </div>`;
+  wireMarketTable();
+  document.querySelectorAll('.sb-row').forEach(r =>
+    r.onclick = () => navigate({view: 'market', dma: r.dataset.dma}));
+}
+
+/* ---------- Market detail ---------- */
+function renderMarket(){
+  const a = STATE._agg || aggregate(STATE.data);
+  STATE._agg = a;
+  const dma = STATE.dma;
+  const row = a.marketRows.find(r => r.dma_db === dma);
+  if(!row){ renderError('Market not found: ' + dma); return; }
+  const dataDma = a.byDma[dma] || {coastal_gross:0,comp_gross:0,stations:{}};
+  const ownedHere = GROUP.stations.filter(s => s.dma_db === dma);
+  const isMulti = ownedHere.length > 1;
+
+  const stationRows = Object.values(dataDma.stations || {}).map(st => {
+    const meta = ownedHere.find(s => s.callsign === st.callsign);
+    const lur = a.lurExposure[st.callsign];
+    return {
+      callsign: anonCallsign(st.callsign), raw_callsign: st.callsign,
+      owner: st.owned ? GROUP.short_name : (STATE.demo ? 'Other Owner' : '—'),
+      network: meta ? meta.network : '',
+      gross: st.gross, buyers: st.buyers.size,
+      avg_rate: st.unit_rates.length ? (st.unit_rates.reduce((s,r) => s + r, 0) / st.unit_rates.length) : null,
+      lur_flags: lur ? lur.violations : 0, owned: st.owned
+    };
+  }).sort((a,b) => b.gross - a.gross);
+
+  const buyerAgg = {};
+  STATE.data.invoices.filter(inv => (inv.station_market || '').toUpperCase() === dma).forEach(inv => {
+    const a = (inv.advertiser_raw || '(unknown)').trim();
+    if(!buyerAgg[a]) buyerAgg[a] = {advertiser: a, coastal: 0, comp: 0, total: 0};
+    const g = num(inv.gross_amount);
+    if(STATE.data.ownedCallsigns.has(inv.station_call_sign)) buyerAgg[a].coastal += g;
+    else buyerAgg[a].comp += g;
+    buyerAgg[a].total += g;
+  });
+  const topBuyers = Object.values(buyerAgg).sort((a,b) => b.total - a.total).slice(0,10);
+  const buyerMax  = Math.max(...topBuyers.map(b => b.total), 1);
+
+  const weeks = {};
+  STATE.data.lines.filter(ln =>
+    ownedHere.some(s => s.callsign === ln.station) ||
+    Object.keys(dataDma.stations).includes(ln.station)
+  ).forEach(ln => {
+    const w = ln.week_of; if(!w) return;
+    if(!weeks[w]) weeks[w] = {week: w, coastal: 0, comp: 0};
+    const t = num(ln.line_total) || (num(ln.rate) * num(ln.units));
+    if(STATE.data.ownedCallsigns.has(ln.station)) weeks[w].coastal += t;
+    else weeks[w].comp += t;
+  });
+  const weekly = Object.values(weeks).sort((a,b) => a.week.localeCompare(b.week));
+  const worstWeek = [...weekly].sort((a,b) => b.comp - a.comp)[0];
+
+  const heatLines = STATE.data.lines.filter(ln => STATE.data.ownedCallsigns.has(ln.station) &&
+    ownedHere.some(s => s.callsign === ln.station));
+
+  $('#main').innerHTML = `
+    <div class="crumbs">
+      <a href="?view=hero">${GROUP.short_name}</a>
+      <span class="sep">/</span> Markets <span class="sep">/</span> ${row.dma_label}
+    </div>
+
+    <div class="hero-grid">
+      <div class="hero-card">
+        <div class="hero-eyebrow">${row.dma_label} · ${ownedHere.length} owned station${ownedHere.length>1?'s':''}</div>
+        <div class="hero-headline">${GROUP.short_name} captured</div>
+        <div class="hero-num-big">${fmtUSD(row.coastal_gross)}</div>
+        <div class="hero-sub">of <strong>${fmtUSD(row.total)}</strong> total in this market.</div>
+        <div class="hero-foot">${ownedHere.length} owned · ${ownedHere.map(s => s.callsign).join(', ')}</div>
+      </div>
+      <div class="hero-card" style="display:flex;align-items:center;justify-content:center">
+        ${shareRing(row.share_pct, GROUP.peer_share_pct)}
+      </div>
+    </div>
+
+    ${row.gap > 0 ? `
+    <div class="hero-card gap" style="margin-bottom:22px">
+      <div class="hero-eyebrow" style="color:var(--gap-red)">Gap in this market</div>
+      <div class="hero-num-big red" style="font-size:4rem">${fmtUSDFull(row.gap)}</div>
+      <div class="hero-sub">went to competitors · ${fmtPct(row.gap_pct,1)} of total</div>
+    </div>` : ''}
+
+    ${isMulti ? `
+    <div class="consol">
+      <div class="consol-eyebrow">In-market consolidation — stop competing against yourself</div>
+      <div class="consol-headline">
+        Your ${ownedHere.length} stations in ${row.dma_label} (${ownedHere.map(s => s.callsign).join(', ')})
+        share an audience but compete for buys. A coordinated pitch closes the gap.
+      </div>
+      <div class="consol-grid">
+        <div class="consol-stat"><div class="lbl">Combined ${GROUP.short_name} $</div><div class="val">${fmtUSDFull(row.coastal_gross)}</div></div>
+        <div class="consol-stat"><div class="lbl">Combined share</div><div class="val">${fmtPct(row.share_pct)}</div></div>
+        <div class="consol-stat"><div class="lbl">Remaining gap</div><div class="val gap">${fmtUSDFull(row.gap)}</div></div>
+      </div>
+    </div>` : ''}
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-hd"><h2>Stations in ${row.dma_label}</h2><div class="sub">${stationRows.length} stations</div></div>
+        <div class="card-bd flush">
+          ${stationRows.length === 0 ? '<div class="empty">No invoices indexed for this DMA yet.</div>' :
+            `<table><thead><tr>
+              <th>Station</th><th>Owner</th><th>Network</th>
+              <th class="cell-num">Political $</th><th class="cell-num">Buyers</th>
+              <th class="cell-num">Avg rate</th><th class="cell-num">LUR flags</th>
+            </tr></thead><tbody>${stationRows.map(s => `
+              <tr class="${s.owned?'row-coastal':''}">
+                <td><strong>${s.callsign}</strong> ${s.owned ? '<span class="tag tag-coastal">Owned</span>' : ''}</td>
+                <td>${s.owner}</td><td>${s.network || '—'}</td>
+                <td class="cell-num">${fmtUSDFull(s.gross)}</td>
+                <td class="cell-num">${fmtInt(s.buyers)}</td>
+                <td class="cell-num">${s.avg_rate != null ? '$' + s.avg_rate.toFixed(0) : '—'}</td>
+                <td class="cell-num">${s.lur_flags > 0 ? `<span class="tag tag-warn">${s.lur_flags}</span>` : '0'}</td>
+              </tr>`).join('')}</tbody></table>`}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><h2>Top buyers in market</h2><div class="sub">${GROUP.short_name} (blue) vs comp (red)</div></div>
+        <div class="card-bd">
+          ${topBuyers.length === 0 ? '<div class="empty">No buyer data yet.</div>' :
+            topBuyers.map(b => {
+              const w = (b.total / buyerMax) * 100;
+              const cf = b.total > 0 ? b.coastal / b.total : 0;
+              const rf = b.total > 0 ? b.comp / b.total : 0;
+              return `<div class="bbar-row">
+                <div class="bbar-name" title="${b.advertiser}">${b.advertiser.length > 20 ? b.advertiser.slice(0,20)+'…' : b.advertiser}</div>
+                <div class="bbar-bar" style="width:${w}%;min-width:80px">
+                  <div class="b-c" style="width:${cf*100}%"></div>
+                  <div class="b-r" style="width:${rf*100}%"></div>
+                </div>
+                <div class="bbar-tot">${fmtUSD(b.total)}</div>
+              </div>`;
+            }).join('')
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><h2>Weekly trend</h2><div class="sub">${GROUP.short_name} (blue) vs competitors (red) by broadcast week</div></div>
+      <div class="card-bd">
+        ${weekly.length === 0 ? '<div class="empty">No line-level data yet.</div>' : weeklyChart(weekly, worstWeek)}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><h2>Daypart heatmap — ${GROUP.short_name} sold inventory</h2><div class="sub">Cells colored by avg unit rate; hover for value</div></div>
+      <div class="card-bd">
+        ${heatLines.length === 0 ? '<div class="empty">No daypart data yet.</div>' : daypartHeatmap(heatLines)}
+      </div>
+    </div>
+  `;
+}
+
+/* Donut/ring share visualization */
+function shareRing(pct, peerPct){
+  const r = 90, c = 2 * Math.PI * r;
+  const filled = Math.max(0, Math.min(100, pct)) / 100 * c;
+  const peerAngle = (peerPct / 100) * 360 - 90;
+  const peerX = 110 + r * Math.cos(peerAngle * Math.PI / 180);
+  const peerY = 110 + r * Math.sin(peerAngle * Math.PI / 180);
+  const delta = pct - peerPct;
+  return `<div class="share-ring-wrap">
+    <svg class="share-ring" viewBox="0 0 220 220" width="220" height="220">
+      <circle cx="110" cy="110" r="${r}" fill="none" stroke="var(--surface-faint)" stroke-width="20"/>
+      <circle cx="110" cy="110" r="${r}" fill="none"
+        stroke="${pct >= peerPct ? 'var(--green)' : 'var(--blue)'}" stroke-width="20"
+        stroke-dasharray="${filled} ${c}" stroke-dashoffset="0"
+        transform="rotate(-90 110 110)" stroke-linecap="round"/>
+      <circle cx="${peerX}" cy="${peerY}" r="4" fill="var(--text)"/>
+      <text class="share-ring-center" x="110" y="118">${fmtPct(pct,0)}</text>
+      <text class="share-ring-label" x="110" y="148">${GROUP.short_name} share</text>
+    </svg>
+    <div class="share-ring-peer">
+      Peer benchmark <strong>${fmtPct(peerPct,0)}</strong> ·
+      <span class="${delta >= 0 ? 'peer-pos' : 'peer-neg'}">${delta >= 0 ? '+' : ''}${delta.toFixed(1)}pp</span>
+    </div>
+  </div>`;
+}
+
+function weeklyChart(weekly, worstWeek){
+  const W = 920, H = 240, pad = {l: 56, r: 16, t: 14, b: 30};
+  const xs = weekly.map(w => w.week);
+  const max = Math.max(...weekly.map(w => Math.max(w.coastal, w.comp)), 1);
+  const innerW = W - pad.l - pad.r, innerH = H - pad.t - pad.b;
+  const x = i => pad.l + (xs.length === 1 ? innerW/2 : (i / (xs.length - 1)) * innerW);
+  const y = v => pad.t + innerH - (v / max) * innerH;
+  const linePath = (key) => weekly.map((w,i) => `${i===0?'M':'L'}${x(i)},${y(w[key])}`).join(' ');
+  const areaPath = (key) => {
+    const top = weekly.map((w,i) => `${i===0?'M':'L'}${x(i)},${y(w[key])}`).join(' ');
+    const bottom = ` L${x(weekly.length-1)},${pad.t+innerH} L${x(0)},${pad.t+innerH} Z`;
+    return top + bottom;
+  };
+  const yticks = [0, max/2, max].map(v =>
+    `<line x1="${pad.l}" y1="${y(v)}" x2="${W-pad.r}" y2="${y(v)}" stroke="var(--border-faint)"/>
+     <text x="${pad.l-8}" y="${y(v)+3}" text-anchor="end" font-family="var(--mono)" font-size="9" fill="var(--text-faint)">${fmtUSD(v,1)}</text>`
+  ).join('');
+  const xticks = weekly.filter((_,i) => i % Math.max(1, Math.floor(weekly.length/8)) === 0).map((w) => {
+    const idx = weekly.findIndex(x => x.week === w.week);
+    return `<text x="${x(idx)}" y="${H-8}" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text-faint)">${w.week.slice(5)}</text>`;
+  }).join('');
+  let annotation = '';
+  if(worstWeek && worstWeek.comp > 0){
+    const idx = weekly.findIndex(w => w.week === worstWeek.week);
+    if(idx >= 0){
+      const wx = x(idx), wy = y(worstWeek.comp);
+      annotation = `<circle cx="${wx}" cy="${wy}" r="5" fill="var(--gap-red)" stroke="#fff" stroke-width="2"/>
+        <text x="${wx + 8}" y="${wy - 10}" font-family="var(--mono)" font-size="10" fill="var(--gap-red)" font-weight="600">
+          Worst week: ${worstWeek.week.slice(5)} · ${fmtUSD(worstWeek.comp)} to comp</text>`;
+    }
+  }
+  return `<svg class="svg-chart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g-coastal" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#1D4ED8" stop-opacity="0.4"/>
+        <stop offset="100%" stop-color="#1D4ED8" stop-opacity="0.05"/>
+      </linearGradient>
+      <linearGradient id="g-comp" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#B8221E" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="#B8221E" stop-opacity="0.05"/>
+      </linearGradient>
+    </defs>
+    ${yticks}
+    <path class="area-comp" d="${areaPath('comp')}"/>
+    <path class="area-coastal" d="${areaPath('coastal')}"/>
+    <path class="line-week line-comp"    d="${linePath('comp')}"/>
+    <path class="line-week line-coastal" d="${linePath('coastal')}"/>
+    ${annotation}
+    ${xticks}
+  </svg>`;
+}
+
+function daypartHeatmap(lines){
+  const dpOrder = ['EM','DT','EF','EN','PA','PT','LN','LF','ON','MN'];
+  const weekSet = new Set(); const cell = {};
+  lines.forEach(ln => {
+    const dp = (ln.daypart_code || ln.daypart || '').toUpperCase().slice(0,2);
+    if(!dpOrder.includes(dp)) return;
+    const wk = ln.week_of; if(!wk) return;
+    weekSet.add(wk);
+    const k = dp + '|' + wk;
+    if(!cell[k]) cell[k] = {gross: 0, units: 0};
+    cell[k].gross += num(ln.line_total) || (num(ln.rate) * num(ln.units));
+    cell[k].units += num(ln.units);
+  });
+  const weeks = [...weekSet].sort();
+  if(weeks.length === 0) return '<div class="empty">No daypart data.</div>';
+  const cw = Math.max(8, Math.min(28, Math.floor(900 / weeks.length)));
+  const ch = 24;
+  const W = 80 + weeks.length * cw + 12;
+  const H = 24 + dpOrder.length * ch + 24;
+  const rates = Object.values(cell).map(c => c.units > 0 ? c.gross / c.units : 0).filter(r => r > 0);
+  const max = Math.max(...rates, 1), min = Math.min(...rates, 0);
+  const color = v => {
+    if(v <= 0) return '#F1F5F9';
+    const t = (v - min) / Math.max(max - min, 1);
+    if(t < 0.5){ const k = t*2; return `rgb(${Math.round(241-k*212)},${Math.round(245-k*167)},${Math.round(249-k*33)})`; }
+    const k = (t-0.5)*2;
+    return `rgb(${Math.round(29+k*191)},${Math.round(78-k*40)},${Math.round(216-k*178)})`;
+  };
+  const cells = dpOrder.map((dp, di) => weeks.map((wk, wi) => {
+    const c = cell[dp + '|' + wk];
+    const v = c && c.units > 0 ? c.gross / c.units : 0;
+    return `<rect class="heat-cell" x="${80 + wi*cw}" y="${24 + di*ch}" width="${cw}" height="${ch}"
+              fill="${color(v)}"><title>${dp} · ${wk} · avg $${v.toFixed(0)}</title></rect>`;
+  }).join('')).join('');
+  const dpLabels = dpOrder.map((dp,i) =>
+    `<text x="72" y="${24+i*ch+15}" text-anchor="end" font-family="var(--mono)" font-size="10" fill="var(--text-muted)" font-weight="600">${dp}</text>`
+  ).join('');
+  const wkLabels = weeks.filter((_,i) => i % Math.max(1, Math.floor(weeks.length/10)) === 0).map(wk => {
+    const idx = weeks.indexOf(wk);
+    return `<text x="${80+idx*cw+cw/2}" y="${20}" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text-faint)">${wk.slice(5)}</text>`;
+  }).join('');
+  return `<svg class="svg-chart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    ${wkLabels}${dpLabels}${cells}
+  </svg>`;
+}
+
+/* ---------- Compliance — station wall ---------- */
+function renderCompliance(){
+  const a = STATE._agg || aggregate(STATE.data);
+  STATE._agg = a;
+  const stationRows = GROUP.stations.map(s => ({
+    callsign: s.callsign, dma: s.dma_label, network: s.network,
+    exposure: a.lurExposure[s.callsign]?.exposure || 0,
+    violations: a.lurExposure[s.callsign]?.violations || 0
+  })).sort((x,y) => y.exposure - x.exposure);
+
+  const top20 = a.all_violations.sort((x,y) => y._delta - x._delta).slice(0, 20);
+  const exposed = stationRows.filter(s => s.exposure > 0);
+  const clean = stationRows.filter(s => s.exposure === 0);
+
+  $('#main').innerHTML = `
+    <div class="crumbs">${GROUP.short_name} <span class="sep">/</span> Compliance</div>
+
+    <div class="hero-grid">
+      <div class="hero-card gap">
+        <div class="hero-eyebrow" style="color:var(--gap-red)">Total LUR exposure across the footprint</div>
+        <div class="hero-num-big red">${fmtUSD(a.lur_total)}</div>
+        <div class="hero-sub">
+          ${fmtInt(a.all_violations.length)} flagged flights across ${exposed.length} stations.
+          <strong>Refund risk</strong> if a candidate audits the political file.
+        </div>
+        <div class="hero-foot">Computed: charged − LUR × spots, summed per flight</div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-eyebrow">Compliance posture</div>
+        <div class="hero-num-big" style="color:var(--green)">${clean.length}<span style="font-size:1.6rem;color:var(--text-faint)"> / ${stationRows.length}</span></div>
+        <div class="hero-sub">Stations <strong>clean</strong> · zero LUR overcharges detected</div>
+        <div class="hero-foot">${exposed.length} station${exposed.length===1?'':'s'} need attention</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">
+        <div><h2>Station wall — exposure at a glance</h2>
+          <div class="sub">Red = LUR overcharges detected · Green = clean</div></div>
+      </div>
+      <div class="card-bd">
+        <div class="station-wall">
+          ${stationRows.map(s => `
+            <div class="sw-tile ${s.exposure > 0 ? 'exposed' : 'clean'}">
+              <div class="sw-bar"></div>
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                  <div class="sw-cs">${s.callsign}</div>
+                  <div class="sw-mkt">${s.dma}</div>
+                  <div class="sw-net">${s.network}</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="sw-exp">${s.exposure > 0 ? fmtUSD(s.exposure) : '✓ Clean'}</div>
+                  ${s.violations > 0 ? `<div class="sw-violations">${s.violations} flag${s.violations===1?'':'s'}</div>` : ''}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">
+        <div><h2>Top 20 violation flights</h2><div class="sub">Charged − LUR × spots, descending</div></div>
+        <button class="icon-btn" onclick="window.print()" style="color:var(--text-muted);border-color:var(--border)">Print PDF</button>
+      </div>
+      <div class="card-bd flush">
+        ${top20.length === 0 ? '<div class="empty">No LUR violations detected across the footprint.</div>' :
+          `<table><thead><tr>
+            <th>Station</th><th>Candidate</th><th>Week</th><th>Daypart</th>
+            <th class="cell-num">Charged</th><th class="cell-num">LUR</th><th class="cell-num">Δ$</th>
+          </tr></thead><tbody>${top20.map(v => `
+            <tr>
+              <td>${v.callsign}</td>
+              <td>${v.candidate || v.candidate_name || v.advertiser || '—'}</td>
+              <td>${v.week_of || v.week || v.flight_start || '—'}</td>
+              <td>${(v.daypart_code || v.daypart || '—')}</td>
+              <td class="cell-num">$${num(v.charged_rate ?? v.rate ?? v.unit_rate).toFixed(0)}</td>
+              <td class="cell-num">$${num(v.lur_rate ?? v.lur).toFixed(0)}</td>
+              <td class="cell-num" style="color:var(--red);font-weight:700">${fmtUSDFull(v._delta)}</td>
+            </tr>`).join('')}</tbody></table>`}
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Competition — advertiser cards ---------- */
+function renderCompetition(){
+  const a = STATE._agg || aggregate(STATE.data);
+  STATE._agg = a;
+  const top = a.advertisers.slice(0, 25);
+  $('#main').innerHTML = `
+    <div class="crumbs">${GROUP.short_name} <span class="sep">/</span> Competition</div>
+
+    <div class="hero-grid">
+      <div class="hero-card">
+        <div class="hero-eyebrow">Top buyers across your footprint</div>
+        <div class="hero-headline">${top.length > 0 ? top[0].advertiser : '—'}</div>
+        <div class="hero-num-big">${top.length > 0 ? fmtUSD(top[0].total) : '—'}</div>
+        <div class="hero-sub">
+          ${top.length > 0 ? `is the largest political buyer in your DMAs · you captured <strong style="color:var(--blue)">${fmtUSD(top[0].coastal)}</strong>, lost <strong style="color:var(--gap-red)">${fmtUSD(top[0].comp)}</strong>.` : ''}
+        </div>
+      </div>
+      <div class="hero-card gap">
+        <div class="hero-eyebrow" style="color:var(--gap-red)">Largest losses to competitors</div>
+        ${(() => {
+          const worst = [...top].sort((x,y) => y.comp - x.comp).slice(0,1)[0];
+          if(!worst) return '<div class="hero-num-big red">—</div>';
+          return `<div class="hero-headline">${worst.advertiser}</div>
+            <div class="hero-num-big red">${fmtUSD(worst.comp)}</div>
+            <div class="hero-sub">to competitors · only <strong>${fmtPct(worst.win_pct,0)}</strong> win rate against this buyer</div>`;
+        })()}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">
+        <div><h2>Top 25 advertisers</h2><div class="sub">Sorted by total $ in your DMAs</div></div>
+        <button class="icon-btn" id="export-comp" style="color:var(--text-muted);border-color:var(--border)">Export CSV</button>
+      </div>
+      <div class="card-bd">
+        ${top.length === 0 ? '<div class="empty">No advertiser data yet.</div>' :
+          `<div class="adv-grid">${top.map((adv, i) => {
+            const w = adv.win_pct;
+            const winCls = w >= 50 ? 'hi' : w >= 25 ? 'mid' : 'lo';
+            const cFrac = adv.total > 0 ? adv.coastal / adv.total : 0;
+            const rFrac = adv.total > 0 ? adv.comp / adv.total : 0;
+            return `<div class="adv-card">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div class="adv-rank">#${i+1}</div>
+                ${adv.party ? `<span class="tag tag-comp">${adv.party}</span>` : ''}
+              </div>
+              <div class="adv-name">${adv.advertiser.length > 50 ? adv.advertiser.slice(0,50)+'…' : adv.advertiser}
+                <span class="meta">${adv.top_dmas.join(' · ')}</span>
+              </div>
+              <div class="adv-total">${fmtUSD(adv.total)}</div>
+              <div class="adv-split-bar">
+                <div class="seg-c" style="width:${cFrac*100}%"></div>
+                <div class="seg-r" style="width:${rFrac*100}%"></div>
+              </div>
+              <div class="adv-split-meta">
+                <span class="c">${fmtUSD(adv.coastal)} captured</span>
+                <span class="r">${fmtUSD(adv.comp)} lost</span>
+              </div>
+              <div class="adv-foot">
+                <span>WIN RATE</span>
+                <span class="adv-win ${winCls}">${fmtPct(w,0)}</span>
+              </div>
+            </div>`;
+          }).join('')}</div>`}
+      </div>
+    </div>
+  `;
+  document.getElementById('export-comp').onclick = () => {
+    const head = ['advertiser','total','captured','to_competitors','win_pct','top_markets'];
+    const lines = [head.join(',')].concat(top.map(adv => [
+      `"${adv.advertiser.replace(/"/g,'""')}"`,
+      adv.total.toFixed(2), adv.coastal.toFixed(2), adv.comp.toFixed(2),
+      adv.win_pct.toFixed(2), `"${adv.top_dmas.join('; ')}"`
+    ].join(','))).join('\n');
+    const blob = new Blob([lines], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = GROUP.slug + '-competition-' + (new Date().toISOString().slice(0,10)) + '.csv';
+    a.click();
+  };
+}
+
+/* ---------- Exports ---------- */
+function renderExports(){
+  const a = STATE._agg || aggregate(STATE.data);
+  STATE._agg = a;
+  const url = location.origin + location.pathname + (STATE.demo?'?demo=true':'');
+  $('#main').innerHTML = `
+    <div class="crumbs">${GROUP.short_name} <span class="sep">/</span> Exports</div>
+
+    <div class="stats-strip">
+      <div class="stat-tile blue" style="cursor:pointer" onclick="window.print()"><div class="accent"></div>
+        <div class="lbl">Owner Briefing PDF</div>
+        <div class="val blue" style="font-size:1.4rem">PRINT</div>
+        <div class="meta">Branded cover · hero numbers · market table · LUR exposure</div>
+      </div>
+      <div class="stat-tile amber"><div class="accent"></div>
+        <div class="lbl">Sales Playbook PPTX</div>
+        <div class="val amber" style="font-size:1.4rem">v2</div>
+        <div class="meta">One slide per market for GSM handoff · server-side, deferred</div>
+      </div>
+      <div class="stat-tile green"><div class="accent"></div>
+        <div class="lbl">Shareable link</div>
+        <div class="val green" style="font-size:1.4rem">COPY</div>
+        <div class="meta" id="share-link" style="word-break:break-all;cursor:pointer"
+          onclick="navigator.clipboard.writeText(this.textContent);this.textContent='Copied'">${url}</div>
+      </div>
+      <div class="stat-tile ${STATE.demo ? 'red' : 'amber'}"><div class="accent"></div>
+        <div class="lbl">Demo mode</div>
+        <div class="val ${STATE.demo ? 'red' : 'amber'}" style="font-size:1.4rem;cursor:pointer"
+          onclick="navigate({demo: ${!STATE.demo}})">${STATE.demo ? 'ON' : 'OFF'}</div>
+        <div class="meta">Anonymizes competitor callsigns to "Competitor A/B/C"</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><h2>What's in the Owner Briefing PDF</h2></div>
+      <div class="card-bd">
+        <ul style="font-family:var(--sans);font-size:0.78rem;line-height:1.8;color:var(--text-muted);list-style:none;padding-left:0">
+          <li>· Cover page — "Prepared for ${GROUP.display_name}, ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}"</li>
+          <li>· Hero numbers — total addressable, captured, gap</li>
+          <li>· Competitive share with peer benchmark</li>
+          <li>· Market scoreboard — every DMA, share-of-voice bars</li>
+          <li>· LUR exposure summary by station</li>
+          <li>· Top 25 advertisers across footprint</li>
+        </ul>
+        <div style="margin-top:18px">
+          <button class="icon-btn" onclick="window.print()"
+            style="color:#fff;background:var(--blue);border-color:var(--blue);padding:11px 24px;font-size:0.7rem">
+            Generate Owner Briefing PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================================
+ * Print briefing — assembled on-demand
+ * ========================================================================= */
+function renderPrintBriefing(){
+  if(!STATE.data) return;
+  const a = STATE._agg || aggregate(STATE.data);
+  STATE._agg = a;
+  const existing = document.getElementById('print-briefing');
+  if(existing) existing.remove();
+  const stationRows = GROUP.stations.map(s => ({
+    callsign: s.callsign, dma: s.dma_label, network: s.network,
+    exposure: a.lurExposure[s.callsign]?.exposure || 0
+  })).sort((x,y) => y.exposure - x.exposure);
+  const block = document.createElement('div');
+  block.id = 'print-briefing'; block.className = 'print-only';
+  block.style.cssText = 'margin-top:30px';
+  block.innerHTML = `
+    <h1 style="font-family:var(--display);font-size:1.6rem;margin-bottom:8px">Hero numbers</h1>
+    <p style="font-family:var(--sans);font-size:0.9rem;margin-bottom:14px">
+      ${GROUP.short_name} captured <strong>${fmtUSDFull(a.coastal_total)}</strong>
+      of <strong>${fmtUSDFull(a.total_addressable)}</strong> across ${a.marketRows.length} markets
+      in the ${GROUP.cycle} cycle. <span style="color:#B8221E">${fmtUSDFull(a.gap)}</span> went to competitors.
+    </p>
+    <h2 style="font-family:var(--sans);font-size:1rem;margin:18px 0 6px">Markets — gap descending</h2>
+    ${marketTable(a.marketRows)}
+    <h2 style="font-family:var(--sans);font-size:1rem;margin:18px 0 6px">LUR exposure by station</h2>
+    <table>
+      <thead><tr><th>Station</th><th>Market</th><th>Network</th><th class="cell-num">Exposure</th></tr></thead>
+      <tbody>${stationRows.map(s => `<tr>
+        <td><strong>${s.callsign}</strong></td><td>${s.dma}</td><td>${s.network}</td>
+        <td class="cell-num">${fmtUSDFull(s.exposure)}</td></tr>`).join('')}</tbody>
+    </table>
+    <h2 style="font-family:var(--sans);font-size:1rem;margin:18px 0 6px">Top 15 advertisers</h2>
+    <table>
+      <thead><tr><th>Advertiser</th><th class="cell-num">Total</th><th class="cell-num">Captured</th><th class="cell-num">Lost</th><th class="cell-num">Win %</th></tr></thead>
+      <tbody>${a.advertisers.slice(0,15).map(adv => `<tr>
+        <td>${adv.advertiser}</td>
+        <td class="cell-num">${fmtUSDFull(adv.total)}</td>
+        <td class="cell-num">${fmtUSDFull(adv.coastal)}</td>
+        <td class="cell-num">${fmtUSDFull(adv.comp)}</td>
+        <td class="cell-num">${fmtPct(adv.win_pct)}</td></tr>`).join('')}</tbody>
+    </table>
+  `;
+  $('#main').appendChild(block);
+}
+window.addEventListener('beforeprint', renderPrintBriefing);
+window.addEventListener('afterprint', () => {
+  const e = document.getElementById('print-briefing'); if(e) e.remove();
+});
+
+/* =========================================================================
+ * Top-level render
+ * ========================================================================= */
+function render(){
+  renderHeader();
+  if(STATE.error){ renderError(STATE.error); return; }
+  if(STATE.loading || !STATE.data){ renderLoading(); return; }
+  switch(STATE.view){
+    case 'hero':        renderHero();        break;
+    case 'markets':     renderMarketsList(); break;
+    case 'market':      renderMarket();      break;
+    case 'compliance':  renderCompliance();  break;
+    case 'competition': renderCompetition(); break;
+    case 'exports':     renderExports();     break;
+    default:            renderHero();
+  }
+}
+
+/* =========================================================================
+ * Bootstrap
+ * ========================================================================= */
+async function init(){
+  parseRoute(); renderHeader();
+  const ok = await checkAuth();
+  if(!ok) return;
+  STATE.loading = true; render();
+  try{
+    STATE.data = await loadGroupData(GROUP);
+    STATE.loading = false; render();
+  }catch(e){
+    STATE.loading = false;
+    STATE.error = 'Failed to load data: ' + e.message;
+    render();
+  }
+}
+
+/* ---- Auth wiring ---- */
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn'), err = document.getElementById('auth-err');
+  btn.disabled = true; btn.textContent = 'Signing in…'; err.textContent = '';
+  try{
+    const r = await fetch(API + '/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        email: document.getElementById('login-email').value.trim(),
+        password: document.getElementById('login-password').value
+      })
+    });
+    const d = await r.json();
+    if(!r.ok){ err.textContent = d.error || 'Login failed'; btn.disabled = false; btn.textContent = 'Sign in'; return; }
+    TOKEN = d.token; USER_EMAIL = d.email;
+    localStorage.setItem('pw_token', d.token);
+    localStorage.setItem('pw_user', d.email);
+    document.getElementById('user-pill').textContent = USER_EMAIL;
+    hideOverlay();
+    init();
+  }catch(ex){ err.textContent = 'Network error'; btn.disabled = false; btn.textContent = 'Sign in'; }
+});
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('register-btn'), err = document.getElementById('auth-err');
+  const pw  = document.getElementById('reg-password').value;
+  const pw2 = document.getElementById('reg-password2').value;
+  if(pw !== pw2){ err.textContent = 'Passwords do not match'; return; }
+  btn.disabled = true; btn.textContent = 'Creating account…'; err.textContent = '';
+  try{
+    const r = await fetch(API + '/auth/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        email: document.getElementById('reg-email').value.trim(),
+        password: pw,
+        invite_token: document.getElementById('reg-invite').value.trim()
+      })
+    });
+    const d = await r.json();
+    if(!r.ok){ err.textContent = d.error || 'Registration failed'; btn.disabled = false; btn.textContent = 'Create account'; return; }
+    TOKEN = d.token; USER_EMAIL = d.email;
+    localStorage.setItem('pw_token', d.token);
+    localStorage.setItem('pw_user', d.email);
+    hideOverlay();
+    init();
+  }catch(ex){ err.textContent = 'Network error'; btn.disabled = false; btn.textContent = 'Create account'; }
+});
+document.getElementById('show-register').onclick = () => {
+  document.getElementById('login-form').style.display = 'none';
+  document.getElementById('register-form').style.display = 'flex';
+  document.getElementById('auth-title').textContent = 'Create account';
+};
+document.getElementById('show-login').onclick = () => {
+  document.getElementById('register-form').style.display = 'none';
+  document.getElementById('login-form').style.display = 'flex';
+  document.getElementById('auth-title').textContent = 'Sign in';
+};
+document.getElementById('logout-btn').onclick = logout;
+
+init();
+</script>
+</body>
+</html>

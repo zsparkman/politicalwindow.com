@@ -172,26 +172,31 @@ multiple PSIDs in the same DMA intentionally collapse to the same
 label. Comcast uses its legal name, not Xfinity.
 
 ## Current State (Apr 2026)
-- **Owner Dashboard viewport (`groups.html`, 5/11/26)** — new page
-  built as a pure read-only viewport over existing `ratewindow-api`
-  endpoints. Sales artifact for closing SaaS license deals with
-  station-group owners. Coastal Television Broadcasting Group is
-  template #1 (22 stations across 12 DMAs); a stubbed
-  `example-broadcasting` second group proves genericity. **No schema
-  changes, no new backend, no edits to any existing file.** Routing
-  is query-param based: `groups.html?group=<slug>&view=<hero|markets|
-  market|compliance|competition|exports>&dma=<DMA>&demo=true`.
-  Group config lives in the `GROUPS` JS object at the top of the
-  file — adding a new owner = one config entry, no other code change.
-  All aggregation (per-DMA Coastal-vs-comp split, LUR exposure, top
-  advertisers, weekly trend, daypart heatmap) runs client-side from
-  `Promise.all` fanout against `/api/invoices?state=`,
-  `/api/lur?callsign=`, and `/api/lines?station=`. Owner Briefing PDF
-  uses a `@media print` stylesheet + `beforeprint` hook that appends
-  the full briefing block regardless of current view; PPTX deferred
-  to v2. Auth reuses the existing JWT/`pw_token` flow from `lur.html`
-  exactly. See `CHANGES.md` 2026-05-11 for the full feature index and
-  v2 candidates. Page index in `politicalwindow.architecture.md` §7.
+- **Coastal Owner Dashboard (`coastal.html`, 5/12/26 — supersedes
+  yesterday's `groups.html`)** — dedicated per-owner page reachable
+  at `politicalwindow.com/coastal` (extension-stripped via GH Pages,
+  matching `/lur`, `/admin`, `/explorer`). Full authentication
+  required — the page renders nothing data-related until
+  `/auth/me` returns 200; login overlay matches `lur.html` exactly
+  (JWT in `localStorage.pw_token`). Pure read-only viewport over
+  existing `ratewindow-api` endpoints — no schema changes, no new
+  backend, no edits to any other file. **Visual rework vs the v1**:
+  hero is a two-card split with the captured number AND the gap
+  number both at 5.5rem Bebas Neue (gap is no longer secondary);
+  market scoreboard with share-of-voice stacked bars sized
+  proportionally to total market $ replaces the table as primary
+  visual; market-detail view gets a 220×220 SVG share donut + peer
+  benchmark dot; weekly trend has gradient area fills; compliance
+  uses a "station wall" of red/green color-coded tiles; competition
+  uses a 25-card advertiser leaderboard. Per-owner onboarding model:
+  copy `coastal.html` to `<owner-slug>.html` and edit the `GROUP`
+  constant at the top (slug, name, station list, peer benchmark).
+  No other code change. The multi-tenant `?group=<slug>` engine from
+  yesterday is gone — per-owner files are the production pattern.
+  Routes: `/coastal?view=<hero|markets|market|compliance|competition|
+  exports>&dma=<DMA>&demo=true`. See `CHANGES.md` 2026-05-12 for the
+  full feature index, visual decisions, and v2 deferrals. Page index
+  in `politicalwindow.architecture.md` §7.
 - **LUR Invoice Review modal (4/24)** — the pop-out on `lur.html` that
   opens from the red "COMPARE INVOICES" button on a variance row now uses
   independent per-panel invoice selection. Each panel has its own
