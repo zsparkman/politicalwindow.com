@@ -4,6 +4,163 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-05-11 — `groups.html` — Owner Dashboard viewport added
+
+New page: `groups.html`. A station-group owner dashboard built as a pure
+**read-only viewport** over the existing `ratewindow-api` data — no
+schema migrations, no new backend service, no edits to any existing
+file. Designed as a sales artifact for closing SaaS license deals with
+station-group owners. Coastal Television Broadcasting Group is template
+#1; a stubbed second group (`example-broadcasting`) is included in the
+config to prove genericity.
+
+### What it is
+
+Single self-contained HTML/CSS/JS file (~1,000 lines) following the
+`lur.html` pattern: login overlay → JWT in `localStorage.pw_token` →
+authed fetches against `https://rates.politicalwindow.com`. No new
+endpoints. All aggregation happens client-side from existing
+`/api/invoices`, `/api/lur`, `/api/lines` responses.
+
+### Routing
+
+Query-param based to fit the static-host model:
+
+- `groups.html?group=coastal-tv` — hero (default)
+- `groups.html?group=coastal-tv&view=markets`
+- `groups.html?group=coastal-tv&view=market&dma=ANCHORAGE`
+- `groups.html?group=coastal-tv&view=compliance`
+- `groups.html?group=coastal-tv&view=competition`
+- `groups.html?group=coastal-tv&view=exports`
+- `groups.html?group=coastal-tv&demo=true` — anonymizes competitor
+  callsigns to "Competitor A/B/C" for screenshots
+
+Subdomain rewrites (`coastal-tv.politicalwindow.com → groups.html?group=coastal-tv`)
+are documented as DNS+CNAME post-sale; no middleware needed because
+nothing on this host runs server-side.
+
+### Group config — extensibility
+
+`GROUPS` JS object keyed by slug. Each entry carries:
+
+- `slug`, `display_name`, `short_name`, `cycle`, `peer_share_pct`
+- `stations[]` — `{callsign, dma_label, dma_db, network, state}` per
+  owned callsign. `dma_db` is the UPPERCASE FCC-format DMA name as
+  stored in `political_invoices.station_market` (e.g. `'ANCHORAGE'`,
+  `'FARGO-VALLEY CITY'`); `dma_label` is the human display string
+  (e.g. `'Anchorage, AK'`).
+
+Adding a new owner group = one config entry. No code change anywhere
+else. Coastal seeded with the 22-station footprint provided by the
+maintainer (verbatim — do not re-fetch coastaltvgroup.com per the
+build directive).
+
+### Views
+
+1. **Hero** (`view=hero`, default) — the entire pitch in one screen at
+   1440px. Headline reads
+   "${group} captured ${X}M of ${Y}M political dollars across your N
+   markets in the ${cycle} cycle" with a half-size red sub
+   "$Z.ZM went to competitor stations." Below: competitive-share
+   stacked bar with peer-benchmark tick mark, three KPI tiles
+   (total addressable / share % vs benchmark / LUR exposure $),
+   sortable market table (default sort: Gap $ desc), CSV export.
+2. **Markets** (`view=markets`) — the same market table as a
+   stand-alone page.
+3. **Market detail** (`view=market&dma=...`) — header with DMA total
+   $, share %, gap $; multi-station consolidation panel for the 9
+   multi-station markets (Anchorage, Fairbanks, Juneau, Casper,
+   Cheyenne, Meridian, Jackson TN, Jonesboro, Lafayette IN);
+   station comparison table (Coastal-highlighted); top-10 buyers
+   in market with Coastal vs comp split; weekly trend SVG line
+   chart with worst-week annotation; daypart × week heatmap of
+   Coastal-side under-indexing.
+4. **Compliance** (`view=compliance`) — KPI tiles (total LUR
+   exposure / refund-risk top station / clean-station count); two
+   tables (stations by LUR exposure, top-20 violation flights).
+   Print-PDF button on the violations table.
+5. **Competition** (`view=competition`) — top-25 advertisers across
+   the entire footprint with total $ / Coastal capture / lost to
+   comp / win-rate bar / top-3 markets. CSV export.
+6. **Exports** (`view=exports`) — Owner Briefing PDF (browser print
+   stylesheet — see below); PPTX deferred to v2 with explicit "v2"
+   tile; shareable read-only link with copy-to-clipboard.
+
+### Owner Briefing PDF — print stylesheet approach
+
+`@media print` block hides the header, footer, and tabs; widens the
+page; switches the body to white; ensures cards page-break-inside:
+avoid. A `.print-cover` div renders only on print and provides the
+"Prepared for ${group}, ${date}" cover page. A `beforeprint` event
+appends a `#print-briefing` block with the full hero numbers + market
+table + LUR exposure + top-15 advertisers, regardless of which view
+the user is currently in. `afterprint` removes it. Result:
+File → Print → Save as PDF in any browser produces a branded,
+multi-page Owner Briefing without a server. PPTX generation is
+explicitly deferred to v2 (would require adding `pptxgenjs` to
+`ratewindow-api`).
+
+### Data flow per page load
+
+For the active group:
+
+1. `Promise.all` fetches `/api/invoices?state=<st>&limit=2000` per
+   distinct state in the group's footprint (≤9 calls for Coastal).
+   Filtered client-side to invoices whose `station_market` matches
+   the group's `dma_db` set.
+2. `Promise.all` fetches `/api/lur?callsign=<cs>` for every owned
+   callsign (22 calls for Coastal).
+3. `Promise.all` fetches `/api/lines?station=<cs>&limit=2000` per
+   owned callsign for the daypart × week heatmap and weekly trend.
+4. Aggregation runs client-side: per-DMA totals, Coastal vs comp
+   split, top advertisers, LUR exposure (charged − LUR × spots,
+   summed), weekly series, daypart matrix.
+5. Coverage indicator: any DMA with zero indexed invoices renders a
+   `No coverage` tag on its row instead of fabricating numbers
+   (per the build directive: "no placeholder data in the live
+   view").
+
+### Auth
+
+Reuses the existing `ratewindow-api` JWT flow exactly as in
+`lur.html`: `POST /auth/login` → `localStorage.pw_token` →
+`Authorization: Bearer` on every authed fetch. Registration accepts
+the existing `invites` token. Per-group invite scoping is **not**
+added in v1 — anyone with a valid `pw_token` can hit `groups.html`.
+A future schema-additive `group_invites` table can introduce
+group-scoped access without breaking the existing flow; deferred
+until first paying customer signs.
+
+### Design
+
+Matches the production token set in `TOKENS.md` (light theme — the
+"Bloomberg dark navy" line in `CLAUDE.md` is stale per the
+inconsistency note in `politicalwindow.architecture.md` §5).
+Executive treatment: more whitespace than the operational pages,
+display typeface (Bebas Neue) on hero numbers, restrained palette
+(blue + red + amber + green only), no chart junk. Microsoft Clarity
+tag included (per `CLAUDE.md` "all 7 HTML pages" convention; this
+makes 8). No GA4 — internal/auth-gated page like `lur.html` and
+`admin.html`.
+
+### Files touched
+
+Only `politicalwindow.com/groups.html` was created. Zero edits to
+`index.html`, `lur.html`, or any other existing page. Zero schema
+changes. Zero changes to `ratewindow-api` or `politicalwindow-api`.
+
+### Future v2 candidates
+
+- Group-scoped auth (additive `group_invites` table; route gating)
+- Server-rendered Owner Briefing PDF (replace browser-print with a
+  `pdfkit` endpoint on `ratewindow-api` for richer layout)
+- Sales Playbook PPTX (`pptxgenjs` on `ratewindow-api`)
+- Subdomain rewrite at the CDN layer (Cloudflare Worker or similar)
+- Federal/state/local + party + PAC-type filters on the
+  Competition view (currently shows totals only)
+
+---
+
 ## 2026-05-07 — Microsoft Clarity analytics installed
 
 Added the Microsoft Clarity tag (project ID `wnbzwo190n`) to every HTML

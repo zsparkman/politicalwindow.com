@@ -172,6 +172,26 @@ multiple PSIDs in the same DMA intentionally collapse to the same
 label. Comcast uses its legal name, not Xfinity.
 
 ## Current State (Apr 2026)
+- **Owner Dashboard viewport (`groups.html`, 5/11/26)** — new page
+  built as a pure read-only viewport over existing `ratewindow-api`
+  endpoints. Sales artifact for closing SaaS license deals with
+  station-group owners. Coastal Television Broadcasting Group is
+  template #1 (22 stations across 12 DMAs); a stubbed
+  `example-broadcasting` second group proves genericity. **No schema
+  changes, no new backend, no edits to any existing file.** Routing
+  is query-param based: `groups.html?group=<slug>&view=<hero|markets|
+  market|compliance|competition|exports>&dma=<DMA>&demo=true`.
+  Group config lives in the `GROUPS` JS object at the top of the
+  file — adding a new owner = one config entry, no other code change.
+  All aggregation (per-DMA Coastal-vs-comp split, LUR exposure, top
+  advertisers, weekly trend, daypart heatmap) runs client-side from
+  `Promise.all` fanout against `/api/invoices?state=`,
+  `/api/lur?callsign=`, and `/api/lines?station=`. Owner Briefing PDF
+  uses a `@media print` stylesheet + `beforeprint` hook that appends
+  the full briefing block regardless of current view; PPTX deferred
+  to v2. Auth reuses the existing JWT/`pw_token` flow from `lur.html`
+  exactly. See `CHANGES.md` 2026-05-11 for the full feature index and
+  v2 candidates. Page index in `politicalwindow.architecture.md` §7.
 - **LUR Invoice Review modal (4/24)** — the pop-out on `lur.html` that
   opens from the red "COMPARE INVOICES" button on a variance row now uses
   independent per-panel invoice selection. Each panel has its own
