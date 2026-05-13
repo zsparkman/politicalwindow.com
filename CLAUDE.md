@@ -172,6 +172,36 @@ multiple PSIDs in the same DMA intentionally collapse to the same
 label. Comcast uses its legal name, not Xfinity.
 
 ## Current State (Apr 2026)
+- **Architecture: §14 Workspaces written + §12 quirks promoted
+  (5/12/26 EOD+)** — the workspace pattern is now first-class
+  documentation in `politicalwindow.architecture.md` §14
+  (8 subsections: concept / types / config schema / view library /
+  data resolution / visual primitives catalog / onboarding /
+  roadmap). The two underlying-data quirks that any future viewport
+  author needs to know — `rate_lines` ~41% gross coverage and
+  `political_invoices.fcc_file_url` being NULL footprint-wide — are
+  now in §12 Known Quirks with the canonical fix patterns
+  (`weekStart()` invoice-bucketing for $ time series; `pdfUrlFor()`
+  for PDF link resolution). Cross-references between §14, the
+  README workspace section, and the root architecture's §6 Q9 are
+  all aligned.
+- **Workspace namespace introduced — `/w/<slug>` (5/12/26 EOD)** —
+  the per-owner dashboard is the first instance of a more general
+  **Workspace** abstraction (a scoped lens on the invoice/line/LUR
+  data lake, parameterized by persona). Coastal moved from
+  `politicalwindow.com/coastal` → `politicalwindow.com/w/coastal`;
+  file relocated to `politicalwindow.com/w/coastal.html`. The bare
+  `/coastal` URL is no longer served. `/w/<slug>` is the canonical
+  workspace namespace going forward — future workspace types
+  (agency-side, campaign-side, custom saved filters) all live at
+  `/w/<slug>`. The current `GROUP` constant pattern stays
+  hardcoded per file until a second workspace type is built; then
+  it becomes a typed `WORKSPACE` config (`type:
+  'ownership_group' | 'agency' | 'campaign' | 'custom'` with
+  scope-discriminated fields). No backend changes; workspaces as
+  DB-backed first-class entities (with CRUD + ACL) is a v3
+  concern. Architecture-doc §14 "Workspaces" planned but not yet
+  written. See `CHANGES.md` 2026-05-12 workspace-namespace entry.
 - **Coastal Owner Dashboard follow-up #4 (5/12/26 late PM)** —
   added a dedicated **Invoices tab** (5th in the top nav) plus an
   in-context "Invoices in this market" section on every market-

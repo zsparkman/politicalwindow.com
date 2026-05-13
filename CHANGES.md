@@ -4,6 +4,136 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-05-12 — Architecture doc: §14 "Workspaces" written + §12 quirks added
+
+Promoted the workspace pattern from informal documentation (CHANGES
+entries + CLAUDE.md "Current State" + memory) to first-class
+architectural documentation in `politicalwindow.architecture.md`.
+
+### §14 Workspaces (new section)
+
+8 subsections covering the full pattern:
+
+- §14.1 Concept — workspace = scoped lens on the data lake; `/w/<slug>`
+  namespace; current per-file implementation
+- §14.2 Workspace types — table of 4 types (ownership_group / agency /
+  campaign / custom) with scope key, persona, headline metric, status
+- §14.3 Workspace config schema — verbatim `GROUP` constant today,
+  the typed `WORKSPACE` config v2 contract with type-discriminated
+  scope, the hard `dma_db` UPPERCASE-match contract
+- §14.4 View library — table of 5 shipped views with scope-agnostic
+  vs type-specific classification + per-type reframing notes
+- §14.5 Data resolution per scope-type — endpoint fanout per type +
+  the two cross-cutting helpers (`weekStart()`, `pdfUrlFor()`)
+- §14.6 Visual primitives catalog — table of 9 primitives with
+  current-use and reusable-for columns
+- §14.7 Onboarding — today (copy-and-edit), v2 (typed config,
+  still per-file), v3 (DB-backed + admin UI)
+- §14.8 Roadmap — v1 → v2 → v3 → v3+ with triggers for each phase
+
+### §12 Known Quirks and Gotchas (two additions)
+
+Promoted two data-quirk caveats from CHANGES + memory to the
+architecture's quirks section so they're discoverable to any future
+viewport author, not just the Coastal-dashboard maintainer:
+
+- **`rate_lines` is incomplete relative to `political_invoices`** —
+  41% gross coverage on the KTBY audit (2026-05-12). Rule: sum
+  `political_invoices.gross_amount` for $ totals; only consult
+  `rate_lines` for daypart/week/per-spot granularity with a UI
+  caveat. Calls out the `weekStart()` invoice-bucketing fix.
+- **`political_invoices.fcc_file_url` is NULL footprint-wide** — 0
+  of 114 Coastal rows. Documents the `pdfByOrder` cross-reference
+  pattern via `/api/lines` (which builds the FCC URL at query time
+  from the `fcc_files` join — `ratewindow-api/index.js:721`).
+  Calls out the `pdfUrlFor()` helper as canonical.
+
+### Cross-doc continuity
+
+- `political-window.architecture.md` §6 Q9 (workspace abstraction
+  maturity) now points at §14 for the resolved pattern.
+- `politicalwindow.com/README.md` Workspaces section is consistent
+  with §14.7 Onboarding.
+- Memory `project_groups_html.md` is consistent with §14.4 (5-view
+  contract) and §14.5 (data resolution patterns).
+
+### Files touched
+
+- `politicalwindow.com/politicalwindow.architecture.md` — appended
+  §14 (~150 lines) + 2 new bullets in §12.
+- This changelog entry.
+
+---
+
+## 2026-05-12 — Workspace namespace introduced: `/w/<slug>` (Coastal moved from `/coastal`)
+
+Architectural shift: the per-owner-file pattern from this morning's
+build is the first concrete instance of a more general **Workspace**
+abstraction. A workspace is a scoped lens on the same underlying
+invoice/line/LUR data, parameterized by persona — ownership groups,
+agencies, campaigns, and arbitrary saved filters all become workspace
+types under a single namespace.
+
+### What changed today
+
+- **Path move**: `politicalwindow.com/coastal` → `politicalwindow.com/w/coastal`.
+  File relocated from `politicalwindow.com/coastal.html` to
+  `politicalwindow.com/w/coastal.html`. The bare `/coastal` URL is
+  no longer served (clean cut — no production traffic, no aliases
+  to maintain). All existing query-string deep links continue to
+  work because the routing inside the file is path-agnostic
+  (`?view=`, `?dma=`, `?demo=` all preserve `location.pathname`).
+- **`/w/<slug>` is the canonical workspace namespace going forward.**
+  Coastal is workspace #1 (type: ownership group). Future workspaces
+  — Nexstar, Sinclair, GMMB-the-agency, the-Schiff-campaign, an
+  analyst's saved filter — all live at `/w/<slug>`.
+
+### Why a workspace abstraction (vs. the per-owner framing)
+
+The current dashboard is owner-specific in tone (gap framing,
+share-of-voice scoreboard, competitor cards) but most of the engine
+underneath is scope-agnostic — `Promise.all` data fanout, the
+sortable Invoices view with PDF resolution, LUR exposure
+computation, top-buyers / top-stations rollups, print briefing,
+auth, demo mode, CSV export. Reframing as Workspaces lets the same
+engine power:
+
+| Type | Scope key | Persona | Headline metric |
+|---|---|---|---|
+| Ownership group (Coastal today) | set of `station_call_sign` | Group exec, sales VP | Gap $ vs competitors |
+| Agency (v2) | set of `agency_name` | Agency principal | $ placed across stations |
+| Campaign (v2) | set of `political_entity_id` | Campaign manager | $ spent + LUR exposure |
+| Custom (v2) | arbitrary saved filter | Analyst | any |
+
+The only owner-specific surfaces are the gap headline framing, the
+share-of-voice scoreboard, and the competitor cards. Everything
+else (Markets, Invoices, Compliance, top buyers) is reusable for
+any scope.
+
+### What's NOT changing today
+
+- `coastal.html` itself is byte-for-byte the same (just relocated).
+- `GROUP` constant pattern is still hardcoded per file. Will become
+  a typed `WORKSPACE` config (`type: 'ownership_group' | 'agency' |
+  'campaign' | 'custom'` + scope-discriminated fields) when the
+  second workspace type is built.
+- No backend changes. Workspaces as DB-backed first-class entities
+  (with CRUD + ACL) is a v3 concern; until then it's "copy file +
+  edit constant" per workspace.
+- Architecture doc additions for the workspace pattern are
+  separately pending (planned as `politicalwindow.architecture.md`
+  §14 Workspaces).
+
+### Files touched
+
+- Moved: `politicalwindow.com/coastal.html` → `politicalwindow.com/w/coastal.html`
+- New directory: `politicalwindow.com/w/`
+- This changelog entry; `CLAUDE.md` "Current State" updated;
+  `politicalwindow.architecture.md` §4 directory layout + §7 page
+  map updated; root `political-window.architecture.md` updated.
+
+---
+
 ## 2026-05-12 — `coastal.html` follow-up #4: dedicated Invoices tab with click-to-view PDF
 
 User asked for invoices to be prominently listed with click-to-view/
