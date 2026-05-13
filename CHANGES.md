@@ -4,6 +4,65 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-05-12 — Architecture-doc generator prompt updated (`Architecture_Docs_Prompt.md`)
+
+The system prompt at `Political Window/Architecture_Docs_Prompt.md`
+that produces all four architecture files was updated so a future
+regeneration captures today's state instead of losing it. Four
+specific issues fixed:
+
+1. **Corrected the `politicalwindow.com/` description.** The prompt
+   previously said "Next.js frontend (deployed via GitHub Pages)"
+   on line 8. The repo is **not** Next.js — it's static multi-page
+   HTML with inline JS, no build step, no `package.json` at the
+   repo root. Updated to call out the static-multi-page reality
+   plus the `/w/<slug>` workspace namespace, with a hedge telling
+   the regenerator to confirm by listing the repo root.
+2. **Added §14+ "Repeatable patterns" as a sanctioned conditional
+   section** in the per-repo doc template. The prompt previously
+   prescribed exactly §1–§13; a regeneration would have deleted
+   `politicalwindow.com/politicalwindow.architecture.md` §14
+   Workspaces. The new rule allows §14+ when (a) more than one
+   instance of the pattern ships or is planned AND (b) future
+   instances would land inconsistently without a written contract.
+   Points at §14 Workspaces as the canonical example.
+3. **Added `_Last revised:_` amendment-history convention** to
+   both the per-repo and parent doc templates. Convention: keep
+   `_Last generated:_` frozen at the date of the original
+   generation; add a new `_Last revised: [date] — [summary]_` line
+   per amendment, never overwriting prior ones. Models the
+   convention by adding a `_Last revised:_` line to the prompt
+   itself.
+4. **Added a sanity-check item** at the bottom of the prompt
+   instructing any regenerator to preserve `_Last revised:_` lines
+   and any §14+ Repeatable-patterns sections from prior versions.
+   If a §14+ pattern has been retired, mark the section
+   "DEPRECATED — superseded by [pointer]" rather than deleting it.
+
+Documented inside `Architecture_Docs_Prompt.md` itself via the new
+`_Last revised:_` line at the top.
+
+### Why this matters
+
+The prompt is the framework that produces the architecture docs.
+Today's manual amendments (workspace namespace, §14 Workspaces, §12
+quirks, all four files' `_Last revised:_` lines) would be wiped on
+the next regeneration unless the prompt itself is updated to
+recognize them as legitimate. With this update, regeneration is a
+safe operation rather than a destructive one — future Claude
+sessions can refresh the architecture docs without losing
+hand-curated content.
+
+### Files touched
+
+- `Political Window/Architecture_Docs_Prompt.md` — 5 edits
+  (corrected line 8, expanded operating context, added §14+ rule,
+  added `_Last revised:_` convention to both templates, added
+  preserve-amendments sanity-check item).
+- This changelog entry.
+
+---
+
 ## 2026-05-12 — Architecture doc: §14 "Workspaces" written + §12 quirks added
 
 Promoted the workspace pattern from informal documentation (CHANGES

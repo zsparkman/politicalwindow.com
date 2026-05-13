@@ -172,6 +172,19 @@ multiple PSIDs in the same DMA intentionally collapse to the same
 label. Comcast uses its legal name, not Xfinity.
 
 ## Current State (Apr 2026)
+- **Architecture-doc generator prompt updated (5/12/26 EOD+)** —
+  `Political Window/Architecture_Docs_Prompt.md` was patched to
+  preserve today's amendments on any future regeneration: corrected
+  the `politicalwindow.com/` description (it's static multi-page,
+  NOT Next.js); added the `/w/<slug>` workspace namespace to the
+  operating context; added §14+ "Repeatable patterns" as a
+  sanctioned optional section in the per-repo template (with §14
+  Workspaces as the canonical example); added a `_Last revised:_`
+  amendment-history convention to both per-repo and parent
+  templates; added a sanity-check item instructing regenerators to
+  preserve `_Last revised:_` lines and §14+ sections. Future
+  regeneration is now safe rather than destructive. See `CHANGES.md`
+  2026-05-12 generator-prompt entry.
 - **Architecture: §14 Workspaces written + §12 quirks promoted
   (5/12/26 EOD+)** — the workspace pattern is now first-class
   documentation in `politicalwindow.architecture.md` §14
