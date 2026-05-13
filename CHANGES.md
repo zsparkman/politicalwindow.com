@@ -4,6 +4,81 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-05-12 — `coastal.html` follow-up #2: Exports tab removed + weekly chart switched to invoice-level data (KTBY audit fix)
+
+### Exports tab removed
+
+The Exports tab was removed from the top-nav `VIEWS` array. The Owner
+Briefing PDF still works from any view via `window.print()` — the
+`@media print` stylesheet + `beforeprint` hook are unchanged. The
+dedicated tab UI was 90% empty (the only live action was Print; PPTX
+is still v2; the share-link copy was a one-line action better placed
+inline) and surfacing it as a primary tab implied more was there.
+
+- `VIEWS` array trimmed from 5 entries to 4 (Overview / Markets /
+  Compliance / Competition).
+- Top-level router still routes `?view=exports` for legacy deep links —
+  it falls through to `renderHero()` rather than 404'ing.
+- `renderExports()` function deleted entirely (~60 lines of dead code).
+- Browser print is the canonical Owner Briefing path now: hit the
+  browser's File → Print from any view; the print stylesheet + the
+  `beforeprint` listener that injects `#print-briefing` produce the
+  full branded report regardless of which view was visible.
+
+### KTBY audit — found a real undercount in the weekly chart, fixed
+
+User asked to double-check KTBY for errors. Cross-referenced
+`political_invoices`, `rate_intel`, `rate_lines`, and the dashboard's
+aggregator output:
+
+- `political_invoices` for KTBY: **20 rows, $167,071 total gross**, 20
+  distinct contracts, all 2026 cycle, all `ANCHORAGE` market,
+  no NULL gross/start/year/market, no duplicate contract numbers.
+  Matches `rate_intel` to the dollar.
+- Dashboard hero / scoreboard / market table / station list / top
+  buyers / advertiser cards: all read from `political_invoices` and
+  display **$167,071** for KTBY — correct, no bug.
+- **`rate_lines` for KTBY: 257 rows, $67,839 total — covers only 41%
+  of the invoiced gross.** This is a known data-quality limitation of
+  the line-level extraction pipeline (many invoices land in
+  `political_invoices` from header totals without the line itemization
+  being parseable). The weekly trend chart on the market-detail view
+  was built off `rate_lines` and was therefore visually undercounting
+  Coastal's Anchorage performance by ~$100K — the chart didn't tie
+  back to the headline numbers.
+- **Fix:** the weekly trend chart now reads from `political_invoices`,
+  bucketing each invoice into the broadcast-week Monday of its
+  `flight_start` via the new `weekStart()` helper (mirrors the
+  `rate_lines.week_of` convention from `ratewindow-api`). The chart
+  now ties exactly to the hero / scoreboard / station-list totals for
+  every market, not just KTBY.
+- **Tradeoff documented:** invoice-level bucketing attributes the
+  entire gross to the flight_start week rather than amortizing across
+  flight_start → flight_end. For a sales-pitch viewport that's fine —
+  the chart shows when bookings landed, not when impressions delivered.
+  An accurate delivery-pace chart would require knowing each flight's
+  daily/weekly schedule, which lives in `rate_lines` (which we just
+  established is incomplete).
+
+### Daypart heatmap caveat surfaced
+
+The daypart heatmap continues to read `rate_lines` because daypart is
+not a column on `political_invoices` — there's no other source. Subhead
+was updated to read "*Avg unit rate by daypart × broadcast week ·
+line-level extractions only (subset of invoiced gross)*" so the user
+understands the heatmap intentionally shows a partial slice; it's the
+only view in the dashboard that does.
+
+### Files touched
+
+- `politicalwindow.com/coastal.html` — `VIEWS` array trimmed,
+  `renderExports()` deleted, `weekStart()` helper added (after
+  `fmtDate`), market-detail weekly aggregation rewritten to use
+  invoices, weekly + heatmap subheads updated.
+- `CHANGES.md` (this entry), `CLAUDE.md` "Current State" updated.
+
+---
+
 ## 2026-05-12 — `coastal.html` follow-up: legends, date formatting, neutralized verbiage
 
 Three fixes after first user review of the new dashboard.

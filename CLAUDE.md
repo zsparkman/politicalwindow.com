@@ -172,6 +172,23 @@ multiple PSIDs in the same DMA intentionally collapse to the same
 label. Comcast uses its legal name, not Xfinity.
 
 ## Current State (Apr 2026)
+- **Coastal Owner Dashboard follow-up #2 (5/12/26 late PM)** —
+  Exports tab removed from `VIEWS`; `renderExports()` deleted;
+  `?view=exports` deep links fall through to the hero. Browser
+  print remains the canonical Owner Briefing path (works from any
+  view via `@media print` + the `beforeprint` hook). Plus a real
+  bug fix: per the KTBY audit, the market-detail weekly trend chart
+  was reading from `rate_lines`, which only covers ~41% of KTBY's
+  invoiced gross (and similarly undercounts most other stations
+  because line-level extraction is a known-incomplete derived
+  table). Switched the weekly chart to read from `political_invoices`
+  bucketed by `flight_start` ISO Monday (new `weekStart()` helper
+  mirrors the `rate_lines.week_of` convention). Chart now ties to
+  hero numbers for every market. Daypart heatmap still uses
+  `rate_lines` because daypart isn't on the invoice table; subhead
+  now warns "line-level extractions only (subset of invoiced gross)"
+  so the partial-coverage caveat is visible in the UI itself. See
+  `CHANGES.md` 2026-05-12 follow-up #2 for the full audit numbers.
 - **Coastal Owner Dashboard follow-up (5/12/26 PM)** — three fixes
   after first review of `coastal.html`: (1) every strategic-
   recommendation phrase that wasn't deducible from the source data
