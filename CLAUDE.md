@@ -172,6 +172,26 @@ multiple PSIDs in the same DMA intentionally collapse to the same
 label. Comcast uses its legal name, not Xfinity.
 
 ## Current State (Apr 2026)
+- **Coastal Owner Dashboard follow-up (5/12/26 PM)** — three fixes
+  after first review of `coastal.html`: (1) every strategic-
+  recommendation phrase that wasn't deducible from the source data
+  was removed (consolidation panel no longer says "stop competing
+  against yourself" / "coordinated pitch"; hero gap card no longer
+  says "money that flowed past your stations to rivals"; PPTX tile
+  no longer says "GSM handoff" — audit grep confirms zero remaining
+  instances of those + similar strategic verbs). (2) Two date
+  helpers (`fmtWeek` → `3/9`, `fmtDate` → `Mar 9`) replace the
+  v1 `.slice(5)` that left ISO-timestamp T-suffix garbage in the
+  weekly chart x-axis, daypart heatmap top labels, daypart cell
+  tooltips, the worst-week annotation, and the LUR violations
+  table week column. (3) Visual legends added to the two charts
+  that lacked them — `.chart-legend` HTML bar above the weekly
+  trend (blue/red swatches + axis note), `.heat-legend` HTML bar
+  below the daypart heatmap (horizontal slate→blue→red gradient
+  strip with min/max dollar values bracketing it). Daypart codes
+  also get SVG `<title>` tooltips resolving to full daypart names
+  (Early Morning / Daytime / etc.) so the two-letter codes decode
+  on hover. See `CHANGES.md` 2026-05-12 follow-up entry.
 - **Coastal Owner Dashboard (`coastal.html`, 5/12/26 — supersedes
   yesterday's `groups.html`)** — dedicated per-owner page reachable
   at `politicalwindow.com/coastal` (extension-stripped via GH Pages,

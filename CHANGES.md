@@ -4,6 +4,74 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-05-12 — `coastal.html` follow-up: legends, date formatting, neutralized verbiage
+
+Three fixes after first user review of the new dashboard.
+
+### What changed
+
+- **Removed every strategic-recommendation phrase that was not
+  deducible from the source data.** Specifically:
+  - The multi-station consolidation panel no longer reads "stop
+    competing against yourself" / "share an audience but compete for
+    buys" / "A coordinated pitch closes the gap." It now reads only
+    "${N}-station market — combined totals" with the literal fact:
+    `${dma_label} · N ${group.short_name} stations: ${callsigns}`.
+    The three rollup tiles (combined $, combined share %, competitor
+    $ in market) stay; the framing language is gone.
+  - The hero gap card no longer says "money that flowed past your
+    stations to rivals." It now says "across N markets with
+    competitor political ad spend on file" — a description of the
+    arithmetic, not a characterization of intent.
+  - The Exports tile previously labeled "Sales Playbook PPTX · One
+    slide per market for GSM handoff" is now "PPTX export · One
+    slide per market." The handoff-target language was a
+    recommendation about how to use the artifact; the artifact
+    description stays.
+  - Audit grep over the entire file confirms zero remaining
+    instances of: `stop competing`, `coordinated pitch`, `flowed
+    past`, `GSM handoff`, `leverage`, `strategic`, `optimize`,
+    `recommend`. Anything left in the file describes data or
+    artifacts, not strategy.
+- **Two date-formatting helpers added — fix for run-over date
+  labels.** The API returns `week_of` and `flight_start` as full
+  ISO timestamps (e.g. `2026-03-09T00:00:00.000Z`); the v1 code did
+  `.slice(5)` which still left `03-09T00:00:00.000Z` — overlapping
+  axis labels (visible in the user's screenshots). New helpers:
+  - `fmtWeek(d)` — compact axis tick: `2026-03-09T00:00:00.000Z`
+    → `3/9` (no zero-pad).
+  - `fmtDate(d)` — readable callout/table cell: `2026-03-09T...`
+    → `Mar 9` (Bebas Neue display style adjacent).
+  Used in: weekly trend x-axis ticks, weekly trend worst-week
+  annotation, daypart heatmap top week labels, daypart heatmap
+  cell tooltips, and the top-20 LUR violations table week column.
+- **Both charts now have explicit legends** (only ones that lacked
+  them — scoreboard, donut, station wall, advertiser cards already
+  carried in-band labels).
+  - Weekly trend: HTML `.chart-legend` bar above the SVG with a
+    blue swatch for ${group.short_name}, a red swatch for
+    Competitors, and a "Y-axis: gross $ · X-axis: broadcast week"
+    note. Visible in the printed PDF too.
+  - Daypart heatmap: HTML `.heat-legend` bar below the SVG showing
+    a horizontal gradient strip (`linear-gradient(slate → blue →
+    red)`) with the actual min and max avg unit rate dollar values
+    bracketing it, plus a "Hover any cell for daypart · week · $"
+    affordance hint. Daypart row labels (`EM`, `DT`, `EF`, …) now
+    also get SVG `<title>` tooltips that resolve to the full daypart
+    name (Early Morning / Daytime / Early Fringe / etc.) so the
+    two-letter codes are decodable on hover.
+- Heatmap cells widened from 8–28px to 14–36px so the grid reads
+  cleanly at fewer-than-30 weeks of data; cell tooltip now reads
+  `Daytime · Mar 9 · avg $1000` (full daypart name + readable date)
+  instead of `DT · 2026-03-09T00:00:00.000Z · avg $1000`.
+
+### Files touched
+
+- `politicalwindow.com/coastal.html` only.
+- This changelog entry; `CLAUDE.md` "Current State" updated.
+
+---
+
 ## 2026-05-12 — `coastal.html` — Owner Dashboard moved to `/coastal` + visual rework
 
 Renamed and rebuilt the Owner Dashboard from yesterday's `groups.html`:
