@@ -4,6 +4,31 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-05-12 — `coastal.html` follow-up #3: weekly chart annotation no longer clips
+
+The worst-comp-week annotation on the market-detail weekly trend chart
+was clipping in two ways: the label sat above the dot at `wy − 10`
+which fell outside the SVG when the worst-week point landed at the
+y-axis max (e.g. Anchorage where the comp line peaked at $487K =
+top of chart); and right-extending text fell off the right edge when
+the worst week was near the end of the cycle. Fix:
+
+- Top padding bumped from 14 → 32 viewBox units, chart height from
+  240 → 248, so there's headroom above any peak for an annotation.
+- Annotation now smart-positions itself:
+  - Right-anchored (`text-anchor="end"`, `x = wx − 8`) when the dot
+    sits in the right 55% of the chart, so text never extends past
+    the right edge.
+  - Plotted below the dot (`y = wy + 18`) when the dot is within
+    18 px of the top padding, so the label stays inside the SVG even
+    when the data point is at the y-axis max.
+  - Left-of-dot above-the-dot is the default (unchanged) for any
+    other position.
+
+No data-layer changes; pure rendering fix in `weeklyChart()`.
+
+---
+
 ## 2026-05-12 — `coastal.html` follow-up #2: Exports tab removed + weekly chart switched to invoice-level data (KTBY audit fix)
 
 ### Exports tab removed

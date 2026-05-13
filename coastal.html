@@ -1220,7 +1220,10 @@ function shareRing(pct, peerPct){
 }
 
 function weeklyChart(weekly, worstWeek){
-  const W = 920, H = 240, pad = {l: 56, r: 16, t: 14, b: 32};
+  /* Top padding leaves room for the worst-week annotation when the
+     peak data point sits at the y-axis max — without it the label
+     plots above the SVG bounds and gets clipped (5/12 follow-up). */
+  const W = 920, H = 248, pad = {l: 56, r: 16, t: 32, b: 32};
   const xs = weekly.map(w => w.week);
   const max = Math.max(...weekly.map(w => Math.max(w.coastal, w.comp)), 1);
   const innerW = W - pad.l - pad.r, innerH = H - pad.t - pad.b;
@@ -1247,8 +1250,18 @@ function weeklyChart(weekly, worstWeek){
     const idx = weekly.findIndex(w => w.week === worstWeek.week);
     if(idx >= 0){
       const wx = x(idx), wy = y(worstWeek.comp);
+      /* Smart-position the label so it always stays inside the SVG:
+         right-anchor when the dot is in the right half (avoids clip on
+         right edge); place below the dot when the dot is near the top
+         (otherwise label plots above the chart and gets clipped). */
+      const rightHalf = wx > W * 0.55;
+      const nearTop   = wy < pad.t + 18;
+      const tx = rightHalf ? (wx - 8) : (wx + 8);
+      const ty = nearTop ? (wy + 18) : (wy - 10);
+      const anchor = rightHalf ? 'end' : 'start';
       annotation = `<circle cx="${wx}" cy="${wy}" r="5" fill="var(--gap-red)" stroke="#fff" stroke-width="2"/>
-        <text x="${wx + 8}" y="${wy - 10}" font-family="var(--mono)" font-size="10" fill="var(--gap-red)" font-weight="600">
+        <text x="${tx}" y="${ty}" text-anchor="${anchor}"
+          font-family="var(--mono)" font-size="10" fill="var(--gap-red)" font-weight="600">
           Worst comp week: ${fmtDate(worstWeek.week)} · ${fmtUSD(worstWeek.comp)}</text>`;
     }
   }
