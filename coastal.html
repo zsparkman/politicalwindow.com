@@ -277,6 +277,38 @@ tr.row-coastal:hover{background:rgba(29,78,216,0.08)}
 .adv-win.mid{color:var(--gap-amber)}
 .adv-win.hi{color:var(--green)}
 
+/* ==== Invoices view ==== */
+.inv-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:14px 22px;
+  border-bottom:1px solid var(--border-faint);background:var(--surface-alt)}
+.inv-toolbar .inv-search{flex:1;min-width:200px;display:flex;align-items:center;gap:6px;
+  background:#fff;border:1px solid var(--border);border-radius:5px;padding:6px 10px}
+.inv-toolbar .inv-search input{flex:1;border:0;outline:none;font-family:var(--mono);
+  font-size:0.7rem;color:var(--text);background:transparent}
+.inv-toolbar .inv-search svg{flex-shrink:0;color:var(--text-faint)}
+.inv-scope{display:inline-flex;background:#fff;border:1px solid var(--border);border-radius:5px;padding:2px}
+.inv-scope button{font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);
+  background:transparent;border:0;padding:5px 12px;border-radius:3px;letter-spacing:0.05em;
+  text-transform:uppercase;cursor:pointer}
+.inv-scope button.active{background:var(--blue);color:#fff}
+.inv-stats{font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);letter-spacing:0.04em;margin-left:auto}
+.inv-stats strong{color:var(--text);font-weight:600}
+.btn-view{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:0.58rem;
+  color:var(--blue);background:var(--blue-glow);border:1px solid rgba(29,78,216,0.3);
+  border-radius:4px;padding:3px 8px;letter-spacing:0.04em;text-decoration:none;font-weight:600;
+  white-space:nowrap;transition:background 0.12s}
+.btn-view:hover{background:var(--blue);color:#fff;text-decoration:none}
+.btn-view-mini{font-family:var(--mono);font-size:0.55rem;color:var(--text-muted);
+  background:transparent;border:1px solid var(--border);border-radius:3px;padding:2px 6px;
+  letter-spacing:0.04em;text-decoration:none;white-space:nowrap}
+.btn-view-mini:hover{color:var(--blue);border-color:var(--blue);text-decoration:none}
+.inv-pager{display:flex;justify-content:space-between;align-items:center;padding:12px 22px;
+  border-top:1px solid var(--border-faint);background:var(--surface-alt);
+  font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);letter-spacing:0.04em}
+.inv-pager button{font-family:var(--mono);font-size:0.6rem;color:var(--text);
+  background:#fff;border:1px solid var(--border);border-radius:4px;padding:4px 12px;
+  letter-spacing:0.05em}
+.inv-pager button:disabled{opacity:0.4;cursor:not-allowed}
+
 /* ==== Buyer bars (market detail) ==== */
 .bbar-row{display:grid;grid-template-columns:140px 1fr 80px;gap:12px;align-items:center;padding:8px 0;
   border-bottom:1px solid var(--surface-faint)}
@@ -522,6 +554,7 @@ const STATE = {view:'hero', dma:null, demo:false, data:null, loading:false, erro
 const VIEWS = [
   {id:'hero',         label:'Overview'},
   {id:'markets',      label:'Markets'},
+  {id:'invoices',     label:'Invoices'},
   {id:'compliance',   label:'Compliance'},
   {id:'competition',  label:'Competition'}
   /* Exports tab disabled 2026-05-12. The Owner Briefing PDF is still
@@ -618,8 +651,32 @@ async function loadGroupData(group){
   ));
   const allLines = lineBatches.flat();
 
+  /* Cross-reference table: political_invoices.fcc_file_url is NULL for the
+     Coastal footprint (verified 2026-05-12 — 0 of 114 rows populated), but
+     /api/lines builds a working FCC public-file PDF URL via the
+     fcc_files join. rate_lines.order_number == political_invoices.contract_number,
+     so we can resolve a PDF URL for ~93% of Coastal invoices client-side
+     without changing the API. Key by station|contract to avoid the rare
+     cross-station collision. */
+  const pdfByOrder = {};
+  allLines.forEach(ln => {
+    if(ln.fcc_pdf_url && ln.order_number && ln.station){
+      const key = ln.station + '|' + ln.order_number;
+      if(!pdfByOrder[key]) pdfByOrder[key] = ln.fcc_pdf_url;
+    }
+  });
+
   return {group, invoices: allInvoices, ownedCallsigns, dmaSet, states,
-          lurByStation, lines: allLines, fetchedAt: new Date()};
+          lurByStation, lines: allLines, pdfByOrder, fetchedAt: new Date()};
+}
+
+/* Resolve a viewable PDF URL for an invoice — direct column first,
+   fall back to the rate_lines cross-reference, finally null. */
+function pdfUrlFor(inv){
+  if(!inv) return null;
+  if(inv.fcc_file_url) return inv.fcc_file_url;
+  const k = (inv.station_call_sign || '') + '|' + (inv.contract_number || '');
+  return (STATE.data && STATE.data.pdfByOrder && STATE.data.pdfByOrder[k]) || null;
 }
 
 /* =========================================================================
@@ -1190,7 +1247,75 @@ function renderMarket(){
         ${heatLines.length === 0 ? '<div class="empty">No line-level daypart data yet.</div>' : daypartHeatmap(heatLines)}
       </div>
     </div>
+
+    ${marketInvoicesCard(dma, row)}
   `;
+
+  /* Wire up the "View all in Invoices" jump on the market-detail card */
+  const jumpBtn = document.getElementById('mkt-inv-all');
+  if(jumpBtn){
+    jumpBtn.onclick = () => {
+      STATE.invFilter = {scope:'owned', q: dma.toLowerCase(), page: 1};
+      STATE.invSort   = {col:'flight_start', dir:'desc'};
+      navigate({view:'invoices', dma: null});
+    };
+  }
+}
+
+/* In-context invoices card for the market detail view — shows owned-only
+   invoices in this DMA, sorted newest first. "View all in this market"
+   link jumps to the Invoices tab pre-filtered. */
+function marketInvoicesCard(dma, row){
+  const invs = STATE.data.invoices
+    .filter(inv => (inv.station_market || '').toUpperCase() === dma)
+    .filter(inv => STATE.data.ownedCallsigns.has(inv.station_call_sign))
+    .sort((a,b) => String(b.flight_start || '').localeCompare(String(a.flight_start || '')));
+  const totalGross = invs.reduce((s, r) => s + num(r.gross_amount), 0);
+  const SHOW = 10;
+  const head = invs.slice(0, SHOW);
+  const remaining = Math.max(0, invs.length - SHOW);
+  return `
+    <div class="card">
+      <div class="card-hd">
+        <div>
+          <h2>${GROUP.short_name} invoices in ${row.dma_label}</h2>
+          <div class="sub">${fmtInt(invs.length)} invoices · ${fmtUSD(totalGross)} gross · click View PDF to open the source FCC document</div>
+        </div>
+        ${invs.length > SHOW ? `<button class="icon-btn" id="mkt-inv-all"
+          style="color:#fff;background:var(--blue);border-color:var(--blue);padding:6px 14px">
+          View all ${fmtInt(invs.length)} in Invoices →</button>` : ''}
+      </div>
+      <div class="card-bd flush">
+        ${invs.length === 0 ? '<div class="empty">No invoices for owned stations in this market.</div>' :
+          `<table>
+            <thead><tr>
+              <th>Flight start</th><th>Station</th><th>Advertiser</th>
+              <th class="cell-num">Gross $</th><th class="cell-num">Spots</th>
+              <th>Contract #</th><th>PDF</th>
+            </tr></thead>
+            <tbody>${head.map(inv => {
+              const adv = (inv.advertiser_raw || '—');
+              const advShort = adv.length > 32 ? adv.slice(0,32)+'…' : adv;
+              const url = pdfUrlFor(inv);
+              const pdfBtn = url
+                ? `<a class="btn-view" href="${url}" target="_blank" rel="noopener noreferrer">View PDF ↗</a>`
+                : '<span style="color:var(--text-faint)" title="No PDF link extracted for this invoice">—</span>';
+              return `<tr class="row-coastal">
+                <td>${fmtDate(inv.flight_start)}</td>
+                <td><strong>${inv.station_call_sign}</strong></td>
+                <td title="${adv.replace(/"/g,'&quot;')}">${advShort}</td>
+                <td class="cell-num"><strong>${fmtUSDFull(num(inv.gross_amount))}</strong></td>
+                <td class="cell-num">${inv.spot_count != null ? fmtInt(inv.spot_count) : '—'}</td>
+                <td>${inv.contract_number || '—'}</td>
+                <td>${pdfBtn}</td>
+              </tr>`;
+            }).join('')}
+            ${remaining > 0 ? `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);font-size:0.62rem;letter-spacing:0.06em">
+              ${remaining} more invoice${remaining===1?'':'s'} not shown · use the Invoices tab to see all
+            </td></tr>` : ''}</tbody>
+          </table>`}
+      </div>
+    </div>`;
 }
 
 /* Donut/ring share visualization */
@@ -1352,6 +1477,204 @@ function daypartHeatmap(lines){
   return `<svg class="svg-chart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
     ${wkLabels}${dpLabels}${cells}
   </svg>` + legendBar;
+}
+
+/* ---------- Invoices — sortable, searchable, click-to-view ---------- */
+const INV_PAGE = 50;
+function renderInvoices(){
+  if(!STATE.invFilter) STATE.invFilter = {scope:'owned', q:'', page:1};
+  if(!STATE.invSort)   STATE.invSort   = {col:'flight_start', dir:'desc'};
+
+  const all = STATE.data.invoices.slice();
+  let rows = all;
+  if(STATE.invFilter.scope === 'owned'){
+    rows = rows.filter(inv => STATE.data.ownedCallsigns.has(inv.station_call_sign));
+  }
+  const q = (STATE.invFilter.q || '').trim().toLowerCase();
+  if(q){
+    rows = rows.filter(inv =>
+      (inv.advertiser_raw   || '').toLowerCase().includes(q) ||
+      (inv.station_call_sign|| '').toLowerCase().includes(q) ||
+      (inv.station_market   || '').toLowerCase().includes(q) ||
+      (inv.contract_number  || '').toLowerCase().includes(q) ||
+      (inv.product_office   || '').toLowerCase().includes(q));
+  }
+
+  const sortCol = STATE.invSort.col, dir = STATE.invSort.dir;
+  rows.sort((a,b) => {
+    const av = a[sortCol], bv = b[sortCol];
+    if(av == null && bv == null) return 0;
+    if(av == null) return 1;
+    if(bv == null) return -1;
+    const an = Number(av), bn = Number(bv);
+    if(!isNaN(an) && !isNaN(bn) && (typeof av !== 'string' || /^\d/.test(av)))
+      return dir === 'asc' ? an - bn : bn - an;
+    return dir === 'asc'
+      ? String(av).localeCompare(String(bv))
+      : String(bv).localeCompare(String(av));
+  });
+
+  const totalGross = rows.reduce((s, r) => s + num(r.gross_amount), 0);
+  const totalCount = rows.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / INV_PAGE));
+  if(STATE.invFilter.page > totalPages) STATE.invFilter.page = totalPages;
+  if(STATE.invFilter.page < 1) STATE.invFilter.page = 1;
+  const page = STATE.invFilter.page;
+  const slice = rows.slice((page-1) * INV_PAGE, page * INV_PAGE);
+
+  const cols = [
+    {k:'flight_start',     l:'Flight start', fmt:fmtDate, num:false, sortable:true},
+    {k:'flight_end',       l:'Flight end',   fmt:fmtDate, num:false, sortable:true},
+    {k:'station_call_sign',l:'Station',      sortable:true},
+    {k:'station_market',   l:'Market',       sortable:true},
+    {k:'advertiser_raw',   l:'Advertiser',   sortable:true},
+    {k:'product_office',   l:'Office',       sortable:true},
+    {k:'gross_amount',     l:'Gross $',      num:true, fmt:v=>fmtUSDFull(num(v)), sortable:true},
+    {k:'spot_count',       l:'Spots',        num:true, fmt:fmtInt, sortable:true},
+    {k:'rate_per_spot',    l:'Rate/spot',    num:true, fmt:v=>v?'$'+num(v).toFixed(0):'—', sortable:true},
+    {k:'contract_number',  l:'Contract #',   sortable:true},
+    {k:'_pdf',             l:'PDF',          sortable:false}
+  ];
+  const head = cols.map(c =>
+    c.sortable
+      ? `<th class="sortable inv-th${sortCol===c.k ? ' sort-' + dir : ''} ${c.num?'cell-num':''}" data-col="${c.k}">${c.l}</th>`
+      : `<th class="${c.num?'cell-num':''}">${c.l}</th>`
+  ).join('');
+
+  const body = slice.length === 0
+    ? `<tr><td colspan="${cols.length}" class="empty">No invoices match your filters.</td></tr>`
+    : slice.map(inv => {
+        const isOwned = STATE.data.ownedCallsigns.has(inv.station_call_sign);
+        const callsign = anonCallsign(inv.station_call_sign || inv.psid || '—');
+        const adv = (inv.advertiser_raw || '—');
+        const advShort = adv.length > 38 ? adv.slice(0,38)+'…' : adv;
+        const url = pdfUrlFor(inv);
+        const pdfBtn = url
+          ? `<a class="btn-view" href="${url}" target="_blank" rel="noopener noreferrer"
+                title="${inv.pdf_filename || 'Open invoice PDF on FCC public file'}">View PDF ↗</a>`
+          : '<span style="color:var(--text-faint);font-size:0.6rem" title="No PDF link extracted for this invoice">—</span>';
+        return `<tr class="${isOwned?'row-coastal':''}">
+          <td>${fmtDate(inv.flight_start)}</td>
+          <td>${fmtDate(inv.flight_end)}</td>
+          <td><strong>${callsign}</strong></td>
+          <td>${inv.station_market || '—'}</td>
+          <td title="${adv.replace(/"/g,'&quot;')}">${advShort}</td>
+          <td>${inv.product_office || '—'}</td>
+          <td class="cell-num"><strong>${fmtUSDFull(num(inv.gross_amount))}</strong></td>
+          <td class="cell-num">${inv.spot_count != null ? fmtInt(inv.spot_count) : '—'}</td>
+          <td class="cell-num">${inv.rate_per_spot ? '$'+num(inv.rate_per_spot).toFixed(0) : '—'}</td>
+          <td>${inv.contract_number || '—'}</td>
+          <td>${pdfBtn}</td>
+        </tr>`;
+      }).join('');
+
+  $('#main').innerHTML = `
+    <div class="crumbs">${GROUP.short_name} <span class="sep">/</span> Invoices</div>
+
+    <div class="stats-strip">
+      <div class="stat-tile blue"><div class="accent"></div>
+        <div class="lbl">Invoices in scope</div>
+        <div class="val blue">${fmtInt(totalCount)}</div>
+        <div class="meta">${STATE.invFilter.scope === 'owned' ? GROUP.short_name + ' stations only' : 'all stations in your DMAs'}</div></div>
+      <div class="stat-tile green"><div class="accent"></div>
+        <div class="lbl">Gross $ across filter</div>
+        <div class="val green">${fmtUSD(totalGross)}</div>
+        <div class="meta">${q ? 'matching "'+q+'"' : 'no filter'}</div></div>
+      <div class="stat-tile amber"><div class="accent"></div>
+        <div class="lbl">PDFs available</div>
+        <div class="val amber">${fmtInt(rows.filter(r => pdfUrlFor(r)).length)}</div>
+        <div class="meta">click any "View PDF" link → FCC public file</div></div>
+      <div class="stat-tile red"><div class="accent"></div>
+        <div class="lbl">Page</div>
+        <div class="val red">${page}<span style="font-size:0.9rem;color:var(--text-faint)"> / ${totalPages}</span></div>
+        <div class="meta">${INV_PAGE} per page · ${fmtInt(totalCount)} total</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">
+        <div><h2>All invoices</h2>
+          <div class="sub">Click any column to sort · click "View PDF" to open the FCC source document in a new tab</div></div>
+        <button class="icon-btn" id="export-inv" style="color:var(--text-muted);border-color:var(--border)">Export CSV</button>
+      </div>
+      <div class="inv-toolbar">
+        <div class="inv-scope">
+          <button class="${STATE.invFilter.scope === 'owned' ? 'active' : ''}" data-scope="owned">${GROUP.short_name}</button>
+          <button class="${STATE.invFilter.scope === 'all'   ? 'active' : ''}" data-scope="all">All in your DMAs</button>
+        </div>
+        <div class="inv-search">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input id="inv-q" type="search" placeholder="Search advertiser, station, contract, market…" value="${(STATE.invFilter.q || '').replace(/"/g,'&quot;')}"/>
+        </div>
+        <div class="inv-stats">${fmtInt(totalCount)} invoices · <strong>${fmtUSD(totalGross)}</strong> gross</div>
+      </div>
+      <div class="card-bd flush">
+        <div style="overflow-x:auto"><table>
+          <thead><tr>${head}</tr></thead>
+          <tbody>${body}</tbody>
+        </table></div>
+      </div>
+      <div class="inv-pager">
+        <span>Showing ${slice.length === 0 ? 0 : ((page-1)*INV_PAGE + 1)}–${(page-1)*INV_PAGE + slice.length} of ${fmtInt(totalCount)}</span>
+        <span style="display:flex;gap:6px">
+          <button id="inv-prev" ${page <= 1 ? 'disabled' : ''}>← Prev</button>
+          <button id="inv-next" ${page >= totalPages ? 'disabled' : ''}>Next →</button>
+        </span>
+      </div>
+    </div>
+  `;
+
+  /* Wire up controls */
+  document.querySelectorAll('.inv-scope button').forEach(b => {
+    b.onclick = () => { STATE.invFilter.scope = b.dataset.scope; STATE.invFilter.page = 1; renderInvoices(); };
+  });
+  const qInput = document.getElementById('inv-q');
+  let _qTimer;
+  qInput.oninput = () => {
+    clearTimeout(_qTimer);
+    _qTimer = setTimeout(() => {
+      STATE.invFilter.q = qInput.value;
+      STATE.invFilter.page = 1;
+      renderInvoices();
+      const el = document.getElementById('inv-q');
+      if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+    }, 180);
+  };
+  document.querySelectorAll('th.inv-th.sortable').forEach(th => {
+    th.onclick = () => {
+      const c = th.dataset.col;
+      STATE.invSort.dir = (STATE.invSort.col === c && STATE.invSort.dir === 'desc') ? 'asc' : 'desc';
+      STATE.invSort.col = c;
+      renderInvoices();
+    };
+  });
+  document.getElementById('inv-prev').onclick = () => { STATE.invFilter.page--; renderInvoices(); window.scrollTo(0,0); };
+  document.getElementById('inv-next').onclick = () => { STATE.invFilter.page++; renderInvoices(); window.scrollTo(0,0); };
+  document.getElementById('export-inv').onclick = () => exportInvoicesCSV(rows);
+}
+
+function exportInvoicesCSV(rows){
+  const head = ['flight_start','flight_end','station','market','advertiser','office','gross','spots','rate_per_spot','contract','fcc_file_url'];
+  const lines = [head.join(',')].concat(rows.map(inv => [
+    inv.flight_start || '',
+    inv.flight_end   || '',
+    `"${(inv.station_call_sign || inv.psid || '').replace(/"/g,'""')}"`,
+    `"${(inv.station_market || '').replace(/"/g,'""')}"`,
+    `"${(inv.advertiser_raw  || '').replace(/"/g,'""')}"`,
+    `"${(inv.product_office  || '').replace(/"/g,'""')}"`,
+    num(inv.gross_amount).toFixed(2),
+    inv.spot_count ?? '',
+    inv.rate_per_spot ?? '',
+    `"${(inv.contract_number || '').replace(/"/g,'""')}"`,
+    `"${(inv.fcc_file_url    || '').replace(/"/g,'""')}"`
+  ].join(','))).join('\n');
+  const blob = new Blob([lines], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = GROUP.slug + '-invoices-' + (new Date().toISOString().slice(0,10)) + '.csv';
+  a.click();
 }
 
 /* ---------- Compliance — station wall ---------- */
@@ -1587,6 +1910,7 @@ function render(){
     case 'markets':     renderMarketsList(); break;
     case 'market':      renderMarket();      break;
     case 'compliance':  renderCompliance();  break;
+    case 'invoices':    renderInvoices();    break;
     case 'competition': renderCompetition(); break;
     /* `exports` tab removed from VIEWS but kept routable for any
         deep-linked URLs already in the wild — they'll still print. */

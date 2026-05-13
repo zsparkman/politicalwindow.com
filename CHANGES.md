@@ -4,6 +4,89 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-05-12 — `coastal.html` follow-up #4: dedicated Invoices tab with click-to-view PDF
+
+User asked for invoices to be prominently listed with click-to-view/
+download. Two surfaces added; one client-side join workaround needed
+to make PDFs reachable.
+
+### New: Invoices tab (5th tab in the top nav)
+
+- Sortable across every column: flight start/end, station, market,
+  advertiser, office, gross, spots, rate/spot, contract #.
+- Searchable: case-insensitive substring across advertiser, station,
+  market, contract, office. 180ms debounce; cursor preserved on
+  re-render.
+- Scope toggle: "${group.short_name}" (default — owned callsigns
+  only) vs. "All in your DMAs" (Coastal + competitors in the same
+  markets).
+- Default sort: `flight_start` desc — newest invoices first.
+- 50 rows per page with a footer pager (Prev / Next, "showing X–Y
+  of Z"). Scrolls back to top on page change.
+- 4-tile stats strip up top: invoices in scope, gross $ across the
+  filter, PDFs available, current page.
+- CSV export of the currently filtered (not just the visible page)
+  rows including the resolved `fcc_file_url`.
+- "View PDF ↗" button per row; opens the FCC public-file PDF in a
+  new tab. Rows whose PDF can't be resolved show "—" with a tooltip
+  explaining why.
+- Owned-callsign rows get the same blue tint used elsewhere
+  (`row-coastal`); the table is bidirectional-scrollable on
+  narrow viewports.
+
+### New: Invoices section on the market-detail view
+
+- Below the daypart heatmap, every market-detail page now ends with
+  a "${group.short_name} invoices in ${dma_label}" card showing the
+  10 most recent owned invoices in that market.
+- Each row has the same View PDF ↗ link.
+- "View all N in Invoices →" jump button when there are more than
+  10 — pre-filters the Invoices tab search box to the DMA name and
+  navigates there.
+
+### PDF URL resolution — important data quirk fixed client-side
+
+Audit during the build surfaced that **`political_invoices.fcc_file_url`
+is NULL for 0 of 114 Coastal invoices** — that column has never been
+populated for the Coastal footprint. Naively wiring "View PDF" to
+`inv.fcc_file_url` would have rendered "—" for every Coastal row.
+
+The fix uses the existing `/api/lines` endpoint, which already builds
+a working FCC public-file PDF URL at query time via
+`fcc_files.folder_id || '/' || fcc_files.file_manager_id`
+(see `ratewindow-api/index.js:721`). The dashboard already fetches
+`/api/lines?station=` per owned callsign for the daypart heatmap;
+during ingestion we now also build a `pdfByOrder` map keyed by
+`station|order_number`. New helper `pdfUrlFor(inv)` falls back to
+that map when `fcc_file_url` is null. Result: **20 of 20 KTBY
+invoices have a working View PDF link** (and ~93% of Coastal
+invoices overall — the missing ~7% are mostly invoices whose
+`rate_lines` rows weren't extractable, which is consistent with
+the ~59% line-level undercount documented in follow-up #2).
+
+The small remaining gap is honestly surfaced in the UI — invoices
+without a resolvable PDF render "—" and explain on hover. No
+fabricated links, no dead clicks.
+
+### No backend change
+
+Pure client-side. `/api/invoices` and `/api/lines` were already in
+the dashboard's data-load fanout; just added one map-build pass
+and one fallback helper. Documented as a permanent pattern in the
+new memory `project_rate_lines_undercount.md` (cross-reference
+trick should be reused for any future viewport that needs PDFs).
+
+### Files touched
+
+- `politicalwindow.com/coastal.html` — VIEWS array (added invoices),
+  router dispatch, `loadGroupData` (builds `pdfByOrder`),
+  new `pdfUrlFor()` helper, `renderInvoices()` (~150 lines),
+  `marketInvoicesCard()` (~40 lines), invoice-toolbar/scope/search
+  CSS (~30 lines).
+- This changelog entry; `CLAUDE.md` "Current State" updated.
+
+---
+
 ## 2026-05-12 — `coastal.html` follow-up #3: weekly chart annotation no longer clips
 
 The worst-comp-week annotation on the market-detail weekly trend chart

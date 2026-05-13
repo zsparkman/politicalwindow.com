@@ -172,6 +172,22 @@ multiple PSIDs in the same DMA intentionally collapse to the same
 label. Comcast uses its legal name, not Xfinity.
 
 ## Current State (Apr 2026)
+- **Coastal Owner Dashboard follow-up #4 (5/12/26 late PM)** —
+  added a dedicated **Invoices tab** (5th in the top nav) plus an
+  in-context "Invoices in this market" section on every market-
+  detail page. Sortable, searchable (debounced), scope-toggle
+  between owned-only and all-in-DMA, 50-per-page pagination,
+  CSV export. Per-row "View PDF ↗" opens the FCC public-file
+  document in a new tab. **Important data quirk fixed client-side:**
+  `political_invoices.fcc_file_url` is NULL for all 114 Coastal
+  rows; resolution falls back to a `pdfByOrder` map built from
+  `/api/lines` responses (which build the URL via the
+  `fcc_files.folder_id || '/' || file_manager_id` join in
+  `ratewindow-api/index.js:721`). Result: 20/20 KTBY invoices and
+  ~93% of Coastal invoices have working View PDF links. New helper
+  `pdfUrlFor(inv)` is the single resolution path. Same pattern
+  should be reused for any future viewport needing PDFs. See
+  `CHANGES.md` 2026-05-12 follow-up #4.
 - **Coastal Owner Dashboard follow-up #2 (5/12/26 late PM)** —
   Exports tab removed from `VIEWS`; `renderExports()` deleted;
   `?view=exports` deep links fall through to the hero. Browser
