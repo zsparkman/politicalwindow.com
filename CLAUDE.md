@@ -279,6 +279,18 @@ label. Comcast uses its legal name, not Xfinity.
   also get SVG `<title>` tooltips resolving to full daypart names
   (Early Morning / Daytime / etc.) so the two-letter codes decode
   on hover. See `CHANGES.md` 2026-05-12 follow-up entry.
+- **Coastal Owner Dashboard follow-up #5 (5/14/26)** — fixed the
+  Market scoreboard so the per-segment dollar values are never
+  hidden. Previously `scoreboard()` only rendered a segment's label
+  when its share was ≥12% of the row, so the captured-revenue
+  number disappeared on rows where Coastal had a small share —
+  exactly the markets the page exists to surface. The 12% threshold
+  is retained for in-bar labels (legibility), but when a segment is
+  too narrow its label now renders as a colored chip just to the
+  right of the bar (`.sb-bar-row` flex wrapper + `.sb-outside-labels`
+  / `.outside-coastal` / `.outside-comp`). Wide segments still show
+  the white-on-color in-bar label. See `CHANGES.md` 2026-05-14
+  scoreboard entry.
 - **Coastal Owner Dashboard (`coastal.html`, 5/12/26 — supersedes
   yesterday's `groups.html`)** — dedicated per-owner page reachable
   at `politicalwindow.com/coastal` (extension-stripped via GH Pages,

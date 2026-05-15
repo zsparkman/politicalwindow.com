@@ -4,6 +4,57 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-05-14 — Market scoreboard: revenue figures always visible (`w/coastal.html`)
+
+The "Market scoreboard — share of voice" stacked bars on the Coastal
+Owner Dashboard previously hid a segment's dollar label whenever that
+segment occupied less than 12% of the row's width. Concretely: when
+Coastal held a small share of a market (Anchorage, Fairbanks, Juneau
+in the current dataset), the blue segment's revenue (e.g. `$266K`)
+was suppressed because there wasn't room for the white-on-blue label
+inside the narrow blue segment. The red competitor segment's label
+still rendered because it filled most of the row.
+
+**Why:** the captured-revenue number is the most important data point
+on the page for the owner. Hiding it for the markets where Coastal is
+*losing* (precisely the markets the page exists to surface) was the
+wrong tradeoff. The 12% threshold protected legibility of in-bar
+labels at the cost of hiding key numbers.
+
+**Fix:** when a segment is too narrow to hold its label inline,
+render that label as a colored chip immediately to the right of the
+bar, in the segment's color (blue for Coastal, red for competitors).
+Wide-enough segments still show their label inside the bar in white
+on color — the existing design is preserved for the common case.
+Both segments can spill their label outside if both are too narrow
+(unusual but handled).
+
+**Implementation:**
+- New CSS class `.sb-bar-row` wraps the bar + any outside labels in
+  a flex row so the labels sit immediately to the right of the bar
+  at the same vertical center. `.sb-bar` gets `flex-shrink:0` so it
+  keeps its proportional width.
+- New CSS class `.sb-outside-labels` lays out one or two chips with
+  `.outside-coastal` (blue) / `.outside-comp` (red) modifiers.
+  Slightly heavier weight (700) and larger size (0.66rem) than the
+  in-bar labels (0.62rem, 600) so the outside-rendered numbers read
+  with comparable visual weight.
+- `scoreboard()` (around `w/coastal.html:957`) computes `cFits` /
+  `xFits` booleans (the existing 12% threshold) and builds an
+  `outside` array of label chips for whichever segments don't fit.
+  The chips render only when there are entries to show, so the
+  layout doesn't change for rows where both labels already fit
+  in-bar (the typical case).
+- The zero-coverage row was also wrapped in `.sb-bar-row` so its
+  empty/striped bar lays out consistently with the data rows
+  (the bar still spans the full middle column via `width:100%`).
+
+**No other changes:** no API contracts touched, no data plumbing
+touched, no other pages affected. Pure `w/coastal.html` viewport
+change consistent with the read-only viewport rule.
+
+---
+
 ## 2026-05-14 — Map attribution moved from map corner to site footer (`index.html`)
 
 The "© CARTO, © OpenStreetMap contributors" badge that MapLibre rendered
