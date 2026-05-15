@@ -286,11 +286,14 @@ label. Comcast uses its legal name, not Xfinity.
   number disappeared on rows where Coastal had a small share —
   exactly the markets the page exists to surface. The 12% threshold
   is retained for in-bar labels (legibility), but when a segment is
-  too narrow its label now renders as a colored chip just to the
-  right of the bar (`.sb-bar-row` flex wrapper + `.sb-outside-labels`
-  / `.outside-coastal` / `.outside-comp`). Wide segments still show
-  the white-on-color in-bar label. See `CHANGES.md` 2026-05-14
-  scoreboard entry.
+  too narrow its label now renders as a colored chip on the matching
+  side of the bar — Coastal/owner chip *before* the bar (left),
+  competitor chip *after* the bar (right) — so each chip sits
+  adjacent to the segment it labels. `.sb-bar-row` is the flex
+  wrapper; chips use standalone `.outside-coastal` / `.outside-comp`
+  classes as direct children of the row, not a wrapper. Wide segments
+  still show the white-on-color in-bar label. See `CHANGES.md`
+  2026-05-14 scoreboard entry.
 - **Coastal Owner Dashboard (`coastal.html`, 5/12/26 — supersedes
   yesterday's `groups.html`)** — dedicated per-owner page reachable
   at `politicalwindow.com/coastal` (extension-stripped via GH Pages,

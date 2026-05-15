@@ -22,29 +22,37 @@ wrong tradeoff. The 12% threshold protected legibility of in-bar
 labels at the cost of hiding key numbers.
 
 **Fix:** when a segment is too narrow to hold its label inline,
-render that label as a colored chip immediately to the right of the
-bar, in the segment's color (blue for Coastal, red for competitors).
-Wide-enough segments still show their label inside the bar in white
-on color — the existing design is preserved for the common case.
-Both segments can spill their label outside if both are too narrow
-(unusual but handled).
+render that label as a colored chip *on the matching side* of the
+bar — Coastal/owner chip before the bar (left), competitor chip
+after the bar (right) — in the segment's color (blue for Coastal,
+red for competitors). Each chip sits adjacent to the segment it
+belongs to, so the spatial mapping between bar segment and dollar
+amount is preserved. Wide-enough segments still show their label
+inside the bar in white on color — the existing design is preserved
+for the common case. Both segments can spill their label outside if
+both are too narrow (unusual but handled).
 
 **Implementation:**
 - New CSS class `.sb-bar-row` wraps the bar + any outside labels in
-  a flex row so the labels sit immediately to the right of the bar
-  at the same vertical center. `.sb-bar` gets `flex-shrink:0` so it
-  keeps its proportional width.
-- New CSS class `.sb-outside-labels` lays out one or two chips with
-  `.outside-coastal` (blue) / `.outside-comp` (red) modifiers.
-  Slightly heavier weight (700) and larger size (0.66rem) than the
-  in-bar labels (0.62rem, 600) so the outside-rendered numbers read
-  with comparable visual weight.
+  a flex row (gap: 10px) so chips and bar align at the same vertical
+  center. `.sb-bar` gets `flex-shrink:0` so it keeps its proportional
+  width when chips sit on either side.
+- `.outside-coastal` (blue) and `.outside-comp` (red) chip styles
+  live as standalone classes — no wrapper element. They render as
+  direct children of `.sb-bar-row`, which lets them sit *before*
+  the bar (Coastal/left) or *after* the bar (competitor/right) so
+  the chip is always adjacent to the segment it labels. Slightly
+  heavier weight (700) and larger size (0.66rem) than the in-bar
+  labels (0.62rem, 600) so the outside-rendered numbers read with
+  comparable visual weight.
 - `scoreboard()` (around `w/coastal.html:957`) computes `cFits` /
-  `xFits` booleans (the existing 12% threshold) and builds an
-  `outside` array of label chips for whichever segments don't fit.
-  The chips render only when there are entries to show, so the
-  layout doesn't change for rows where both labels already fit
-  in-bar (the typical case).
+  `xFits` booleans (the existing 12% threshold) and builds a
+  `leftChip` (Coastal $ when its segment doesn't fit) and a
+  `rightChip` (competitor $ when its segment doesn't fit). Each
+  chip is emitted on its corresponding side of the bar, so the
+  spatial position of the label matches the segment it represents.
+  Chips render only when their segment doesn't fit, so the layout
+  doesn't change for rows where both labels already fit in-bar.
 - The zero-coverage row was also wrapped in `.sb-bar-row` so its
   empty/striped bar lays out consistently with the data rows
   (the bar still spans the full middle column via `width:100%`).
