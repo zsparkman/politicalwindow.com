@@ -4,55 +4,70 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
-## 2026-05-14 — Market scoreboard: revenue figures always visible (`w/coastal.html`)
+## 2026-05-14 — Market scoreboard: column-flanked value pattern (`w/coastal.html`)
 
 The "Market scoreboard — share of voice" stacked bars on the Coastal
-Owner Dashboard previously hid a segment's dollar label whenever that
-segment occupied less than 12% of the row's width. Concretely: when
-Coastal held a small share of a market (Anchorage, Fairbanks, Juneau
-in the current dataset), the blue segment's revenue (e.g. `$266K`)
-was suppressed because there wasn't room for the white-on-blue label
-inside the narrow blue segment. The red competitor segment's label
-still rendered because it filled most of the row.
+Owner Dashboard previously rendered dollar values *inside* the bar
+segments (white text on blue/red gradients), with a 12% threshold that
+silently hid labels in narrow segments. An interim fix (earlier in
+the same session) appended outside-bar "chips" on the matching side
+when a segment was too narrow — that worked but was a kludge with
+custom overflow logic and inconsistent label positioning between rows.
 
-**Why:** the captured-revenue number is the most important data point
-on the page for the owner. Hiding it for the markets where Coastal is
-*losing* (precisely the markets the page exists to surface) was the
-wrong tradeoff. The 12% threshold protected legibility of in-bar
-labels at the cost of hiding key numbers.
+**Final pattern: dedicated value columns flanking the bar.** This is
+the standard Bloomberg / FT / NYT comparison-bar layout: the bar is
+pure visual share-of-voice (no text inside it), and the two dollar
+values live in fixed-width columns immediately to the left (owner,
+blue) and right (competitor, red) of the bar. Numbers are always
+visible, always aligned vertically across rows, always color-coded.
 
-**Fix:** when a segment is too narrow to hold its label inline,
-render that label as a colored chip *on the matching side* of the
-bar — Coastal/owner chip before the bar (left), competitor chip
-after the bar (right) — in the segment's color (blue for Coastal,
-red for competitors). Each chip sits adjacent to the segment it
-belongs to, so the spatial mapping between bar segment and dollar
-amount is preserved. Wide-enough segments still show their label
-inside the bar in white on color — the existing design is preserved
-for the common case. Both segments can spill their label outside if
-both are too narrow (unusual but handled).
+**Why this is better than the previous patterns:**
+- No threshold logic. No "fits / doesn't fit" branching. The bar
+  doesn't carry text at all, so segment width has zero effect on
+  label visibility.
+- Vertical alignment across rows. Reading down the owner column gives
+  you a scannable revenue list per market without having to find the
+  label inside a stacked bar of varying widths.
+- Color and position both encode segment identity. Left column =
+  blue = owner; right column = red = competitor. No need for a
+  legend lookup for label positioning.
+- Consistent with the existing `marketTable()` (the table-view in
+  detail panels) which already uses dedicated columns for owner $ /
+  competitor $ — the scoreboard now reads as a visual analog of the
+  same data shape.
+
+**Tradeoff acknowledged:** the bar got ~170px narrower (78px each
+for the two flanking value columns + 14px gaps). The visual scale
+comparison between markets compresses slightly. In exchange: clean
+alignment, no overflow logic, no in-bar contrast problems, scannable
+value columns.
 
 **Implementation:**
-- New CSS class `.sb-bar-row` wraps the bar + any outside labels in
-  a flex row (gap: 10px) so chips and bar align at the same vertical
-  center. `.sb-bar` gets `flex-shrink:0` so it keeps its proportional
-  width when chips sit on either side.
-- `.outside-coastal` (blue) and `.outside-comp` (red) chip styles
-  live as standalone classes — no wrapper element. They render as
-  direct children of `.sb-bar-row`, which lets them sit *before*
-  the bar (Coastal/left) or *after* the bar (competitor/right) so
-  the chip is always adjacent to the segment it labels. Slightly
-  heavier weight (700) and larger size (0.66rem) than the in-bar
-  labels (0.62rem, 600) so the outside-rendered numbers read with
-  comparable visual weight.
-- `scoreboard()` (around `w/coastal.html:957`) computes `cFits` /
-  `xFits` booleans (the existing 12% threshold) and builds a
-  `leftChip` (Coastal $ when its segment doesn't fit) and a
-  `rightChip` (competitor $ when its segment doesn't fit). Each
-  chip is emitted on its corresponding side of the bar, so the
-  spatial position of the label matches the segment it represents.
-  Chips render only when their segment doesn't fit, so the layout
-  doesn't change for rows where both labels already fit in-bar.
+- `.sb-row` grid template changed from `170px 1fr 100px` to
+  `170px 78px 1fr 78px 100px`. Two new grid cells flank the bar.
+- New CSS classes `.sb-val-coastal` (right-aligned, blue, 0.72rem,
+  mono, 700 weight) and `.sb-val-comp` (left-aligned, red, same
+  type treatment). The right/left alignment makes each value abut
+  the edge of the bar it represents. `.is-empty` modifier renders
+  the placeholder `—` in faint slate.
+- `.sb-bar .seg-coastal` / `.seg-comp` stripped of all text-rendering
+  styles (`display:flex`, `align-items`, `padding`, `color`,
+  `font-*`, `white-space`, `overflow`, `letter-spacing` removed).
+  Segments are now pure colored gradients with no content inside.
+- `scoreboard()` (around `w/coastal.html:957`) emits five grid
+  children per row: `.sb-mkt`, `.sb-val-coastal`, `.sb-bar`,
+  `.sb-val-comp`, `.sb-share`. All threshold / chip / outside-label
+  logic from the interim fix was deleted.
+- Mobile breakpoint at `@media(max-width:1100px)` updated to a
+  compact 5-column grid (`110px 56px 1fr 56px 70px`, gap 8px) with
+  reduced value font size (0.62rem) so the layout survives in
+  narrow viewports. Mobile gets cramped but readable; if the
+  five-column layout proves untenable on small phones a follow-up
+  can stack the values below the market name.
+- Print stylesheet uses the default desktop 5-column layout — fine
+  for letter-sized print pages.
+- Zero-coverage rows (`r.total <= 0`) also render five grid children
+  with the value columns showing faint `—` placeholders.
 - The zero-coverage row was also wrapped in `.sb-bar-row` so its
   empty/striped bar lays out consistently with the data rows
   (the bar still spans the full middle column via `width:100%`).

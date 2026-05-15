@@ -149,26 +149,25 @@ input,select{font-family:var(--mono);outline:none}
 .sb-legend{display:flex;gap:14px;font-family:var(--mono);font-size:0.58rem;color:var(--text-muted)}
 .sb-legend .dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;
   vertical-align:middle}
-.sb-row{display:grid;grid-template-columns:170px 1fr 100px;gap:14px;align-items:center;
+.sb-row{display:grid;grid-template-columns:170px 78px 1fr 78px 100px;gap:14px;align-items:center;
   padding:10px 0;border-bottom:1px solid var(--surface-faint);cursor:pointer;transition:background 0.12s}
 .sb-row:last-child{border-bottom:0}
 .sb-row:hover{background:var(--surface-alt)}
 .sb-mkt{display:flex;flex-direction:column;gap:2px}
 .sb-mkt .mkt-name{font-family:var(--sans);font-size:0.78rem;color:var(--text);font-weight:600}
 .sb-mkt .mkt-meta{font-family:var(--mono);font-size:0.58rem;color:var(--text-faint);letter-spacing:0.04em}
-.sb-bar-row{display:flex;align-items:center;gap:10px;min-width:0}
+/* Owner $ and competitor $ live in their own flanking columns — the bar
+   itself is pure visual share-of-voice, no in-bar text. Standard
+   Bloomberg/FT comparison-bar pattern. */
+.sb-val-coastal{font-family:var(--mono);font-size:0.72rem;font-weight:700;color:var(--blue);
+  text-align:right;letter-spacing:0.02em;line-height:1;white-space:nowrap}
+.sb-val-comp{font-family:var(--mono);font-size:0.72rem;font-weight:700;color:var(--gap-red);
+  text-align:left;letter-spacing:0.02em;line-height:1;white-space:nowrap}
+.sb-val-coastal.is-empty,.sb-val-comp.is-empty{color:var(--text-faint);font-weight:400}
 .sb-bar{position:relative;height:30px;background:var(--surface-faint);border-radius:5px;
-  overflow:hidden;display:flex;flex-shrink:0}
-.outside-coastal,.outside-comp{font-family:var(--mono);font-size:0.66rem;font-weight:700;
-  letter-spacing:0.03em;white-space:nowrap;line-height:1;flex-shrink:0}
-.outside-coastal{color:var(--blue)}
-.outside-comp{color:var(--gap-red)}
-.sb-bar .seg-coastal{background:linear-gradient(90deg,var(--blue) 0%, var(--blue-light) 100%);
-  display:flex;align-items:center;padding:0 8px;color:#fff;font-family:var(--mono);font-size:0.62rem;
-  font-weight:600;white-space:nowrap;overflow:hidden;letter-spacing:0.03em}
-.sb-bar .seg-comp{background:linear-gradient(90deg,var(--gap-red) 0%, #E64541 100%);
-  display:flex;align-items:center;padding:0 8px;color:#fff;font-family:var(--mono);font-size:0.62rem;
-  font-weight:600;white-space:nowrap;overflow:hidden;letter-spacing:0.03em}
+  overflow:hidden;display:flex}
+.sb-bar .seg-coastal{background:linear-gradient(90deg,var(--blue) 0%, var(--blue-light) 100%)}
+.sb-bar .seg-comp{background:linear-gradient(90deg,var(--gap-red) 0%, #E64541 100%)}
 .sb-bar .seg-empty{flex:1;background:repeating-linear-gradient(45deg, var(--surface-faint),
   var(--surface-faint) 4px, #E5E9F0 4px, #E5E9F0 8px);
   display:flex;align-items:center;justify-content:center;color:var(--text-faint);
@@ -440,7 +439,8 @@ tr.row-coastal:hover{background:rgba(29,78,216,0.08)}
   .stats-strip{grid-template-columns:1fr}
   .two-col{grid-template-columns:1fr}
   .consol-grid{grid-template-columns:1fr}
-  .sb-row{grid-template-columns:130px 1fr 70px;gap:10px}
+  .sb-row{grid-template-columns:110px 56px 1fr 56px 70px;gap:8px}
+  .sb-val-coastal,.sb-val-comp{font-size:0.62rem}
 }
 </style>
 </head>
@@ -971,11 +971,11 @@ function scoreboard(rows){
           <div class="mkt-name">${r.dma_label}</div>
           <div class="mkt-meta">${r.owned_count} owned · ${r.owned_callsigns}</div>
         </div>
-        <div class="sb-bar-row">
-          <div class="sb-bar" style="width:100%">
-            <div class="seg-empty">Coverage pending</div>
-          </div>
+        <div class="sb-val-coastal is-empty">—</div>
+        <div class="sb-bar" style="width:100%">
+          <div class="seg-empty">Coverage pending</div>
         </div>
+        <div class="sb-val-comp is-empty">—</div>
         <div class="sb-share" style="color:var(--text-faint);font-size:0.7rem;font-family:var(--mono)">—</div>
       </div>`;
     }
@@ -984,28 +984,17 @@ function scoreboard(rows){
     const cFracOfRow = r.coastal_gross / r.total;
     const xFracOfRow = r.comp_gross / r.total;
     const shareColor = r.share_pct >= GROUP.peer_share_pct ? 'var(--green)' : 'var(--gap-red)';
-    /* Labels render inside the segment when ≥12% of the row; otherwise they
-       render outside the bar on the matching side — Coastal (owner) chip
-       before the bar (left), competitor chip after the bar (right) — so each
-       chip sits adjacent to the segment it belongs to and the revenue figure
-       is never hidden when a segment is too narrow. */
-    const cFits = cFracOfRow * 100 >= 12;
-    const xFits = xFracOfRow * 100 >= 12;
-    const leftChip  = (cFracOfRow > 0 && !cFits) ? `<span class="outside-coastal">${fmtUSD(r.coastal_gross)}</span>` : '';
-    const rightChip = (xFracOfRow > 0 && !xFits) ? `<span class="outside-comp">${fmtUSD(r.comp_gross)}</span>` : '';
     return `<div class="sb-row" data-dma="${r.dma_db}">
       <div class="sb-mkt">
         <div class="mkt-name">${r.dma_label}</div>
         <div class="mkt-meta">${r.owned_count} owned · ${r.owned_callsigns} · ${r.owned_networks||''}</div>
       </div>
-      <div class="sb-bar-row">
-        ${leftChip}
-        <div class="sb-bar" style="width:${wpct}%;min-width:120px">
-          ${cFracOfRow > 0 ? `<div class="seg-coastal" style="width:${cFracOfRow*100}%">${cFits ? fmtUSD(r.coastal_gross) : ''}</div>` : ''}
-          ${xFracOfRow > 0 ? `<div class="seg-comp"    style="width:${xFracOfRow*100}%">${xFits ? fmtUSD(r.comp_gross) : ''}</div>` : ''}
-        </div>
-        ${rightChip}
+      <div class="sb-val-coastal${cFracOfRow > 0 ? '' : ' is-empty'}">${cFracOfRow > 0 ? fmtUSD(r.coastal_gross) : '—'}</div>
+      <div class="sb-bar" style="width:${wpct}%;min-width:120px">
+        ${cFracOfRow > 0 ? `<div class="seg-coastal" style="width:${cFracOfRow*100}%"></div>` : ''}
+        ${xFracOfRow > 0 ? `<div class="seg-comp"    style="width:${xFracOfRow*100}%"></div>` : ''}
       </div>
+      <div class="sb-val-comp${xFracOfRow > 0 ? '' : ' is-empty'}">${xFracOfRow > 0 ? fmtUSD(r.comp_gross) : '—'}</div>
       <div class="sb-share">
         <span class="pct" style="color:${shareColor}">${fmtPct(r.share_pct,0)}</span>
         ${r.gap > 0 ? `<span class="gap-amt">gap ${fmtUSD(r.gap)}</span>` : ''}

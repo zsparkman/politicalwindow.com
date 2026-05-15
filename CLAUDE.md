@@ -279,21 +279,22 @@ label. Comcast uses its legal name, not Xfinity.
   also get SVG `<title>` tooltips resolving to full daypart names
   (Early Morning / Daytime / etc.) so the two-letter codes decode
   on hover. See `CHANGES.md` 2026-05-12 follow-up entry.
-- **Coastal Owner Dashboard follow-up #5 (5/14/26)** — fixed the
-  Market scoreboard so the per-segment dollar values are never
-  hidden. Previously `scoreboard()` only rendered a segment's label
-  when its share was ≥12% of the row, so the captured-revenue
-  number disappeared on rows where Coastal had a small share —
-  exactly the markets the page exists to surface. The 12% threshold
-  is retained for in-bar labels (legibility), but when a segment is
-  too narrow its label now renders as a colored chip on the matching
-  side of the bar — Coastal/owner chip *before* the bar (left),
-  competitor chip *after* the bar (right) — so each chip sits
-  adjacent to the segment it labels. `.sb-bar-row` is the flex
-  wrapper; chips use standalone `.outside-coastal` / `.outside-comp`
-  classes as direct children of the row, not a wrapper. Wide segments
-  still show the white-on-color in-bar label. See `CHANGES.md`
-  2026-05-14 scoreboard entry.
+- **Coastal Owner Dashboard follow-up #5 (5/14/26)** — Market
+  scoreboard refactored to the **column-flanked value pattern**
+  (standard Bloomberg / FT comparison-bar layout). The bar is now
+  pure visual share-of-voice with no text inside it; owner $ and
+  competitor $ each live in their own dedicated grid column flanking
+  the bar (blue right-aligned on the left, red left-aligned on the
+  right). Numbers are always visible regardless of segment width,
+  always vertically aligned across rows, always color-coded.
+  `.sb-row` grid is `170px 78px 1fr 78px 100px` (was `170px 1fr 100px`);
+  new CSS classes `.sb-val-coastal` and `.sb-val-comp`. The previous
+  in-session iterations (in-bar labels with 12% threshold, then
+  outside-bar chip kludge) were replaced wholesale — `scoreboard()`
+  no longer has any `cFits` / `xFits` / chip / outside-label logic.
+  The `.seg-coastal` / `.seg-comp` segments were stripped of their
+  text-rendering styles. Mobile breakpoint also updated to a compact
+  5-column grid. See `CHANGES.md` 2026-05-14 scoreboard entry.
 - **Coastal Owner Dashboard (`coastal.html`, 5/12/26 — supersedes
   yesterday's `groups.html`)** — dedicated per-owner page reachable
   at `politicalwindow.com/coastal` (extension-stripped via GH Pages,
