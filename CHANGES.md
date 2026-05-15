@@ -4,6 +4,46 @@ Frontend changelog. Newest entries first. Document all non-trivial edits here.
 
 ---
 
+## 2026-05-14 — Map attribution moved from map corner to site footer (`index.html`)
+
+The "© CARTO, © OpenStreetMap contributors" badge that MapLibre rendered
+in the bottom-right corner of the 2026 Election Activity Map was
+removed from the map surface and relocated to the site footer.
+
+**Why:** the badge overlapped the FL/Hawaii inset area of the map and
+read as visual clutter against the dashboard's data-dense layout.
+Removing attribution entirely would violate the CARTO basemap TOS and
+the OSM ODbL, so the requirement is satisfied site-wide via the footer
+instead of per-map.
+
+**Change:**
+- Removed `glMap.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');`
+  (was at `index.html:1505`). The map constructor already sets
+  `attributionControl: false` so no badge renders on the map surface.
+- Added a second line to the existing `<footer>` block (around
+  `index.html:4395`):
+  `Basemap © CARTO, © OpenStreetMap contributors` with links to
+  `carto.com/attributions` and `openstreetmap.org/copyright`
+  (target=_blank, rel=noopener, slate underline matching footer text).
+
+**Scope:** `index.html` only. No other map-bearing page on the domain
+(`candidate-tracker.html`, `explorer.html`, `public-file.html`,
+`rates.html`, `admin.html`, `lur.html`) uses MapLibre — the only US
+map elsewhere is the tile-grid fallback cartogram which has no
+attribution requirement. The owner-workspace pages under `/w/<slug>`
+don't render a basemap either. So the footer line on `index.html`
+covers the only place CARTO/OSM tiles are actually served from the
+site as of 2026-05-14. If a future page adds another MapLibre map,
+either reuse the same footer attribution or re-enable the in-map
+AttributionControl on that page.
+
+**TOS note for future Claude / future maintainers:** don't remove the
+footer line without first either (a) adding back the in-map
+AttributionControl, or (b) switching to a basemap provider with
+white-label rights. The badge is a license requirement, not chrome.
+
+---
+
 ## 2026-05-12 — Architecture-doc generator prompt updated (`Architecture_Docs_Prompt.md`)
 
 The system prompt at `Political Window/Architecture_Docs_Prompt.md`

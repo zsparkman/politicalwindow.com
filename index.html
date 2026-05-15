@@ -1502,7 +1502,6 @@ async function initMap() {
     glMap = new maplibregl.Map(glMapOpts);
 
     glMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-    glMap.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
 
     // Disable rotation via touch
     glMap.touchZoomRotate.disableRotation();
@@ -4393,7 +4392,8 @@ updateKPIStats();
 </script>
 
 <footer style="text-align:center;padding:16px;font-family:var(--sans);font-size:0.65rem;color:var(--slate);border-top:1px solid var(--border-faint);margin-top:20px;">
-  © 2026 PoliticalWindow.com · All rights reserved · FCC Political Ad Intelligence
+  © 2026 PoliticalWindow.com · All rights reserved · FCC Political Ad Intelligence<br>
+  Basemap © <a href="https://carto.com/attributions" target="_blank" rel="noopener" style="color:var(--slate);text-decoration:underline;">CARTO</a>, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:var(--slate);text-decoration:underline;">OpenStreetMap</a> contributors
 </footer>
 
 </div><!-- /page-wrap -->

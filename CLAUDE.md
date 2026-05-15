@@ -18,6 +18,17 @@ entire frontend — a single-file static SPA hosted on GitHub Pages.
 - **CARTO Dark Matter basemap** — free dark basemap tiles (no API key needed)
 - Falls back to tile-grid cartogram if MapLibre CDN fails to load
 
+### Basemap attribution
+As of 2026-05-14, CARTO + OSM attribution is rendered **once in the
+site footer** (`index.html` `<footer>` block) instead of per-map. The
+map constructor sets `attributionControl: false` and the
+`AttributionControl` add-control call is intentionally absent.
+This satisfies the CARTO basemap TOS / OSM ODbL site-wide. Do not
+remove the footer attribution line without re-enabling the in-map
+control or switching to a white-labeled basemap. If a future page
+adds another MapLibre basemap, either reuse the footer attribution
+or re-enable the in-map control on that page.
+
 ## Analytics
 All HTML pages load two analytics tags inside `<head>`, in this order:
 
